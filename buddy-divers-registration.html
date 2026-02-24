@@ -995,4 +995,14 @@ document.getElementById('regForm').addEventListener('submit', async function(e) 
   } catch(err) {
     // For demo/testing — show success anyway
     // In production, show an error message instead
-    do
+    do    document.getElementById('regForm').style.display = 'none';
+    document.getElementById('successScreen').classList.add('show');
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+});
+
+// Run on load
+init();
+</script>
+</body>
+</html>
