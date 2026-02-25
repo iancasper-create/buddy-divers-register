@@ -801,7 +801,8 @@ const TRIPS = {
         value: "single_supplement",
         he: "תוספת שימוש יחיד בחדר",
         en: "Single cabin supplement (add-on)",
-        price: "€690 תוספת"
+        price: "€690 תוספת",
+        supplement: true
       }
     ]
   },
@@ -838,24 +839,41 @@ function init() {
   tripConfig.pricing.forEach((opt, i) => {
     const label = document.createElement('label');
     label.className = 'option-item';
-    label.innerHTML = `
-      <input type="radio" name="pricing" value="${opt.value}" ${i===0?'checked':''} />
-      <div class="option-label">
-        <span class="he">${opt.he}</span>
-        <span class="en">${opt.en}</span>
-        <span class="price">${opt.price}</span>
-      </div>
-    `;
-    if (i===0) label.classList.add('selected');
+    const isSuplement = opt.supplement === true;
+    if (isSuplement) {
+      // Render as checkbox with divider
+      const divider = document.createElement('hr');
+      divider.style.cssText = 'border:none;border-top:1px dashed #c5dfe6;margin:8px 0;';
+      container.appendChild(divider);
+      label.innerHTML = `
+        <input type="checkbox" name="pricing_supplement" value="${opt.value}" />
+        <div class="option-label">
+          <span class="he">${opt.he}</span>
+          <span class="en">${opt.en}</span>
+          <span class="price">${opt.price}</span>
+        </div>
+      `;
+      label.addEventListener('click', () => {
+        label.classList.toggle('selected', label.querySelector('input').checked);
+      });
+    } else {
+      label.innerHTML = `
+        <input type="radio" name="pricing" value="${opt.value}" ${i===0?'checked':''} />
+        <div class="option-label">
+          <span class="he">${opt.he}</span>
+          <span class="en">${opt.en}</span>
+          <span class="price">${opt.price}</span>
+        </div>
+      `;
+      if (i===0) label.classList.add('selected');
+      label.addEventListener('click', () => {
+        container.querySelectorAll('input[type="radio"]').forEach(r => {
+          r.closest('.option-item').classList.remove('selected');
+        });
+        label.classList.add('selected');
+      });
+    }
     container.appendChild(label);
-  });
-
-  // Mark selected on click
-  container.querySelectorAll('.option-item').forEach(item => {
-    item.addEventListener('click', () => {
-      container.querySelectorAll('.option-item').forEach(i => i.classList.remove('selected'));
-      item.classList.add('selected');
-    });
   });
   
   // Also for flight options
