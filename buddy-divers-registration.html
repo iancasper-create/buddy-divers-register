@@ -275,12 +275,12 @@
       <div class="form-row">
         <div class="field" id="f-firstName">
           <label>שם פרטי (באנגלית) <span class="en">/ First Name</span><span class="req">*</span></label>
-          <input type="text" name="firstName" placeholder="Israel" autocomplete="given-name" pattern="[A-Za-z\s\-]+" title="אנגלית בלבד / English only" />
+          <input type="text" name="firstName" placeholder="John" autocomplete="given-name" pattern="[A-Za-z\s\-]+" title="אנגלית בלבד / English only" />
           <span class="field-error">שדה חובה / Required</span>
         </div>
         <div class="field" id="f-lastName">
           <label>שם משפחה (באנגלית) <span class="en">/ Last Name</span><span class="req">*</span></label>
-          <input type="text" name="lastName" placeholder="Israeli" autocomplete="family-name" pattern="[A-Za-z\s\-]+" title="אנגלית בלבד / English only" />
+          <input type="text" name="lastName" placeholder="Smith" autocomplete="family-name" pattern="[A-Za-z\s\-]+" title="אנגלית בלבד / English only" />
           <span class="field-error">שדה חובה / Required</span>
         </div>
       </div>
@@ -288,7 +288,7 @@
       <div class="form-row">
         <div class="field" id="f-email">
           <label>אימייל <span class="en">Email</span><span class="req">*</span></label>
-          <input type="email" name="email" placeholder="israel@example.com" autocomplete="email" />
+          <input type="email" name="email" placeholder="email@example.com" autocomplete="email" />
           <span class="field-error">כתובת אימייל לא תקינה / Invalid email</span>
         </div>
         <div class="field" id="f-phone">
@@ -302,11 +302,6 @@
         <div class="field" id="f-dob">
           <label>תאריך לידה <span class="en">Date of Birth</span><span class="req">*</span></label>
           <input type="date" name="dob" />
-          <span class="field-error">שדה חובה / Required</span>
-        </div>
-        <div class="field" id="f-nationality">
-          <label>אזרחות <span class="en">Nationality</span><span class="req">*</span></label>
-          <input type="text" name="nationality" placeholder="ישראלי / Israeli" />
           <span class="field-error">שדה חובה / Required</span>
         </div>
       </div>
@@ -368,10 +363,19 @@
       <div class="section-title"><span class="icon">🛂</span> דרכון <span style="font-weight:400;color:var(--muted);font-size:12px;margin-right:6px;">Passport Details</span></div>
 
       <div class="form-row">
+        <div class="field" id="f-nationality">
+          <label>אזרחות <span class="en">Nationality</span><span class="req">*</span></label>
+          <input type="text" name="nationality" placeholder="לאום / Nationality" />
+          <span class="field-error">שדה חובה / Required</span>
+        </div>
         <div class="field" id="f-passportNumber">
           <label>מספר דרכון <span class="en">Passport Number</span><span class="req">*</span></label>
           <input type="text" name="passportNumber" placeholder="XX0000000" />
           <span class="field-error">שדה חובה / Required</span>
+        </div>
+        <div class="field">
+          <label>תאריך הנפקת דרכון <span class="en">Passport Issue Date</span></label>
+          <input type="date" name="passportIssue" />
         </div>
         <div class="field" id="f-passportExpiry">
           <label>תוקף דרכון <span class="en">Passport Expiry</span><span class="req">*</span></label>
