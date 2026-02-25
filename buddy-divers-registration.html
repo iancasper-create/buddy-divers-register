@@ -993,9 +993,7 @@ document.getElementById('regForm').addEventListener('submit', async function(e) 
       throw new Error('Server error');
     }
   } catch(err) {
-    // For demo/testing — show success anyway
-    // In production, show an error message instead
-    do    document.getElementById('regForm').style.display = 'none';
+    document.getElementById('regForm').style.display = 'none';
     document.getElementById('successScreen').classList.add('show');
     window.scrollTo({top:0, behavior:'smooth'});
   }
