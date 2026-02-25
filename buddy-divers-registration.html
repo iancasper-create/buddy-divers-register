@@ -673,21 +673,21 @@
       <div class="field" id="f-paymentMethod">
         <div class="options-group">
           <label class="option-item">
-            <input type="radio" name="paymentMethod" value="BankTransfer" required />
+            <input type="radio" name="paymentMethod" value="Bank Transfer" required />
             <div class="option-label">
               <span class="he">תשלום בהעברה בנקאית לחשבון על שם: באדי-דייברס בע"מ</span>
               <span class="en">בנק מזרחי טפחות 20 | סניף 422 | חשבון 625145</span>
             </div>
           </label>
           <label class="option-item">
-            <input type="radio" name="paymentMethod" value="CreditCard" />
+            <input type="radio" name="paymentMethod" value="Credit Card up to 3 payments" />
             <div class="option-label">
               <span class="he">עד 3 תשלומים ללא ריבית בכרטיס אשראי</span>
               <span class="en">Up to 3 interest-free installments — a payment link will be sent</span>
             </div>
           </label>
           <label class="option-item">
-            <input type="radio" name="paymentMethod" value="StandingOrder" />
+            <input type="radio" name="paymentMethod" value="Standing Order" />
             <div class="option-label">
               <span class="he">באמצעות הוראת קבע בבנק</span>
               <span class="en">Standing bank order (does not use credit limit)</span>
@@ -998,7 +998,7 @@ document.getElementById('regForm').addEventListener('submit', async function(e) 
   data.submittedAt = new Date().toISOString();
 
   // ⚠️ REPLACE THIS URL with your Make.com webhook URL
-  const WEBHOOK_URL = 'https://hook.eu1.make.com/h3wexi08df15jvkk1uyfw0ix669qv1ms';
+  const WEBHOOK_URL = 'https://hook.eu2.make.com/YOUR_WEBHOOK_ID_HERE';
 
   try {
     const resp = await fetch(WEBHOOK_URL, {
