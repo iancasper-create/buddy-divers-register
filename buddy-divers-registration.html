@@ -638,8 +638,9 @@
           <span class="field-error">שדה חובה / Required</span>
         </div>
         <div class="field">
-          <label>בעיות רפואיות רלוונטיות <span class="en">Medical Conditions</span></label>
-          <textarea name="medicalNotes" placeholder="תתבקש/י למלא הצהרת בריאות מפורטת. אם ידוע לך על מצב רפואי העלול להגביל את פעילותך או להוות סיכון במהלך הספארי — פרט/י כאן."></textarea>
+          <label>בעיות רפואיות רלוונטיות <span class="en">Medical Conditions</span><span class="req">*</span></label>
+          <textarea name="medicalNotes" id="f-medicalNotes" placeholder="תתבקש/י למלא הצהרת בריאות מפורטת. אם ידוע לך על מצב רפואי העלול להגביל את פעילותך או להוות סיכון במהלך הספארי — פרט/י כאן."></textarea>
+          <span class="field-error">שדה חובה / Required</span>
         </div>
       </div>
 
@@ -972,6 +973,7 @@ function validateForm() {
     ['f-passportIssue','passportIssue','text'],
     ['f-passportExpiry','passportExpiry','text'],
     ['f-certLevel','certLevel','select'],
+    ['f-medicalNotes','medicalNotes','text'],
   ];
 
   required.forEach(([fieldId, name, type]) => {
@@ -1011,12 +1013,9 @@ function validateForm() {
   });
 
   const terms = document.getElementById('termsCheckbox');
-  const insurance = document.getElementById('insuranceCheckbox');
   const termsOk = terms.checked;
-  const insOk = insurance.checked;
   document.getElementById('termsError').style.display = termsOk ? 'none' : 'block';
-  document.getElementById('insuranceError').style.display = insOk ? 'none' : 'block';
-  if (!termsOk || !insOk) valid = false;
+  if (!termsOk) valid = false;
 
   return valid;
 }
