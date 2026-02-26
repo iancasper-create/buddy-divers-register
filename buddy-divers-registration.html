@@ -136,10 +136,14 @@
     .field input[type=date] {
       max-width: 100%;
       width: 100%;
+      box-sizing: border-box;
+      -webkit-appearance: none;
+      appearance: none;
     }
     @media(max-width:580px){
       .field input[type=date] {
         font-size: 13px;
+        max-width: calc(100vw - 80px);
       }
     }
     .field input::placeholder { color:#b0c4cc; }
@@ -340,16 +344,17 @@
 
     <!-- SECTION 5: Safari Pricing (DYNAMIC) -->
     <div class="card">
-      <div class="section-title"><span class="icon">💳</span> עלות הספארי ללא טיסות <span style="font-weight:400;color:var(--muted);font-size:12px;margin-right:6px;">Safari Pricing (excl. flights)</span></div>
+      <div class="section-title"><span class="icon">💳</span> עלות הספארי ללא טיסות <span style="font-weight:400;color:var(--muted);font-size:12px;margin-right:6px;">Safari Pricing (excl. flights)</span><span class="req">*</span></div>
 
       <div class="options-group" id="pricingOptions">
         <!-- Dynamically populated from trip config -->
       </div>
+      <span class="field-error" id="pricingError" style="display:none;margin-top:8px;">יש לבחור אפשרות תמחור / Please select a pricing option</span>
     </div>
 
     <!-- SECTION 6: Flights -->
     <div class="card">
-      <div class="section-title"><span class="icon">✈️</span> טיסות <span style="font-weight:400;color:var(--muted);font-size:12px;margin-right:6px;">Flights</span></div>
+      <div class="section-title"><span class="icon">✈️</span> טיסות <span style="font-weight:400;color:var(--muted);font-size:12px;margin-right:6px;">Flights</span><span class="req">*</span></div>
 
       <div class="options-group" id="flightOptions">
         <label class="option-item" id="opt-flight-buddy">
@@ -369,6 +374,7 @@
           </div>
         </label>
       </div>
+      <span class="field-error" id="flightsError" style="display:none;margin-top:8px;">יש לבחור אפשרות טיסה / Please select a flights option</span>
     </div>
 
     <!-- SECTION 2: Passport -->
@@ -442,7 +448,7 @@
             <option value="AOW">Advanced Open Water</option>
             <option value="Rescue">Rescue Diver</option>
             <option value="MasterDiver">Master Diver</option>
-            <option value="Divemaster">Divemaster</option>
+            <option value="Divemaster">Dive Master</option>
             <option value="AsstInstructor">Asst. Instructor</option>
             <option value="Instructor">Instructor or above</option>
           </select>
@@ -645,7 +651,6 @@
           <label>קשר <span class="en">Relationship</span><span class="req">*</span></label>
           <select name="emergencyRelationship">
             <option value="">בחר / Select</option>
-            <option value="Spouse">בן/בת זוג נשוי/ה / Spouse</option>
             <option value="Partner">בן/בת זוג / Partner</option>
             <option value="Parent">הורה / Parent</option>
             <option value="Sibling">אח/אחות / Sibling</option>
@@ -695,7 +700,7 @@
 
     <!-- SECTION: Payment Method -->
     <div class="card">
-      <div class="section-title"><span class="icon">💰</span> אמצעי תשלום <span style="font-weight:400;color:var(--muted);font-size:12px;margin-right:6px;">Payment Method</span></div>
+      <div class="section-title"><span class="icon">💰</span> אמצעי תשלום <span style="font-weight:400;color:var(--muted);font-size:12px;margin-right:6px;">Payment Method</span><span class="req">*</span></div>
 
       <div style="background:var(--light-bg);border-radius:10px;padding:14px 16px;margin-bottom:18px;font-size:13px;line-height:1.7;color:var(--text);border:1px solid var(--border);">
         דרכי תשלום: לנוחיותכם ניתן לשלם בכרטיס אשראי ישראלי, העברה בנקאית או הוראת קבע בבנק (לא ניתן לשלם באמצעות כרטיסי דיינרס ואמריקן אקספרס)
@@ -978,6 +983,18 @@ function validateForm() {
     fieldEl.classList.toggle('invalid', !ok);
     if (!ok) valid = false;
   });
+
+  // Pricing selection
+  const pricing = document.querySelector('[name="pricing"]:checked');
+  const pricingOk = !!pricing;
+  document.getElementById('pricingError').style.display = pricingOk ? 'none' : 'block';
+  if (!pricingOk) valid = false;
+
+  // Flights selection
+  const flights = document.querySelector('[name="flights"]:checked');
+  const flightsOk = !!flights;
+  document.getElementById('flightsError').style.display = flightsOk ? 'none' : 'block';
+  if (!flightsOk) valid = false;
 
   // Terms
   // Payment method
