@@ -133,6 +133,15 @@
       border-color: var(--teal);
       box-shadow: 0 0 0 3px rgba(0,114,137,0.12);
     }
+    .field input[type=date] {
+      max-width: 100%;
+      width: 100%;
+    }
+    @media(max-width:580px){
+      .field input[type=date] {
+        font-size: 13px;
+      }
+    }
     .field input::placeholder { color:#b0c4cc; }
     .field textarea { resize:vertical; min-height:80px; }
     .field select { appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23007289' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:left 12px center; padding-left:32px; }
@@ -273,6 +282,14 @@
       <div class="section-title"><span class="icon">👤</span> פרטים אישיים <span style="font-weight:400;color:var(--muted);font-size:12px;margin-right:6px;">Personal Details</span></div>
 
       <div class="form-row">
+        <div class="field" id="f-idNumber">
+          <label>מספר תעודת זהות <span class="en">ID Number</span><span class="req">*</span></label>
+          <input type="text" name="idNumber" placeholder="XXXXXXXXX" />
+          <span class="field-error">שדה חובה / Required</span>
+        </div>
+      </div>
+
+      <div class="form-row">
         <div class="field" id="f-firstName">
           <label>שם פרטי (באנגלית) <span class="en">/ First Name</span><span class="req">*</span></label>
           <input type="text" name="firstName" placeholder="John" autocomplete="given-name" pattern="[A-Za-z\s\-]+" title="אנגלית בלבד / English only" />
@@ -307,11 +324,6 @@
       </div>
 
       <div class="form-row">
-        <div class="field" id="f-idNumber">
-          <label>מספר תעודת זהות <span class="en">ID Number</span><span class="req">*</span></label>
-          <input type="text" name="idNumber" placeholder="XXXXXXXXX" />
-          <span class="field-error">שדה חובה / Required</span>
-        </div>
         <div class="field">
           <label>עיר מגורים <span class="en">City</span></label>
           <input type="text" name="city" placeholder="תל אביב / Tel Aviv" />
@@ -343,9 +355,10 @@
         <label class="option-item" id="opt-flight-buddy">
           <input type="radio" name="flights" value="BuddyArranged" />
           <div class="option-label">
-            <span class="he">הזמנת טיסות דרך Buddy-Divers</span>
+            <span class="he">הזמנת טיסות דרך באדי-דייברס</span>
             <span class="en">Flights arranged by Buddy-Divers</span>
-            <span class="price" style="font-size:12px;color:var(--muted);font-weight:400;">עלות הטיסות תקבע בהתאם לזמינות ביום ההזמנה בפועל / Price based on availability at time of booking</span>
+            <span class="price" style="font-size:12px;color:var(--muted);font-weight:400;">עלות הטיסות תקבע בהתאם לזמינות ביום ההזמנה בפועל</span>
+            <span class="price" style="font-size:12px;color:var(--muted);font-weight:400;">Price based on availability at time of booking</span>
           </div>
         </label>
         <label class="option-item" id="opt-flight-self">
@@ -373,9 +386,10 @@
           <input type="text" name="passportNumber" placeholder="XX0000000" />
           <span class="field-error">שדה חובה / Required</span>
         </div>
-        <div class="field">
-          <label>תאריך הנפקת דרכון <span class="en">Passport Issue Date</span></label>
+        <div class="field" id="f-passportIssue">
+          <label>תאריך הנפקת דרכון <span class="en">Passport Issue Date</span><span class="req">*</span></label>
           <input type="date" name="passportIssue" />
+          <span class="field-error">שדה חובה / Required</span>
         </div>
         <div class="field" id="f-passportExpiry">
           <label>תוקף דרכון <span class="en">Passport Expiry</span><span class="req">*</span></label>
@@ -427,7 +441,9 @@
             <option value="OW">Open Water</option>
             <option value="AOW">Advanced Open Water</option>
             <option value="Rescue">Rescue Diver</option>
+            <option value="MasterDiver">Master Diver</option>
             <option value="Divemaster">Divemaster</option>
+            <option value="AsstInstructor">Asst. Instructor</option>
             <option value="Instructor">Instructor or above</option>
           </select>
           <span class="field-error">שדה חובה / Required</span>
@@ -626,6 +642,21 @@
           <input type="text" name="emergencyName" placeholder="שם מלא / Full name" />
         </div>
         <div class="field">
+          <label>קשר <span class="en">Relationship</span><span class="req">*</span></label>
+          <select name="emergencyRelationship">
+            <option value="">בחר / Select</option>
+            <option value="Spouse">בן/בת זוג נשוי/ה / Spouse</option>
+            <option value="Partner">בן/בת זוג / Partner</option>
+            <option value="Parent">הורה / Parent</option>
+            <option value="Sibling">אח/אחות / Sibling</option>
+            <option value="Friend">חבר/ה / Friend</option>
+            <option value="Other">אחר / Other</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="field">
           <label>טלפון איש קשר <span class="en">Emergency Contact Phone</span><span class="req">*</span></label>
           <input type="tel" name="emergencyPhone" placeholder="05X-XXXXXXX" />
         </div>
@@ -689,7 +720,7 @@
           <label class="option-item">
             <input type="radio" name="paymentMethod" value="Standing Order" />
             <div class="option-label">
-              <span class="he">באמצעות הוראת קבע בבנק</span>
+              <span class="he">באמצעות הוראת קבע בבנק (לא תופס מסגרת אשראי)</span>
               <span class="en">Standing bank order (does not use credit limit)</span>
             </div>
           </label>
@@ -741,7 +772,7 @@
 
       <div class="checkbox-row" style="margin-bottom:8px;" id="termsCheck">
         <input type="checkbox" name="terms" id="termsCheckbox" />
-        <span>קראתי ואני מסכים/ה לתנאי ההרשמה והביטול<span class="en">I have read and agree to the registration and cancellation terms</span></span>
+        <span>קראתי ואני מסכים/ה לתנאי ההרשמה והביטול<span class="req">*</span><span class="en">I have read and agree to the registration and cancellation terms</span></span>
       </div>
       <div class="field-error" id="termsError" style="display:none;margin-bottom:12px;">יש לאשר את התנאים / Please accept terms</div>
 
@@ -923,14 +954,15 @@ function showFileName(input, targetId) {
 function validateForm() {
   let valid = true;
   const required = [
+    ['f-idNumber','idNumber','text'],
     ['f-firstName','firstName','text'],
     ['f-lastName','lastName','text'],
     ['f-email','email','email'],
     ['f-phone','phone','text'],
     ['f-dob','dob','text'],
     ['f-nationality','nationality','text'],
-    ['f-idNumber','idNumber','text'],
     ['f-passportNumber','passportNumber','text'],
+    ['f-passportIssue','passportIssue','text'],
     ['f-passportExpiry','passportExpiry','text'],
     ['f-certLevel','certLevel','select'],
   ];
