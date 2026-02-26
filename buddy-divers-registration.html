@@ -598,7 +598,7 @@
         </div>
       </div>
 
-      <div class="form-row">
+      <div class="form-row three">
         <div class="field">
           <label>סנפירים <span class="en">Fins Size (EU)</span></label>
           <select name="finsSize">
@@ -616,6 +616,13 @@
           <select name="mask">
             <option value="No">אין צורך / Not needed</option>
             <option value="Yes">כן / Yes</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>מיכל <span class="en">Tank</span></label>
+          <select name="tank15L">
+            <option value="No">מיכל 12 ליטר / 12L tank</option>
+            <option value="Yes">מיכל 15 ליטר (בתשלום נוסף) / 15L tank (at an extra cost)</option>
           </select>
         </div>
       </div>
@@ -770,7 +777,16 @@
         </div>
       </div>
 
-      <div class="form-row full">
+      <div class="form-row">
+        <div class="field" id="f-mediaConsent">
+          <label>הסכמה לשימוש במדיה <span class="en">Media Consent</span><span class="req">*</span></label>
+          <select name="mediaConsent">
+            <option value="">בחר / Select</option>
+            <option value="Yes">אני שמח/ה לאפשר לבאדי-דייברס להשתמש בתמונות ווידאו בהם אני מופיע/ה לצורך פרסום</option>
+            <option value="No">אינני מסכים/ה / I do not consent</option>
+          </select>
+          <span class="field-error">שדה חובה / Required</span>
+        </div>
         <div class="field">
           <label>איך שמעת עלינו? <span class="en">How did you hear about us?</span></label>
           <select name="referral">
@@ -1047,6 +1063,7 @@ function validateForm() {
     ['f-passportIssue','passportIssue','text'],
     ['f-passportExpiry','passportExpiry','text'],
     ['f-certLevel','certLevel','select'],
+    ['f-mediaConsent','mediaConsent','select'],
     ['f-medicalNotes','medicalNotes','text'],
   ];
 
