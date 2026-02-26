@@ -1004,7 +1004,7 @@ async function handleUpload(input, areaId, urlFieldId, statusId) {
     formData.append('folder', 'buddy-divers-registrations');
 
     const response = await fetch(
-      `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/auto/upload`,
+      file.type === "application/pdf" ? `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/raw/upload` : `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
       { method: 'POST', body: formData }
     );
 
