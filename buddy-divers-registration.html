@@ -680,6 +680,7 @@
         <div class="field">
           <label>איש קשר לחירום <span class="en">Emergency Contact Name</span><span class="req">*</span></label>
           <input type="text" name="emergencyName" placeholder="שם מלא באנגלית / Full name in English" id="emergencyNameInput" />
+          <span class="field-error">אנגלית בלבד / English characters only</span>
         </div>
         <div class="field">
           <label>קשר <span class="en">Relationship</span><span class="req">*</span></label>
@@ -1198,19 +1199,6 @@ function attachBlurValidation() {
     });
   }
 
-  // Emergency contact name - English only, optional
-  const emergencyNameEl = document.getElementById('emergencyNameInput');
-  if (emergencyNameEl) {
-    emergencyNameEl.addEventListener('blur', () => {
-      const val = emergencyNameEl.value.trim();
-      const fieldEl = emergencyNameEl.closest('.field');
-      if (!fieldEl) return;
-      const errEl = fieldEl.querySelector('.field-error');
-      const ok = !val || /^[A-Za-z\s\-'.]+$/.test(val);
-      if (errEl) errEl.textContent = 'אנגלית בלבד / English characters only';
-      fieldEl.classList.toggle('invalid', !ok);
-    });
-  }
 }
 
 // ============================================================
