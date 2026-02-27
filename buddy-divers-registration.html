@@ -1339,4 +1339,12 @@ document.getElementById('regForm').addEventListener('submit', async function(e) 
   document.getElementById('lastDiveInput').max = today;
   // DOB: min is 90 years ago, max is today
   const minDob = new Date();
-  minDob.set
+  minDob.setFullYear(minDob.getFullYear() - 90);
+  document.getElementById('dobInput') && (document.getElementById('dobInput').min = minDob.toISOString().split('T')[0]);
+  document.getElementById('dobInput') && (document.getElementById('dobInput').max = today);
+})();
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
