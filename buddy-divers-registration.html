@@ -506,6 +506,7 @@
             <option value="">בחר / Select</option>
             <option value="No">לא / No</option>
             <option value="Yes">כן / Yes</option>
+            <option value="NonDiver">לא צולל / Non-Diver</option>
           </select>
         </div>
       </div>
@@ -548,9 +549,9 @@
       <div class="section-title"><span class="icon">🪣</span> השכרת ציוד <span style="font-weight:400;color:var(--muted);font-size:12px;margin-right:6px;">Equipment Rental</span></div>
 
       <!-- מחשב צלילה -->
-      <div class="field" id="f-diveComputer" style="margin-bottom:16px;">
-        <label>מחשב צלילה (חובה) <span class="en">Dive Computer</span><span class="req">*</span></label>
-        <div class="options-group" style="margin-top:6px;">
+      <div id="f-diveComputer" style="margin-bottom:16px;">
+        <label style="display:block;margin-bottom:8px;">מחשב צלילה (חובה) <span class="en">Dive Computer</span><span class="req">*</span></label>
+        <div class="form-row three" style="margin-bottom:0;">
           <label class="option-item">
             <input type="radio" name="diveComputer" value="Own" required />
             <div class="option-label">
@@ -563,6 +564,13 @@
             <div class="option-label">
               <span class="he">ברצוני לשכור מחשב צלילה</span>
               <span class="en">I would like to rent a dive computer</span>
+            </div>
+          </label>
+          <label class="option-item">
+            <input type="radio" name="diveComputer" value="NonDiver" />
+            <div class="option-label">
+              <span class="he">לא צולל</span>
+              <span class="en">Non-Diver</span>
             </div>
           </label>
         </div>
@@ -861,13 +869,13 @@
     </div>
     <div style="margin-top:30px; padding:16px; background:var(--light-bg); border-radius:10px;">
       <div style="font-size:13px; color:var(--muted);">יש שאלות? / Any questions?</div>
-      <div style="font-weight:700; color:var(--teal); margin-top:4px;"><a href="mailto:info@buddy-divers.com" style="color:var(--teal);text-decoration:none;">info@buddy-divers.com</a></div>
+      <div style="font-weight:700; color:var(--teal); margin-top:4px;"><a href="/cdn-cgi/l/email-protection#1d74737b725d7f687979643079746b786f6e337e7270" style="color:var(--teal);text-decoration:none;"><span class="__cf_email__" data-cfemail="9df4f3fbf2ddffe8f9f9e4b0f9f4ebf8efeeb3fef2f0">[email&#160;protected]</span></a></div>
     </div>
   </div>
 
 </div><!-- /page-wrapper -->
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 // ============================================================
 // TRIP CONFIG — update this section for each trip
 // The URL parameter ?trip=TRIPID will select the right config
@@ -1095,6 +1103,7 @@ function validateField(fieldId, name, type) {
       ok = /^[A-Za-z\s\-'.]+$/.test(val);
       msg = 'אנגלית בלבד / English characters only';
     }
+  } else if (type === 'idNumber') {
     if (!/^\d{9}$/.test(val)) {
       ok = false;
       msg = 'נדרשות בדיוק 9 ספרות / Exactly 9 digits required';
@@ -1328,14 +1337,4 @@ document.getElementById('regForm').addEventListener('submit', async function(e) 
   document.getElementById('lastDiveInput').max = today;
   // DOB: min is 90 years ago, max is today
   const minDob = new Date();
-  minDob.setFullYear(minDob.getFullYear() - 90);
-  document.getElementById('dobInput').min = minDob.toISOString().split('T')[0];
-  document.getElementById('dobInput').max = today;
-})();
-
-// Run on load
-init();
-attachBlurValidation();
-</script>
-</body>
-</html>
+  minDob.set
