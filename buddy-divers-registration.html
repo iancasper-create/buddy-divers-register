@@ -1073,8 +1073,19 @@ function validateField(fieldId, name, type) {
     ok = EMAIL_RE.test(val);
     msg = 'כתובת אימייל לא תקינה / Invalid email format';
   } else if (type === 'idNumber') {
-    ok = /^\d{9}$/.test(val);
-    msg = 'נדרשות בדיוק 9 ספרות / Exactly 9 digits required';
+    if (!/^\d{9}$/.test(val)) {
+      ok = false;
+      msg = 'נדרשות בדיוק 9 ספרות / Exactly 9 digits required';
+    } else {
+      // Israeli ID checksum (Luhn-style)
+      const sum = val.split('').reduce((acc, digit, i) => {
+        let n = parseInt(digit) * (i % 2 === 0 ? 1 : 2);
+        if (n > 9) n -= 9;
+        return acc + n;
+      }, 0);
+      ok = sum % 10 === 0;
+      msg = 'מספר תעודת זהות לא תקין / Invalid Israeli ID number';
+    }
   } else if (type === 'dob') {
     if (!val) { ok = false; }
     else {
