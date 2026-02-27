@@ -679,7 +679,7 @@
       <div class="form-row">
         <div class="field">
           <label>איש קשר לחירום <span class="en">Emergency Contact Name</span><span class="req">*</span></label>
-          <input type="text" name="emergencyName" placeholder="שם מלא / Full name" id="emergencyNameInput" />
+          <input type="text" name="emergencyName" placeholder="שם מלא באנגלית / Full name in English" id="emergencyNameInput" />
         </div>
         <div class="field">
           <label>קשר <span class="en">Relationship</span><span class="req">*</span></label>
@@ -1174,6 +1174,7 @@ function attachBlurValidation() {
     ['f-certLevel',       'certLevel',      'select'],
     ['f-medicalNotes',    'medicalNotes',   'text'],
     ['f-emergencyEmail',  'emergencyEmail', 'email'],
+    ['f-emergencyName',   'emergencyName',  'englishOnly'],
   ];
   fields.forEach(([fieldId, name, type]) => {
     const fieldEl = document.getElementById(fieldId);
@@ -1232,6 +1233,7 @@ function validateForm() {
     ['f-certLevel',       'certLevel',      'select'],
     ['f-medicalNotes',    'medicalNotes',   'text'],
     ['f-emergencyEmail',  'emergencyEmail', 'email'],
+    ['f-emergencyName',   'emergencyName',  'englishOnly'],
   ];
 
   required.forEach(([fieldId, name, type]) => {
