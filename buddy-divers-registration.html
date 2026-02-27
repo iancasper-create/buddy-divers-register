@@ -1344,7 +1344,7 @@ document.getElementById('regForm').addEventListener('submit', async function(e) 
   document.getElementById('dobInput') && (document.getElementById('dobInput').max = today);
 })();
 
-document.addEventListener('DOMContentLoaded', init);
+document.addEventListener('DOMContentLoaded', () => { init(); attachBlurValidation(); });
 </script>
 </body>
 </html>
