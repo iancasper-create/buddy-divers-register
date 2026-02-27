@@ -440,7 +440,7 @@
       <div class="field" style="margin-top:8px;">
         <label>תמונת דרכון <span class="en">Passport Photo Upload</span></label>
         <div class="file-upload-area" id="passportUploadArea">
-          <input type="file" accept="image/*,.pdf" onchange="handleUpload(this,'passportUploadArea','passportPhotoUrl','passportUploadStatus')" />
+          <input type="file" accept="image/*,.pdf" onchange="handleUpload(this,'passportUploadArea','passportPhotoUrl','passportUploadStatus','passports')" />
           <div class="upload-icon">📎</div>
           <div class="upload-text">לחץ להעלאת קובץ <strong>/ Click to upload</strong></div>
           <div class="upload-text" style="font-size:11px;margin-top:4px;">JPG, PNG, PDF עד 10MB</div>
@@ -515,7 +515,7 @@
       <div class="field" style="margin-top:8px;">
         <label>תמונת תעודת צלילה <span class="en">Dive Certification Photo</span></label>
         <div class="file-upload-area" id="certUploadArea">
-          <input type="file" accept="image/*,.pdf" onchange="handleUpload(this,'certUploadArea','certPhotoUrl','certUploadStatus')" />
+          <input type="file" accept="image/*,.pdf" onchange="handleUpload(this,'certUploadArea','certPhotoUrl','certUploadStatus','diving')" />
           <div class="upload-icon">🪪</div>
           <div class="upload-text">לחץ להעלאת תעודת צלילה <strong>/ Upload dive certification</strong></div>
           <div id="certUploadStatus"></div>
@@ -534,7 +534,7 @@
         <div class="field" style="margin-top:8px;">
           <label>תמונת תעודת נייטרוקס <span class="en">Nitrox Certification Photo</span></label>
           <div class="file-upload-area" id="nitroxUploadArea">
-            <input type="file" accept="image/*,.pdf" onchange="handleUpload(this,'nitroxUploadArea','nitroxPhotoUrl','nitroxUploadStatus')" />
+            <input type="file" accept="image/*,.pdf" onchange="handleUpload(this,'nitroxUploadArea','nitroxPhotoUrl','nitroxUploadStatus','diving')" />
             <div class="upload-icon">🪪</div>
             <div class="upload-text">לחץ להעלאת תעודת נייטרוקס <strong>/ Upload Nitrox certification</strong></div>
             <div id="nitroxUploadStatus"></div>
@@ -737,7 +737,7 @@
           <label>מסמך ביטוח צלילה <span class="en">Dive Insurance Document</span></label>
           <div class="file-upload-area" id="insuranceUploadArea" onclick="document.getElementById('insuranceFileInput').click()">
             <input type="file" id="insuranceFileInput" accept="image/*,.pdf" style="display:none"
-              onchange="handleUpload(this,'insuranceUploadArea','insurancePhotoUrl','insuranceUploadStatus')" />
+              onchange="handleUpload(this,'insuranceUploadArea','insurancePhotoUrl','insuranceUploadStatus','diving')" />
             <input type="hidden" name="diveInsurancePhotoUrl" id="insurancePhotoUrl" />
             <div class="upload-icon">📄</div>
             <div class="upload-text">
@@ -1069,7 +1069,7 @@ const CLOUDINARY_UPLOAD_PRESET = 'buddy_divers_uploads';
 // Uploads file immediately on selection; stores returned URL
 // in a hidden input field for form submission.
 // ============================================================
-async function handleUpload(input, areaId, urlFieldId, statusId) {
+async function handleUpload(input, areaId, urlFieldId, statusId, folder) {
   const file = input.files && input.files[0];
   if (!file) return;
 
@@ -1096,7 +1096,8 @@ async function handleUpload(input, areaId, urlFieldId, statusId) {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-    formData.append('folder', 'buddy-divers-registrations');
+    const tripId = document.getElementById('tripName') ? document.getElementById('tripName').dataset.tripId || 'general' : 'general';
+    formData.append('folder', tripId + '/' + (folder || 'general'));
 
     const response = await fetch(
       file.type === "application/pdf" ? `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/raw/upload` : `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
