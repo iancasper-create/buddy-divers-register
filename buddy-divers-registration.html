@@ -271,6 +271,20 @@
     /* Loading spinner */
     .spinner { display:inline-block; width:20px; height:20px; border:2px solid rgba(255,255,255,0.4); border-top-color:white; border-radius:50%; animation:spin 0.7s linear infinite; vertical-align:middle; margin-left:8px; }
     @keyframes spin { to{transform:rotate(360deg)} }
+
+    /* Welcome back banner */
+    .welcome-back-banner {
+      display:none;
+      background:linear-gradient(135deg,rgba(39,174,96,0.12),rgba(0,114,137,0.08));
+      border:1.5px solid #27ae60;
+      border-radius:10px;
+      padding:12px 16px;
+      margin-bottom:16px;
+      font-size:14px;
+      color:#1a6e35;
+      font-weight:600;
+    }
+    .welcome-back-banner.show { display:block; }
   </style>
 </head>
 <body>
@@ -298,11 +312,17 @@
     <div class="card">
       <div class="section-title"><span class="icon">👤</span> פרטים אישיים <span style="font-weight:400;color:var(--muted);font-size:12px;margin-right:6px;">Personal Details</span></div>
 
+      <div class="welcome-back-banner" id="welcomeBackBanner">
+        ✅ ברוך שובך! פרטיך נטענו אוטומטית — אנא בדוק ועדכן אם נדרש.<br/>
+        <span style="font-weight:400;font-size:13px;">Welcome back! Your details have been pre-filled — please review and update anything that has changed.</span>
+      </div>
+
       <div class="form-row">
         <div class="field" id="f-idNumber">
           <label>מספר תעודת זהות <span class="en">ID Number</span><span class="req">*</span></label>
-          <input type="text" name="idNumber" placeholder="XXXXXXXXX" inputmode="numeric" pattern="\d{9}" maxlength="9" title="9 ספרות בלבד / 9 digits only" />
+          <input type="text" name="idNumber" id="idNumberInput" placeholder="XXXXXXXXX" inputmode="numeric" pattern="\d{9}" maxlength="9" title="9 ספרות בלבד / 9 digits only" />
           <span class="field-error">שדה חובה / Required</span>
+          <span id="lookupStatus" style="font-size:12px;margin-top:4px;display:none;"></span>
         </div>
       </div>
 
@@ -1381,6 +1401,133 @@ document.getElementById('regForm').addEventListener('submit', async function(e) 
   document.getElementById('dobInput') && (document.getElementById('dobInput').min = minDob.toISOString().split('T')[0]);
   document.getElementById('dobInput') && (document.getElementById('dobInput').max = today);
 })();
+
+// ============================================================
+// DIVER LOOKUP — auto-fill from Airtable via Make.com proxy
+// ============================================================
+const LOOKUP_WEBHOOK_URL = 'https://hook.eu1.make.com/cagpzykef831olz5dmp5unu65lochg5v';
+
+function setLookupStatus(msg, color) {
+  const el = document.getElementById('lookupStatus');
+  el.textContent = msg;
+  el.style.color = color || '#007289';
+  el.style.display = msg ? 'block' : 'none';
+}
+
+function setVal(name, value) {
+  if (!value && value !== 0) return;
+  const el = document.querySelector('[name="' + name + '"]');
+  if (!el) return;
+  el.value = value;
+  // Trigger change event so validation clears invalid state
+  el.dispatchEvent(new Event('change', { bubbles: true }));
+}
+
+function setSelect(name, value) {
+  if (!value) return;
+  const el = document.querySelector('[name="' + name + '"]');
+  if (!el) return;
+  // Try exact match first, then case-insensitive
+  const opts = Array.from(el.options);
+  const match = opts.find(o => o.value === value) || opts.find(o => o.value.toLowerCase() === value.toLowerCase());
+  if (match) { el.value = match.value; el.dispatchEvent(new Event('change', { bubbles: true })); }
+}
+
+function prefillForm(d) {
+  setVal('firstName', d.firstName);
+  setVal('lastName', d.lastName);
+  setVal('email', d.email);
+  setVal('phone', d.phone);
+  setVal('dob', d.dob);
+  setSelect('gender', d.gender);
+  setVal('city', d.city);
+  setVal('address', d.address);
+  setVal('nationality', d.nationality);
+  setVal('passportNumber', d.passportNumber);
+  setVal('passportIssue', d.passportIssue);
+  setVal('passportExpiry', d.passportExpiry);
+  setVal('passportFullName', d.passportFullName);
+  setSelect('certLevel', d.certLevel);
+  setSelect('certAgency', d.certAgency);
+  setVal('certNumber', d.certNumber);
+  setSelect('nitrox', d.nitrox);
+  setVal('nitroxCertNumber', d.nitroxCertNumber);
+  setVal('numDives', d.numDives);
+  setVal('lastDiveDate', d.lastDive);
+  setVal('height', d.height);
+  setVal('weight', d.weight);
+  setVal('allergies', d.allergies);
+  setVal('medicalNotes', d.medicalNotes);
+  setVal('emergencyName', d.emergencyName);
+  setSelect('emergencyRelationship', d.emergencyRelationship);
+  setVal('emergencyPhone', d.emergencyPhone);
+  setVal('emergencyEmail', d.emergencyEmail);
+  setVal('insuranceCompany', d.insuranceCompany);
+  setVal('policyNumber', d.policyNumber);
+  setSelect('bcdSize', d.bcdSize);
+  setSelect('regulator', d.regulator);
+  setSelect('wetsuitSize', d.wetsuitSize);
+  setVal('finsSize', d.finsSize);
+  setSelect('mask', d.mask);
+  setSelect('tank15L', d.tank15L);
+  // Dive computer is radio buttons
+  if (d.diveComputer) {
+    const radio = document.querySelector('[name="diveComputer"][value="' + d.diveComputer + '"]');
+    if (radio) {
+      radio.checked = true;
+      radio.closest('.option-item') && radio.closest('.option-item').classList.add('selected');
+    }
+  }
+  setVal('dietary', d.dietary);
+}
+
+async function lookupDiver(idNumber) {
+  setLookupStatus('מחפש פרטים... / Looking up your details... ⏳', '#007289');
+  document.getElementById('welcomeBackBanner').classList.remove('show');
+  try {
+    const resp = await fetch(LOOKUP_WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ idNumber })
+    });
+    if (!resp.ok) throw new Error('lookup failed');
+    const data = await resp.json();
+    if (data && data.found && data.firstName) {
+      prefillForm(data);
+      setLookupStatus('✅ פרטיך נטענו! / Details loaded', '#27ae60');
+      document.getElementById('welcomeBackBanner').classList.add('show');
+    } else {
+      setLookupStatus('צולל חדש — נא למלא את הפרטים / New diver — please fill in your details', '#5a7a8a');
+    }
+  } catch(e) {
+    setLookupStatus('', '');
+  }
+}
+
+// Wire up the Israeli ID field — trigger lookup when 9 valid digits entered
+document.addEventListener('DOMContentLoaded', function() {
+  const idInput = document.getElementById('idNumberInput');
+  if (!idInput) return;
+  idInput.addEventListener('input', function() {
+    const val = this.value.replace(/\D/g,'');
+    if (val.length === 9) {
+      // Run Luhn checksum before firing lookup
+      let sum = 0;
+      for (let i = 0; i < 9; i++) {
+        let d = parseInt(val[i]);
+        if (i % 2 !== 0) d *= 2;
+        if (d > 9) d -= 9;
+        sum += d;
+      }
+      if (sum % 10 === 0) {
+        lookupDiver(val);
+      }
+    } else {
+      setLookupStatus('', '');
+      document.getElementById('welcomeBackBanner').classList.remove('show');
+    }
+  });
+});
 
 document.addEventListener('DOMContentLoaded', () => { init(); attachBlurValidation(); });
 </script>
