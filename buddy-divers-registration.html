@@ -309,12 +309,12 @@
       <div class="form-row">
         <div class="field" id="f-firstName">
           <label>שם פרטי (באנגלית) <span class="en">/ First Name</span><span class="req">*</span></label>
-          <input type="text" name="firstName" placeholder="John" autocomplete="given-name" pattern="[A-Za-z\s\-]+" title="אנגלית בלבד / English only" />
+          <input type="text" name="firstName" placeholder="John" autocomplete="given-name" id="firstNameInput" />
           <span class="field-error">שדה חובה / Required</span>
         </div>
         <div class="field" id="f-lastName">
           <label>שם משפחה (באנגלית) <span class="en">/ Last Name</span><span class="req">*</span></label>
-          <input type="text" name="lastName" placeholder="Smith" autocomplete="family-name" pattern="[A-Za-z\s\-]+" title="אנגלית בלבד / English only" />
+          <input type="text" name="lastName" placeholder="Smith" autocomplete="family-name" id="lastNameInput" />
           <span class="field-error">שדה חובה / Required</span>
         </div>
       </div>
@@ -392,34 +392,47 @@
       <div class="section-title"><span class="icon">🛂</span> דרכון <span style="font-weight:400;color:var(--muted);font-size:12px;margin-right:6px;">Passport Details</span></div>
 
       <div class="form-row">
-        <div class="field" id="f-nationality">
-          <label>אזרחות <span class="en">Nationality</span><span class="req">*</span></label>
-          <input type="text" name="nationality" placeholder="לאום / Nationality" />
-          <span class="field-error">שדה חובה / Required</span>
-        </div>
         <div class="field" id="f-passportNumber">
           <label>מספר דרכון <span class="en">Passport Number</span><span class="req">*</span></label>
           <input type="text" name="passportNumber" placeholder="XX0000000" />
           <span class="field-error">שדה חובה / Required</span>
         </div>
+        <div class="field" id="f-nationality">
+          <label>אזרחות <span class="en">Nationality</span><span class="req">*</span></label>
+          <input type="text" name="nationality" placeholder="לאום / Nationality" id="nationalityInput" />
+          <span class="field-error">אנגלית בלבד / English characters only</span>
+        </div>
+      </div>
+
+      <div class="form-row">
         <div class="field" id="f-passportIssue">
           <label>תאריך הנפקת דרכון <span class="en">Passport Issue Date</span><span class="req">*</span></label>
           <input type="date" name="passportIssue" id="passportIssueInput" />
           <span class="field-error" id="passportIssueError">שדה חובה / Required</span>
+        </div>
+        <div class="field" id="f-passportExpiry">
           <label>תוקף דרכון <span class="en">Passport Expiry</span><span class="req">*</span></label>
           <input type="date" name="passportExpiry" id="passportExpiryInput" />
           <span class="field-hint">⚠️ חובה 6 חודשים מעבר לתאריך חזרה / Must be valid 6 months after return</span>
-          <span class="field-error" id="passportExpiryError">שדה חובה / Required</span> <span class="en">Gender (as on passport)</span><span class="req">*</span></label>
+          <span class="field-error" id="passportExpiryError">שדה חובה / Required</span>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="field" id="f-gender">
+          <label>מין בדרכון <span class="en">Gender (as on passport)</span><span class="req">*</span></label>
           <select name="gender">
             <option value="">בחר / Select</option>
             <option value="M">זכר / Male</option>
             <option value="F">נקבה / Female</option>
           </select>
+          <span class="field-error">שדה חובה / Required</span>
         </div>
-        <div class="field">
+        <div class="field" id="f-passportFullName">
           <label>שם מלא כבדרכון <span class="en">Full Name as on Passport</span></label>
-          <input type="text" name="passportName" placeholder="כמו בדרכון / As in passport" />
+          <input type="text" name="passportFullName" placeholder="כמו בדרכון / As in passport" id="passportFullNameInput" />
           <span class="field-hint">מלא רק אם שונה מהשם לעיל / Only if different from above</span>
+          <span class="field-error">אנגלית בלבד / English characters only</span>
         </div>
       </div>
 
@@ -658,7 +671,7 @@
       <div class="form-row">
         <div class="field">
           <label>איש קשר לחירום <span class="en">Emergency Contact Name</span><span class="req">*</span></label>
-          <input type="text" name="emergencyName" placeholder="שם מלא / Full name" />
+          <input type="text" name="emergencyName" placeholder="שם מלא / Full name" id="emergencyNameInput" />
         </div>
         <div class="field">
           <label>קשר <span class="en">Relationship</span><span class="req">*</span></label>
@@ -791,7 +804,7 @@
           <label>הסכמה לשימוש במדיה <span class="en">Media Consent</span><span class="req">*</span></label>
           <select name="mediaConsent">
             <option value="">בחר / Select</option>
-            <option value="Yes">אני שמח/ה לאפשר לבאדי-דייברס להשתמש בתמונות ווידאו בהם אני מופיע/ה לצורך פרסום</option>
+            <option value="Yes" selected>אני שמח/ה לאפשר לבאדי-דייברס להשתמש בתמונות ווידאו בהם אני מופיע/ה לצורך פרסום</option>
             <option value="No">אינני מסכים/ה / I do not consent</option>
           </select>
           <span class="field-error">שדה חובה / Required</span>
@@ -1072,7 +1085,17 @@ function validateField(fieldId, name, type) {
   if (type === 'email') {
     ok = EMAIL_RE.test(val);
     msg = 'כתובת אימייל לא תקינה / Invalid email format';
-  } else if (type === 'idNumber') {
+  } else if (type === 'englishOnly') {
+    if (!val) { ok = false; msg = 'שדה חובה / Required'; }
+    else {
+      ok = /^[A-Za-z\s\-'.]+$/.test(val);
+      msg = 'אנגלית בלבד / English characters only';
+    }
+  } else if (type === 'englishOnlyOptional') {
+    if (val) {
+      ok = /^[A-Za-z\s\-'.]+$/.test(val);
+      msg = 'אנגלית בלבד / English characters only';
+    }
     if (!/^\d{9}$/.test(val)) {
       ok = false;
       msg = 'נדרשות בדיוק 9 ספרות / Exactly 9 digits required';
@@ -1128,20 +1151,22 @@ function validateField(fieldId, name, type) {
 // Attach blur listeners for real-time feedback
 function attachBlurValidation() {
   const fields = [
-    ['f-idNumber',    'idNumber',    'idNumber'],
-    ['f-firstName',   'firstName',   'text'],
-    ['f-lastName',    'lastName',    'text'],
-    ['f-email',       'email',       'email'],
-    ['f-phone',       'phone',       'text'],
-    ['f-dob',         'dob',         'dob'],
-    ['f-nationality', 'nationality', 'text'],
-    ['f-passportNumber','passportNumber','text'],
-    ['f-passportIssue','passportIssue','passportIssue'],
-    ['f-passportExpiry','passportExpiry','passportExpiry'],
-    ['f-certLevel',   'certLevel',   'select'],
-    ['f-mediaConsent','mediaConsent','select'],
-    ['f-medicalNotes','medicalNotes','text'],
-    ['f-emergencyEmail','emergencyEmail','email'],
+    ['f-idNumber',        'idNumber',       'idNumber'],
+    ['f-firstName',       'firstName',      'englishOnly'],
+    ['f-lastName',        'lastName',       'englishOnly'],
+    ['f-email',           'email',          'email'],
+    ['f-phone',           'phone',          'text'],
+    ['f-dob',             'dob',            'dob'],
+    ['f-nationality',     'nationality',    'englishOnly'],
+    ['f-passportNumber',  'passportNumber', 'text'],
+    ['f-passportIssue',   'passportIssue',  'passportIssue'],
+    ['f-passportExpiry',  'passportExpiry', 'passportExpiry'],
+    ['f-passportFullName','passportFullName','englishOnlyOptional'],
+    ['f-gender',          'gender',         'select'],
+    ['f-certLevel',       'certLevel',      'select'],
+    ['f-mediaConsent',    'mediaConsent',   'select'],
+    ['f-medicalNotes',    'medicalNotes',   'text'],
+    ['f-emergencyEmail',  'emergencyEmail', 'email'],
   ];
   fields.forEach(([fieldId, name, type]) => {
     const fieldEl = document.getElementById(fieldId);
@@ -1160,9 +1185,22 @@ function attachBlurValidation() {
     lastDiveEl.addEventListener('change', () => {
       const val = lastDiveEl.value;
       const ok = !val || new Date(val) <= new Date();
-      // find parent field
       const fieldEl = lastDiveEl.closest('.field');
       if (fieldEl) fieldEl.classList.toggle('invalid', !ok);
+    });
+  }
+
+  // Emergency contact name - English only, optional
+  const emergencyNameEl = document.getElementById('emergencyNameInput');
+  if (emergencyNameEl) {
+    emergencyNameEl.addEventListener('blur', () => {
+      const val = emergencyNameEl.value.trim();
+      const fieldEl = emergencyNameEl.closest('.field');
+      if (!fieldEl) return;
+      const errEl = fieldEl.querySelector('.field-error');
+      const ok = !val || /^[A-Za-z\s\-'.]+$/.test(val);
+      if (errEl) errEl.textContent = 'אנגלית בלבד / English characters only';
+      fieldEl.classList.toggle('invalid', !ok);
     });
   }
 }
@@ -1173,20 +1211,21 @@ function attachBlurValidation() {
 function validateForm() {
   let valid = true;
   const required = [
-    ['f-idNumber',    'idNumber',    'idNumber'],
-    ['f-firstName',   'firstName',   'text'],
-    ['f-lastName',    'lastName',    'text'],
-    ['f-email',       'email',       'email'],
-    ['f-phone',       'phone',       'text'],
-    ['f-dob',         'dob',         'dob'],
-    ['f-nationality', 'nationality', 'text'],
-    ['f-passportNumber','passportNumber','text'],
-    ['f-passportIssue','passportIssue','passportIssue'],
-    ['f-passportExpiry','passportExpiry','passportExpiry'],
-    ['f-certLevel',   'certLevel',   'select'],
-    ['f-mediaConsent','mediaConsent','select'],
-    ['f-medicalNotes','medicalNotes','text'],
-    ['f-emergencyEmail','emergencyEmail','email'],
+    ['f-idNumber',        'idNumber',       'idNumber'],
+    ['f-firstName',       'firstName',      'englishOnly'],
+    ['f-lastName',        'lastName',       'englishOnly'],
+    ['f-email',           'email',          'email'],
+    ['f-phone',           'phone',          'text'],
+    ['f-dob',             'dob',            'dob'],
+    ['f-nationality',     'nationality',    'englishOnly'],
+    ['f-passportNumber',  'passportNumber', 'text'],
+    ['f-passportIssue',   'passportIssue',  'passportIssue'],
+    ['f-passportExpiry',  'passportExpiry', 'passportExpiry'],
+    ['f-gender',          'gender',         'select'],
+    ['f-certLevel',       'certLevel',      'select'],
+    ['f-mediaConsent',    'mediaConsent',   'select'],
+    ['f-medicalNotes',    'medicalNotes',   'text'],
+    ['f-emergencyEmail',  'emergencyEmail', 'email'],
   ];
 
   required.forEach(([fieldId, name, type]) => {
