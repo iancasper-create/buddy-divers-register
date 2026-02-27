@@ -641,7 +641,7 @@
 
     <!-- SECTION: Health & Emergency -->
     <div class="card">
-      <div class="section-title"><span class="icon">🏥</span> בריאות, ביטוח וחירום <span style="font-weight:400;color:var(--muted);font-size:12px;margin-right:6px;">Health, Insurance & Emergency</span></div>
+      <div class="section-title"><span class="icon">🏥</span> בריאות וחירום <span style="font-weight:400;color:var(--muted);font-size:12px;margin-right:6px;">Health & Emergency</span></div>
 
       <div class="form-row full">
         <div class="field">
@@ -683,23 +683,22 @@
       </div>
 
       <div class="form-row">
+        <div class="field" id="f-emergencyEmail">
+          <label>מייל איש קשר לחירום <span class="en">Emergency Contact Email</span><span class="req">*</span></label>
+          <input type="email" name="emergencyEmail" placeholder="email@example.com" />
+          <span class="field-error">כתובת אימייל לא תקינה / Invalid email</span>
+        </div>
         <div class="field">
           <label>טלפון איש קשר <span class="en">Emergency Contact Phone</span><span class="req">*</span></label>
           <input type="tel" name="emergencyPhone" placeholder="05X-XXXXXXX" />
         </div>
       </div>
 
-      <div class="form-row full">
-        <div class="field" id="f-emergencyEmail">
-          <label>מייל איש קשר לחירום <span class="en">Emergency Contact Email</span><span class="req">*</span></label>
-          <input type="email" name="emergencyEmail" placeholder="email@example.com" />
-          <span class="field-error">כתובת אימייל לא תקינה / Invalid email</span>
-        </div>
-      </div>
+    </div>
 
-      <hr class="divider" />
-
-      <div class="section-title" style="font-size:13px;margin-bottom:16px;"><span class="icon">🏥</span> ביטוח צלילה <span style="font-weight:400;color:var(--muted);font-size:12px;margin-right:6px;">Dive Insurance</span></div>
+    <!-- SECTION: Dive Insurance -->
+    <div class="card">
+      <div class="section-title"><span class="icon">🛡️</span> ביטוח צלילה <span style="font-weight:400;color:var(--muted);font-size:12px;margin-right:6px;">Dive Insurance</span></div>
 
       <div class="form-row">
         <div class="field">
@@ -715,7 +714,25 @@
       <div class="form-row full">
         <div class="field">
           <label>פרטי יצירת קשר עם חברת הביטוח <span class="en">Insurance Company Contact Details</span></label>
-          <textarea name="insuranceContact" placeholder="טלפון, מייל, או כל פרטי קשר רלוונטיים / Phone, email, or any relevant contact details"></textarea>
+          <textarea name="insuranceContact" placeholder="טלפון, מייל, או כל פרטי קשר רלוונטיים / Phone, email, or any relevant contact details" style="min-height:44px;max-height:44px;resize:none;overflow:hidden;"></textarea>
+        </div>
+      </div>
+
+      <div class="form-row full">
+        <div class="field">
+          <label>מסמך ביטוח צלילה <span class="en">Dive Insurance Document</span></label>
+          <div class="file-upload-area" id="insuranceUploadArea" onclick="document.getElementById('insuranceFileInput').click()">
+            <input type="file" id="insuranceFileInput" accept="image/*,.pdf" style="display:none"
+              onchange="handleUpload(this,'insuranceUploadArea','insurancePhotoUrl','insuranceUploadStatus')" />
+            <input type="hidden" name="diveInsurancePhotoUrl" id="insurancePhotoUrl" />
+            <div class="upload-icon">📄</div>
+            <div class="upload-text">
+              <span class="he">העלה תמונה או PDF של מסמך הביטוח</span>
+              <span class="en">Upload your insurance document (photo or PDF)</span>
+            </div>
+            <div class="upload-subtext">JPG, PNG, PDF · עד 10MB / up to 10MB</div>
+            <div id="insuranceUploadStatus"></div>
+          </div>
         </div>
       </div>
     </div>
