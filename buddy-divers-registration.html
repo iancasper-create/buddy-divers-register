@@ -301,7 +301,7 @@
       <div class="form-row">
         <div class="field" id="f-idNumber">
           <label>מספר תעודת זהות <span class="en">ID Number</span><span class="req">*</span></label>
-          <input type="text" name="idNumber" placeholder="XXXXXXXXX" />
+          <input type="text" name="idNumber" placeholder="XXXXXXXXX" inputmode="numeric" pattern="\d{9}" maxlength="9" title="9 ספרות בלבד / 9 digits only" />
           <span class="field-error">שדה חובה / Required</span>
         </div>
       </div>
@@ -335,7 +335,7 @@
       <div class="form-row">
         <div class="field" id="f-dob">
           <label>תאריך לידה <span class="en">Date of Birth</span><span class="req">*</span></label>
-          <input type="date" name="dob" />
+          <input type="date" name="dob" id="dobInput" />
           <span class="field-error">שדה חובה / Required</span>
         </div>
         <div class="field">
@@ -409,7 +409,7 @@
         </div>
         <div class="field" id="f-passportExpiry">
           <label>תוקף דרכון <span class="en">Passport Expiry</span><span class="req">*</span></label>
-          <input type="date" name="passportExpiry" />
+          <input type="date" name="passportExpiry" id="passportExpiryInput" />
           <span class="field-hint">⚠️ חובה 6 חודשים מעבר לתאריך חזרה / Must be valid 6 months after return</span>
           <span class="field-error">שדה חובה / Required</span>
         </div>
@@ -493,7 +493,7 @@
       <div class="form-row">
         <div class="field">
           <label>תאריך צלילה אחרונה <span class="en">Last Dive Date</span></label>
-          <input type="date" name="lastDive" />
+          <input type="date" name="lastDive" id="lastDiveInput" />
         </div>
         <div class="field">
           <label>האם מוסמך נייטרוקס? <span class="en">Nitrox Certified?</span><span class="req">*</span></label>
@@ -1185,6 +1185,20 @@ document.getElementById('regForm').addEventListener('submit', async function(e) 
     window.scrollTo({top:0, behavior:'smooth'});
   }
 });
+
+// Set dynamic date limits
+(function() {
+  const today = new Date().toISOString().split('T')[0];
+  // Passport expiry: must be today or future
+  document.getElementById('passportExpiryInput').min = today;
+  // Last dive: cannot be future
+  document.getElementById('lastDiveInput').max = today;
+  // DOB: min is 90 years ago, max is today
+  const minDob = new Date();
+  minDob.setFullYear(minDob.getFullYear() - 90);
+  document.getElementById('dobInput').min = minDob.toISOString().split('T')[0];
+  document.getElementById('dobInput').max = today;
+})();
 
 // Run on load
 init();
