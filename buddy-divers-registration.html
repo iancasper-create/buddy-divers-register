@@ -303,6 +303,7 @@
     <div class="trip-banner">
       <div class="trip-name" id="tripName">🤿 ספארי מדגסקר — Madagascar Safari</div>
       <div class="trip-dates"><span id="tripDates"></span></div>
+      <div class="trip-note-banner" id="tripNote" style="display:none;margin-top:6px;font-size:13px;color:#f0c040;font-weight:600;"></div>
     </div>
   </div>
 
@@ -1077,6 +1078,114 @@ const TRIPS = {
       }
     ]
   },
+
+  "260828": {
+    name: "🤿 ספארי פיג'י וטונגה — Fiji & Tonga Safari",
+    dates: "28/08/2026 – 12/09/2026",
+    note: "⛔ רשימת המתנה בלבד / Waiting list only",
+    pricing: [
+      {
+        value: "single_9790",
+        he: "מחיר לאדם",
+        en: "Price per person",
+        price: "$9,790"
+      }
+    ]
+  },
+  "261022": {
+    name: "🤿 ספארי גלאפגוס — Galapagos Safari",
+    dates: "22/10/2026 – 29/10/2026",
+    note: "2 מקומות אחרונים / Last 2 spaces",
+    pricing: [
+      {
+        value: "single_7300",
+        he: "מחיר לאדם",
+        en: "Price per person",
+        price: "$7,300"
+      }
+    ]
+  },
+  "271014": {
+    name: "🤿 ספארי גלאפגוס — Galapagos Safari",
+    dates: "14/10/2027 – 21/10/2027",
+    note: "סוכות / Sukkot",
+    pricing: [
+      {
+        value: "single_7350",
+        he: "מחיר לאדם",
+        en: "Price per person",
+        price: "$7,350"
+      }
+    ]
+  },
+  "261122": {
+    name: "🤿 ספארי תאילנד — Thailand Safari",
+    dates: "22/11/2026 – 29/11/2026",
+    pricing: [
+      {
+        value: "upper_standard_2360",
+        he: "יחיד בחדר זוגי — סטנדרטי מפלס עליון (שרותים ומקלחת משותפים)",
+        en: "Single in twin room — upper deck standard (shared bathroom)",
+        price: "$2,360"
+      },
+      {
+        value: "main_deluxe_2427",
+        he: "יחיד בחדר זוגי — דלקס מפלס ראשי",
+        en: "Single in twin room — main deck deluxe",
+        price: "$2,427"
+      },
+      {
+        value: "main_master_2528",
+        he: "יחיד בחדר זוגי — מאסטר מפלס ראשי (מיטה זוגית בלבד)",
+        en: "Single in twin room — main deck master (double bed only)",
+        price: "$2,528"
+      }
+    ]
+  },
+  "261215": {
+    name: "🤿 פיליפינים קומבו — Philippines Combo",
+    dates: "15/12/2026 – 26/12/2026",
+    note: "🏝️ Anilao (land - optional): 15/12–19/12 · $1,350 | 🚢 Infiniti Liveaboard: 19/12–26/12",
+    pricing: [
+      {
+        value: "land_only_1350",
+        he: "אנילאו — יבשה בלבד (אופציונלי)",
+        en: "Anilao — land only (optional)",
+        price: "$1,350"
+      },
+      {
+        value: "liveaboard_deluxe_twin_2995",
+        he: "אינפיניטי לייבבורד — חדר דלוקס טווין",
+        en: "Infiniti Liveaboard — Deluxe Twin room",
+        price: "$2,995"
+      },
+      {
+        value: "liveaboard_premium_deluxe_3195",
+        he: "אינפיניטי לייבבורד — חדר פרמיום דלוקס",
+        en: "Infiniti Liveaboard — Premium Deluxe room",
+        price: "$3,195"
+      }
+    ]
+  },
+  "270104": {
+    name: "🤿 מקסיקו קומבו — Mexico Combo",
+    dates: "04/01/2027 – 16/01/2027",
+    note: "🏜️ La Paz (land - optional): 04/01–07/01 · $1,190 | 🚢 Socorro: 07/01–16/01",
+    pricing: [
+      {
+        value: "land_only_1190",
+        he: "לה פאז — יבשה בלבד (אופציונלי)",
+        en: "La Paz — land only (optional)",
+        price: "$1,190"
+      },
+      {
+        value: "socorro_4295",
+        he: "סוקורו לייבבורד",
+        en: "Socorro Liveaboard",
+        price: "$4,295"
+      }
+    ]
+  },
   "270106": {
     name: "🤿 ספארי מיאנמר — Myanmar Safari",
     dates: "06/01/2027 – 13/01/2027",
@@ -1127,6 +1236,15 @@ function init() {
   document.getElementById('tripName').textContent = tripConfig.name;
   document.getElementById('tripDates').textContent = tripConfig.dates;
   document.getElementById('tripName').dataset.tripId = tripId;
+
+  // Show note if present
+  const noteEl = document.getElementById('tripNote');
+  if (tripConfig.note) {
+    noteEl.textContent = tripConfig.note;
+    noteEl.style.display = 'block';
+  } else {
+    noteEl.style.display = 'none';
+  }
 
   // Build pricing options
   const container = document.getElementById('pricingOptions');
