@@ -356,7 +356,7 @@
       <div class="form-row">
         <div class="field" id="f-dob">
           <label>תאריך לידה <span class="en">Date of Birth</span><span class="req">*</span></label>
-          <input type="date" name="dob" id="dobInput" />
+          <input type="text" name="dob" id="dobInput" placeholder="DD/MM/YYYY" pattern="\d{2}/\d{2}/\d{4}" maxlength="10" />
           <span class="field-error">שדה חובה / Required</span>
         </div>
         <div class="field">
@@ -428,12 +428,12 @@
       <div class="form-row">
         <div class="field" id="f-passportIssue">
           <label>תאריך הנפקת דרכון <span class="en">Passport Issue Date</span><span class="req">*</span></label>
-          <input type="date" name="passportIssue" id="passportIssueInput" />
+          <input type="text" name="passportIssue" id="passportIssueInput" placeholder="DD/MM/YYYY" pattern="\d{2}/\d{2}/\d{4}" maxlength="10" />
           <span class="field-error" id="passportIssueError">שדה חובה / Required</span>
         </div>
         <div class="field" id="f-passportExpiry">
           <label>תוקף דרכון <span class="en">Passport Expiry</span><span class="req">*</span></label>
-          <input type="date" name="passportExpiry" id="passportExpiryInput" />
+          <input type="text" name="passportExpiry" id="passportExpiryInput" placeholder="DD/MM/YYYY" pattern="\d{2}/\d{2}/\d{4}" maxlength="10" />
           <span class="field-hint">⚠️ חובה 6 חודשים מעבר לתאריך חזרה / Must be valid 6 months after return</span>
           <span class="field-error" id="passportExpiryError">שדה חובה / Required</span>
         </div>
@@ -519,7 +519,7 @@
       <div class="form-row">
         <div class="field">
           <label>תאריך צלילה אחרונה <span class="en">Last Dive Date</span></label>
-          <input type="date" name="lastDive" id="lastDiveInput" />
+          <input type="text" name="lastDive" id="lastDiveInput" placeholder="DD/MM/YYYY" pattern="\d{2}/\d{2}/\d{4}" maxlength="10" />
         </div>
         <div class="field">
           <label>האם מוסמך נייטרוקס? <span class="en">Nitrox Certified?</span><span class="req">*</span></label>
@@ -1394,6 +1394,22 @@ async function handleUpload(input, areaId, urlFieldId, statusId, folder) {
 // ============================================================
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+// Parse DD/MM/YYYY string into a Date object
+function parseDate(val) {
+  if (!val) return null;
+  const m = val.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  if (!m) return null;
+  return new Date(parseInt(m[3]), parseInt(m[2]) - 1, parseInt(m[1]));
+}
+
+// Convert YYYY-MM-DD (from Airtable) to DD/MM/YYYY for display
+function isoToDmy(val) {
+  if (!val) return '';
+  const m = val.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (!m) return val;
+  return m[3] + '/' + m[2] + '/' + m[1];
+}
+
 function validateField(fieldId, name, type) {
   const fieldEl = document.getElementById(fieldId);
   if (!fieldEl) return true;
@@ -1434,29 +1450,31 @@ function validateField(fieldId, name, type) {
   } else if (type === 'dob') {
     if (!val) { ok = false; }
     else {
-      const d = new Date(val), now = new Date();
+      const d = parseDate(val), now = new Date();
       const min = new Date(); min.setFullYear(now.getFullYear() - 90);
-      ok = d >= min && d <= now;
-      msg = 'תאריך לידה לא תקין / Invalid date of birth';
+      ok = d && d >= min && d <= now;
+      msg = 'תאריך לידה לא תקין / Invalid date of birth (DD/MM/YYYY)';
     }
   } else if (type === 'passportIssue') {
     if (!val) { ok = false; }
     else {
-      const d = new Date(val), now = new Date();
+      const d = parseDate(val), now = new Date();
       const min = new Date(); min.setFullYear(now.getFullYear() - 10);
-      ok = d >= min && d <= now;
-      msg = 'תאריך הנפקה לא יכול להיות מעל 10 שנים / Issue date cannot be more than 10 years ago';
+      ok = d && d >= min && d <= now;
+      msg = 'תאריך הנפקה לא יכול להיות מעל 10 שנים / Issue date cannot be more than 10 years ago (DD/MM/YYYY)';
     }
   } else if (type === 'passportExpiry') {
     if (!val) { ok = false; }
     else {
-      ok = new Date(val) >= new Date();
-      msg = 'הדרכון פג תוקף / Passport has expired';
+      const d = parseDate(val);
+      ok = d && d >= new Date();
+      msg = 'הדרכון פג תוקף / Passport has expired (DD/MM/YYYY)';
     }
   } else if (type === 'lastDive') {
     if (val) {
-      ok = new Date(val) <= new Date();
-      msg = 'תאריך לא יכול להיות בעתיד / Date cannot be in the future';
+      const d = parseDate(val);
+      ok = d && d <= new Date();
+      msg = 'תאריך לא יכול להיות בעתיד / Date cannot be in the future (DD/MM/YYYY)';
     }
   } else if (type === 'select') {
     ok = val.length > 0;
@@ -1506,7 +1524,8 @@ function attachBlurValidation() {
   if (lastDiveEl) {
     lastDiveEl.addEventListener('change', () => {
       const val = lastDiveEl.value;
-      const ok = !val || new Date(val) <= new Date();
+      const d = parseDate(val);
+      const ok = !val || (d && d <= new Date());
       const fieldEl = lastDiveEl.closest('.field');
       if (fieldEl) fieldEl.classList.toggle('invalid', !ok);
     });
@@ -1681,14 +1700,14 @@ function prefillForm(d) {
   setVal('lastName', d.lastName);
   setVal('email', d.email);
   setVal('phone', d.phone);
-  setVal('dob', d.dob);
+  setVal('dob', isoToDmy(d.dob));
   setSelect('gender', d.gender);
   setVal('city', d.city);
   setVal('address', d.address);
   setVal('nationality', d.nationality);
   setVal('passportNumber', d.passportNumber);
-  setVal('passportIssue', d.passportIssue);
-  setVal('passportExpiry', d.passportExpiry);
+  setVal('passportIssue', isoToDmy(d.passportIssue));
+  setVal('passportExpiry', isoToDmy(d.passportExpiry));
   setVal('passportFullName', d.passportFullName);
   setSelect('certLevel', d.certLevel);
   setSelect('certAgency', d.certAgency);
@@ -1696,7 +1715,7 @@ function prefillForm(d) {
   setSelect('nitrox', d.nitrox);
   setVal('nitroxCertNumber', d.nitroxCertNumber);
   setVal('numDives', d.numDives);
-  setVal('lastDiveDate', d.lastDive);
+  setVal('lastDiveDate', isoToDmy(d.lastDive));
   setVal('height', d.height);
   setVal('weight', d.weight);
   setVal('allergies', d.allergies);
@@ -1772,7 +1791,22 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 });
 
-document.addEventListener('DOMContentLoaded', () => { init(); attachBlurValidation(); });
+// Auto-format date fields as user types (inserts / after DD and MM)
+function attachDateAutoFormat() {
+  ['dobInput','passportIssueInput','passportExpiryInput','lastDiveInput'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('input', function(e) {
+      let v = this.value.replace(/[^\d]/g, '');
+      if (v.length > 8) v = v.slice(0, 8);
+      if (v.length >= 5) v = v.slice(0,2) + '/' + v.slice(2,4) + '/' + v.slice(4);
+      else if (v.length >= 3) v = v.slice(0,2) + '/' + v.slice(2);
+      this.value = v;
+    });
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => { init(); attachBlurValidation(); attachDateAutoFormat(); });
 </script>
 </body>
 </html>
