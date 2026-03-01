@@ -360,17 +360,11 @@
           <span class="field-error">שדה חובה / Required</span>
         </div>
         <div class="field">
-          <label>עיר מגורים <span class="en">City</span></label>
-          <input type="text" name="city" placeholder="תל אביב / Tel Aviv" />
+          <label>עיר מגורים <span class="en">City of Residence</span></label>
+          <input type="text" name="city" placeholder="ניתן להקליד בעברית או באנגלית / Can be keyed in Hebrew or English" />
         </div>
       </div>
 
-      <div class="form-row full">
-        <div class="field">
-          <label>כתובת מגורים מלאה <span class="en">Full Address</span></label>
-          <input type="text" name="address" placeholder="רחוב, מספר, עיר" />
-        </div>
-      </div>
     </div>
 
     <!-- SECTION 5: Safari Pricing (DYNAMIC) -->
@@ -1703,7 +1697,6 @@ function prefillForm(d) {
   setVal('dob', isoToDmy(d.dob));
   setSelect('gender', d.gender);
   setVal('city', d.city);
-  setVal('address', d.address);
   setVal('nationality', d.nationality);
   setVal('passportNumber', d.passportNumber);
   setVal('passportIssue', isoToDmy(d.passportIssue));
