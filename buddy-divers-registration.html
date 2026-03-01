@@ -413,7 +413,7 @@
           <span class="field-error">שדה חובה / Required</span>
         </div>
         <div class="field" id="f-nationality">
-          <label>אזרחות <span class="en">Nationality</span><span class="req">*</span></label>
+          <label>אזרחות (באנגלית) <span class="en">/ Nationality</span><span class="req">*</span></label>
           <input type="text" name="nationality" placeholder="לאום / Nationality" id="nationalityInput" />
           <span class="field-error">אנגלית בלבד / English characters only</span>
         </div>
@@ -1708,7 +1708,7 @@ function prefillForm(d) {
   setSelect('nitrox', d.nitrox);
   setVal('nitroxCertNumber', d.nitroxCertNumber);
   setVal('numDives', d.numDives);
-  setVal('lastDiveDate', isoToDmy(d.lastDive));
+  setVal('lastDive', isoToDmy(d.lastDive));
   setVal('height', d.height);
   setVal('weight', d.weight);
   setVal('allergies', d.allergies);
@@ -1718,7 +1718,9 @@ function prefillForm(d) {
   setVal('emergencyPhone', d.emergencyPhone);
   setVal('emergencyEmail', d.emergencyEmail);
   setVal('insuranceCompany', d.insuranceCompany);
-  setVal('policyNumber', d.policyNumber);
+  setVal('insurancePolicy', d.insurancePolicy);
+  setVal('insuranceContact', d.insuranceContact);
+  setSelect('referral', d.referral);
   setSelect('bcdSize', d.bcdSize);
   setSelect('regulator', d.regulator);
   setSelect('wetsuitSize', d.wetsuitSize);
@@ -1734,6 +1736,13 @@ function prefillForm(d) {
     }
   }
   setVal('dietary', d.dietary);
+  // Auto-check "returning customer" checkbox
+  const returningCb = document.querySelector('[name="returningCustomer"]');
+  if (returningCb) {
+    returningCb.checked = true;
+    const optItem = returningCb.closest('.option-item');
+    if (optItem) optItem.classList.add('selected');
+  }
 }
 
 async function lookupDiver(idNumber) {
