@@ -272,6 +272,44 @@
     .spinner { display:inline-block; width:20px; height:20px; border:2px solid rgba(255,255,255,0.4); border-top-color:white; border-radius:50%; animation:spin 0.7s linear infinite; vertical-align:middle; margin-left:8px; }
     @keyframes spin { to{transform:rotate(360deg)} }
 
+    /* OTP verification box */
+    .otp-box {
+      display:none;
+      background:linear-gradient(135deg,rgba(0,114,137,0.08),rgba(34,69,96,0.08));
+      border:1.5px solid #007289;
+      border-radius:10px;
+      padding:16px;
+      margin-bottom:16px;
+      font-size:14px;
+      color:#1a3a4a;
+    }
+    .otp-box.show { display:block; }
+    .otp-box .otp-title { font-weight:700; font-size:15px; margin-bottom:6px; color:#007289; }
+    .otp-box .otp-hint { font-size:13px; color:#5a7a8a; margin-bottom:12px; }
+    .otp-box .otp-input-row { display:flex; align-items:center; gap:10px; margin-bottom:10px; flex-wrap:wrap; }
+    .otp-box input[type="text"] {
+      width:120px; font-size:22px; letter-spacing:8px; text-align:center;
+      border:2px solid #007289; border-radius:8px; padding:8px 12px;
+      font-family:monospace; color:#224560;
+    }
+    .otp-box input[type="text"]:focus { outline:none; border-color:#f07830; }
+    .otp-box .otp-verify-btn {
+      background:#007289; color:white; border:none; border-radius:8px;
+      padding:10px 20px; font-size:14px; font-weight:600; cursor:pointer;
+    }
+    .otp-box .otp-verify-btn:hover { background:#005f72; }
+    .otp-box .otp-error { color:#c0392b; font-size:13px; font-weight:600; display:none; margin-bottom:6px; }
+    .otp-box .otp-error.show { display:block; }
+    .otp-box .otp-countdown { font-size:12px; color:#888; margin-bottom:8px; }
+    .otp-box .otp-countdown.urgent { color:#c0392b; font-weight:700; }
+    .otp-box .otp-resend { font-size:12px; color:#007289; cursor:pointer; text-decoration:underline; display:none; }
+    .otp-box .otp-resend.show { display:inline; }
+    .otp-box .otp-manual-link {
+      margin-top:12px; padding-top:12px; border-top:1px solid #d0e0e8;
+      font-size:12px; color:#888; text-align:center;
+    }
+    .otp-box .otp-manual-link a { color:#c0392b; cursor:pointer; text-decoration:underline; }
+
     /* Welcome back banner */
     .welcome-back-banner {
       display:none;
@@ -316,6 +354,22 @@
       <div class="welcome-back-banner" id="welcomeBackBanner">
         ✅ ברוך שובך! פרטיך נטענו אוטומטית — <span style="color:red;text-decoration:underline;">אנא בדוק ועדכן אם נדרש.</span><br/>
         <span style="font-weight:400;font-size:13px;direction:ltr;display:block;text-align:left;">Welcome back! Your details have been pre-filled — <span style="color:red;text-decoration:underline;">please review and update anything that has changed.</span></span>
+      </div>
+
+      <!-- OTP Verification Box -->
+      <div class="otp-box" id="otpBox">
+        <div class="otp-title">✉️ אימות זהות / Identity Verification</div>
+        <div class="otp-hint" id="otpHint">שלחנו קוד אימות לכתובת המייל שלך / We sent a verification code to your email</div>
+        <div class="otp-error" id="otpError">קוד שגוי — נסה שנית / Incorrect code — please try again</div>
+        <div class="otp-input-row">
+          <input type="text" id="otpInput" maxlength="4" placeholder="_ _ _ _" inputmode="numeric" autocomplete="one-time-code" />
+          <button type="button" class="otp-verify-btn" id="otpVerifyBtn" onclick="verifyOtp()">אמת / Verify</button>
+        </div>
+        <div class="otp-countdown" id="otpCountdown"></div>
+        <span class="otp-resend" id="otpResend" onclick="resendOtp()">לא קיבלת? שלח שוב / Didn't receive it? Resend</span>
+        <div class="otp-manual-link">
+          <a onclick="continueManually()">לא קיבלתי את הקוד — המשך מילוי ידני / I didn't receive the code — continue filling in manually</a>
+        </div>
       </div>
 
       <div class="form-row">
@@ -1662,12 +1716,117 @@ document.getElementById('regForm').addEventListener('submit', async function(e) 
 // DIVER LOOKUP — auto-fill from Airtable via Make.com proxy
 // ============================================================
 const LOOKUP_WEBHOOK_URL = 'https://hook.eu1.make.com/cagpzykef831olz5dmp5unu65lochg5v';
+const OTP_VALIDATE_WEBHOOK_URL = 'https://hook.eu1.make.com/REPLACE_WITH_OTP_VALIDATE_WEBHOOK';
+
+// OTP state
+let otpTimer = null;
+let otpResendTimer = null;
+let otpCurrentId = null;
 
 function setLookupStatus(msg, color) {
   const el = document.getElementById('lookupStatus');
   el.textContent = msg;
   el.style.color = color || '#007289';
   el.style.display = msg ? 'block' : 'none';
+}
+
+function showOtpBox(maskedEmail) {
+  const hint = document.getElementById('otpHint');
+  hint.textContent = maskedEmail
+    ? 'שלחנו קוד אימות ל־' + maskedEmail + ' / We sent a code to ' + maskedEmail
+    : 'שלחנו קוד אימות לכתובת המייל שלך / We sent a verification code to your email';
+  document.getElementById('otpBox').classList.add('show');
+  document.getElementById('otpInput').value = '';
+  document.getElementById('otpError').classList.remove('show');
+  document.getElementById('otpResend').classList.remove('show');
+  startOtpCountdown();
+  // Show resend after 60s
+  otpResendTimer = setTimeout(() => {
+    document.getElementById('otpResend').classList.add('show');
+  }, 60000);
+}
+
+function hideOtpBox() {
+  document.getElementById('otpBox').classList.remove('show');
+  clearInterval(otpTimer);
+  clearTimeout(otpResendTimer);
+}
+
+function startOtpCountdown() {
+  clearInterval(otpTimer);
+  let seconds = 300; // 5 minutes
+  const el = document.getElementById('otpCountdown');
+  function update() {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    el.textContent = 'הקוד תקף ל־' + m + ':' + (s < 10 ? '0' : '') + s + ' / Code valid for ' + m + ':' + (s < 10 ? '0' : '') + s;
+    el.classList.toggle('urgent', seconds <= 60);
+    if (seconds <= 0) {
+      clearInterval(otpTimer);
+      el.textContent = 'הקוד פג תוקף / Code expired';
+      document.getElementById('otpVerifyBtn').disabled = true;
+      document.getElementById('otpResend').classList.add('show');
+    }
+    seconds--;
+  }
+  update();
+  otpTimer = setInterval(update, 1000);
+}
+
+async function verifyOtp() {
+  const code = document.getElementById('otpInput').value.trim();
+  if (code.length !== 4) {
+    document.getElementById('otpError').textContent = 'נא להזין קוד בן 4 ספרות / Please enter the 4-digit code';
+    document.getElementById('otpError').classList.add('show');
+    return;
+  }
+  document.getElementById('otpVerifyBtn').disabled = true;
+  document.getElementById('otpVerifyBtn').textContent = '...מאמת / Verifying';
+  document.getElementById('otpError').classList.remove('show');
+  try {
+    const resp = await fetch(OTP_VALIDATE_WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ idNumber: otpCurrentId, code: code })
+    });
+    if (!resp.ok) throw new Error('validate failed');
+    const data = await resp.json();
+    if (data && data.valid && data.diverData) {
+      hideOtpBox();
+      prefillForm(data.diverData);
+      setLookupStatus('✅ פרטיך נטענו! / Details loaded', '#27ae60');
+      document.getElementById('welcomeBackBanner').classList.add('show');
+    } else if (data && data.expired) {
+      document.getElementById('otpError').textContent = 'הקוד פג תוקף — בקש קוד חדש / Code expired — please request a new code';
+      document.getElementById('otpError').classList.add('show');
+      document.getElementById('otpVerifyBtn').disabled = false;
+      document.getElementById('otpVerifyBtn').textContent = 'אמת / Verify';
+    } else {
+      document.getElementById('otpError').textContent = 'קוד שגוי — נסה שנית / Incorrect code — please try again';
+      document.getElementById('otpError').classList.add('show');
+      document.getElementById('otpVerifyBtn').disabled = false;
+      document.getElementById('otpVerifyBtn').textContent = 'אמת / Verify';
+    }
+  } catch(e) {
+    document.getElementById('otpError').textContent = 'שגיאה — נסה שנית / Error — please try again';
+    document.getElementById('otpError').classList.add('show');
+    document.getElementById('otpVerifyBtn').disabled = false;
+    document.getElementById('otpVerifyBtn').textContent = 'אמת / Verify';
+  }
+}
+
+async function resendOtp() {
+  document.getElementById('otpResend').classList.remove('show');
+  document.getElementById('otpVerifyBtn').disabled = false;
+  document.getElementById('otpVerifyBtn').textContent = 'אמת / Verify';
+  document.getElementById('otpError').classList.remove('show');
+  await lookupDiver(otpCurrentId);
+}
+
+function continueManually() {
+  hideOtpBox();
+  setLookupStatus('ממשיך מילוי ידני / Continuing manually', '#5a7a8a');
+  otpCurrentId = null;
 }
 
 function setVal(name, value) {
@@ -1748,6 +1907,7 @@ function prefillForm(d) {
 async function lookupDiver(idNumber) {
   setLookupStatus('מחפש פרטים... / Looking up your details... ⏳', '#007289');
   document.getElementById('welcomeBackBanner').classList.remove('show');
+  hideOtpBox();
   try {
     const resp = await fetch(LOOKUP_WEBHOOK_URL, {
       method: 'POST',
@@ -1756,10 +1916,10 @@ async function lookupDiver(idNumber) {
     });
     if (!resp.ok) throw new Error('lookup failed');
     const data = await resp.json();
-    if (data && data.found && data.firstName) {
-      prefillForm(data);
-      setLookupStatus('✅ פרטיך נטענו! / Details loaded', '#27ae60');
-      document.getElementById('welcomeBackBanner').classList.add('show');
+    if (data && data.found) {
+      otpCurrentId = idNumber;
+      setLookupStatus('נמצאת במערכת! בדוק את המייל שלך לקוד אימות / Found! Check your email for a verification code 📧', '#007289');
+      showOtpBox(data.maskedEmail || null);
     } else {
       setLookupStatus('צולל חדש — נא למלא את הפרטים / New diver — please fill in your details', '#5a7a8a');
     }
@@ -1789,7 +1949,12 @@ document.addEventListener('DOMContentLoaded', function() {
     } else {
       setLookupStatus('', '');
       document.getElementById('welcomeBackBanner').classList.remove('show');
+      hideOtpBox();
     }
+  });
+  // Enter key on OTP input triggers verify
+  document.getElementById('otpInput').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') { e.preventDefault(); verifyOtp(); }
   });
 });
 
