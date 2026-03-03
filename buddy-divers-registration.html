@@ -366,6 +366,7 @@
           <button type="button" class="otp-verify-btn" id="otpVerifyBtn" onclick="verifyOtp()">אמת / Verify</button>
         </div>
         <div class="otp-countdown" id="otpCountdown"></div>
+        <span id="otpResendCountdown" style="font-size:12px;color:var(--muted);">ניתן לשלוח שוב בעוד <span id="otpResendSecs">60</span> שניות / Resend available in <span id="otpResendSecsEn">60</span>s</span>
         <span class="otp-resend" id="otpResend" onclick="resendOtp()">לא קיבלת? שלח שוב / Didn't receive it? Resend</span>
         <div class="otp-manual-link">
           <a onclick="continueManually()">לא קיבלתי את הקוד — המשך מילוי ידני / I didn't receive the code — continue filling in manually</a>
@@ -1739,17 +1740,30 @@ function showOtpBox(maskedEmail) {
   document.getElementById('otpInput').value = '';
   document.getElementById('otpError').classList.remove('show');
   document.getElementById('otpResend').classList.remove('show');
+  document.getElementById('otpResendCountdown').style.display = 'inline';
   startOtpCountdown();
-  // Show resend after 60s
-  otpResendTimer = setTimeout(() => {
-    document.getElementById('otpResend').classList.add('show');
-  }, 60000);
+  // Resend countdown: tick every second, reveal link at 0
+  let resendSecs = 60;
+  function updateResendCountdown() {
+    document.getElementById('otpResendSecs').textContent = resendSecs;
+    document.getElementById('otpResendSecsEn').textContent = resendSecs;
+    if (resendSecs <= 0) {
+      clearInterval(otpResendTimer);
+      document.getElementById('otpResendCountdown').style.display = 'none';
+      document.getElementById('otpResend').classList.add('show');
+      return;
+    }
+    resendSecs--;
+  }
+  updateResendCountdown();
+  otpResendTimer = setInterval(updateResendCountdown, 1000);
 }
 
 function hideOtpBox() {
   document.getElementById('otpBox').classList.remove('show');
   clearInterval(otpTimer);
-  clearTimeout(otpResendTimer);
+  clearInterval(otpResendTimer);
+  document.getElementById('otpResendCountdown').style.display = 'none';
 }
 
 function startOtpCountdown() {
