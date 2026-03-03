@@ -287,6 +287,15 @@
     .otp-box .otp-title { font-weight:700; font-size:15px; margin-bottom:6px; color:#007289; }
     .otp-box .otp-hint { font-size:13px; color:#5a7a8a; margin-bottom:12px; }
     .otp-box .otp-input-row { display:flex; align-items:center; gap:10px; margin-bottom:10px; flex-wrap:wrap; }
+    .otp-digit-boxes { display:flex; gap:10px; justify-content:center; margin-bottom:10px; }
+    .otp-digit-box {
+      width:48px; height:56px; font-size:24px; font-weight:700;
+      text-align:center; border:2px solid #b0c8d0; border-radius:8px;
+      color:#007289; background:#fff; outline:none;
+      transition: border-color 0.2s;
+    }
+    .otp-digit-box:focus { border-color:#f07830; }
+    .otp-info-text { font-size:13px; color:#5a7a8a; text-align:center; margin-bottom:10px; }
     .otp-box input[type="text"] {
       width:120px; font-size:22px; letter-spacing:8px; text-align:center;
       border:2px solid #007289; border-radius:8px; padding:8px 12px;
@@ -361,10 +370,13 @@
         <div class="otp-title">✉️ אימות זהות / Identity Verification</div>
         <div class="otp-hint" id="otpHint">שלחנו קוד אימות לכתובת המייל שלך / We sent a verification code to your email</div>
         <div class="otp-error" id="otpError">קוד שגוי — נסה שנית / Incorrect code — please try again</div>
-        <div class="otp-input-row">
-          <input type="text" id="otpInput" maxlength="4" placeholder="_ _ _ _" inputmode="numeric" autocomplete="one-time-code" />
-          <button type="button" class="otp-verify-btn" id="otpVerifyBtn" onclick="verifyOtp()">אמת / Verify</button>
+        <div class="otp-digit-boxes">
+          <input type="text" class="otp-digit-box" id="otpD1" maxlength="1" inputmode="numeric" autocomplete="one-time-code" />
+          <input type="text" class="otp-digit-box" id="otpD2" maxlength="1" inputmode="numeric" />
+          <input type="text" class="otp-digit-box" id="otpD3" maxlength="1" inputmode="numeric" />
+          <input type="text" class="otp-digit-box" id="otpD4" maxlength="1" inputmode="numeric" />
         </div>
+        <div class="otp-info-text">הזן את קוד האימות בן 4 הספרות / Enter your 4 digit code</div>
         <div class="otp-countdown" id="otpCountdown"></div>
         <span class="otp-resend" id="otpResend" onclick="resendOtp()">לא קיבלת? שלח שוב / Didn't receive it? Resend</span>
         <div class="otp-countdown" id="otpResendCountdown" style="display:none;"></div>
@@ -1759,7 +1771,8 @@ function showOtpBox(maskedEmail) {
     ? 'שלחנו קוד אימות ל־' + maskedEmail + ' / We sent a code to ' + maskedEmail
     : 'שלחנו קוד אימות לכתובת המייל שלך / We sent a verification code to your email';
   document.getElementById('otpBox').classList.add('show');
-  document.getElementById('otpInput').value = '';
+  ['otpD1','otpD2','otpD3','otpD4'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('otpD1').focus();
   document.getElementById('otpError').classList.remove('show');
   document.getElementById('otpResend').classList.remove('show');
   startOtpCountdown();
@@ -1799,7 +1812,6 @@ function startOtpCountdown() {
     if (seconds <= 0) {
       clearInterval(otpTimer);
       el.textContent = 'הקוד פג תוקף / Code expired';
-      document.getElementById('otpVerifyBtn').disabled = true;
       document.getElementById('otpResend').classList.add('show');
     }
     seconds--;
@@ -1809,15 +1821,14 @@ function startOtpCountdown() {
 }
 
 async function verifyOtp() {
-  const code = document.getElementById('otpInput').value.trim();
+  const code = ['otpD1','otpD2','otpD3','otpD4'].map(id => document.getElementById(id).value).join('');
   if (code.length !== 4) {
     document.getElementById('otpError').textContent = 'נא להזין קוד בן 4 ספרות / Please enter the 4-digit code';
     document.getElementById('otpError').classList.add('show');
     return;
   }
-  document.getElementById('otpVerifyBtn').disabled = true;
-  document.getElementById('otpVerifyBtn').textContent = '...מאמת / Verifying';
   document.getElementById('otpError').classList.remove('show');
+  ['otpD1','otpD2','otpD3','otpD4'].forEach(id => document.getElementById(id).disabled = true);
   try {
     const resp = await fetch(OTP_VALIDATE_WEBHOOK_URL, {
       method: 'POST',
@@ -1834,19 +1845,19 @@ async function verifyOtp() {
     } else if (data && data.expired) {
       document.getElementById('otpError').textContent = 'הקוד פג תוקף — בקש קוד חדש / Code expired — please request a new code';
       document.getElementById('otpError').classList.add('show');
-      document.getElementById('otpVerifyBtn').disabled = false;
-      document.getElementById('otpVerifyBtn').textContent = 'אמת / Verify';
+      ['otpD1','otpD2','otpD3','otpD4'].forEach(id => { document.getElementById(id).disabled = false; document.getElementById(id).value = ''; });
+      document.getElementById('otpD1').focus();
     } else {
       document.getElementById('otpError').textContent = 'קוד שגוי — נסה שנית / Incorrect code — please try again';
       document.getElementById('otpError').classList.add('show');
-      document.getElementById('otpVerifyBtn').disabled = false;
-      document.getElementById('otpVerifyBtn').textContent = 'אמת / Verify';
+      ['otpD1','otpD2','otpD3','otpD4'].forEach(id => { document.getElementById(id).disabled = false; document.getElementById(id).value = ''; });
+      document.getElementById('otpD1').focus();
     }
   } catch(e) {
     document.getElementById('otpError').textContent = 'שגיאה — נסה שנית / Error — please try again';
     document.getElementById('otpError').classList.add('show');
-    document.getElementById('otpVerifyBtn').disabled = false;
-    document.getElementById('otpVerifyBtn').textContent = 'אמת / Verify';
+    ['otpD1','otpD2','otpD3','otpD4'].forEach(id => { document.getElementById(id).disabled = false; document.getElementById(id).value = ''; });
+    document.getElementById('otpD1').focus();
   }
 }
 
@@ -1854,8 +1865,7 @@ async function resendOtp() {
   document.getElementById('otpResend').classList.remove('show');
   document.getElementById('otpResendCountdown').style.display = 'none';
   clearInterval(otpResendTimer);
-  document.getElementById('otpVerifyBtn').disabled = false;
-  document.getElementById('otpVerifyBtn').textContent = 'אמת / Verify';
+
   document.getElementById('otpError').classList.remove('show');
   await lookupDiver(otpCurrentId);
 }
@@ -1989,9 +1999,23 @@ document.addEventListener('DOMContentLoaded', function() {
       hideOtpBox();
     }
   });
-  // Enter key on OTP input triggers verify
-  document.getElementById('otpInput').addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') { e.preventDefault(); verifyOtp(); }
+  // 4-digit box auto-advance and auto-submit
+  ['otpD1','otpD2','otpD3','otpD4'].forEach((id, idx, arr) => {
+    const el = document.getElementById(id);
+    el.addEventListener('input', function() {
+      this.value = this.value.replace(/[^0-9]/g, '').slice(-1);
+      if (this.value && idx < arr.length - 1) {
+        document.getElementById(arr[idx + 1]).focus();
+      }
+      if (idx === arr.length - 1 && this.value) {
+        verifyOtp();
+      }
+    });
+    el.addEventListener('keydown', function(e) {
+      if (e.key === 'Backspace' && !this.value && idx > 0) {
+        document.getElementById(arr[idx - 1]).focus();
+      }
+    });
   });
 });
 
