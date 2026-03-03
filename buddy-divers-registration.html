@@ -917,6 +917,11 @@
       </div>
       <div class="field-error" id="insuranceError" style="display:none;margin-top:4px;margin-bottom:12px;">יש לאשר ביטוח / Please confirm insurance</div>
 
+      <div id="validationSummary" style="display:none;background:#fff0f0;border:1.5px solid var(--error);border-radius:10px;padding:16px 20px;margin-bottom:20px;">
+        <div style="font-weight:700;color:var(--error);margin-bottom:10px;font-size:14px;">⚠️ נא להשלים את השדות הבאים / Please complete the following fields:</div>
+        <ul id="validationSummaryList" style="margin:0;padding-right:20px;padding-left:20px;color:var(--error);font-size:13px;line-height:2;"></ul>
+      </div>
+
       <div style="margin-top:24px;">
         <button type="submit" class="submit-btn" id="submitBtn">
           🤿 שלח טופס הרשמה / Submit Registration
@@ -1591,48 +1596,51 @@ function attachBlurValidation() {
 // ============================================================
 function validateForm() {
   let valid = true;
+  const missingFields = [];
+
   const required = [
-    ['f-idNumber',        'idNumber',       'idNumber'],
-    ['f-firstName',       'firstName',      'englishOnly'],
-    ['f-lastName',        'lastName',       'englishOnly'],
-    ['f-email',           'email',          'email'],
-    ['f-phone',           'phone',          'text'],
-    ['f-dob',             'dob',            'dob'],
-    ['f-nationality',     'nationality',    'englishOnly'],
-    ['f-passportNumber',  'passportNumber', 'text'],
-    ['f-passportIssue',   'passportIssue',  'passportIssue'],
-    ['f-passportExpiry',  'passportExpiry', 'passportExpiry'],
-    ['f-gender',          'gender',         'select'],
-    ['f-certLevel',       'certLevel',      'select'],
-    ['f-medicalNotes',    'medicalNotes',   'text'],
-    ['f-emergencyEmail',  'emergencyEmail', 'emailOptional'],
-    ['f-emergencyName',   'emergencyName',  'englishOnly'],
+    ['f-idNumber',        'idNumber',       'idNumber',        'מספר תעודת זהות / ID Number'],
+    ['f-firstName',       'firstName',      'englishOnly',     'שם פרטי / First Name'],
+    ['f-lastName',        'lastName',       'englishOnly',     'שם משפחה / Last Name'],
+    ['f-email',           'email',          'email',           'אימייל / Email'],
+    ['f-phone',           'phone',          'text',            'טלפון / Phone'],
+    ['f-dob',             'dob',            'dob',             'תאריך לידה / Date of Birth'],
+    ['f-nationality',     'nationality',    'englishOnly',     'לאום / Nationality'],
+    ['f-passportNumber',  'passportNumber', 'text',            'מספר דרכון / Passport Number'],
+    ['f-passportIssue',   'passportIssue',  'passportIssue',   'תאריך הנפקת דרכון / Passport Issue Date'],
+    ['f-passportExpiry',  'passportExpiry', 'passportExpiry',  'תאריך פקיעת דרכון / Passport Expiry Date'],
+    ['f-gender',          'gender',         'select',          'מגדר / Gender'],
+    ['f-certLevel',       'certLevel',      'select',          'רמת הסמכה / Certification Level'],
+    ['f-medicalNotes',    'medicalNotes',   'text',            'מצב בריאותי / Medical Notes'],
+    ['f-emergencyEmail',  'emergencyEmail', 'emailOptional',   'מייל איש קשר חירום / Emergency Email'],
+    ['f-emergencyName',   'emergencyName',  'englishOnly',     'שם איש קשר חירום / Emergency Contact Name'],
   ];
 
-  required.forEach(([fieldId, name, type]) => {
-    if (!validateField(fieldId, name, type)) valid = false;
+  required.forEach(([fieldId, name, type, label]) => {
+    if (!validateField(fieldId, name, type)) {
+      valid = false;
+      missingFields.push(label);
+    }
   });
 
   // Pricing selection
   const pricing = document.querySelector('[name="pricing"]:checked');
   const pricingOk = !!pricing;
   document.getElementById('pricingError').style.display = pricingOk ? 'none' : 'block';
-  if (!pricingOk) valid = false;
+  if (!pricingOk) { valid = false; missingFields.push('בחירת מחיר / Pricing Selection'); }
 
   // Flights selection
   const flights = document.querySelector('[name="flights"]:checked');
   const flightsOk = !!flights;
   document.getElementById('flightsError').style.display = flightsOk ? 'none' : 'block';
-  if (!flightsOk) valid = false;
+  if (!flightsOk) { valid = false; missingFields.push('הסדרי טיסה / Flight Arrangements'); }
 
-  // Terms
   // Payment method
   const payment = document.querySelector('[name="paymentMethod"]:checked');
   const paymentOk = !!payment;
   document.getElementById('paymentError').style.display = paymentOk ? 'none' : 'block';
-  if (!paymentOk) valid = false;
+  if (!paymentOk) { valid = false; missingFields.push('אמצעי תשלום / Payment Method'); }
 
-  // Mark selected styling for payment
   document.querySelectorAll('#f-paymentMethod .option-item').forEach(item => {
     item.classList.toggle('selected', item.querySelector('input').checked);
   });
@@ -1640,7 +1648,19 @@ function validateForm() {
   const terms = document.getElementById('termsCheckbox');
   const termsOk = terms.checked;
   document.getElementById('termsError').style.display = termsOk ? 'none' : 'block';
-  if (!termsOk) valid = false;
+  if (!termsOk) { valid = false; missingFields.push('אישור תנאים / Terms & Conditions'); }
+
+  // Show or hide summary box
+  const summary = document.getElementById('validationSummary');
+  const summaryList = document.getElementById('validationSummaryList');
+  if (!valid && missingFields.length > 0) {
+    summaryList.innerHTML = missingFields.map(f => `<li>${f}</li>`).join('');
+    summary.style.display = 'block';
+    summary.scrollIntoView({behavior: 'smooth', block: 'center'});
+  } else {
+    summary.style.display = 'none';
+    summaryList.innerHTML = '';
+  }
 
   return valid;
 }
@@ -1658,9 +1678,6 @@ document.getElementById('regForm').addEventListener('submit', async function(e) 
   }
 
   if (!validateForm()) {
-    // Scroll to first error
-    const firstError = document.querySelector('.field.invalid, #termsError:not([style*="none"])');
-    if (firstError) firstError.scrollIntoView({behavior:'smooth', block:'center'});
     return;
   }
 
