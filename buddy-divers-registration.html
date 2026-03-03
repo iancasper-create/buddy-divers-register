@@ -287,11 +287,12 @@
     .otp-box .otp-title { font-weight:700; font-size:15px; margin-bottom:6px; color:#007289; }
     .otp-box .otp-hint { font-size:13px; color:#5a7a8a; margin-bottom:12px; }
     .otp-box .otp-input-row { display:flex; align-items:center; gap:10px; margin-bottom:10px; flex-wrap:wrap; }
-    .otp-digit-boxes { display:flex; gap:8px; justify-content:center; margin:0 auto 10px auto; width:fit-content; direction:ltr; }
+    .otp-digit-boxes { display:inline-flex; gap:8px; direction:ltr; margin-bottom:10px; }
     .otp-digit-box {
-      width:32px; height:40px; font-size:20px; font-weight:700;
+      width:34px !important; min-width:34px !important; max-width:34px !important;
+      height:42px; font-size:20px; font-weight:700;
       text-align:center; border:2px solid #b0c8d0; border-radius:8px;
-      color:#007289; background:#fff; outline:none;
+      color:#007289; background:#fff; outline:none; box-sizing:border-box;
       transition: border-color 0.2s; padding:0;
     }
     .otp-digit-box:focus { border-color:#f07830; }
@@ -370,11 +371,13 @@
         <div class="otp-title">✉️ אימות זהות / Identity Verification</div>
         <div class="otp-hint" id="otpHint">שלחנו קוד אימות לכתובת המייל שלך / We sent a verification code to your email</div>
         <div class="otp-error" id="otpError">קוד שגוי — נסה שנית / Incorrect code — please try again</div>
-        <div class="otp-digit-boxes">
+        <div style="text-align:center;">
+        <div class="otp-digit-boxes" style="display:inline-flex;">
           <input type="text" class="otp-digit-box" id="otpD1" maxlength="1" inputmode="numeric" autocomplete="one-time-code" />
           <input type="text" class="otp-digit-box" id="otpD2" maxlength="1" inputmode="numeric" />
           <input type="text" class="otp-digit-box" id="otpD3" maxlength="1" inputmode="numeric" />
           <input type="text" class="otp-digit-box" id="otpD4" maxlength="1" inputmode="numeric" />
+        </div>
         </div>
         <div class="otp-info-text">הזן את קוד האימות בן 4 הספרות / Enter your 4 digit code</div>
         <div class="otp-countdown" id="otpCountdown"></div>
