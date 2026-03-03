@@ -367,6 +367,7 @@
         </div>
         <div class="otp-countdown" id="otpCountdown"></div>
         <span class="otp-resend" id="otpResend" onclick="resendOtp()">לא קיבלת? שלח שוב / Didn't receive it? Resend</span>
+        <div class="otp-countdown" id="otpResendCountdown" style="display:none;"></div>
         <div class="otp-manual-link">
           <a onclick="continueManually()">לא קיבלתי את הקוד — המשך מילוי ידני / I didn't receive the code — continue filling in manually</a>
         </div>
@@ -1762,16 +1763,28 @@ function showOtpBox(maskedEmail) {
   document.getElementById('otpError').classList.remove('show');
   document.getElementById('otpResend').classList.remove('show');
   startOtpCountdown();
-  // Show resend after 60s
-  otpResendTimer = setTimeout(() => {
-    document.getElementById('otpResend').classList.add('show');
-  }, 60000);
+  // Show resend countdown and then button after 60s
+  let resendSecs = 60;
+  const resendEl = document.getElementById('otpResendCountdown');
+  resendEl.style.display = 'block';
+  resendEl.textContent = 'ניתן לשלוח מחדש בעוד ' + resendSecs + ' שניות / Resend available in ' + resendSecs + 's';
+  otpResendTimer = setInterval(() => {
+    resendSecs--;
+    if (resendSecs <= 0) {
+      clearInterval(otpResendTimer);
+      resendEl.style.display = 'none';
+      document.getElementById('otpResend').classList.add('show');
+    } else {
+      resendEl.textContent = 'ניתן לשלוח מחדש בעוד ' + resendSecs + ' שניות / Resend available in ' + resendSecs + 's';
+    }
+  }, 1000);
 }
 
 function hideOtpBox() {
   document.getElementById('otpBox').classList.remove('show');
   clearInterval(otpTimer);
-  clearTimeout(otpResendTimer);
+  clearInterval(otpResendTimer);
+  document.getElementById('otpResendCountdown').style.display = 'none';
 }
 
 function startOtpCountdown() {
@@ -1839,6 +1852,8 @@ async function verifyOtp() {
 
 async function resendOtp() {
   document.getElementById('otpResend').classList.remove('show');
+  document.getElementById('otpResendCountdown').style.display = 'none';
+  clearInterval(otpResendTimer);
   document.getElementById('otpVerifyBtn').disabled = false;
   document.getElementById('otpVerifyBtn').textContent = 'אמת / Verify';
   document.getElementById('otpError').classList.remove('show');
