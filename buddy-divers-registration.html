@@ -1865,7 +1865,7 @@ function prefillForm(d) {
   setVal('passportNumber', d.passportNumber);
   setVal('passportIssue', isoToDmy(d.passportIssue));
   setVal('passportExpiry', isoToDmy(d.passportExpiry));
-  setVal('passportFullName', d['Full Name as on Passport']);
+  setVal('passportFullName', d.passportFullName);
   setSelect('certLevel', d.certLevel);
   setSelect('certAgency', d.certAgency);
   setVal('certNumber', d.certNumber);
