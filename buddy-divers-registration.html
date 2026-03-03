@@ -934,8 +934,8 @@
     <div class="success-msg">
       תודה רבה! קיבלנו את טופס ההרשמה שלך.<br/>
       ניצור איתך קשר תוך 72 שעות עם פרטי התשלום לאישור מקומך.<br/><br/>
-      Thank you! We've received your registration.<br/>
-      <span dir="ltr" style="display:inline-block;">We'll be in touch within 72 hours with payment details to secure your spot.</span>
+      <div dir="ltr">Thank you! We've received your registration.<br/>
+      We'll be in touch within 72 hours with payment details to secure your spot.</div>
     </div>
     <div style="margin-top:30px; padding:16px; background:var(--light-bg); border-radius:10px;">
       <div style="font-size:13px; color:var(--muted);">יש שאלות? / Any questions?</div>
@@ -1470,6 +1470,11 @@ function validateField(fieldId, name, type) {
   if (type === 'email') {
     ok = EMAIL_RE.test(val);
     msg = 'כתובת אימייל לא תקינה / Invalid email format';
+  } else if (type === 'emailOptional') {
+    if (val) {
+      ok = EMAIL_RE.test(val);
+      msg = 'כתובת אימייל לא תקינה / Invalid email format';
+    }
   } else if (type === 'englishOnly') {
     if (!val) { ok = false; msg = 'שדה חובה / Required'; }
     else {
@@ -1553,7 +1558,7 @@ function attachBlurValidation() {
     ['f-gender',          'gender',         'select'],
     ['f-certLevel',       'certLevel',      'select'],
     ['f-medicalNotes',    'medicalNotes',   'text'],
-    ['f-emergencyEmail',  'emergencyEmail', 'email'],
+    ['f-emergencyEmail',  'emergencyEmail', 'emailOptional'],
     ['f-emergencyName',   'emergencyName',  'englishOnly'],
   ];
   fields.forEach(([fieldId, name, type]) => {
@@ -1600,7 +1605,7 @@ function validateForm() {
     ['f-gender',          'gender',         'select'],
     ['f-certLevel',       'certLevel',      'select'],
     ['f-medicalNotes',    'medicalNotes',   'text'],
-    ['f-emergencyEmail',  'emergencyEmail', 'email'],
+    ['f-emergencyEmail',  'emergencyEmail', 'emailOptional'],
     ['f-emergencyName',   'emergencyName',  'englishOnly'],
   ];
 
@@ -1860,7 +1865,7 @@ function prefillForm(d) {
   setVal('passportNumber', d.passportNumber);
   setVal('passportIssue', isoToDmy(d.passportIssue));
   setVal('passportExpiry', isoToDmy(d.passportExpiry));
-  setVal('passportFullName', d.passportFullName);
+  setVal('passportFullName', d['Full Name as on Passport']);
   setSelect('certLevel', d.certLevel);
   setSelect('certAgency', d.certAgency);
   setVal('certNumber', d.certNumber);
