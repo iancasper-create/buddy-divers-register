@@ -1707,9 +1707,17 @@ document.getElementById('regForm').addEventListener('submit', async function(e) 
   const fd = new FormData(form);
   fd.forEach((v,k) => { data[k] = v; });
   
-  // Add trip ID
+  // Add trip ID and destination
   const params = new URLSearchParams(window.location.search);
   data.tripId = params.get('trip') || 'default';
+  const tripConf = TRIPS[data.tripId];
+  if (tripConf && tripConf.name) {
+    // Extract English part after '—' e.g. "🤿 ספארי מדגסקר — Madagascar Safari" → "Madagascar Safari"
+    const parts = tripConf.name.split('—');
+    data.tripDestination = parts.length > 1 ? parts[parts.length - 1].trim() : tripConf.name.trim();
+  } else {
+    data.tripDestination = '';
+  }
   data.submittedAt = new Date().toISOString();
 
   // ⚠️ REPLACE THIS URL with your Make.com webhook URL
