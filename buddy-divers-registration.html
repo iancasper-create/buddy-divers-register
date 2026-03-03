@@ -366,7 +366,6 @@
           <button type="button" class="otp-verify-btn" id="otpVerifyBtn" onclick="verifyOtp()">אמת / Verify</button>
         </div>
         <div class="otp-countdown" id="otpCountdown"></div>
-        <span id="otpResendCountdown" style="font-size:12px;color:var(--muted);">ניתן לשלוח שוב בעוד <span id="otpResendSecs">60</span> שניות / Resend available in <span id="otpResendSecsEn">60</span>s</span>
         <span class="otp-resend" id="otpResend" onclick="resendOtp()">לא קיבלת? שלח שוב / Didn't receive it? Resend</span>
         <div class="otp-manual-link">
           <a onclick="continueManually()">לא קיבלתי את הקוד — המשך מילוי ידני / I didn't receive the code — continue filling in manually</a>
@@ -508,7 +507,7 @@
 
       <!-- Passport photo upload -->
       <div class="field" style="margin-top:8px;">
-        <label>תמונת דרכון <span class="en">Passport Photo Upload</span></label>
+        <label>תמונת דרכון <span class="en">Passport Photo Upload</span> <span style="color:var(--error);font-size:12px;">(צילום הדרכון אינו נשמר במערכת ויש להעלותו מחדש בכל הרשמה)</span></label>
         <div class="file-upload-area" id="passportUploadArea">
           <input type="file" accept="image/*,.pdf" onchange="handleUpload(this,'passportUploadArea','passportPhotoUrl','passportUploadStatus','passports')" />
           <div class="upload-icon">📎</div>
@@ -768,7 +767,7 @@
 
       <div class="form-row">
         <div class="field" id="f-emergencyEmail">
-          <label>מייל איש קשר לחירום <span class="en">Emergency Contact Email</span><span class="req">*</span></label>
+          <label>מייל איש קשר לחירום <span class="en">Emergency Contact Email</span></label>
           <input type="email" name="emergencyEmail" placeholder="email@example.com" />
           <span class="field-error">כתובת אימייל לא תקינה / Invalid email</span>
         </div>
@@ -862,7 +861,7 @@
       <div class="section-title"><span class="icon">⭐</span> פרטים נוספים <span style="font-weight:400;color:var(--muted);font-size:12px;margin-right:6px;">Additional Details</span></div>
 
       <div class="field" style="margin-bottom:18px;">
-        <label class="option-item" style="border-color:var(--orange);background:rgba(245,166,35,0.04);" id="returningCustomerOpt">
+        <label class="option-item" id="returningCustomerOpt">
           <input type="checkbox" name="returningCustomer" value="Yes" />
           <div class="option-label">
             <span class="he">⭐ אני לקוח/ת חוזר/ת של Buddy-Divers</span>
@@ -936,7 +935,7 @@
       תודה רבה! קיבלנו את טופס ההרשמה שלך.<br/>
       ניצור איתך קשר תוך 72 שעות עם פרטי התשלום לאישור מקומך.<br/><br/>
       Thank you! We've received your registration.<br/>
-      We'll be in touch within 72 hours with payment details to secure your spot.
+      <span dir="ltr" style="display:inline-block;">We'll be in touch within 72 hours with payment details to secure your spot.</span>
     </div>
     <div style="margin-top:30px; padding:16px; background:var(--light-bg); border-radius:10px;">
       <div style="font-size:13px; color:var(--muted);">יש שאלות? / Any questions?</div>
@@ -1740,30 +1739,17 @@ function showOtpBox(maskedEmail) {
   document.getElementById('otpInput').value = '';
   document.getElementById('otpError').classList.remove('show');
   document.getElementById('otpResend').classList.remove('show');
-  document.getElementById('otpResendCountdown').style.display = 'inline';
   startOtpCountdown();
-  // Resend countdown: tick every second, reveal link at 0
-  let resendSecs = 60;
-  function updateResendCountdown() {
-    document.getElementById('otpResendSecs').textContent = resendSecs;
-    document.getElementById('otpResendSecsEn').textContent = resendSecs;
-    if (resendSecs <= 0) {
-      clearInterval(otpResendTimer);
-      document.getElementById('otpResendCountdown').style.display = 'none';
-      document.getElementById('otpResend').classList.add('show');
-      return;
-    }
-    resendSecs--;
-  }
-  updateResendCountdown();
-  otpResendTimer = setInterval(updateResendCountdown, 1000);
+  // Show resend after 60s
+  otpResendTimer = setTimeout(() => {
+    document.getElementById('otpResend').classList.add('show');
+  }, 60000);
 }
 
 function hideOtpBox() {
   document.getElementById('otpBox').classList.remove('show');
   clearInterval(otpTimer);
-  clearInterval(otpResendTimer);
-  document.getElementById('otpResendCountdown').style.display = 'none';
+  clearTimeout(otpResendTimer);
 }
 
 function startOtpCountdown() {
