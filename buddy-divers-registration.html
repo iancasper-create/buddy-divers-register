@@ -1771,7 +1771,7 @@ let otpCurrentId = null;
 
 function setLookupStatus(msg, color) {
   const el = document.getElementById('lookupStatus');
-  el.textContent = msg;
+  el.innerHTML = msg;
   el.style.color = color || '#007289';
   el.style.display = msg ? 'block' : 'none';
 }
@@ -1979,7 +1979,7 @@ async function lookupDiver(idNumber) {
       setLookupStatus('נמצאת במערכת! בדוק את המייל שלך לקוד אימות / Found! Check your email for a verification code 📧', '#007289');
       showOtpBox(data.maskedEmail || null);
     } else {
-      setLookupStatus('צולל חדש — נא למלא את הפרטים / New diver — please fill in your details', '#5a7a8a');
+      setLookupStatus('<strong>נא למלא את הפרטים / Please fill in your details</strong>', '#5a7a8a');
     }
   } catch(e) {
     setLookupStatus('', '');
