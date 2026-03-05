@@ -1860,7 +1860,8 @@ async function verifyOtp() {
       data = JSON.parse(out);
     } catch(e) {
       console.log('OTP parse error:', e.message);
-    console.log('OTP last 20 chars:', rawText.slice(-20).split('').map(c=>c.charCodeAt(0)));
+    console.log('OTP cleaned around 1710:', out.substring(1700,1720).split('').map(c=>c.charCodeAt(0)));
+    console.log('OTP cleaned length:', out.length);
       console.log('OTP response was not JSON:', rawText);
       throw new Error('invalid response from server');
     }
