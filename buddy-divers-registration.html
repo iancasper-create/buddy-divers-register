@@ -1853,7 +1853,11 @@ async function verifyOtp() {
     const rawText = await resp.text();
     console.log('OTP raw response:', rawText);
     let data;
-    try { data = JSON.parse(rawText); } catch(e) {
+    try {
+      // Strip newlines inside JSON string values (e.g. Cloudinary URLs split across lines by Make)
+      const cleaned = rawText.split("\r\n").join("").split("\n").join("").split("\r").join("");
+      data = JSON.parse(cleaned);
+    } catch(e) {
       console.log('OTP response was not JSON:', rawText);
       throw new Error('invalid response from server');
     }
