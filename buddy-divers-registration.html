@@ -1852,11 +1852,11 @@ async function verifyOtp() {
     if (!resp.ok) throw new Error('validate failed');
     const rawText = await resp.text();
     console.log('OTP raw response:', rawText);
-    console.log('OTP chars at 1200-1215:', rawText.substring(1200,1215).split('').map(c=>c.charCodeAt(0)));
+
     let data;
     try {
-      var inStr=false,esc=false,out='';
-      for(var i=0;i<rawText.length;i++){var c=rawText[i];if(esc){out+=c;esc=false;}else if(c=='\\'){out+=c;esc=true;}else if(c==='"'){inStr=!inStr;out+=c;}else if(inStr&&(c==='\n'||c==='\r')){}else{out+=c;}}
+      var inStr=false,out='';
+      for(var i=0;i<rawText.length;i++){var c=rawText[i];var cc=rawText.charCodeAt(i);if(c==='"'&&(i===0||rawText[i-1]!=='\\')){inStr=!inStr;out+=c;}else if(inStr&&(cc===10||cc===13)){}else{out+=c;}}
       data = JSON.parse(out);
     } catch(e) {
       console.log('OTP parse error:', e.message, 'at position', e.message.match(/\d+/));
