@@ -1854,9 +1854,9 @@ async function verifyOtp() {
     console.log('OTP raw response:', rawText);
     let data;
     try {
-      // Fix Make.com inserting newlines inside long URL string values
-      const cleaned = rawText.replace(/"([^"]*?)"/gs, (m, val) => '"' + val.replace(/[\r\n]/g, '') + '"');
-      data = JSON.parse(cleaned);
+      var inStr=false,esc=false,out='';
+      for(var i=0;i<rawText.length;i++){var c=rawText[i];if(esc){out+=c;esc=false;}else if(c=='\\'){out+=c;esc=true;}else if(c==='"'){inStr=!inStr;out+=c;}else if(inStr&&(c==='\n'||c==='\r')){}else{out+=c;}}
+      data = JSON.parse(out);
     } catch(e) {
       console.log('OTP response was not JSON:', rawText);
       throw new Error('invalid response from server');
