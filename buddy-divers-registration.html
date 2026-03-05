@@ -1852,9 +1852,7 @@ async function verifyOtp() {
     if (!resp.ok) throw new Error('validate failed');
     const rawText = await resp.text();
     console.log('OTP raw response:', rawText);
-    var ppStart = rawText.indexOf('passportPhoto')+16;
-    var ppEnd = rawText.indexOf('nitroxPhoto')-5;
-    console.log('OTP passport URL end chars:', rawText.substring(ppEnd-5, ppEnd+5).split('').map(c=>c.charCodeAt(0)));
+    console.log('OTP chars at 1200-1215:', rawText.substring(1200,1215).split('').map(c=>c.charCodeAt(0)));
     let data;
     try {
       var inStr=false,esc=false,out='';
