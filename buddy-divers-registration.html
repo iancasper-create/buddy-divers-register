@@ -1859,6 +1859,7 @@ async function verifyOtp() {
       for(var i=0;i<rawText.length;i++){var c=rawText[i];if(esc){out+=c;esc=false;}else if(c=='\\'){out+=c;esc=true;}else if(c==='"'){inStr=!inStr;out+=c;}else if(inStr&&(c==='\n'||c==='\r')){}else{out+=c;}}
       data = JSON.parse(out);
     } catch(e) {
+      console.log('OTP parse error:', e.message, 'at position', e.message.match(/\d+/));
       console.log('OTP response was not JSON:', rawText);
       throw new Error('invalid response from server');
     }
