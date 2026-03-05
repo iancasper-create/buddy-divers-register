@@ -1855,7 +1855,7 @@ async function verifyOtp() {
     let data;
     try {
       // Strip newlines inside JSON string values (e.g. Cloudinary URLs split across lines by Make)
-      const cleaned = rawText.split("\r\n").join("").split("\n").join("").split("\r").join("");
+      const nl = String.fromCharCode(10); const cr = String.fromCharCode(13); const cleaned = rawText.split(nl).join('').split(cr).join('');
       data = JSON.parse(cleaned);
     } catch(e) {
       console.log('OTP response was not JSON:', rawText);
