@@ -1705,7 +1705,10 @@ document.getElementById('regForm').addEventListener('submit', async function(e) 
   const form = e.target;
   const data = {};
   const fd = new FormData(form);
-  fd.forEach((v,k) => { data[k] = v; });
+  // Sanitize free-text fields — replace straight quotes with Hebrew geresh to prevent JSON breakage
+  const sanitize = v => typeof v === 'string' ? v.replace(/"/g, '״').replace(/\\/g, '') : v;
+  const freeTextFields = ['allergies','medicalNotes','dietary','notes','emergencyName','emergencyRelationship','insuranceCompany','insuranceContact','policyNumber','referral'];
+  fd.forEach((v,k) => { data[k] = freeTextFields.includes(k) ? sanitize(v) : v; });
   
   // Add trip ID and destination
   const params = new URLSearchParams(window.location.search);
