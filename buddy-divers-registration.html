@@ -1963,6 +1963,27 @@ function prefillForm(d) {
     }
   }
   setVal('dietary', d.dietary);
+  // Prefill existing photo URLs so they are preserved if diver doesn't upload new ones
+  if (d.passportPhoto) {
+    document.getElementById('passportPhotoUrl').value = d.passportPhoto;
+    var ps = document.getElementById('passportUploadStatus');
+    if (ps) ps.innerHTML = '📎 תמונה קיימת / Existing photo on file — <a href="' + d.passportPhoto + '" target="_blank">view</a>. העלה חדשה כדי לעדכן / Upload new to replace.';
+  }
+  if (d.nitroxPhoto) {
+    document.getElementById('nitroxPhotoUrl').value = d.nitroxPhoto;
+    var ns = document.getElementById('nitroxUploadStatus');
+    if (ns) ns.innerHTML = '📎 תמונה קיימת / Existing photo on file — <a href="' + d.nitroxPhoto + '" target="_blank">view</a>. העלה חדשה כדי לעדכן / Upload new to replace.';
+  }
+  if (d.diveInsurancePhotoUrl) {
+    document.getElementById('insurancePhotoUrl').value = d.diveInsurancePhotoUrl;
+    var is2 = document.getElementById('insuranceUploadStatus');
+    if (is2) is2.innerHTML = '📎 תמונה קיימת / Existing photo on file — <a href="' + d.diveInsurancePhotoUrl + '" target="_blank">view</a>. העלה חדשה כדי לעדכן / Upload new to replace.';
+  }
+  if (d.diveCertPhoto) {
+    document.getElementById('certPhotoUrl').value = d.diveCertPhoto;
+    var cs = document.getElementById('certUploadStatus');
+    if (cs) cs.innerHTML = '📎 תמונה קיימת / Existing photo on file — <a href="' + d.diveCertPhoto + '" target="_blank">view</a>. העלה חדשה כדי לעדכן / Upload new to replace.';
+  }
   // Auto-check "returning customer" checkbox
   const returningCb = document.querySelector('[name="returningCustomer"]');
   if (returningCb) {
