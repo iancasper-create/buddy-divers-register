@@ -1854,8 +1854,8 @@ async function verifyOtp() {
     console.log('OTP raw response:', rawText);
     let data;
     try {
-      // Strip newlines inside JSON string values (e.g. Cloudinary URLs split across lines by Make)
-      const nl = String.fromCharCode(10); const cr = String.fromCharCode(13); const cleaned = rawText.split(nl).join('').split(cr).join('');
+      // Fix Make.com inserting newlines inside long URL string values
+      const cleaned = rawText.replace(/"([^"]*?)"/gs, (m, val) => '"' + val.replace(/[\r\n]/g, '') + '"');
       data = JSON.parse(cleaned);
     } catch(e) {
       console.log('OTP response was not JSON:', rawText);
