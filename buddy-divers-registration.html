@@ -528,8 +528,8 @@
           <input type="file" id="passportFileInput" accept="image/*,.pdf" style="display:none"
             onchange="handleUpload(this,'passportUploadArea','passportPhotoUrl','passportUploadStatus','passports')" />
           <div class="upload-icon">📎</div>
-          <div class="upload-text">לחץ להעלאת קובץ <strong>/ Click to upload</strong></div>
-          <div class="upload-text" style="font-size:11px;margin-top:4px;">JPG, PNG, PDF עד 10MB</div>
+          <div class="upload-text">לחץ להעלאת תמונת דרכון <strong>/ Upload passport photo</strong></div>
+          <div class="upload-text" style="font-size:11px;margin-top:4px;">JPG, PNG, PDF · עד 10MB / up to 10MB</div>
           <div id="passportUploadStatus"></div>
         </div>
         <input type="hidden" name="passportPhoto" id="passportPhotoUrl" />
@@ -603,8 +603,9 @@
         <div class="file-upload-area" id="certUploadArea" onclick="document.getElementById('certFileInput').click()">
           <input type="file" id="certFileInput" accept="image/*,.pdf" style="display:none"
             onchange="handleUpload(this,'certUploadArea','certPhotoUrl','certUploadStatus','diving')" />
-          <div class="upload-icon">🪪</div>
+          <div class="upload-icon">📎</div>
           <div class="upload-text">לחץ להעלאת תעודת צלילה <strong>/ Upload dive certification</strong></div>
+          <div class="upload-text" style="font-size:11px;margin-top:4px;">JPG, PNG, PDF · עד 10MB / up to 10MB</div>
           <div id="certUploadStatus"></div>
         </div>
         <input type="hidden" name="certPhoto" id="certPhotoUrl" />
@@ -623,8 +624,9 @@
           <div class="file-upload-area" id="nitroxUploadArea" onclick="document.getElementById('nitroxFileInput').click()">
             <input type="file" id="nitroxFileInput" accept="image/*,.pdf" style="display:none"
               onchange="handleUpload(this,'nitroxUploadArea','nitroxPhotoUrl','nitroxUploadStatus','diving')" />
-            <div class="upload-icon">🪪</div>
+            <div class="upload-icon">📎</div>
             <div class="upload-text">לחץ להעלאת תעודת נייטרוקס <strong>/ Upload Nitrox certification</strong></div>
+            <div class="upload-text" style="font-size:11px;margin-top:4px;">JPG, PNG, PDF · עד 10MB / up to 10MB</div>
             <div id="nitroxUploadStatus"></div>
           </div>
           <input type="hidden" name="nitroxPhoto" id="nitroxPhotoUrl" />
@@ -827,12 +829,9 @@
             <input type="file" id="insuranceFileInput" accept="image/*,.pdf" style="display:none"
               onchange="handleUpload(this,'insuranceUploadArea','insurancePhotoUrl','insuranceUploadStatus','diving')" />
             <input type="hidden" name="diveInsurancePhotoUrl" id="insurancePhotoUrl" />
-            <div class="upload-icon">📄</div>
-            <div class="upload-text">
-              <span class="he">העלה תמונה או PDF של מסמך הביטוח</span>
-              <span class="en">Upload your insurance document (photo or PDF)</span>
-            </div>
-            <div class="upload-subtext">JPG, PNG, PDF · עד 10MB / up to 10MB</div>
+            <div class="upload-icon">📎</div>
+            <div class="upload-text">לחץ להעלאת מסמך ביטוח <strong>/ Upload insurance document</strong></div>
+            <div class="upload-text" style="font-size:11px;margin-top:4px;">JPG, PNG, PDF · עד 10MB / up to 10MB</div>
             <div id="insuranceUploadStatus"></div>
           </div>
         </div>
