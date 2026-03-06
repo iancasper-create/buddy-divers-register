@@ -1891,7 +1891,6 @@ async function verifyOtp() {
     }
     if (data && (data.valid === true || data.valid === 'true') && data.diverData) {
       hideOtpBox();
-      alert('PHOTO DEBUG:\npassportPhoto=' + (data.passportPhoto||'EMPTY') + '\nnitroxPhoto=' + (data.nitroxPhoto||'EMPTY') + '\ndiveInsurance=' + (data.diveInsurancePhotoUrl||'EMPTY') + '\ndiveCert=' + (data.diveCertPhoto||'EMPTY'));
       if (data.passportPhoto) data.diverData.passportPhoto = data.passportPhoto;
       if (data.nitroxPhoto) data.diverData.nitroxPhoto = data.nitroxPhoto;
       if (data.diveInsurancePhotoUrl) data.diverData.diveInsurancePhotoUrl = data.diveInsurancePhotoUrl;
@@ -2000,6 +1999,7 @@ function prefillForm(d) {
   }
   setVal('dietary', d.dietary);
   // Prefill existing photo URLs so they are preserved if diver doesn't upload new ones
+  alert('prefillForm photo check:\npassportPhoto=' + (d.passportPhoto||'EMPTY') + '\ndiveCert=' + (d.diveCertPhoto||'EMPTY'));
   if (d.passportPhoto) {
     document.getElementById('passportPhotoUrl').value = d.passportPhoto;
     var ps = document.getElementById('passportUploadStatus');
