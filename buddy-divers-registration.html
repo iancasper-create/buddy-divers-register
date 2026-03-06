@@ -1851,7 +1851,6 @@ async function verifyOtp() {
     });
     if (!resp.ok) throw new Error('HTTP ' + resp.status + ' - validate failed');
     const rawText = await resp.text();
-    alert('STATUS:' + resp.status + '\nLENGTH:' + rawText.length + '\nFIRST 100:\n' + rawText.substring(0,100));
 
     let data;
     try {
@@ -1872,27 +1871,19 @@ async function verifyOtp() {
         if (cc === 65279) continue;  // BOM
         stripped += rawText[i];
       }
-      // Also find and log what's at the exact failure position
-      var failChar = stripped.charCodeAt(stripped.length - 1);
-      try {
-        data = JSON.parse(stripped);
-      } catch(parseErr) {
-        // Log every char code in last 10 positions
-        var last10 = '';
-        for (var j = Math.max(0, stripped.length-10); j < stripped.length; j++) {
-          last10 += stripped[j] + '(' + stripped.charCodeAt(j) + ') ';
-        }
-        var opens = 0, closes = 0;
-        for (var k = 0; k < stripped.length; k++) {
-          if (stripped[k] === '{') opens++;
-          if (stripped[k] === '}') closes++;
-        }
-        alert('PARSE FAILED: ' + parseErr.message + '\nOPEN { count: ' + opens + '\nCLOSE } count: ' + closes + '\nLAST 10 CODES: ' + last10);
-        throw parseErr;
+      // Make.com appends an extra } - balance braces before parsing
+      var opens = 0, closes = 0;
+      for (var k = 0; k < stripped.length; k++) {
+        if (stripped[k] === '{') opens++;
+        if (stripped[k] === '}') closes++;
       }
+      while (closes > opens) {
+        stripped = stripped.slice(0, stripped.lastIndexOf('}'));
+        closes--;
+      }
+      data = JSON.parse(stripped);
 
     } catch(e) {
-      alert('PARSE FAILED: ' + e.message + '\nSTRIPPED LENGTH: ' + stripped.length + '\nLAST 50: ' + stripped.slice(-50) + '\n\nLAST 5 CHAR CODES: ' + stripped.slice(-5).split('').map(function(c){return c+'('+c.charCodeAt(0)+')'}).join(' '));
       throw new Error('invalid response from server');
     }
     if (data && (data.valid === true || data.valid === 'true') && data.diverData) {
@@ -1916,7 +1907,7 @@ async function verifyOtp() {
       document.getElementById('otpD1').focus();
     }
   } catch(e) {
-    document.getElementById('otpError').textContent = 'שגיאה: ' + e.message + ' / Error: ' + e.message;
+    document.getElementById('otpError').textContent = 'שגיאה — נסה שנית / Error — please try again';
     document.getElementById('otpError').classList.add('show');
     ['otpD1','otpD2','otpD3','otpD4'].forEach(id => { document.getElementById(id).disabled = false; document.getElementById(id).value = ''; });
     document.getElementById('otpD1').focus();
