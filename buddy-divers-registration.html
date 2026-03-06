@@ -1854,13 +1854,38 @@ async function verifyOtp() {
 
     let data;
     try {
-      // Make.com inserts literal newlines inside long JSON string values (e.g. photo URLs).
-      // Fix: remove any CR/LF that sits immediately before or after a quote, or between two non-space chars.
-      var cleaned = rawText
-        .replace(/[\r\n]+"/g, '"')
-        .replace(/"[\r\n]+/g, '"')
-        .replace(/([^\s])[\r\n]+([^\s])/g, '$1$2');
-      data = JSON.parse(cleaned);
+      // Make.com corrupts long string values by inserting newlines inside them.
+      // Strategy: extract the 4 photo URLs directly via regex BEFORE parsing,
+      // then blank them out in the raw text so JSON.parse succeeds on everything else.
+      function extractUrl(text, key) {
+        // Match "key": "...value..." tolerating any whitespace/newlines inside the value
+        var re = new RegExp('"' + key + '"\\s*:\\s*"([^"]*)"', 's');
+        var m = text.match(re);
+        if (!m) return '';
+        // Strip any whitespace/newlines from inside the URL
+        return m[1].replace(/[\s\r\n]+/g, '');
+      }
+
+      var passportPhoto     = extractUrl(rawText, 'passportPhoto');
+      var nitroxPhoto       = extractUrl(rawText, 'nitroxPhoto');
+      var diveInsurancePhotoUrl = extractUrl(rawText, 'diveInsurancePhotoUrl');
+      var diveCertPhoto     = extractUrl(rawText, 'diveCertPhoto');
+
+      // Now blank out the photo fields so their broken values don't crash JSON.parse
+      var safeText = rawText
+        .replace(/"passportPhoto"\s*:\s*"[^"]*"/s,         '"passportPhoto":""')
+        .replace(/"nitroxPhoto"\s*:\s*"[^"]*"/s,           '"nitroxPhoto":""')
+        .replace(/"diveInsurancePhotoUrl"\s*:\s*"[^"]*"/s, '"diveInsurancePhotoUrl":""')
+        .replace(/"diveCertPhoto"\s*:\s*"[^"]*"/s,         '"diveCertPhoto":""');
+
+      data = JSON.parse(safeText);
+
+      // Re-attach the cleanly extracted photo URLs
+      if (passportPhoto)         data.passportPhoto         = passportPhoto;
+      if (nitroxPhoto)           data.nitroxPhoto           = nitroxPhoto;
+      if (diveInsurancePhotoUrl) data.diveInsurancePhotoUrl = diveInsurancePhotoUrl;
+      if (diveCertPhoto)         data.diveCertPhoto         = diveCertPhoto;
+
     } catch(e) {
       throw new Error('invalid response from server');
     }
