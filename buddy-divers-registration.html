@@ -1852,12 +1852,18 @@ async function verifyOtp() {
     if (!resp.ok) throw new Error('validate failed');
     const rawText = await resp.text();
 
+    // === DEBUG: show raw response in alert so we can see exactly what Make returns ===
+    var debugPreview = rawText.substring(0, 300);
+    var charCodes = [];
+    for (var di = 0; di < Math.min(rawText.length, 500); di++) {
+      var dcc = rawText.charCodeAt(di);
+      if (dcc < 32 || dcc > 126) charCodes.push('pos' + di + ':cc' + dcc);
+    }
+    alert('RAW LENGTH: ' + rawText.length + '\n\nFIRST 300 CHARS:\n' + debugPreview + '\n\nCONTROL CHARS FOUND:\n' + (charCodes.length ? charCodes.join(', ') : 'NONE'));
+    // === END DEBUG ===
+
     let data;
     try {
-      // Make.com inserts literal newline characters inside JSON string values when URLs are long.
-      // Fix: walk the string char-by-char tracking whether we are inside a JSON string,
-      // and drop any CR/LF/tab (control chars 0-31) found inside a string value.
-      // We track escape sequences so a backslash before a quote doesn't flip the in-string flag.
       var chars = [];
       var inString = false;
       var escaped = false;
@@ -1873,13 +1879,17 @@ async function verifyOtp() {
           inString = !inString;
           chars.push(rawText[i]);
         } else if (inString && cc < 32) {
-          // Control character inside a string — skip it (this is the newline Make inserts)
+          // Control character inside a string — skip it
         } else {
           chars.push(rawText[i]);
         }
       }
-      data = JSON.parse(chars.join(''));
+      var cleanedJson = chars.join('');
+      alert('CLEANED LENGTH: ' + cleanedJson.length + '\n\nFIRST 300 CLEANED:\n' + cleanedJson.substring(0, 300));
+      data = JSON.parse(cleanedJson);
+      alert('PARSE OK\nvalid=' + data.valid + '\nhas diverData=' + !!data.diverData + '\npassportPhoto=' + (data.passportPhoto || 'EMPTY'));
     } catch(e) {
+      alert('PARSE FAILED: ' + e.message + '\n\nAt position context:\n' + cleanedJson.substring(Math.max(0, (parseInt(e.message.match(/position (\d+)/)?.[1]||0))-20), (parseInt(e.message.match(/position (\d+)/)?.[1]||0))+20));
       throw new Error('invalid response from server');
     }
     if (data && (data.valid === true || data.valid === 'true') && data.diverData) {
