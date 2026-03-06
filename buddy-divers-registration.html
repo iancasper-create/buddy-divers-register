@@ -1852,44 +1852,16 @@ async function verifyOtp() {
     if (!resp.ok) throw new Error('validate failed');
     const rawText = await resp.text();
 
-    // === DEBUG: show raw response in alert so we can see exactly what Make returns ===
-    var debugPreview = rawText.substring(0, 300);
-    var charCodes = [];
-    for (var di = 0; di < Math.min(rawText.length, 500); di++) {
-      var dcc = rawText.charCodeAt(di);
-      if (dcc < 32 || dcc > 126) charCodes.push('pos' + di + ':cc' + dcc);
-    }
-    alert('RAW LENGTH: ' + rawText.length + '\n\nFIRST 300 CHARS:\n' + debugPreview + '\n\nCONTROL CHARS FOUND:\n' + (charCodes.length ? charCodes.join(', ') : 'NONE'));
-    // === END DEBUG ===
-
     let data;
     try {
-      var chars = [];
-      var inString = false;
-      var escaped = false;
-      for (var i = 0; i < rawText.length; i++) {
-        var cc = rawText.charCodeAt(i);
-        if (escaped) {
-          chars.push(rawText[i]);
-          escaped = false;
-        } else if (cc === 92) { // backslash
-          escaped = true;
-          chars.push(rawText[i]);
-        } else if (cc === 34) { // double-quote
-          inString = !inString;
-          chars.push(rawText[i]);
-        } else if (inString && cc < 32) {
-          // Control character inside a string — skip it
-        } else {
-          chars.push(rawText[i]);
-        }
-      }
-      var cleanedJson = chars.join('');
-      alert('CLEANED LENGTH: ' + cleanedJson.length + '\n\nFIRST 300 CLEANED:\n' + cleanedJson.substring(0, 300));
-      data = JSON.parse(cleanedJson);
-      alert('PARSE OK\nvalid=' + data.valid + '\nhas diverData=' + !!data.diverData + '\npassportPhoto=' + (data.passportPhoto || 'EMPTY'));
+      // Make.com inserts literal newlines inside long JSON string values (e.g. photo URLs).
+      // Fix: remove any CR/LF that sits immediately before or after a quote, or between two non-space chars.
+      var cleaned = rawText
+        .replace(/[\r\n]+"/g, '"')
+        .replace(/"[\r\n]+/g, '"')
+        .replace(/([^\s])[\r\n]+([^\s])/g, '$1$2');
+      data = JSON.parse(cleaned);
     } catch(e) {
-      alert('PARSE FAILED: ' + e.message + '\n\nAt position context:\n' + cleanedJson.substring(Math.max(0, (parseInt(e.message.match(/position (\d+)/)?.[1]||0))-20), (parseInt(e.message.match(/position (\d+)/)?.[1]||0))+20));
       throw new Error('invalid response from server');
     }
     if (data && (data.valid === true || data.valid === 'true') && data.diverData) {
