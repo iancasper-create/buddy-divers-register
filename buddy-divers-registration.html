@@ -1852,56 +1852,25 @@ async function verifyOtp() {
     if (!resp.ok) throw new Error('validate failed');
     const rawText = await resp.text();
 
-    // DIAGNOSTIC
-    var midCodes = '';
-    for (var di = 1700; di < rawText.length; di++) {
-      midCodes += rawText[di] + '(cc' + rawText.charCodeAt(di) + ') ';
-    }
-    alert('LENGTH:' + rawText.length + '\n\nCHARS 1700 to end:\n' + midCodes);
-
     let data;
     try {
-      // Make.com corrupts long string values by inserting newlines inside them.
-      // Strategy: extract the 4 photo URLs directly via regex BEFORE parsing,
-      // then blank them out in the raw text so JSON.parse succeeds on everything else.
-      function extractUrl(text, key) {
-        // Match "key": "...value..." tolerating any whitespace/newlines inside the value
-        var re = new RegExp('"' + key + '"\\s*:\\s*"([^"]*)"', 's');
-        var m = text.match(re);
-        if (!m) return '';
-        // Strip any whitespace/newlines from inside the URL
-        return m[1].replace(/[\s\r\n]+/g, '');
+      // Try direct parse first - the JSON may actually be valid
+      try {
+        data = JSON.parse(rawText);
+      } catch(e1) {
+        // Fallback: strip all actual newline/CR characters then retry
+        data = JSON.parse(rawText.split('').filter(function(c){ var cc = c.charCodeAt(0); return cc !== 10 && cc !== 13; }).join(''));
       }
-
-      var passportPhoto     = extractUrl(rawText, 'passportPhoto');
-      var nitroxPhoto       = extractUrl(rawText, 'nitroxPhoto');
-      var diveInsurancePhotoUrl = extractUrl(rawText, 'diveInsurancePhotoUrl');
-      var diveCertPhoto     = extractUrl(rawText, 'diveCertPhoto');
-
-      // Now blank out the photo fields so their broken values don't crash JSON.parse
-      var safeText = rawText
-        .replace(/"passportPhoto"\s*:\s*"[^"]*"/s,         '"passportPhoto":""')
-        .replace(/"nitroxPhoto"\s*:\s*"[^"]*"/s,           '"nitroxPhoto":""')
-        .replace(/"diveInsurancePhotoUrl"\s*:\s*"[^"]*"/s, '"diveInsurancePhotoUrl":""')
-        .replace(/"diveCertPhoto"\s*:\s*"[^"]*"/s,         '"diveCertPhoto":""');
-
-      data = JSON.parse(safeText);
-
-      // Re-attach the cleanly extracted photo URLs
-      if (passportPhoto)         data.passportPhoto         = passportPhoto;
-      if (nitroxPhoto)           data.nitroxPhoto           = nitroxPhoto;
-      if (diveInsurancePhotoUrl) data.diveInsurancePhotoUrl = diveInsurancePhotoUrl;
-      if (diveCertPhoto)         data.diveCertPhoto         = diveCertPhoto;
 
     } catch(e) {
       throw new Error('invalid response from server');
     }
     if (data && (data.valid === true || data.valid === 'true') && data.diverData) {
       hideOtpBox();
-      if (data.passportPhoto) data.diverData.passportPhoto = decodeURIComponent(data.passportPhoto);
-      if (data.nitroxPhoto) data.diverData.nitroxPhoto = decodeURIComponent(data.nitroxPhoto);
-      if (data.diveInsurancePhotoUrl) data.diverData.diveInsurancePhotoUrl = decodeURIComponent(data.diveInsurancePhotoUrl);
-      if (data.diveCertPhoto) data.diverData.diveCertPhoto = decodeURIComponent(data.diveCertPhoto);
+      try { if (data.passportPhoto) data.diverData.passportPhoto = decodeURIComponent(data.passportPhoto); } catch(e) { data.diverData.passportPhoto = data.passportPhoto; }
+      try { if (data.nitroxPhoto) data.diverData.nitroxPhoto = decodeURIComponent(data.nitroxPhoto); } catch(e) { data.diverData.nitroxPhoto = data.nitroxPhoto; }
+      try { if (data.diveInsurancePhotoUrl) data.diverData.diveInsurancePhotoUrl = decodeURIComponent(data.diveInsurancePhotoUrl); } catch(e) { data.diverData.diveInsurancePhotoUrl = data.diveInsurancePhotoUrl; }
+      try { if (data.diveCertPhoto) data.diverData.diveCertPhoto = decodeURIComponent(data.diveCertPhoto); } catch(e) { data.diverData.diveCertPhoto = data.diveCertPhoto; }
       prefillForm(data.diverData);
       setLookupStatus('✅ פרטיך נטענו! / Details loaded', '#27ae60');
       document.getElementById('welcomeBackBanner').classList.add('show');
