@@ -1853,11 +1853,11 @@ async function verifyOtp() {
     const rawText = await resp.text();
 
     // DIAGNOSTIC
-    var tailCodes = '';
-    for (var di = Math.max(0, rawText.length-20); di < rawText.length; di++) {
-      tailCodes += 'pos' + di + '=cc' + rawText.charCodeAt(di) + ' ';
+    var midCodes = '';
+    for (var di = 1700; di < rawText.length; di++) {
+      midCodes += rawText[di] + '(cc' + rawText.charCodeAt(di) + ') ';
     }
-    alert('LENGTH:' + rawText.length + '\nLAST 100:\n' + JSON.stringify(rawText.slice(-100)) + '\n\nLAST 20 CODES:\n' + tailCodes);
+    alert('LENGTH:' + rawText.length + '\n\nCHARS 1700 to end:\n' + midCodes);
 
     let data;
     try {
