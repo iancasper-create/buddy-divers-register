@@ -887,9 +887,10 @@
       </div>
 
       <div class="form-row full">
-        <div class="field">
-          <label>* הערות / בקשות מיוחדות <span class="en">Notes / Special Requests</span></label>
-          <textarea name="notes" id="f-notes" required placeholder="כל מידע נוסף שתרצה.י לשתף איתנו, לרבות בקשות שיבוץ שותף.ה לחדר&#10;Any additional information you'd like to share, including cabin sharing requests"></textarea>
+        <div class="field" id="f-notes">
+          <label>הערות / בקשות מיוחדות <span class="en">Notes / Special Requests</span><span class="req">*</span></label>
+          <textarea name="notes" placeholder="כל מידע נוסף שתרצה.י לשתף איתנו, לרבות בקשות שיבוץ שותף.ה לחדר&#10;Any additional information you'd like to share, including cabin sharing requests"></textarea>
+          <span class="field-error">שדה חובה / Required</span>
         </div>
       </div>
 
@@ -1581,6 +1582,7 @@ function attachBlurValidation() {
     ['f-medicalNotes',    'medicalNotes',   'text'],
     ['f-emergencyEmail',  'emergencyEmail', 'emailOptional'],
     ['f-emergencyName',   'emergencyName',  'englishOnly'],
+    ['f-notes',           'notes',          'text'],
   ];
   fields.forEach(([fieldId, name, type]) => {
     const fieldEl = document.getElementById(fieldId);
