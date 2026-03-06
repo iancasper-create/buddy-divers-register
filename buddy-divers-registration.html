@@ -1854,13 +1854,15 @@ async function verifyOtp() {
 
     let data;
     try {
-      // Try direct parse first - the JSON may actually be valid
-      try {
-        data = JSON.parse(rawText);
-      } catch(e1) {
-        // Fallback: strip all actual newline/CR characters then retry
-        data = JSON.parse(rawText.split('').filter(function(c){ var cc = c.charCodeAt(0); return cc !== 10 && cc !== 13; }).join(''));
+      // Strip every control character (cc 0-31) from the entire response.
+      // This is safe — JSON structure only needs quotes, braces, colons, commas.
+      // Newlines inside string values (Make.com bug) and outside (formatting) are all removed.
+      var stripped = '';
+      for (var i = 0; i < rawText.length; i++) {
+        var cc = rawText.charCodeAt(i);
+        if (cc >= 32) stripped += rawText[i];
       }
+      data = JSON.parse(stripped);
 
     } catch(e) {
       throw new Error('invalid response from server');
