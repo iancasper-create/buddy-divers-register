@@ -1864,6 +1864,7 @@ async function verifyOtp() {
         if (cc >= 32) stripped += rawText[i];
       }
       data = JSON.parse(stripped.trim());
+      alert('PARSE SUCCESS! valid=' + data.valid + ' diverData=' + !!data.diverData);
 
     } catch(e) {
       alert('PARSE FAILED: ' + e.message + '\nSTRIPPED LENGTH: ' + stripped.length + '\nLAST 50: ' + stripped.slice(-50) + '\n\nLAST 5 CHAR CODES: ' + stripped.slice(-5).split('').map(function(c){return c+'('+c.charCodeAt(0)+')'}).join(' '));
