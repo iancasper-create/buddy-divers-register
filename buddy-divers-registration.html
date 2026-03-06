@@ -1882,7 +1882,12 @@ async function verifyOtp() {
         for (var j = Math.max(0, stripped.length-10); j < stripped.length; j++) {
           last10 += stripped[j] + '(' + stripped.charCodeAt(j) + ') ';
         }
-        alert('PARSE FAILED: ' + parseErr.message + '\nLAST 10 CODES: ' + last10);
+        var opens = 0, closes = 0;
+        for (var k = 0; k < stripped.length; k++) {
+          if (stripped[k] === '{') opens++;
+          if (stripped[k] === '}') closes++;
+        }
+        alert('PARSE FAILED: ' + parseErr.message + '\nOPEN { count: ' + opens + '\nCLOSE } count: ' + closes + '\nLAST 10 CODES: ' + last10);
         throw parseErr;
       }
 
