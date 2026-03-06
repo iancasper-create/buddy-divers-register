@@ -1863,10 +1863,10 @@ async function verifyOtp() {
         var cc = rawText.charCodeAt(i);
         if (cc >= 32) stripped += rawText[i];
       }
-      data = JSON.parse(stripped);
+      data = JSON.parse(stripped.trim());
 
     } catch(e) {
-      alert('PARSE FAILED: ' + e.message + '\nSTRIPPED LENGTH: ' + stripped.length + '\nLAST 50: ' + stripped.slice(-50));
+      alert('PARSE FAILED: ' + e.message + '\nSTRIPPED LENGTH: ' + stripped.length + '\nLAST 50: ' + stripped.slice(-50) + '\n\nLAST 5 CHAR CODES: ' + stripped.slice(-5).split('').map(function(c){return c+'('+c.charCodeAt(0)+')'}).join(' '));
       throw new Error('invalid response from server');
     }
     if (data && (data.valid === true || data.valid === 'true') && data.diverData) {
