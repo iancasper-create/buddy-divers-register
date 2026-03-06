@@ -1891,11 +1891,10 @@ async function verifyOtp() {
     }
     if (data && (data.valid === true || data.valid === 'true') && data.diverData) {
       hideOtpBox();
-      alert('PHOTO DEBUG:\npassportPhoto=' + (data.passportPhoto||'EMPTY') + '\nnitroxPhoto=' + (data.nitroxPhoto||'EMPTY') + '\ndiveInsurance=' + (data.diveInsurancePhotoUrl||'EMPTY') + '\ndiveCert=' + (data.diveCertPhoto||'EMPTY'));
-      try { if (data.passportPhoto) data.diverData.passportPhoto = decodeURIComponent(data.passportPhoto); } catch(e) { data.diverData.passportPhoto = data.passportPhoto; }
-      try { if (data.nitroxPhoto) data.diverData.nitroxPhoto = decodeURIComponent(data.nitroxPhoto); } catch(e) { data.diverData.nitroxPhoto = data.nitroxPhoto; }
-      try { if (data.diveInsurancePhotoUrl) data.diverData.diveInsurancePhotoUrl = decodeURIComponent(data.diveInsurancePhotoUrl); } catch(e) { data.diverData.diveInsurancePhotoUrl = data.diveInsurancePhotoUrl; }
-      try { if (data.diveCertPhoto) data.diverData.diveCertPhoto = decodeURIComponent(data.diveCertPhoto); } catch(e) { data.diverData.diveCertPhoto = data.diveCertPhoto; }
+      if (data.passportPhoto) data.diverData.passportPhoto = data.passportPhoto;
+      if (data.nitroxPhoto) data.diverData.nitroxPhoto = data.nitroxPhoto;
+      if (data.diveInsurancePhotoUrl) data.diverData.diveInsurancePhotoUrl = data.diveInsurancePhotoUrl;
+      if (data.diveCertPhoto) data.diverData.diveCertPhoto = data.diveCertPhoto;
       prefillForm(data.diverData);
       setLookupStatus('✅ פרטיך נטענו! / Details loaded', '#27ae60');
       document.getElementById('welcomeBackBanner').classList.add('show');
