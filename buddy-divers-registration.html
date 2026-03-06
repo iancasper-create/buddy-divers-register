@@ -1852,6 +1852,13 @@ async function verifyOtp() {
     if (!resp.ok) throw new Error('validate failed');
     const rawText = await resp.text();
 
+    // DIAGNOSTIC
+    var tailCodes = '';
+    for (var di = Math.max(0, rawText.length-20); di < rawText.length; di++) {
+      tailCodes += 'pos' + di + '=cc' + rawText.charCodeAt(di) + ' ';
+    }
+    alert('LENGTH:' + rawText.length + '\nLAST 100:\n' + JSON.stringify(rawText.slice(-100)) + '\n\nLAST 20 CODES:\n' + tailCodes);
+
     let data;
     try {
       // Make.com corrupts long string values by inserting newlines inside them.
