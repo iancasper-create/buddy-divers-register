@@ -1849,8 +1849,9 @@ async function verifyOtp() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ idNumber: otpCurrentId, code: code })
     });
-    if (!resp.ok) throw new Error('validate failed');
+    if (!resp.ok) throw new Error('HTTP ' + resp.status + ' - validate failed');
     const rawText = await resp.text();
+    alert('STATUS:' + resp.status + '\nLENGTH:' + rawText.length + '\nFIRST 100:\n' + rawText.substring(0,100));
 
     let data;
     try {
