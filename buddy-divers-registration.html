@@ -524,8 +524,9 @@
       <!-- Passport photo upload -->
       <div class="field" style="margin-top:8px;">
         <label>תמונת דרכון <span class="en">Passport Photo Upload</span></label>
-        <div class="file-upload-area" id="passportUploadArea">
-          <input type="file" accept="image/*,.pdf" onchange="handleUpload(this,'passportUploadArea','passportPhotoUrl','passportUploadStatus','passports')" />
+        <div class="file-upload-area" id="passportUploadArea" onclick="document.getElementById('passportFileInput').click()">
+          <input type="file" id="passportFileInput" accept="image/*,.pdf" style="display:none"
+            onchange="handleUpload(this,'passportUploadArea','passportPhotoUrl','passportUploadStatus','passports')" />
           <div class="upload-icon">📎</div>
           <div class="upload-text">לחץ להעלאת קובץ <strong>/ Click to upload</strong></div>
           <div class="upload-text" style="font-size:11px;margin-top:4px;">JPG, PNG, PDF עד 10MB</div>
@@ -599,8 +600,9 @@
       <!-- Cert card upload -->
       <div class="field" style="margin-top:8px;">
         <label>תמונת תעודת צלילה <span class="en">Dive Certification Photo</span></label>
-        <div class="file-upload-area" id="certUploadArea">
-          <input type="file" accept="image/*,.pdf" onchange="handleUpload(this,'certUploadArea','certPhotoUrl','certUploadStatus','diving')" />
+        <div class="file-upload-area" id="certUploadArea" onclick="document.getElementById('certFileInput').click()">
+          <input type="file" id="certFileInput" accept="image/*,.pdf" style="display:none"
+            onchange="handleUpload(this,'certUploadArea','certPhotoUrl','certUploadStatus','diving')" />
           <div class="upload-icon">🪪</div>
           <div class="upload-text">לחץ להעלאת תעודת צלילה <strong>/ Upload dive certification</strong></div>
           <div id="certUploadStatus"></div>
@@ -618,8 +620,9 @@
         </div>
         <div class="field" style="margin-top:8px;">
           <label>תמונת תעודת נייטרוקס <span class="en">Nitrox Certification Photo</span></label>
-          <div class="file-upload-area" id="nitroxUploadArea">
-            <input type="file" accept="image/*,.pdf" onchange="handleUpload(this,'nitroxUploadArea','nitroxPhotoUrl','nitroxUploadStatus','diving')" />
+          <div class="file-upload-area" id="nitroxUploadArea" onclick="document.getElementById('nitroxFileInput').click()">
+            <input type="file" id="nitroxFileInput" accept="image/*,.pdf" style="display:none"
+              onchange="handleUpload(this,'nitroxUploadArea','nitroxPhotoUrl','nitroxUploadStatus','diving')" />
             <div class="upload-icon">🪪</div>
             <div class="upload-text">לחץ להעלאת תעודת נייטרוקס <strong>/ Upload Nitrox certification</strong></div>
             <div id="nitroxUploadStatus"></div>
@@ -1999,7 +2002,7 @@ function prefillForm(d) {
   }
   setVal('dietary', d.dietary);
   // Prefill existing photo URLs so they are preserved if diver doesn't upload new ones
-  alert('prefillForm photo check:\npassportPhoto=' + (d.passportPhoto||'EMPTY') + '\ndiveCert=' + (d.diveCertPhoto||'EMPTY'));
+  // Prefill existing photo URLs so they are preserved if diver doesn't upload new ones
   if (d.passportPhoto) {
     document.getElementById('passportPhotoUrl').value = d.passportPhoto;
     var ps = document.getElementById('passportUploadStatus');
