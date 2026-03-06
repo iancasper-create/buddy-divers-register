@@ -1858,13 +1858,33 @@ async function verifyOtp() {
       // Strip every control character (cc 0-31) from the entire response.
       // This is safe — JSON structure only needs quotes, braces, colons, commas.
       // Newlines inside string values (Make.com bug) and outside (formatting) are all removed.
+      // Strip control chars AND common invisible Unicode chars
       var stripped = '';
       for (var i = 0; i < rawText.length; i++) {
         var cc = rawText.charCodeAt(i);
-        if (cc >= 32) stripped += rawText[i];
+        // Keep only printable ASCII and valid Unicode text chars
+        // Skip: control chars (0-31), DEL (127), non-breaking space (160),
+        // zero-width chars (8203-8207), BOM (65279), and other invisible Unicode
+        if (cc < 32) continue;
+        if (cc === 127) continue;
+        if (cc === 160) continue;  // non-breaking space
+        if (cc >= 8192 && cc <= 8207) continue;  // Unicode spaces/zero-width
+        if (cc === 65279) continue;  // BOM
+        stripped += rawText[i];
       }
-      data = JSON.parse(stripped.trim());
-      alert('PARSE SUCCESS! valid=' + data.valid + ' diverData=' + !!data.diverData);
+      // Also find and log what's at the exact failure position
+      var failChar = stripped.charCodeAt(stripped.length - 1);
+      try {
+        data = JSON.parse(stripped);
+      } catch(parseErr) {
+        // Log every char code in last 10 positions
+        var last10 = '';
+        for (var j = Math.max(0, stripped.length-10); j < stripped.length; j++) {
+          last10 += stripped[j] + '(' + stripped.charCodeAt(j) + ') ';
+        }
+        alert('PARSE FAILED: ' + parseErr.message + '\nLAST 10 CODES: ' + last10);
+        throw parseErr;
+      }
 
     } catch(e) {
       alert('PARSE FAILED: ' + e.message + '\nSTRIPPED LENGTH: ' + stripped.length + '\nLAST 50: ' + stripped.slice(-50) + '\n\nLAST 5 CHAR CODES: ' + stripped.slice(-5).split('').map(function(c){return c+'('+c.charCodeAt(0)+')'}).join(' '));
