@@ -1886,7 +1886,7 @@ async function verifyOtp() {
       document.getElementById('otpD1').focus();
     }
   } catch(e) {
-    document.getElementById('otpError').textContent = 'שגיאה — נסה שנית / Error — please try again';
+    document.getElementById('otpError').textContent = 'שגיאה: ' + e.message + ' / Error: ' + e.message;
     document.getElementById('otpError').classList.add('show');
     ['otpD1','otpD2','otpD3','otpD4'].forEach(id => { document.getElementById(id).disabled = false; document.getElementById(id).value = ''; });
     document.getElementById('otpD1').focus();
