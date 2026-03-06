@@ -1866,6 +1866,7 @@ async function verifyOtp() {
       data = JSON.parse(stripped);
 
     } catch(e) {
+      alert('PARSE FAILED: ' + e.message + '\nSTRIPPED LENGTH: ' + stripped.length + '\nLAST 50: ' + stripped.slice(-50));
       throw new Error('invalid response from server');
     }
     if (data && (data.valid === true || data.valid === 'true') && data.diverData) {
