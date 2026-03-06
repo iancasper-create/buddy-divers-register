@@ -523,7 +523,7 @@
 
       <!-- Passport photo upload -->
       <div class="field" style="margin-top:8px;">
-        <label>תמונת דרכון <span class="en">Passport Photo Upload</span> <span style="color:var(--error);font-size:12px;">(צילום הדרכון אינו נשמר במערכת ויש להעלותו מחדש בכל הרשמה)</span></label>
+        <label>תמונת דרכון <span class="en">Passport Photo Upload</span></label>
         <div class="file-upload-area" id="passportUploadArea">
           <input type="file" accept="image/*,.pdf" onchange="handleUpload(this,'passportUploadArea','passportPhotoUrl','passportUploadStatus','passports')" />
           <div class="upload-icon">📎</div>
@@ -888,8 +888,8 @@
 
       <div class="form-row full">
         <div class="field">
-          <label>הערות / בקשות מיוחדות <span class="en">Notes / Special Requests</span></label>
-          <textarea name="notes" placeholder="כל מידע נוסף שתרצה.י לשתף איתנו, לרבות בקשות שיבוץ שותף.ה לחדר&#10;Any additional information you'd like to share, including cabin sharing requests"></textarea>
+          <label>* הערות / בקשות מיוחדות <span class="en">Notes / Special Requests</span></label>
+          <textarea name="notes" id="f-notes" required placeholder="כל מידע נוסף שתרצה.י לשתף איתנו, לרבות בקשות שיבוץ שותף.ה לחדר&#10;Any additional information you'd like to share, including cabin sharing requests"></textarea>
         </div>
       </div>
 
@@ -1630,6 +1630,7 @@ function validateForm() {
     ['f-medicalNotes',    'medicalNotes',   'text',            'מצב בריאותי / Medical Notes'],
     ['f-emergencyEmail',  'emergencyEmail', 'emailOptional',   'מייל איש קשר חירום / Emergency Email'],
     ['f-emergencyName',   'emergencyName',  'englishOnly',     'שם איש קשר חירום / Emergency Contact Name'],
+    ['f-notes',           'notes',          'text',            'הערות / Notes'],
   ];
 
   required.forEach(([fieldId, name, type, label]) => {
