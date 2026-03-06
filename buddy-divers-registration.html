@@ -1732,10 +1732,11 @@ document.getElementById('regForm').addEventListener('submit', async function(e) 
   const WEBHOOK_URL = 'https://hook.eu1.make.com/h3wexi08df15jvkk1uyfw0ix669qv1ms';
 
   try {
+    const payload = JSON.stringify(data);
     const resp = await fetch(WEBHOOK_URL, {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
-      body: JSON.stringify(data)
+      body: payload
     });
 
     if (resp.ok || resp.status === 200) {
@@ -1743,12 +1744,12 @@ document.getElementById('regForm').addEventListener('submit', async function(e) 
       document.getElementById('successScreen').classList.add('show');
       window.scrollTo({top:0, behavior:'smooth'});
     } else {
-      throw new Error('Server error');
+      throw new Error('Server error ' + resp.status);
     }
   } catch(err) {
-    document.getElementById('regForm').style.display = 'none';
-    document.getElementById('successScreen').classList.add('show');
-    window.scrollTo({top:0, behavior:'smooth'});
+    btn.disabled = false;
+    btn.innerHTML = 'שלח הרשמה / Submit Registration';
+    alert('שגיאה בשליחת הטופס / Submission error: ' + err.message + '\nPlease try again or contact us.');
   }
 });
 
