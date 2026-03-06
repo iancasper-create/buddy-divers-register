@@ -1891,6 +1891,7 @@ async function verifyOtp() {
     }
     if (data && (data.valid === true || data.valid === 'true') && data.diverData) {
       hideOtpBox();
+      alert('PHOTO DEBUG:\npassportPhoto=' + (data.passportPhoto||'EMPTY') + '\nnitroxPhoto=' + (data.nitroxPhoto||'EMPTY') + '\ndiveInsurance=' + (data.diveInsurancePhotoUrl||'EMPTY') + '\ndiveCert=' + (data.diveCertPhoto||'EMPTY'));
       if (data.passportPhoto) data.diverData.passportPhoto = data.passportPhoto;
       if (data.nitroxPhoto) data.diverData.nitroxPhoto = data.nitroxPhoto;
       if (data.diveInsurancePhotoUrl) data.diverData.diveInsurancePhotoUrl = data.diveInsurancePhotoUrl;
