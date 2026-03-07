@@ -525,11 +525,11 @@
       <div class="field" style="margin-top:8px;">
         <label>תמונת דרכון <span class="en">Passport Photo Upload</span></label>
         <div class="file-upload-area" id="passportUploadArea" onclick="document.getElementById('passportFileInput').click()">
-          <input type="file" id="passportFileInput" accept="image/*,.pdf" style="display:none"
+          <input type="file" id="passportFileInput" accept="image/*" style="display:none"
             onchange="handleUpload(this,'passportUploadArea','passportPhotoUrl','passportUploadStatus','passports','passport')" />
           <div class="upload-icon">📎</div>
           <div class="upload-text">לחץ להעלאת תמונת דרכון <strong>/ Upload passport photo</strong></div>
-          <div class="upload-text" style="font-size:11px;margin-top:4px;">JPG, PNG, PDF · עד 5MB / up to 5MB</div>
+          <div class="upload-text" style="font-size:11px;margin-top:4px;">JPG, PNG · עד 5MB / up to 5MB</div>
           <div id="passportUploadStatus"></div>
         </div>
         <input type="hidden" name="passportPhoto" id="passportPhotoUrl" />
@@ -601,11 +601,11 @@
       <div class="field" style="margin-top:8px;">
         <label>תמונת תעודת צלילה <span class="en">Dive Certification Photo</span></label>
         <div class="file-upload-area" id="certUploadArea" onclick="document.getElementById('certFileInput').click()">
-          <input type="file" id="certFileInput" accept="image/*,.pdf" style="display:none"
+          <input type="file" id="certFileInput" accept="image/*" style="display:none"
             onchange="handleUpload(this,'certUploadArea','certPhotoUrl','certUploadStatus','diving','divecert')" />
           <div class="upload-icon">📎</div>
           <div class="upload-text">לחץ להעלאת תעודת צלילה <strong>/ Upload dive certification</strong></div>
-          <div class="upload-text" style="font-size:11px;margin-top:4px;">JPG, PNG, PDF · עד 5MB / up to 5MB</div>
+          <div class="upload-text" style="font-size:11px;margin-top:4px;">JPG, PNG · עד 5MB / up to 5MB</div>
           <div id="certUploadStatus"></div>
         </div>
         <input type="hidden" name="certPhoto" id="certPhotoUrl" />
@@ -622,11 +622,11 @@
         <div class="field" style="margin-top:8px;">
           <label>תמונת תעודת נייטרוקס <span class="en">Nitrox Certification Photo</span></label>
           <div class="file-upload-area" id="nitroxUploadArea" onclick="document.getElementById('nitroxFileInput').click()">
-            <input type="file" id="nitroxFileInput" accept="image/*,.pdf" style="display:none"
+            <input type="file" id="nitroxFileInput" accept="image/*" style="display:none"
               onchange="handleUpload(this,'nitroxUploadArea','nitroxPhotoUrl','nitroxUploadStatus','diving','nitrox')" />
             <div class="upload-icon">📎</div>
             <div class="upload-text">לחץ להעלאת תעודת נייטרוקס <strong>/ Upload Nitrox certification</strong></div>
-            <div class="upload-text" style="font-size:11px;margin-top:4px;">JPG, PNG, PDF · עד 5MB / up to 5MB</div>
+            <div class="upload-text" style="font-size:11px;margin-top:4px;">JPG, PNG · עד 5MB / up to 5MB</div>
             <div id="nitroxUploadStatus"></div>
           </div>
           <input type="hidden" name="nitroxPhoto" id="nitroxPhotoUrl" />
@@ -826,12 +826,12 @@
         <div class="field">
           <label>מסמך ביטוח צלילה <span class="en">Dive Insurance Document</span></label>
           <div class="file-upload-area" id="insuranceUploadArea" onclick="document.getElementById('insuranceFileInput').click()">
-            <input type="file" id="insuranceFileInput" accept="image/*,.pdf" style="display:none"
+            <input type="file" id="insuranceFileInput" accept="image/*" style="display:none"
               onchange="handleUpload(this,'insuranceUploadArea','insurancePhotoUrl','insuranceUploadStatus','diving','insurance')" />
             <input type="hidden" name="diveInsurancePhotoUrl" id="insurancePhotoUrl" />
             <div class="upload-icon">📎</div>
             <div class="upload-text">לחץ להעלאת מסמך ביטוח <strong>/ Upload insurance document</strong></div>
-            <div class="upload-text" style="font-size:11px;margin-top:4px;">JPG, PNG, PDF · עד 5MB / up to 5MB</div>
+            <div class="upload-text" style="font-size:11px;margin-top:4px;">JPG, PNG · עד 5MB / up to 5MB</div>
             <div id="insuranceUploadStatus"></div>
           </div>
         </div>
@@ -1450,9 +1450,9 @@ async function handleUpload(input, areaId, urlFieldId, statusId, folder, docType
     formData.append('file', file);
     formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
     // Build folder as divers/ID_LastName_FirstName/subfolder
-    const diverId = (document.getElementById('idNumber') ? document.getElementById('idNumber').value : '') || 'unknown';
-    const diverFirst = (document.getElementById('firstName') ? document.getElementById('firstName').value : '').trim().replace(/\s+/g, '-') || 'unknown';
-    const diverLast = (document.getElementById('lastName') ? document.getElementById('lastName').value : '').trim().replace(/\s+/g, '-') || 'unknown';
+    const diverId = (document.getElementById('idNumberInput') ? document.getElementById('idNumberInput').value : '') || 'unknown';
+    const diverFirst = (document.getElementById('firstNameInput') ? document.getElementById('firstNameInput').value : '').trim().replace(/\s+/g, '-') || 'unknown';
+    const diverLast = (document.getElementById('lastNameInput') ? document.getElementById('lastNameInput').value : '').trim().replace(/\s+/g, '-') || 'unknown';
     const diverFolder = 'divers/' + diverId + '_' + diverLast + '_' + diverFirst;
     formData.append('folder', diverFolder + '/' + (folder || 'general'));
 
