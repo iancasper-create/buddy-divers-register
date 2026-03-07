@@ -1734,10 +1734,10 @@ document.getElementById('regForm').addEventListener('submit', async function(e) 
   fd.forEach((v,k) => { data[k] = freeTextFields.includes(k) ? sanitize(v) : v; });
   
   // Calculate totalPrice from selected pricing + supplement if checked
-  const params = new URLSearchParams(window.location.search);
+  const submitParams = new URLSearchParams(window.location.search);
   const selectedPricingValue = data['pricing'] || '';
   const supplementChecked = !!data['pricing_supplement'];
-  const tripPricingConf = TRIPS[params.get('trip') || 'default'];
+  const tripPricingConf = TRIPS[submitParams.get('trip') || 'default'];
   let mainPriceNum = 0;
   let supplementPriceNum = 0;
   let pricingLabel = selectedPricingValue;
@@ -1756,7 +1756,7 @@ document.getElementById('regForm').addEventListener('submit', async function(e) 
   data['totalPrice'] = mainPriceNum + supplementPriceNum;
 
   // Add trip ID and destination
-  data.tripId = params.get('trip') || 'default';
+  data.tripId = submitParams.get('trip') || 'default';
   const tripConf = TRIPS[data.tripId];
   if (tripConf && tripConf.name) {
     // Extract English part after '—' e.g. "🤿 ספארי מדגסקר — Madagascar Safari" → "Madagascar Safari"
