@@ -529,7 +529,7 @@
             onchange="handleUpload(this,'passportUploadArea','passportPhotoUrl','passportUploadStatus','passports','passport')" />
           <div class="upload-icon">📎</div>
           <div class="upload-text">לחץ להעלאת תמונת דרכון <strong>/ Upload passport photo</strong></div>
-          <div class="upload-text" style="font-size:11px;margin-top:4px;">JPG, PNG, PDF · עד 10MB / up to 10MB</div>
+          <div class="upload-text" style="font-size:11px;margin-top:4px;">JPG, PNG, PDF · עד 5MB / up to 5MB</div>
           <div id="passportUploadStatus"></div>
         </div>
         <input type="hidden" name="passportPhoto" id="passportPhotoUrl" />
@@ -605,7 +605,7 @@
             onchange="handleUpload(this,'certUploadArea','certPhotoUrl','certUploadStatus','diving','divecert')" />
           <div class="upload-icon">📎</div>
           <div class="upload-text">לחץ להעלאת תעודת צלילה <strong>/ Upload dive certification</strong></div>
-          <div class="upload-text" style="font-size:11px;margin-top:4px;">JPG, PNG, PDF · עד 10MB / up to 10MB</div>
+          <div class="upload-text" style="font-size:11px;margin-top:4px;">JPG, PNG, PDF · עד 5MB / up to 5MB</div>
           <div id="certUploadStatus"></div>
         </div>
         <input type="hidden" name="certPhoto" id="certPhotoUrl" />
@@ -626,7 +626,7 @@
               onchange="handleUpload(this,'nitroxUploadArea','nitroxPhotoUrl','nitroxUploadStatus','diving','nitrox')" />
             <div class="upload-icon">📎</div>
             <div class="upload-text">לחץ להעלאת תעודת נייטרוקס <strong>/ Upload Nitrox certification</strong></div>
-            <div class="upload-text" style="font-size:11px;margin-top:4px;">JPG, PNG, PDF · עד 10MB / up to 10MB</div>
+            <div class="upload-text" style="font-size:11px;margin-top:4px;">JPG, PNG, PDF · עד 5MB / up to 5MB</div>
             <div id="nitroxUploadStatus"></div>
           </div>
           <input type="hidden" name="nitroxPhoto" id="nitroxPhotoUrl" />
@@ -831,7 +831,7 @@
             <input type="hidden" name="diveInsurancePhotoUrl" id="insurancePhotoUrl" />
             <div class="upload-icon">📎</div>
             <div class="upload-text">לחץ להעלאת מסמך ביטוח <strong>/ Upload insurance document</strong></div>
-            <div class="upload-text" style="font-size:11px;margin-top:4px;">JPG, PNG, PDF · עד 10MB / up to 10MB</div>
+            <div class="upload-text" style="font-size:11px;margin-top:4px;">JPG, PNG, PDF · עד 5MB / up to 5MB</div>
             <div id="insuranceUploadStatus"></div>
           </div>
         </div>
@@ -1430,11 +1430,11 @@ async function handleUpload(input, areaId, urlFieldId, statusId, folder, docType
   const statusEl = document.getElementById(statusId);
   const urlField = document.getElementById(urlFieldId);
 
-  // Validate file size (10MB)
-  if (file.size > 10 * 1024 * 1024) {
+  // Validate file size (5MB)
+  if (file.size > 5 * 1024 * 1024) {
     area.classList.remove('uploading','upload-done');
     area.classList.add('upload-error');
-    statusEl.innerHTML = '<span class="upload-error-msg">❌ הקובץ גדול מ-10MB / File exceeds 10MB limit</span>';
+    statusEl.innerHTML = '<span class="upload-error-msg">❌ הקובץ גדול מ-5MB / File exceeds 5MB limit</span>';
     urlField.value = '';
     return;
   }
@@ -1455,10 +1455,6 @@ async function handleUpload(input, areaId, urlFieldId, statusId, folder, docType
     const diverLast = (document.getElementById('lastName') ? document.getElementById('lastName').value : '').trim().replace(/\s+/g, '-') || 'unknown';
     const diverFolder = 'divers/' + diverId + '_' + diverLast + '_' + diverFirst;
     formData.append('folder', diverFolder + '/' + (folder || 'general'));
-    if (docType) {
-      formData.append('public_id', docType);
-      formData.append('overwrite', 'true');
-    }
 
     const response = await fetch(
       file.type === "application/pdf" ? `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/raw/upload` : `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
