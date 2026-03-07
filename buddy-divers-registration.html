@@ -209,6 +209,21 @@
     .file-upload-area .upload-text { font-size:13px; color:var(--muted); }
     .file-upload-area .upload-text strong { color:var(--teal); }
     .file-name { font-size:12px; color:var(--teal); margin-top:6px; font-weight:500; }
+    .upload-box { border:2px dashed var(--border); border-radius:12px; padding:14px 16px; background:var(--light-bg); transition:border-color 0.2s; }
+    .upload-box.upload-done { border-color:#27ae60; background:rgba(39,174,96,0.06); }
+    .upload-box.upload-error { border-color:var(--error); background:rgba(224,85,85,0.06); }
+    .upload-box.uploading { border-color:var(--orange); background:rgba(245,166,35,0.05); }
+    .upload-box-status { font-size:12px; color:var(--muted); margin-bottom:10px; min-height:18px; }
+    .upload-box-buttons { display:flex; gap:8px; flex-wrap:wrap; }
+    .upload-btn { display:inline-flex; align-items:center; gap:6px; padding:9px 14px; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer; border:none; transition:background 0.2s, transform 0.1s; text-decoration:none; }
+    .upload-btn:active { transform:scale(0.97); }
+    .upload-btn-gallery { background:var(--teal); color:white; }
+    .upload-btn-gallery:hover { background:var(--teal2); }
+    .upload-btn-camera { background:var(--navy); color:white; }
+    .upload-btn-camera:hover { background:#1a3d70; }
+    .upload-btn-view { background:white; color:var(--teal); border:1.5px solid var(--teal) !important; }
+    .upload-btn-view:hover { background:rgba(0,114,137,0.07); }
+    .upload-hint { font-size:11px; color:var(--muted); margin-top:8px; }
     .upload-progress { font-size:12px; color:var(--orange); margin-top:6px; font-weight:500; }
     .upload-success { font-size:12px; color:#27ae60; margin-top:6px; font-weight:600; }
     .upload-error-msg { font-size:12px; color:var(--error); margin-top:6px; font-weight:500; }
@@ -524,13 +539,18 @@
       <!-- Passport photo upload -->
       <div class="field" style="margin-top:8px;">
         <label>תמונת דרכון <span class="en">Passport Photo Upload</span></label>
-        <div class="file-upload-area" id="passportUploadArea" onclick="document.getElementById('passportFileInput').click()">
+        <div class="upload-box" id="passportUploadArea">
           <input type="file" id="passportFileInput" accept="image/jpeg, image/png" style="display:none"
             onchange="handleUpload(this,'passportUploadArea','passportPhotoUrl','passportUploadStatus','passports','passport')" />
-          <div class="upload-icon">📎</div>
-          <div class="upload-text">לחץ להעלאת תמונת דרכון <strong>/ Upload passport photo</strong></div>
-          <div class="upload-text" style="font-size:11px;margin-top:4px;">JPG, PNG · עד 5MB / up to 5MB</div>
-          <div id="passportUploadStatus"></div>
+          <input type="file" id="passportCameraInput" accept="image/jpeg, image/png" capture="environment" style="display:none"
+            onchange="handleUpload(this,'passportUploadArea','passportPhotoUrl','passportUploadStatus','passports','passport')" />
+          <div class="upload-box-status" id="passportUploadStatus">תמונת דרכון / Passport photo</div>
+          <div class="upload-box-buttons">
+            <button type="button" class="upload-btn upload-btn-gallery" onclick="document.getElementById('passportFileInput').click()">🖼 גלריה / Gallery</button>
+            <button type="button" class="upload-btn upload-btn-camera" onclick="document.getElementById('passportCameraInput').click()">📷 מצלמה / Camera</button>
+            <a id="passportViewBtn" class="upload-btn upload-btn-view" href="#" target="_blank" style="display:none">👁 צפה / View</a>
+          </div>
+          <div class="upload-hint">JPG, PNG · עד 5MB / up to 5MB</div>
         </div>
         <input type="hidden" name="passportPhoto" id="passportPhotoUrl" />
       </div>
@@ -600,13 +620,18 @@
       <!-- Cert card upload -->
       <div class="field" style="margin-top:8px;">
         <label>תמונת תעודת צלילה <span class="en">Dive Certification Photo</span></label>
-        <div class="file-upload-area" id="certUploadArea" onclick="document.getElementById('certFileInput').click()">
+        <div class="upload-box" id="certUploadArea">
           <input type="file" id="certFileInput" accept="image/jpeg, image/png" style="display:none"
             onchange="handleUpload(this,'certUploadArea','certPhotoUrl','certUploadStatus','diving','divecert')" />
-          <div class="upload-icon">📎</div>
-          <div class="upload-text">לחץ להעלאת תעודת צלילה <strong>/ Upload dive certification</strong></div>
-          <div class="upload-text" style="font-size:11px;margin-top:4px;">JPG, PNG · עד 5MB / up to 5MB</div>
-          <div id="certUploadStatus"></div>
+          <input type="file" id="certCameraInput" accept="image/jpeg, image/png" capture="environment" style="display:none"
+            onchange="handleUpload(this,'certUploadArea','certPhotoUrl','certUploadStatus','diving','divecert')" />
+          <div class="upload-box-status" id="certUploadStatus">תעודת צלילה / Dive certification</div>
+          <div class="upload-box-buttons">
+            <button type="button" class="upload-btn upload-btn-gallery" onclick="document.getElementById('certFileInput').click()">🖼 גלריה / Gallery</button>
+            <button type="button" class="upload-btn upload-btn-camera" onclick="document.getElementById('certCameraInput').click()">📷 מצלמה / Camera</button>
+            <a id="certViewBtn" class="upload-btn upload-btn-view" href="#" target="_blank" style="display:none">👁 צפה / View</a>
+          </div>
+          <div class="upload-hint">JPG, PNG · עד 5MB / up to 5MB</div>
         </div>
         <input type="hidden" name="certPhoto" id="certPhotoUrl" />
       </div>
@@ -621,13 +646,18 @@
         </div>
         <div class="field" style="margin-top:8px;">
           <label>תמונת תעודת נייטרוקס <span class="en">Nitrox Certification Photo</span></label>
-          <div class="file-upload-area" id="nitroxUploadArea" onclick="document.getElementById('nitroxFileInput').click()">
+          <div class="upload-box" id="nitroxUploadArea">
             <input type="file" id="nitroxFileInput" accept="image/jpeg, image/png" style="display:none"
               onchange="handleUpload(this,'nitroxUploadArea','nitroxPhotoUrl','nitroxUploadStatus','diving','nitrox')" />
-            <div class="upload-icon">📎</div>
-            <div class="upload-text">לחץ להעלאת תעודת נייטרוקס <strong>/ Upload Nitrox certification</strong></div>
-            <div class="upload-text" style="font-size:11px;margin-top:4px;">JPG, PNG · עד 5MB / up to 5MB</div>
-            <div id="nitroxUploadStatus"></div>
+            <input type="file" id="nitroxCameraInput" accept="image/jpeg, image/png" capture="environment" style="display:none"
+              onchange="handleUpload(this,'nitroxUploadArea','nitroxPhotoUrl','nitroxUploadStatus','diving','nitrox')" />
+            <div class="upload-box-status" id="nitroxUploadStatus">תעודת נייטרוקס / Nitrox certification</div>
+            <div class="upload-box-buttons">
+              <button type="button" class="upload-btn upload-btn-gallery" onclick="document.getElementById('nitroxFileInput').click()">🖼 גלריה / Gallery</button>
+              <button type="button" class="upload-btn upload-btn-camera" onclick="document.getElementById('nitroxCameraInput').click()">📷 מצלמה / Camera</button>
+              <a id="nitroxViewBtn" class="upload-btn upload-btn-view" href="#" target="_blank" style="display:none">👁 צפה / View</a>
+            </div>
+            <div class="upload-hint">JPG, PNG · עד 5MB / up to 5MB</div>
           </div>
           <input type="hidden" name="nitroxPhoto" id="nitroxPhotoUrl" />
         </div>
@@ -825,14 +855,19 @@
       <div class="form-row full">
         <div class="field">
           <label>מסמך ביטוח צלילה <span class="en">Dive Insurance Document</span></label>
-          <div class="file-upload-area" id="insuranceUploadArea" onclick="document.getElementById('insuranceFileInput').click()">
+          <div class="upload-box" id="insuranceUploadArea">
             <input type="file" id="insuranceFileInput" accept="image/jpeg, image/png" style="display:none"
               onchange="handleUpload(this,'insuranceUploadArea','insurancePhotoUrl','insuranceUploadStatus','diving','insurance')" />
+            <input type="file" id="insuranceCameraInput" accept="image/jpeg, image/png" capture="environment" style="display:none"
+              onchange="handleUpload(this,'insuranceUploadArea','insurancePhotoUrl','insuranceUploadStatus','diving','insurance')" />
             <input type="hidden" name="diveInsurancePhotoUrl" id="insurancePhotoUrl" />
-            <div class="upload-icon">📎</div>
-            <div class="upload-text">לחץ להעלאת מסמך ביטוח <strong>/ Upload insurance document</strong></div>
-            <div class="upload-text" style="font-size:11px;margin-top:4px;">JPG, PNG · עד 5MB / up to 5MB</div>
-            <div id="insuranceUploadStatus"></div>
+            <div class="upload-box-status" id="insuranceUploadStatus">מסמך ביטוח / Insurance document</div>
+            <div class="upload-box-buttons">
+              <button type="button" class="upload-btn upload-btn-gallery" onclick="document.getElementById('insuranceFileInput').click()">🖼 גלריה / Gallery</button>
+              <button type="button" class="upload-btn upload-btn-camera" onclick="document.getElementById('insuranceCameraInput').click()">📷 מצלמה / Camera</button>
+              <a id="insuranceViewBtn" class="upload-btn upload-btn-view" href="#" target="_blank" style="display:none">👁 צפה / View</a>
+            </div>
+            <div class="upload-hint">JPG, PNG · עד 5MB / up to 5MB</div>
           </div>
         </div>
       </div>
@@ -2050,22 +2085,26 @@ function prefillForm(d) {
   if (d.passportPhoto) {
     document.getElementById('passportPhotoUrl').value = d.passportPhoto;
     var ps = document.getElementById('passportUploadStatus');
-    if (ps) ps.innerHTML = '📎 תמונה קיימת / Existing photo on file — <a href="' + d.passportPhoto + '" target="_blank"' + viewLink + '>view</a><br><span style="font-size:11px;color:#888;">Click box to upload a new one / לחץ על המסגרת להחלפה</span>';
+    if (ps) { ps.innerHTML = '<span class="existing-file">✅ תמונה קיימת / Photo on file</span>'; }
+    var pvb = document.getElementById('passportViewBtn'); if (pvb && d.passportPhoto) { pvb.href = d.passportPhoto; pvb.style.display = 'inline-flex'; }
   }
   if (d.nitroxPhoto) {
     document.getElementById('nitroxPhotoUrl').value = d.nitroxPhoto;
     var ns = document.getElementById('nitroxUploadStatus');
-    if (ns) ns.innerHTML = '📎 תמונה קיימת / Existing photo on file — <a href="' + d.nitroxPhoto + '" target="_blank"' + viewLink + '>view</a><br><span style="font-size:11px;color:#888;">Click box to upload a new one / לחץ על המסגרת להחלפה</span>';
+    if (ns) { ns.innerHTML = '<span class="existing-file">✅ תמונה קיימת / Photo on file</span>'; }
+    var nvb = document.getElementById('nitroxViewBtn'); if (nvb && d.nitroxPhoto) { nvb.href = d.nitroxPhoto; nvb.style.display = 'inline-flex'; }
   }
   if (d.diveInsurancePhotoUrl) {
     document.getElementById('insurancePhotoUrl').value = d.diveInsurancePhotoUrl;
     var is2 = document.getElementById('insuranceUploadStatus');
-    if (is2) is2.innerHTML = '📎 תמונה קיימת / Existing photo on file — <a href="' + d.diveInsurancePhotoUrl + '" target="_blank"' + viewLink + '>view</a><br><span style="font-size:11px;color:#888;">Click box to upload a new one / לחץ על המסגרת להחלפה</span>';
+    if (is2) { is2.innerHTML = '<span class="existing-file">✅ תמונה קיימת / Photo on file</span>'; }
+    var ivb = document.getElementById('insuranceViewBtn'); if (ivb && d.diveInsurancePhotoUrl) { ivb.href = d.diveInsurancePhotoUrl; ivb.style.display = 'inline-flex'; }
   }
   if (d.diveCertPhoto) {
     document.getElementById('certPhotoUrl').value = d.diveCertPhoto;
     var cs = document.getElementById('certUploadStatus');
-    if (cs) cs.innerHTML = '📎 תמונה קיימת / Existing photo on file — <a href="' + d.diveCertPhoto + '" target="_blank"' + viewLink + '>view</a><br><span style="font-size:11px;color:#888;">Click box to upload a new one / לחץ על המסגרת להחלפה</span>';
+    if (cs) { cs.innerHTML = '<span class="existing-file">✅ תמונה קיימת / Photo on file</span>'; }
+    var cvb = document.getElementById('certViewBtn'); if (cvb && d.diveCertPhoto) { cvb.href = d.diveCertPhoto; cvb.style.display = 'inline-flex'; }
   }
   // Auto-check "returning customer" checkbox
   const returningCb = document.querySelector('[name="returningCustomer"]');
