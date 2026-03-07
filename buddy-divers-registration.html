@@ -984,19 +984,22 @@ const TRIPS = {
         value: "twin_2890",
         he: "יחיד בחדר זוגי",
         en: "Single occupancy in twin room",
-        price: "€2,890"
+        price: "€2,890",
+        priceNum: 2890
       },
       {
         value: "twin_2690",
         he: "יחיד בחדר זוגי (שאינו צולל)",
         en: "Non-diver sharing twin room",
-        price: "€2,690"
+        price: "€2,690",
+        priceNum: 2690
       },
       {
         value: "single_supplement",
         he: "תוספת שימוש יחיד בחדר",
         en: "Single room supplement (add-on)",
         price: "€690 תוספת",
+        priceNum: 690,
         supplement: true
       }
     ]
@@ -1009,19 +1012,22 @@ const TRIPS = {
         value: "twin_2890",
         he: "יחיד בחדר זוגי",
         en: "Single occupancy in twin room",
-        price: "€2,890"
+        price: "€2,890",
+        priceNum: 2890
       },
       {
         value: "twin_2690",
         he: "יחיד בחדר זוגי (שאינו צולל)",
         en: "Non-diver sharing twin room",
-        price: "€2,690"
+        price: "€2,690",
+        priceNum: 2690
       },
       {
         value: "single_supplement",
         he: "תוספת שימוש יחיד בחדר",
         en: "Single room supplement (add-on)",
         price: "€690 תוספת",
+        priceNum: 690,
         supplement: true
       }
     ]
@@ -1034,19 +1040,22 @@ const TRIPS = {
         value: "twin_2890",
         he: "יחיד בחדר זוגי",
         en: "Single occupancy in twin room",
-        price: "€2,890"
+        price: "€2,890",
+        priceNum: 2890
       },
       {
         value: "twin_2690",
         he: "יחיד בחדר זוגי (שאינו צולל)",
         en: "Non-diver sharing twin room",
-        price: "€2,690"
+        price: "€2,690",
+        priceNum: 2690
       },
       {
         value: "single_supplement",
         he: "תוספת שימוש יחיד בחדר",
         en: "Single room supplement (add-on)",
         price: "€690 תוספת",
+        priceNum: 690,
         supplement: true
       }
     ]
@@ -1059,19 +1068,22 @@ const TRIPS = {
         value: "twin_2890",
         he: "יחיד בחדר זוגי",
         en: "Single occupancy in twin room",
-        price: "€2,890"
+        price: "€2,890",
+        priceNum: 2890
       },
       {
         value: "twin_2690",
         he: "יחיד בחדר זוגי (שאינו צולל)",
         en: "Non-diver sharing twin room",
-        price: "€2,690"
+        price: "€2,690",
+        priceNum: 2690
       },
       {
         value: "single_supplement",
         he: "תוספת שימוש יחיד בחדר",
         en: "Single room supplement (add-on)",
         price: "€690 תוספת",
+        priceNum: 690,
         supplement: true
       }
     ]
@@ -1084,19 +1096,22 @@ const TRIPS = {
         value: "twin_2890",
         he: "יחיד בחדר זוגי",
         en: "Single occupancy in twin room",
-        price: "€2,890"
+        price: "€2,890",
+        priceNum: 2890
       },
       {
         value: "twin_2690",
         he: "יחיד בחדר זוגי (שאינו צולל)",
         en: "Non-diver sharing twin room",
-        price: "€2,690"
+        price: "€2,690",
+        priceNum: 2690
       },
       {
         value: "single_supplement",
         he: "תוספת שימוש יחיד בחדר",
         en: "Single room supplement (add-on)",
         price: "€690 תוספת",
+        priceNum: 690,
         supplement: true
       }
     ]
@@ -1109,19 +1124,22 @@ const TRIPS = {
         value: "twin_2890",
         he: "יחיד בחדר זוגי",
         en: "Single occupancy in twin room",
-        price: "€2,890"
+        price: "€2,890",
+        priceNum: 2890
       },
       {
         value: "twin_2690",
         he: "יחיד בחדר זוגי (שאינו צולל)",
         en: "Non-diver sharing twin room",
-        price: "€2,690"
+        price: "€2,690",
+        priceNum: 2690
       },
       {
         value: "single_supplement",
         he: "תוספת שימוש יחיד בחדר",
         en: "Single room supplement (add-on)",
         price: "€690 תוספת",
+        priceNum: 690,
         supplement: true
       }
     ]
@@ -1715,6 +1733,27 @@ document.getElementById('regForm').addEventListener('submit', async function(e) 
   const freeTextFields = ['allergies','medicalNotes','dietary','notes','emergencyName','emergencyRelationship','insuranceCompany','insuranceContact','policyNumber','referral'];
   fd.forEach((v,k) => { data[k] = freeTextFields.includes(k) ? sanitize(v) : v; });
   
+  // Calculate totalPrice from selected pricing + supplement if checked
+  const selectedPricingValue = data['pricing'] || '';
+  const supplementChecked = !!data['pricing_supplement'];
+  const tripPricingConf = TRIPS[params.get('trip') || 'default'];
+  let mainPriceNum = 0;
+  let supplementPriceNum = 0;
+  let pricingLabel = selectedPricingValue;
+  if (tripPricingConf && tripPricingConf.pricing) {
+    const mainOpt = tripPricingConf.pricing.find(o => o.value === selectedPricingValue);
+    if (mainOpt && mainOpt.priceNum) mainPriceNum = mainOpt.priceNum;
+    if (supplementChecked) {
+      const suppOpt = tripPricingConf.pricing.find(o => o.supplement === true);
+      if (suppOpt && suppOpt.priceNum) {
+        supplementPriceNum = suppOpt.priceNum;
+        pricingLabel = selectedPricingValue + ' + single_supplement_' + supplementPriceNum;
+      }
+    }
+  }
+  data['pricing'] = pricingLabel;
+  data['totalPrice'] = mainPriceNum + supplementPriceNum;
+
   // Add trip ID and destination
   const params = new URLSearchParams(window.location.search);
   data.tripId = params.get('trip') || 'default';
