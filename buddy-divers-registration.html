@@ -1743,11 +1743,11 @@ document.getElementById('regForm').addEventListener('submit', async function(e) 
   let pricingLabel = selectedPricingValue;
   if (tripPricingConf && tripPricingConf.pricing) {
     const mainOpt = tripPricingConf.pricing.find(o => o.value === selectedPricingValue);
-    if (mainOpt && mainOpt.priceNum) mainPriceNum = mainOpt.priceNum;
+    if (mainOpt && mainOpt.priceNum) mainPriceNum = Number(mainOpt.priceNum);
     if (supplementChecked) {
       const suppOpt = tripPricingConf.pricing.find(o => o.supplement === true);
       if (suppOpt && suppOpt.priceNum) {
-        supplementPriceNum = suppOpt.priceNum;
+        supplementPriceNum = Number(suppOpt.priceNum);
         pricingLabel = selectedPricingValue + ' + single_supplement_' + supplementPriceNum;
       }
     }
