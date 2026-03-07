@@ -1734,6 +1734,7 @@ document.getElementById('regForm').addEventListener('submit', async function(e) 
   fd.forEach((v,k) => { data[k] = freeTextFields.includes(k) ? sanitize(v) : v; });
   
   // Calculate totalPrice from selected pricing + supplement if checked
+  const params = new URLSearchParams(window.location.search);
   const selectedPricingValue = data['pricing'] || '';
   const supplementChecked = !!data['pricing_supplement'];
   const tripPricingConf = TRIPS[params.get('trip') || 'default'];
@@ -1755,7 +1756,6 @@ document.getElementById('regForm').addEventListener('submit', async function(e) 
   data['totalPrice'] = mainPriceNum + supplementPriceNum;
 
   // Add trip ID and destination
-  const params = new URLSearchParams(window.location.search);
   data.tripId = params.get('trip') || 'default';
   const tripConf = TRIPS[data.tripId];
   if (tripConf && tripConf.name) {
