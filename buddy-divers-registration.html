@@ -1753,7 +1753,7 @@ document.getElementById('regForm').addEventListener('submit', async function(e) 
     }
   }
   data['pricing'] = pricingLabel;
-  data['totalPrice'] = mainPriceNum + supplementPriceNum;
+  data['totalPrice'] = parseInt(mainPriceNum, 10) + parseInt(supplementPriceNum, 10);
 
   // Add trip ID and destination
   data.tripId = submitParams.get('trip') || 'default';
