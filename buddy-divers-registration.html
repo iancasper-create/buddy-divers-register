@@ -526,7 +526,7 @@
         <label>תמונת דרכון <span class="en">Passport Photo Upload</span></label>
         <div class="file-upload-area" id="passportUploadArea" onclick="document.getElementById('passportFileInput').click()">
           <input type="file" id="passportFileInput" accept="image/*,.pdf" style="display:none"
-            onchange="handleUpload(this,'passportUploadArea','passportPhotoUrl','passportUploadStatus','passports')" />
+            onchange="handleUpload(this,'passportUploadArea','passportPhotoUrl','passportUploadStatus','passports','passport')" />
           <div class="upload-icon">📎</div>
           <div class="upload-text">לחץ להעלאת תמונת דרכון <strong>/ Upload passport photo</strong></div>
           <div class="upload-text" style="font-size:11px;margin-top:4px;">JPG, PNG, PDF · עד 10MB / up to 10MB</div>
@@ -602,7 +602,7 @@
         <label>תמונת תעודת צלילה <span class="en">Dive Certification Photo</span></label>
         <div class="file-upload-area" id="certUploadArea" onclick="document.getElementById('certFileInput').click()">
           <input type="file" id="certFileInput" accept="image/*,.pdf" style="display:none"
-            onchange="handleUpload(this,'certUploadArea','certPhotoUrl','certUploadStatus','diving')" />
+            onchange="handleUpload(this,'certUploadArea','certPhotoUrl','certUploadStatus','diving','divecert')" />
           <div class="upload-icon">📎</div>
           <div class="upload-text">לחץ להעלאת תעודת צלילה <strong>/ Upload dive certification</strong></div>
           <div class="upload-text" style="font-size:11px;margin-top:4px;">JPG, PNG, PDF · עד 10MB / up to 10MB</div>
@@ -623,7 +623,7 @@
           <label>תמונת תעודת נייטרוקס <span class="en">Nitrox Certification Photo</span></label>
           <div class="file-upload-area" id="nitroxUploadArea" onclick="document.getElementById('nitroxFileInput').click()">
             <input type="file" id="nitroxFileInput" accept="image/*,.pdf" style="display:none"
-              onchange="handleUpload(this,'nitroxUploadArea','nitroxPhotoUrl','nitroxUploadStatus','diving')" />
+              onchange="handleUpload(this,'nitroxUploadArea','nitroxPhotoUrl','nitroxUploadStatus','diving','nitrox')" />
             <div class="upload-icon">📎</div>
             <div class="upload-text">לחץ להעלאת תעודת נייטרוקס <strong>/ Upload Nitrox certification</strong></div>
             <div class="upload-text" style="font-size:11px;margin-top:4px;">JPG, PNG, PDF · עד 10MB / up to 10MB</div>
@@ -827,7 +827,7 @@
           <label>מסמך ביטוח צלילה <span class="en">Dive Insurance Document</span></label>
           <div class="file-upload-area" id="insuranceUploadArea" onclick="document.getElementById('insuranceFileInput').click()">
             <input type="file" id="insuranceFileInput" accept="image/*,.pdf" style="display:none"
-              onchange="handleUpload(this,'insuranceUploadArea','insurancePhotoUrl','insuranceUploadStatus','diving')" />
+              onchange="handleUpload(this,'insuranceUploadArea','insurancePhotoUrl','insuranceUploadStatus','diving','insurance')" />
             <input type="hidden" name="diveInsurancePhotoUrl" id="insurancePhotoUrl" />
             <div class="upload-icon">📎</div>
             <div class="upload-text">לחץ להעלאת מסמך ביטוח <strong>/ Upload insurance document</strong></div>
@@ -1422,7 +1422,7 @@ const CLOUDINARY_UPLOAD_PRESET = 'buddy_divers_uploads';
 // Uploads file immediately on selection; stores returned URL
 // in a hidden input field for form submission.
 // ============================================================
-async function handleUpload(input, areaId, urlFieldId, statusId, folder) {
+async function handleUpload(input, areaId, urlFieldId, statusId, folder, docType) {
   const file = input.files && input.files[0];
   if (!file) return;
 
@@ -1449,8 +1449,16 @@ async function handleUpload(input, areaId, urlFieldId, statusId, folder) {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-    const tripId = document.getElementById('tripName') ? document.getElementById('tripName').dataset.tripId || 'general' : 'general';
-    formData.append('folder', tripId + '/' + (folder || 'general'));
+    // Build folder as divers/ID_LastName_FirstName/subfolder
+    const diverId = (document.getElementById('idNumber') ? document.getElementById('idNumber').value : '') || 'unknown';
+    const diverFirst = (document.getElementById('firstName') ? document.getElementById('firstName').value : '').trim().replace(/\s+/g, '-') || 'unknown';
+    const diverLast = (document.getElementById('lastName') ? document.getElementById('lastName').value : '').trim().replace(/\s+/g, '-') || 'unknown';
+    const diverFolder = 'divers/' + diverId + '_' + diverLast + '_' + diverFirst;
+    formData.append('folder', diverFolder + '/' + (folder || 'general'));
+    if (docType) {
+      formData.append('public_id', docType);
+      formData.append('overwrite', 'true');
+    }
 
     const response = await fetch(
       file.type === "application/pdf" ? `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/raw/upload` : `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
@@ -1743,17 +1751,18 @@ document.getElementById('regForm').addEventListener('submit', async function(e) 
   let pricingLabel = selectedPricingValue;
   if (tripPricingConf && tripPricingConf.pricing) {
     const mainOpt = tripPricingConf.pricing.find(o => o.value === selectedPricingValue);
-    if (mainOpt && mainOpt.priceNum) mainPriceNum = Number(mainOpt.priceNum);
+    if (mainOpt && mainOpt.priceNum) mainPriceNum = mainOpt.priceNum * 1;
     if (supplementChecked) {
       const suppOpt = tripPricingConf.pricing.find(o => o.supplement === true);
       if (suppOpt && suppOpt.priceNum) {
-        supplementPriceNum = Number(suppOpt.priceNum);
+        supplementPriceNum = suppOpt.priceNum * 1;
         pricingLabel = selectedPricingValue + ' + single_supplement_' + supplementPriceNum;
       }
     }
   }
   data['pricing'] = pricingLabel;
-  data['totalPrice'] = parseInt(mainPriceNum, 10) + parseInt(supplementPriceNum, 10);
+  const totalPriceCalc = mainPriceNum + supplementPriceNum;
+  data['totalPrice'] = totalPriceCalc;
 
   // Add trip ID and destination
   data.tripId = submitParams.get('trip') || 'default';
