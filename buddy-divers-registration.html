@@ -1506,6 +1506,11 @@ async function handleUpload(input, areaId, urlFieldId, statusId, folder, docType
       area.classList.add('upload-done');
       const shortName = file.name.length > 30 ? file.name.substring(0,27)+'...' : file.name;
       statusEl.innerHTML = `<span class="upload-success">✓ הועלה בהצלחה / Uploaded: ${shortName}</span>`;
+      // Restore all view buttons from data-url (Android can lose display state)
+      ['passportViewBtn','certViewBtn','nitroxViewBtn','insuranceViewBtn'].forEach(function(id) {
+        var btn = document.getElementById(id);
+        if (btn && btn.getAttribute('data-url')) { btn.style.display = 'inline-flex'; }
+      });
     } else {
       throw new Error('No URL in response');
     }
@@ -2086,25 +2091,25 @@ function prefillForm(d) {
     document.getElementById('passportPhotoUrl').value = d.passportPhoto;
     var ps = document.getElementById('passportUploadStatus');
     if (ps) { ps.innerHTML = '<span class="existing-file">✅ תמונה קיימת / Photo on file</span>'; }
-    var pvb = document.getElementById('passportViewBtn'); if (pvb && d.passportPhoto) { pvb.href = d.passportPhoto; pvb.style.display = 'inline-flex'; }
+    var pvb = document.getElementById('passportViewBtn'); if (pvb && d.passportPhoto) { pvb.href = d.passportPhoto; pvb.setAttribute('data-url', d.passportPhoto); pvb.style.display = 'inline-flex'; }
   }
   if (d.nitroxPhoto) {
     document.getElementById('nitroxPhotoUrl').value = d.nitroxPhoto;
     var ns = document.getElementById('nitroxUploadStatus');
     if (ns) { ns.innerHTML = '<span class="existing-file">✅ תמונה קיימת / Photo on file</span>'; }
-    var nvb = document.getElementById('nitroxViewBtn'); if (nvb && d.nitroxPhoto) { nvb.href = d.nitroxPhoto; nvb.style.display = 'inline-flex'; }
+    var nvb = document.getElementById('nitroxViewBtn'); if (nvb && d.nitroxPhoto) { nvb.href = d.nitroxPhoto; nvb.setAttribute('data-url', d.nitroxPhoto); nvb.style.display = 'inline-flex'; }
   }
   if (d.diveInsurancePhotoUrl) {
     document.getElementById('insurancePhotoUrl').value = d.diveInsurancePhotoUrl;
     var is2 = document.getElementById('insuranceUploadStatus');
     if (is2) { is2.innerHTML = '<span class="existing-file">✅ תמונה קיימת / Photo on file</span>'; }
-    var ivb = document.getElementById('insuranceViewBtn'); if (ivb && d.diveInsurancePhotoUrl) { ivb.href = d.diveInsurancePhotoUrl; ivb.style.display = 'inline-flex'; }
+    var ivb = document.getElementById('insuranceViewBtn'); if (ivb && d.diveInsurancePhotoUrl) { ivb.href = d.diveInsurancePhotoUrl; ivb.setAttribute('data-url', d.diveInsurancePhotoUrl); ivb.style.display = 'inline-flex'; }
   }
   if (d.diveCertPhoto) {
     document.getElementById('certPhotoUrl').value = d.diveCertPhoto;
     var cs = document.getElementById('certUploadStatus');
     if (cs) { cs.innerHTML = '<span class="existing-file">✅ תמונה קיימת / Photo on file</span>'; }
-    var cvb = document.getElementById('certViewBtn'); if (cvb && d.diveCertPhoto) { cvb.href = d.diveCertPhoto; cvb.style.display = 'inline-flex'; }
+    var cvb = document.getElementById('certViewBtn'); if (cvb && d.diveCertPhoto) { cvb.href = d.diveCertPhoto; cvb.setAttribute('data-url', d.diveCertPhoto); cvb.style.display = 'inline-flex'; }
   }
   // Auto-check "returning customer" checkbox
   const returningCb = document.querySelector('[name="returningCustomer"]');
