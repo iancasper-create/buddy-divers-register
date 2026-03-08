@@ -1896,10 +1896,7 @@ function showOtpBox(maskedEmail) {
     : 'שלחנו קוד אימות לכתובת המייל שלך / We sent a verification code to your email';
   document.getElementById('otpBox').classList.add('show');
   document.getElementById('otpSingle').value = '';
-  // Reset viewport before focusing to prevent iOS RTL shrink
-  var mv = document.querySelector('meta[name=viewport]');
-  mv.setAttribute('content','width=device-width, initial-scale=1.0, maximum-scale=1.0');
-  setTimeout(function(){ document.getElementById('otpSingle').focus(); }, 50);
+  // No auto-focus — prevents iOS keyboard from triggering viewport shrink
   document.getElementById('otpError').classList.remove('show');
   document.getElementById('otpResend').classList.remove('show');
   startOtpCountdown();
