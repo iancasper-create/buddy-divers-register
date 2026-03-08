@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="he" dir="rtl">
+<html lang="he">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, interactive-widget=resizes-content" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
   <title>טופס הרשמה לספארי | Buddy-Divers</title>
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&family=Raleway:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet" />
   <style>
@@ -27,8 +27,6 @@
       color: var(--text);
       min-height: 100vh;
       direction: rtl;
-      width: 100%;
-      overflow-x: hidden;
     }
     body::before {
       content: '';
@@ -2216,29 +2214,6 @@ function attachDateAutoFormat() {
 }
 
 document.addEventListener('DOMContentLoaded', () => { init(); attachBlurValidation(); attachDateAutoFormat(); });
-</script>
-<script>
-// Fix iOS Safari RTL viewport shrink when keyboard appears
-(function() {
-  var metaViewport = document.querySelector('meta[name=viewport]');
-  var originalWidth = window.innerWidth;
-  
-  function fixViewport() {
-    var w = Math.max(originalWidth, window.innerWidth, document.documentElement.clientWidth);
-    document.documentElement.style.minWidth = w + 'px';
-    document.body.style.minWidth = w + 'px';
-  }
-
-  window.addEventListener('resize', fixViewport);
-  document.addEventListener('focusin', fixViewport);
-  document.addEventListener('focusout', function() {
-    document.documentElement.style.minWidth = '';
-    document.body.style.minWidth = '';
-    window.scrollTo(0, window.scrollY);
-  });
-  
-  fixViewport();
-})();
 </script>
 </body>
 </html>
