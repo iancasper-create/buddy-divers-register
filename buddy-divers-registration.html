@@ -392,10 +392,10 @@
         <div class="otp-error" id="otpError">קוד שגוי — נסה שנית / Incorrect code — please try again</div>
         <div style="text-align:center;">
         <div class="otp-digit-boxes" style="display:inline-flex;">
-          <input type="text" class="otp-digit-box" id="otpD1" maxlength="1" inputmode="numeric" autocomplete="one-time-code" />
-          <input type="text" class="otp-digit-box" id="otpD2" maxlength="1" inputmode="numeric" autocomplete="one-time-code" />
-          <input type="text" class="otp-digit-box" id="otpD3" maxlength="1" inputmode="numeric" autocomplete="one-time-code" />
-          <input type="text" class="otp-digit-box" id="otpD4" maxlength="1" inputmode="numeric" autocomplete="one-time-code" />
+          <input type="text" id="otpSingle" maxlength="4" inputmode="numeric" autocomplete="one-time-code"
+            style="width:200px;height:52px;font-size:28px;font-weight:700;letter-spacing:16px;text-align:center;
+            border:2px solid #b0c8d0;border-radius:8px;color:#007289;background:#fff;outline:none;
+            padding:0 8px;box-sizing:border-box;font-family:monospace;" />
         </div>
         </div>
         <div class="otp-info-text">הזן את קוד האימות בן 4 הספרות / Enter your 4 digit code</div>
@@ -1897,8 +1897,8 @@ function showOtpBox(maskedEmail) {
     ? 'שלחנו קוד אימות ל־' + maskedEmail + ' / We sent a code to ' + maskedEmail
     : 'שלחנו קוד אימות לכתובת המייל שלך / We sent a verification code to your email';
   document.getElementById('otpBox').classList.add('show');
-  ['otpD1','otpD2','otpD3','otpD4'].forEach(id => document.getElementById(id).value = '');
-  document.getElementById('otpD1').focus();
+  document.getElementById('otpSingle').value = '';
+  document.getElementById('otpSingle').focus();
   document.getElementById('otpError').classList.remove('show');
   document.getElementById('otpResend').classList.remove('show');
   startOtpCountdown();
@@ -1947,14 +1947,14 @@ function startOtpCountdown() {
 }
 
 async function verifyOtp() {
-  const code = ['otpD1','otpD2','otpD3','otpD4'].map(id => document.getElementById(id).value).join('');
+  const code = document.getElementById('otpSingle').value.replace(/[^0-9]/g,'');
   if (code.length !== 4) {
     document.getElementById('otpError').textContent = 'נא להזין קוד בן 4 ספרות / Please enter the 4-digit code';
     document.getElementById('otpError').classList.add('show');
     return;
   }
   document.getElementById('otpError').classList.remove('show');
-  ['otpD1','otpD2','otpD3','otpD4'].forEach(id => document.getElementById(id).disabled = true);
+  document.getElementById('otpSingle').disabled = true;
   try {
     const resp = await fetch(OTP_VALIDATE_WEBHOOK_URL, {
       method: 'POST',
@@ -2010,19 +2010,19 @@ async function verifyOtp() {
     } else if (data && data.expired) {
       document.getElementById('otpError').textContent = 'הקוד פג תוקף — בקש קוד חדש / Code expired — please request a new code';
       document.getElementById('otpError').classList.add('show');
-      ['otpD1','otpD2','otpD3','otpD4'].forEach(id => { document.getElementById(id).disabled = false; document.getElementById(id).value = ''; });
-      document.getElementById('otpD1').focus();
+      document.getElementById('otpSingle').disabled = false; document.getElementById('otpSingle').value = '';
+      document.getElementById('otpSingle').focus();
     } else {
       document.getElementById('otpError').textContent = 'קוד שגוי — נסה שנית / Incorrect code — please try again';
       document.getElementById('otpError').classList.add('show');
-      ['otpD1','otpD2','otpD3','otpD4'].forEach(id => { document.getElementById(id).disabled = false; document.getElementById(id).value = ''; });
-      document.getElementById('otpD1').focus();
+      document.getElementById('otpSingle').disabled = false; document.getElementById('otpSingle').value = '';
+      document.getElementById('otpSingle').focus();
     }
   } catch(e) {
     document.getElementById('otpError').textContent = 'שגיאה — נסה שנית / Error — please try again';
     document.getElementById('otpError').classList.add('show');
-    ['otpD1','otpD2','otpD3','otpD4'].forEach(id => { document.getElementById(id).disabled = false; document.getElementById(id).value = ''; });
-    document.getElementById('otpD1').focus();
+    document.getElementById('otpSingle').disabled = false; document.getElementById('otpSingle').value = '';
+    document.getElementById('otpSingle').focus();
   }
 }
 
@@ -2190,48 +2190,14 @@ document.addEventListener('DOMContentLoaded', function() {
       hideOtpBox();
     }
   });
-  // 4-digit box auto-advance and auto-submit
-  ['otpD1','otpD2','otpD3','otpD4'].forEach((id, idx, arr) => {
-    const el = document.getElementById(id);
-    el.addEventListener('input', function() {
-      // Handle iOS AutoFill / paste of full 4-digit code into first box
-      const digits = this.value.replace(/[^0-9]/g, '');
-      if (digits.length > 1) {
-        arr.forEach((aid, aidx) => {
-          document.getElementById(aid).value = digits[aidx] || '';
-        });
-        const lastFilled = Math.min(digits.length - 1, arr.length - 1);
-        document.getElementById(arr[lastFilled]).focus();
-        if (digits.length >= arr.length) { verifyOtp(); }
-        return;
-      }
-      this.value = digits.slice(-1);
-      if (this.value && idx < arr.length - 1) {
-        document.getElementById(arr[idx + 1]).focus();
-      }
-      if (idx === arr.length - 1 && this.value) {
-        verifyOtp();
-      }
+  // Single OTP input — auto-submit when 4 digits entered (works with iOS AutoFill)
+  const otpSingle = document.getElementById('otpSingle');
+  if (otpSingle) {
+    otpSingle.addEventListener('input', function() {
+      this.value = this.value.replace(/[^0-9]/g, '').slice(0, 4);
+      if (this.value.length === 4) { verifyOtp(); }
     });
-    el.addEventListener('keydown', function(e) {
-      if (e.key === 'Backspace' && !this.value && idx > 0) {
-        document.getElementById(arr[idx - 1]).focus();
-      }
-    });
-    // Handle paste event (iOS AutoFill fires paste, not input)
-    el.addEventListener('paste', function(e) {
-      e.preventDefault();
-      const pasted = (e.clipboardData || window.clipboardData).getData('text');
-      const digits = pasted.replace(/[^0-9]/g, '');
-      if (!digits) return;
-      arr.forEach((aid, aidx) => {
-        document.getElementById(aid).value = digits[aidx] || '';
-      });
-      const lastFilled = Math.min(digits.length - 1, arr.length - 1);
-      document.getElementById(arr[lastFilled]).focus();
-      if (digits.length >= arr.length) { verifyOtp(); }
-    });
-  });
+  }
 });
 
 // Auto-format date fields as user types (inserts / after DD and MM)
@@ -2250,6 +2216,29 @@ function attachDateAutoFormat() {
 }
 
 document.addEventListener('DOMContentLoaded', () => { init(); attachBlurValidation(); attachDateAutoFormat(); });
+</script>
+<script>
+// Fix iOS Safari RTL viewport shrink when keyboard appears
+(function() {
+  var metaViewport = document.querySelector('meta[name=viewport]');
+  var originalWidth = window.innerWidth;
+  
+  function fixViewport() {
+    var w = Math.max(originalWidth, window.innerWidth, document.documentElement.clientWidth);
+    document.documentElement.style.minWidth = w + 'px';
+    document.body.style.minWidth = w + 'px';
+  }
+
+  window.addEventListener('resize', fixViewport);
+  document.addEventListener('focusin', fixViewport);
+  document.addEventListener('focusout', function() {
+    document.documentElement.style.minWidth = '';
+    document.body.style.minWidth = '';
+    window.scrollTo(0, window.scrollY);
+  });
+  
+  fixViewport();
+})();
 </script>
 </body>
 </html>
