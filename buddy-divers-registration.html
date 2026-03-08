@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="he">
+<html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>טופס הרשמה לספארי | Buddy-Divers</title>
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&family=Raleway:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet" />
   <style>
@@ -122,7 +122,7 @@
       border: 1.5px solid var(--border);
       border-radius: 9px;
       font-family: 'Heebo', sans-serif;
-      font-size: 16px;
+      font-size: 14px;
       color: var(--text);
       background: var(--white);
       transition: border-color 0.2s, box-shadow 0.2s;
@@ -143,7 +143,7 @@
     }
     @media(max-width:580px){
       .field input[type=date] {
-        font-size: 16px;
+        font-size: 13px;
         max-width: calc(100vw - 80px);
         height: 46px;
         padding: 11px 14px;
@@ -291,28 +291,16 @@
 
     /* OTP verification box */
     .otp-box {
-      visibility:hidden;
-      opacity:0;
-      height:0;
-      overflow:hidden;
-      padding:0;
-      margin:0;
-      border:none;
+      display:none;
       background:linear-gradient(135deg,rgba(0,114,137,0.08),rgba(34,69,96,0.08));
+      border:1.5px solid #007289;
       border-radius:10px;
-      font-size:14px;
-      color:#1a3a4a;
-      transition: opacity 0.2s;
-    }
-    .otp-box.show {
-      visibility:visible;
-      opacity:1;
-      height:auto;
-      overflow:visible;
       padding:16px;
       margin-bottom:16px;
-      border:1.5px solid #007289;
+      font-size:14px;
+      color:#1a3a4a;
     }
+    .otp-box.show { display:block; }
     .otp-box .otp-title { font-weight:700; font-size:15px; margin-bottom:6px; color:#007289; }
     .otp-box .otp-hint { font-size:13px; color:#5a7a8a; margin-bottom:12px; }
     .otp-box .otp-input-row { display:flex; align-items:center; gap:10px; margin-bottom:10px; flex-wrap:wrap; }
@@ -325,15 +313,6 @@
       transition: border-color 0.2s; padding:0;
     }
     .otp-digit-box:focus { border-color:#f07830; }
-    .otp-slot {
-      width:52px; height:58px; border:2px solid #b0c8d0; border-radius:10px;
-      display:flex; align-items:center; justify-content:center;
-      font-size:28px; font-weight:700; color:#007289; background:#fff;
-      font-family:monospace; cursor:text; transition:border-color 0.2s;
-      user-select:none;
-    }
-    .otp-slot.active { border-color:#f07830; box-shadow:0 0 0 3px rgba(240,120,48,0.15); }
-    .otp-slot.filled { border-color:#007289; color:#007289; }
     .otp-info-text { font-size:13px; color:#5a7a8a; text-align:center; margin-bottom:10px; }
     .otp-box input[type="text"] {
       width:120px; font-size:22px; letter-spacing:8px; text-align:center;
@@ -411,10 +390,10 @@
         <div class="otp-error" id="otpError">קוד שגוי — נסה שנית / Incorrect code — please try again</div>
         <div style="text-align:center;">
         <div class="otp-digit-boxes" style="display:inline-flex;">
-          <input type="text" id="otpSingle" maxlength="4" inputmode="numeric" autocomplete="one-time-code"
-            style="width:200px;height:52px;font-size:28px;font-weight:700;letter-spacing:16px;text-align:center;
-            border:2px solid #b0c8d0;border-radius:8px;color:#007289;background:#fff;outline:none;
-            padding:0 8px;box-sizing:border-box;font-family:monospace;" />
+          <input type="text" class="otp-digit-box" id="otpD1" maxlength="1" inputmode="numeric" autocomplete="one-time-code" />
+          <input type="text" class="otp-digit-box" id="otpD2" maxlength="1" inputmode="numeric" />
+          <input type="text" class="otp-digit-box" id="otpD3" maxlength="1" inputmode="numeric" />
+          <input type="text" class="otp-digit-box" id="otpD4" maxlength="1" inputmode="numeric" />
         </div>
         </div>
         <div class="otp-info-text">הזן את קוד האימות בן 4 הספרות / Enter your 4 digit code</div>
@@ -1210,22 +1189,19 @@ const TRIPS = {
         value: "upper_standard_2480",
         he: "יחיד בחדר זוגי — סטנדרטי מפלס עליון (שרותים ומקלחת משותפים)",
         en: "Single in twin room — upper deck standard (shared bathroom)",
-        price: "$2,480",
-        priceNum: 2480
+        price: "$2,480"
       },
       {
         value: "main_deluxe_2550",
         he: "יחיד בחדר זוגי — דלקס מפלס ראשי",
         en: "Single in twin room — main deck deluxe",
-        price: "$2,550",
-        priceNum: 2550
+        price: "$2,550"
       },
       {
         value: "main_master_2660",
         he: "יחיד בחדר זוגי — מאסטר מפלס ראשי (מיטה זוגית בלבד)",
         en: "Single in twin room — main deck master (double bed only)",
-        price: "$2,660",
-        priceNum: 2660
+        price: "$2,660"
       }
     ]
   },
@@ -1239,8 +1215,7 @@ const TRIPS = {
         value: "single_9790",
         he: "מחיר לאדם",
         en: "Price per person",
-        price: "$9,790",
-        priceNum: 9790
+        price: "$9,790"
       }
     ]
   },
@@ -1253,8 +1228,7 @@ const TRIPS = {
         value: "single_7300",
         he: "מחיר לאדם",
         en: "Price per person",
-        price: "$7,300",
-        priceNum: 7300
+        price: "$7,300"
       }
     ]
   },
@@ -1267,8 +1241,7 @@ const TRIPS = {
         value: "single_7350",
         he: "מחיר לאדם",
         en: "Price per person",
-        price: "$7,350",
-        priceNum: 7350
+        price: "$7,350"
       }
     ]
   },
@@ -1280,72 +1253,63 @@ const TRIPS = {
         value: "upper_standard_2360",
         he: "יחיד בחדר זוגי — סטנדרטי מפלס עליון (שרותים ומקלחת משותפים)",
         en: "Single in twin room — upper deck standard (shared bathroom)",
-        price: "$2,360",
-        priceNum: 2360
+        price: "$2,360"
       },
       {
         value: "main_deluxe_2427",
         he: "יחיד בחדר זוגי — דלקס מפלס ראשי",
         en: "Single in twin room — main deck deluxe",
-        price: "$2,427",
-        priceNum: 2427
+        price: "$2,427"
       },
       {
         value: "main_master_2528",
         he: "יחיד בחדר זוגי — מאסטר מפלס ראשי (מיטה זוגית בלבד)",
         en: "Single in twin room — main deck master (double bed only)",
-        price: "$2,528",
-        priceNum: 2528
+        price: "$2,528"
       }
     ]
   },
   "261215": {
     name: "🤿 פיליפינים קומבו — Philippines Combo",
     dates: "15/12/2026 – 26/12/2026",
-    note: "‎🏝️ Anilao (land - optional): 15/12‎–19/12 | Infiniti: 19/12‎–26/12 🚢‎",
+    note: "🏝️ Anilao (land - optional): 15/12–19/12 · $1,350 | 🚢 Infiniti Liveaboard: 19/12–26/12",
     pricing: [
       {
-        value: "deluxe_twin_2995",
-        he: "אינפיניטי — חדר דלוקס טווין",
-        en: "Infiniti — Deluxe Twin room",
-        price: "$2,995",
-        priceNum: 2995
+        value: "land_only_1350",
+        he: "אנילאו — יבשה בלבד (אופציונלי)",
+        en: "Anilao — land only (optional)",
+        price: "$1,350"
       },
       {
-        value: "premium_deluxe_3195",
-        he: "אינפיניטי — חדר פרמיום דלוקס",
-        en: "Infiniti — Premium Deluxe room",
-        price: "$3,195",
-        priceNum: 3195
+        value: "liveaboard_deluxe_twin_2995",
+        he: "אינפיניטי לייבבורד — חדר דלוקס טווין",
+        en: "Infiniti Liveaboard — Deluxe Twin room",
+        price: "$2,995"
       },
       {
-        value: "anilao_supplement",
-        he: "תוספת אנילאו — יבשה (אופציונלי 15/12–19/12)",
-        en: "Anilao land segment (add-on, 15/12–19/12)",
-        price: "$1,350 תוספת",
-        priceNum: 1350,
-        supplement: true
+        value: "liveaboard_premium_deluxe_3195",
+        he: "אינפיניטי לייבבורד — חדר פרמיום דלוקס",
+        en: "Infiniti Liveaboard — Premium Deluxe room",
+        price: "$3,195"
       }
     ]
   },
   "270104": {
-    name: "🤿 מקסיקו קומבו — Mexico Combo",
+    name: "🌊 מקסיקו קומבו 🌊 — Mexico Combo",
     dates: "04/01/2027 – 16/01/2027",
-    note: "🏜️ La Paz (land - optional): 04/01–07/01 · $1,190 | 🚢 Socorro: 07/01–16/01",
+    note: "🏜️ La Paz (land - optional): 04/01–07/01 | 🚢 Quino Del Mar: 07/01–16/01",
     pricing: [
       {
-        value: "land_only_1190",
-        he: "לה פאז — יבשה בלבד (אופציונלי)",
-        en: "La Paz — land only (optional)",
-        price: "$1,190",
-        priceNum: 1190
+        value: "quino_4295",
+        he: "קינו דל מאר — 07/01/27–16/01/27",
+        en: "Quino Del Mar — 07/01/27–16/01/27",
+        price: "$4,295"
       },
       {
-        value: "socorro_4295",
-        he: "סוקורו לייבבורד",
-        en: "Socorro Liveaboard",
-        price: "$4,295",
-        priceNum: 4295
+        value: "land_only_1190",
+        he: "לה פאז — יבשה בלבד (אופציונלי) 04/01/27–07/01/27",
+        en: "La Paz — land only (optional) 04/01/27–07/01/27",
+        price: "$1,190"
       }
     ]
   },
@@ -1357,22 +1321,19 @@ const TRIPS = {
         value: "upper_standard_2480",
         he: "יחיד בחדר זוגי — סטנדרטי מפלס עליון (שרותים ומקלחת משותפים)",
         en: "Single in twin room — upper deck standard (shared bathroom)",
-        price: "$2,480",
-        priceNum: 2480
+        price: "$2,480"
       },
       {
         value: "main_deluxe_2550",
         he: "יחיד בחדר זוגי — דלקס מפלס ראשי",
         en: "Single in twin room — main deck deluxe",
-        price: "$2,550",
-        priceNum: 2550
+        price: "$2,550"
       },
       {
         value: "main_master_2660",
         he: "יחיד בחדר זוגי — מאסטר מפלס ראשי (מיטה זוגית בלבד)",
         en: "Single in twin room — main deck master (double bed only)",
-        price: "$2,660",
-        priceNum: 2660
+        price: "$2,660"
       }
     ]
   },
@@ -1916,10 +1877,8 @@ function showOtpBox(maskedEmail) {
     ? 'שלחנו קוד אימות ל־' + maskedEmail + ' / We sent a code to ' + maskedEmail
     : 'שלחנו קוד אימות לכתובת המייל שלך / We sent a verification code to your email';
   document.getElementById('otpBox').classList.add('show');
-  document.getElementById('otpSingle').value = '';
-  ['oSlot1','oSlot2','oSlot3','oSlot4'].forEach(id => { const s=document.getElementById(id); if(s){s.textContent='_';s.classList.remove('filled','active');} });
-  document.getElementById('oSlot1') && document.getElementById('oSlot1').classList.add('active');
-  // No auto-focus — prevents iOS keyboard from triggering viewport shrink
+  ['otpD1','otpD2','otpD3','otpD4'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('otpD1').focus();
   document.getElementById('otpError').classList.remove('show');
   document.getElementById('otpResend').classList.remove('show');
   startOtpCountdown();
@@ -1968,14 +1927,14 @@ function startOtpCountdown() {
 }
 
 async function verifyOtp() {
-  const code = document.getElementById('otpSingle').value.replace(/[^0-9]/g,'');
+  const code = ['otpD1','otpD2','otpD3','otpD4'].map(id => document.getElementById(id).value).join('');
   if (code.length !== 4) {
     document.getElementById('otpError').textContent = 'נא להזין קוד בן 4 ספרות / Please enter the 4-digit code';
     document.getElementById('otpError').classList.add('show');
     return;
   }
   document.getElementById('otpError').classList.remove('show');
-  document.getElementById('otpSingle').disabled = true;
+  ['otpD1','otpD2','otpD3','otpD4'].forEach(id => document.getElementById(id).disabled = true);
   try {
     const resp = await fetch(OTP_VALIDATE_WEBHOOK_URL, {
       method: 'POST',
@@ -2031,19 +1990,19 @@ async function verifyOtp() {
     } else if (data && data.expired) {
       document.getElementById('otpError').textContent = 'הקוד פג תוקף — בקש קוד חדש / Code expired — please request a new code';
       document.getElementById('otpError').classList.add('show');
-      document.getElementById('otpSingle').disabled = false; document.getElementById('otpSingle').value = '';
-      document.getElementById('otpSingle').focus();
+      ['otpD1','otpD2','otpD3','otpD4'].forEach(id => { document.getElementById(id).disabled = false; document.getElementById(id).value = ''; });
+      document.getElementById('otpD1').focus();
     } else {
       document.getElementById('otpError').textContent = 'קוד שגוי — נסה שנית / Incorrect code — please try again';
       document.getElementById('otpError').classList.add('show');
-      document.getElementById('otpSingle').disabled = false; document.getElementById('otpSingle').value = '';
-      document.getElementById('otpSingle').focus();
+      ['otpD1','otpD2','otpD3','otpD4'].forEach(id => { document.getElementById(id).disabled = false; document.getElementById(id).value = ''; });
+      document.getElementById('otpD1').focus();
     }
   } catch(e) {
     document.getElementById('otpError').textContent = 'שגיאה — נסה שנית / Error — please try again';
     document.getElementById('otpError').classList.add('show');
-    document.getElementById('otpSingle').disabled = false; document.getElementById('otpSingle').value = '';
-    document.getElementById('otpSingle').focus();
+    ['otpD1','otpD2','otpD3','otpD4'].forEach(id => { document.getElementById(id).disabled = false; document.getElementById(id).value = ''; });
+    document.getElementById('otpD1').focus();
   }
 }
 
@@ -2211,14 +2170,24 @@ document.addEventListener('DOMContentLoaded', function() {
       hideOtpBox();
     }
   });
-  // Single OTP input — auto-submit when 4 digits entered (works with iOS AutoFill)
-  const otpSingle = document.getElementById('otpSingle');
-  if (otpSingle) {
-    otpSingle.addEventListener('input', function() {
-      this.value = this.value.replace(/[^0-9]/g, '').slice(0, 4);
-      if (this.value.length === 4) { verifyOtp(); }
+  // 4-digit box auto-advance and auto-submit
+  ['otpD1','otpD2','otpD3','otpD4'].forEach((id, idx, arr) => {
+    const el = document.getElementById(id);
+    el.addEventListener('input', function() {
+      this.value = this.value.replace(/[^0-9]/g, '').slice(-1);
+      if (this.value && idx < arr.length - 1) {
+        document.getElementById(arr[idx + 1]).focus();
+      }
+      if (idx === arr.length - 1 && this.value) {
+        verifyOtp();
+      }
     });
-  }
+    el.addEventListener('keydown', function(e) {
+      if (e.key === 'Backspace' && !this.value && idx > 0) {
+        document.getElementById(arr[idx - 1]).focus();
+      }
+    });
+  });
 });
 
 // Auto-format date fields as user types (inserts / after DD and MM)
