@@ -291,16 +291,28 @@
 
     /* OTP verification box */
     .otp-box {
-      display:none;
+      visibility:hidden;
+      opacity:0;
+      height:0;
+      overflow:hidden;
+      padding:0;
+      margin:0;
+      border:none;
       background:linear-gradient(135deg,rgba(0,114,137,0.08),rgba(34,69,96,0.08));
-      border:1.5px solid #007289;
       border-radius:10px;
-      padding:16px;
-      margin-bottom:16px;
       font-size:14px;
       color:#1a3a4a;
+      transition: opacity 0.2s;
     }
-    .otp-box.show { display:block; }
+    .otp-box.show {
+      visibility:visible;
+      opacity:1;
+      height:auto;
+      overflow:visible;
+      padding:16px;
+      margin-bottom:16px;
+      border:1.5px solid #007289;
+    }
     .otp-box .otp-title { font-weight:700; font-size:15px; margin-bottom:6px; color:#007289; }
     .otp-box .otp-hint { font-size:13px; color:#5a7a8a; margin-bottom:12px; }
     .otp-box .otp-input-row { display:flex; align-items:center; gap:10px; margin-bottom:10px; flex-wrap:wrap; }
