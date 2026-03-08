@@ -411,14 +411,10 @@
         <div class="otp-error" id="otpError">קוד שגוי — נסה שנית / Incorrect code — please try again</div>
         <div style="text-align:center;">
         <div class="otp-digit-boxes" style="display:inline-flex;">
-          <div style="display:inline-flex;gap:10px;direction:ltr;">
-            <div class="otp-slot" id="oSlot1">_</div>
-            <div class="otp-slot" id="oSlot2">_</div>
-            <div class="otp-slot" id="oSlot3">_</div>
-            <div class="otp-slot" id="oSlot4">_</div>
-            <input type="text" id="otpSingle" maxlength="4" inputmode="numeric" autocomplete="one-time-code"
-              style="position:absolute;opacity:0;width:1px;height:1px;pointer-events:none;" />
-          </div>
+          <input type="text" id="otpSingle" maxlength="4" inputmode="numeric" autocomplete="one-time-code"
+            style="width:200px;height:52px;font-size:28px;font-weight:700;letter-spacing:16px;text-align:center;
+            border:2px solid #b0c8d0;border-radius:8px;color:#007289;background:#fff;outline:none;
+            padding:0 8px;box-sizing:border-box;font-family:monospace;" />
         </div>
         </div>
         <div class="otp-info-text">הזן את קוד האימות בן 4 הספרות / Enter your 4 digit code</div>
@@ -2215,47 +2211,13 @@ document.addEventListener('DOMContentLoaded', function() {
       hideOtpBox();
     }
   });
-  // Single hidden OTP input with visual slots — works with iOS AutoFill
+  // Single OTP input — auto-submit when 4 digits entered (works with iOS AutoFill)
   const otpSingle = document.getElementById('otpSingle');
-  const otpSlots = [
-    document.getElementById('oSlot1'),
-    document.getElementById('oSlot2'),
-    document.getElementById('oSlot3'),
-    document.getElementById('oSlot4')
-  ];
-
-  function updateOtpSlots(val) {
-    otpSlots.forEach((slot, i) => {
-      slot.textContent = val[i] || '_';
-      slot.classList.toggle('filled', !!val[i]);
-      slot.classList.toggle('active', i === val.length && val.length < 4);
-    });
-  }
-
-  // Clicking any slot focuses the hidden input
-  otpSlots.forEach(slot => {
-    slot.addEventListener('click', function() {
-      otpSingle.style.position = 'fixed';
-      otpSingle.style.opacity = '0';
-      otpSingle.style.width = '1px';
-      otpSingle.style.height = '1px';
-      otpSingle.focus();
-    });
-  });
-
-  // Also make the whole OTP digit box area clickable
-  const otpDigitBox = document.querySelector('.otp-digit-boxes');
-  if (otpDigitBox) {
-    otpDigitBox.addEventListener('click', function() { otpSingle.focus(); });
-  }
-
   if (otpSingle) {
     otpSingle.addEventListener('input', function() {
       this.value = this.value.replace(/[^0-9]/g, '').slice(0, 4);
-      updateOtpSlots(this.value);
       if (this.value.length === 4) { verifyOtp(); }
     });
-    updateOtpSlots('');
   }
 });
 
