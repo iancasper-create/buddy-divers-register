@@ -303,23 +303,16 @@
     .otp-box.show { display:block; }
     .otp-box .otp-title { font-weight:700; font-size:15px; margin-bottom:6px; color:#007289; }
     .otp-box .otp-hint { font-size:13px; color:#5a7a8a; margin-bottom:12px; }
-    .otp-box .otp-input-row { display:flex; align-items:center; gap:10px; margin-bottom:10px; flex-wrap:wrap; }
-    .otp-digit-boxes { display:inline-flex; gap:8px; direction:ltr; margin-bottom:10px; }
-    .otp-digit-box {
-      width:48px !important; min-width:48px !important; max-width:48px !important;
-      height:52px; font-size:22px; font-weight:700;
-      text-align:center; border:2px solid #b0c8d0; border-radius:8px;
+    .otp-single-input {
+      width:160px; height:52px; font-size:28px; font-weight:700;
+      text-align:center; letter-spacing:10px;
+      border:2px solid #b0c8d0; border-radius:8px;
       color:#007289; background:#fff; outline:none; box-sizing:border-box;
-      transition: border-color 0.2s; padding:0;
+      transition: border-color 0.2s; padding:0 8px;
+      display:block; margin:0 auto 10px auto;
     }
-    .otp-digit-box:focus { border-color:#f07830; }
+    .otp-single-input:focus { border-color:#f07830; }
     .otp-info-text { font-size:13px; color:#5a7a8a; text-align:center; margin-bottom:10px; }
-    .otp-box input[type="text"] {
-      width:120px; font-size:22px; letter-spacing:8px; text-align:center;
-      border:2px solid #007289; border-radius:8px; padding:8px 12px;
-      font-family:monospace; color:#224560;
-    }
-    .otp-box input[type="text"]:focus { outline:none; border-color:#f07830; }
     .otp-box .otp-verify-btn {
       background:#007289; color:white; border:none; border-radius:8px;
       padding:10px 20px; font-size:14px; font-weight:600; cursor:pointer;
@@ -389,12 +382,7 @@
         <div class="otp-hint" id="otpHint">שלחנו קוד אימות לכתובת המייל שלך / We sent a verification code to your email</div>
         <div class="otp-error" id="otpError">קוד שגוי — נסה שנית / Incorrect code — please try again</div>
         <div style="text-align:center;">
-        <div class="otp-digit-boxes" style="display:inline-flex;">
-          <input type="text" class="otp-digit-box" id="otpD1" maxlength="1" inputmode="numeric" autocomplete="one-time-code" />
-          <input type="text" class="otp-digit-box" id="otpD2" maxlength="1" inputmode="numeric" />
-          <input type="text" class="otp-digit-box" id="otpD3" maxlength="1" inputmode="numeric" />
-          <input type="text" class="otp-digit-box" id="otpD4" maxlength="1" inputmode="numeric" />
-        </div>
+          <input type="text" class="otp-single-input" id="otpInput" maxlength="4" inputmode="numeric" autocomplete="one-time-code" placeholder="····" />
         </div>
         <div class="otp-info-text">הזן את קוד האימות בן 4 הספרות / Enter your 4 digit code</div>
         <div class="otp-countdown" id="otpCountdown"></div>
@@ -1189,22 +1177,19 @@ const TRIPS = {
         value: "upper_standard_2480",
         he: "יחיד בחדר זוגי — סטנדרטי מפלס עליון (שרותים ומקלחת משותפים)",
         en: "Single in twin room — upper deck standard (shared bathroom)",
-        price: "$2,480",
-        priceNum: 2480
+        price: "$2,480"
       },
       {
         value: "main_deluxe_2550",
         he: "יחיד בחדר זוגי — דלקס מפלס ראשי",
         en: "Single in twin room — main deck deluxe",
-        price: "$2,550",
-        priceNum: 2550
+        price: "$2,550"
       },
       {
         value: "main_master_2660",
         he: "יחיד בחדר זוגי — מאסטר מפלס ראשי (מיטה זוגית בלבד)",
         en: "Single in twin room — main deck master (double bed only)",
-        price: "$2,660",
-        priceNum: 2660
+        price: "$2,660"
       }
     ]
   },
@@ -1218,8 +1203,7 @@ const TRIPS = {
         value: "single_9790",
         he: "מחיר לאדם",
         en: "Price per person",
-        price: "$9,790",
-        priceNum: 9790
+        price: "$9,790"
       }
     ]
   },
@@ -1232,8 +1216,7 @@ const TRIPS = {
         value: "single_7300",
         he: "מחיר לאדם",
         en: "Price per person",
-        price: "$7,300",
-        priceNum: 7300
+        price: "$7,300"
       }
     ]
   },
@@ -1246,8 +1229,7 @@ const TRIPS = {
         value: "single_7350",
         he: "מחיר לאדם",
         en: "Price per person",
-        price: "$7,350",
-        priceNum: 7350
+        price: "$7,350"
       }
     ]
   },
@@ -1259,22 +1241,19 @@ const TRIPS = {
         value: "upper_standard_2360",
         he: "יחיד בחדר זוגי — סטנדרטי מפלס עליון (שרותים ומקלחת משותפים)",
         en: "Single in twin room — upper deck standard (shared bathroom)",
-        price: "$2,360",
-        priceNum: 2360
+        price: "$2,360"
       },
       {
         value: "main_deluxe_2427",
         he: "יחיד בחדר זוגי — דלקס מפלס ראשי",
         en: "Single in twin room — main deck deluxe",
-        price: "$2,427",
-        priceNum: 2427
+        price: "$2,427"
       },
       {
         value: "main_master_2528",
         he: "יחיד בחדר זוגי — מאסטר מפלס ראשי (מיטה זוגית בלבד)",
         en: "Single in twin room — main deck master (double bed only)",
-        price: "$2,528",
-        priceNum: 2528
+        price: "$2,528"
       }
     ]
   },
@@ -1287,22 +1266,19 @@ const TRIPS = {
         value: "land_only_1350",
         he: "אנילאו — יבשה בלבד (אופציונלי)",
         en: "Anilao — land only (optional)",
-        price: "$1,350",
-        priceNum: 1350
+        price: "$1,350"
       },
       {
         value: "liveaboard_deluxe_twin_2995",
         he: "אינפיניטי לייבבורד — חדר דלוקס טווין",
         en: "Infiniti Liveaboard — Deluxe Twin room",
-        price: "$2,995",
-        priceNum: 2995
+        price: "$2,995"
       },
       {
         value: "liveaboard_premium_deluxe_3195",
         he: "אינפיניטי לייבבורד — חדר פרמיום דלוקס",
         en: "Infiniti Liveaboard — Premium Deluxe room",
-        price: "$3,195",
-        priceNum: 3195
+        price: "$3,195"
       }
     ]
   },
@@ -1336,22 +1312,19 @@ const TRIPS = {
         value: "upper_standard_2480",
         he: "יחיד בחדר זוגי — סטנדרטי מפלס עליון (שרותים ומקלחת משותפים)",
         en: "Single in twin room — upper deck standard (shared bathroom)",
-        price: "$2,480",
-        priceNum: 2480
+        price: "$2,480"
       },
       {
         value: "main_deluxe_2550",
         he: "יחיד בחדר זוגי — דלקס מפלס ראשי",
         en: "Single in twin room — main deck deluxe",
-        price: "$2,550",
-        priceNum: 2550
+        price: "$2,550"
       },
       {
         value: "main_master_2660",
         he: "יחיד בחדר זוגי — מאסטר מפלס ראשי (מיטה זוגית בלבד)",
         en: "Single in twin room — main deck master (double bed only)",
-        price: "$2,660",
-        priceNum: 2660
+        price: "$2,660"
       }
     ]
   },
@@ -1895,8 +1868,8 @@ function showOtpBox(maskedEmail) {
     ? 'שלחנו קוד אימות ל־' + maskedEmail + ' / We sent a code to ' + maskedEmail
     : 'שלחנו קוד אימות לכתובת המייל שלך / We sent a verification code to your email';
   document.getElementById('otpBox').classList.add('show');
-  ['otpD1','otpD2','otpD3','otpD4'].forEach(id => document.getElementById(id).value = '');
-  document.getElementById('otpD1').focus();
+  document.getElementById('otpInput').value = '';
+  document.getElementById('otpInput').focus();
   document.getElementById('otpError').classList.remove('show');
   document.getElementById('otpResend').classList.remove('show');
   startOtpCountdown();
@@ -1945,14 +1918,14 @@ function startOtpCountdown() {
 }
 
 async function verifyOtp() {
-  const code = ['otpD1','otpD2','otpD3','otpD4'].map(id => document.getElementById(id).value).join('');
+  const code = document.getElementById('otpInput').value.replace(/[^0-9]/g, '');
   if (code.length !== 4) {
     document.getElementById('otpError').textContent = 'נא להזין קוד בן 4 ספרות / Please enter the 4-digit code';
     document.getElementById('otpError').classList.add('show');
     return;
   }
   document.getElementById('otpError').classList.remove('show');
-  ['otpD1','otpD2','otpD3','otpD4'].forEach(id => document.getElementById(id).disabled = true);
+  document.getElementById('otpInput').disabled = true;
   try {
     const resp = await fetch(OTP_VALIDATE_WEBHOOK_URL, {
       method: 'POST',
@@ -2008,19 +1981,19 @@ async function verifyOtp() {
     } else if (data && data.expired) {
       document.getElementById('otpError').textContent = 'הקוד פג תוקף — בקש קוד חדש / Code expired — please request a new code';
       document.getElementById('otpError').classList.add('show');
-      ['otpD1','otpD2','otpD3','otpD4'].forEach(id => { document.getElementById(id).disabled = false; document.getElementById(id).value = ''; });
-      document.getElementById('otpD1').focus();
+      document.getElementById('otpInput').disabled = false; document.getElementById('otpInput').value = '';
+      document.getElementById('otpInput').focus();
     } else {
       document.getElementById('otpError').textContent = 'קוד שגוי — נסה שנית / Incorrect code — please try again';
       document.getElementById('otpError').classList.add('show');
-      ['otpD1','otpD2','otpD3','otpD4'].forEach(id => { document.getElementById(id).disabled = false; document.getElementById(id).value = ''; });
-      document.getElementById('otpD1').focus();
+      document.getElementById('otpInput').disabled = false; document.getElementById('otpInput').value = '';
+      document.getElementById('otpInput').focus();
     }
   } catch(e) {
     document.getElementById('otpError').textContent = 'שגיאה — נסה שנית / Error — please try again';
     document.getElementById('otpError').classList.add('show');
-    ['otpD1','otpD2','otpD3','otpD4'].forEach(id => { document.getElementById(id).disabled = false; document.getElementById(id).value = ''; });
-    document.getElementById('otpD1').focus();
+    document.getElementById('otpInput').disabled = false; document.getElementById('otpInput').value = '';
+    document.getElementById('otpInput').focus();
   }
 }
 
@@ -2188,23 +2161,13 @@ document.addEventListener('DOMContentLoaded', function() {
       hideOtpBox();
     }
   });
-  // 4-digit box auto-advance and auto-submit
-  ['otpD1','otpD2','otpD3','otpD4'].forEach((id, idx, arr) => {
-    const el = document.getElementById(id);
-    el.addEventListener('input', function() {
-      this.value = this.value.replace(/[^0-9]/g, '').slice(-1);
-      if (this.value && idx < arr.length - 1) {
-        document.getElementById(arr[idx + 1]).focus();
-      }
-      if (idx === arr.length - 1 && this.value) {
-        verifyOtp();
-      }
-    });
-    el.addEventListener('keydown', function(e) {
-      if (e.key === 'Backspace' && !this.value && idx > 0) {
-        document.getElementById(arr[idx - 1]).focus();
-      }
-    });
+  // Single OTP input — numeric only, auto-submit when 4 digits entered
+  const otpEl = document.getElementById('otpInput');
+  otpEl.addEventListener('input', function() {
+    this.value = this.value.replace(/[^0-9]/g, '').slice(0, 4);
+    if (this.value.length === 4) {
+      verifyOtp();
+    }
   });
 });
 
