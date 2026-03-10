@@ -658,13 +658,16 @@ async function loadDiver() {
   // Check if a Payment record already exists for this diver + trip
   currentPaymentRecordId = null;
   try {
-    const formula = encodeURIComponent(`AND({Trip ID} = "${booking.tripId}", FIND("${booking.diverId}", ARRAYJOIN({Diver})))`);
+    // Fetch all payment records for this Trip ID, filter by diverId in JS (avoids linked-record formula issues)
+    const formula = encodeURIComponent(`{Trip ID} = "${booking.tripId}"`);
     const url = `https://api.airtable.com/v0/${BASE_ID}/${PAYMENTS_TABLE}?filterByFormula=${formula}`;
     const res = await fetch(url, { headers: { Authorization: `Bearer ${AIRTABLE_API_KEY}` } });
     const data = await res.json();
 
-    if (data.records && data.records.length > 0) {
-      const rec = data.records[0];
+    // Match by diverId in JS (Divers is a linked array field)
+    const matchedRec = (data.records || []).find(r => (r.fields['Diver'] || r.fields['Divers'] || []).includes(booking.diverId));
+    if (matchedRec) {
+      const rec = matchedRec;
       currentPaymentRecordId = rec.id;
       populateForm(rec.fields, booking);
       showMsg('diverMsg', 'info', '✅ Existing record loaded — update and save.');
