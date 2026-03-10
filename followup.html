@@ -563,20 +563,15 @@ async function searchTrip() {
   document.getElementById('formWrap').style.display = 'none';
 
   try {
-    // Step 1: Find the Trip record ID from the Trips table by primary field
-    const allTripsUrl = `https://api.airtable.com/v0/${BASE_ID}/tbl8KGVwkIHi26plq`;
-    const allTripsRes = await fetch(allTripsUrl, { headers: { Authorization: `Bearer ${AIRTABLE_API_KEY}` } });
-    const allTripsData = await allTripsRes.json();
+    // Step 1: Find the Trip record ID from the Trips table by Trip Id field
+    const tripFormula = encodeURIComponent(`{Trip Id} = ${parseInt(tripId)}`);
+    const tripUrl = `https://api.airtable.com/v0/${BASE_ID}/tbl8KGVwkIHi26plq?filterByFormula=${tripFormula}&fields[]=Trip+Id`;
+    const tripRes = await fetch(tripUrl, { headers: { Authorization: `Bearer ${AIRTABLE_API_KEY}` } });
+    const tripData = await tripRes.json();
 
     let tripRecordId = null;
-    if (allTripsData.records) {
-      // Primary field is the trip number e.g. "271014"
-      const match = allTripsData.records.find(r => {
-        return r.fields?.['Trip Id'] === tripId || 
-               r.fields?.['Trip Id'] === parseInt(tripId) ||
-               String(r.fields?.['Trip Id']) === tripId;
-      });
-      if (match) tripRecordId = match.id;
+    if (tripData.records && tripData.records.length > 0) {
+      tripRecordId = tripData.records[0].id;
     }
 
     if (!tripRecordId) {
