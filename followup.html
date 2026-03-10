@@ -564,7 +564,7 @@ async function searchTrip() {
 
   try {
     // Step 1: Find the Trip record ID from the Trips table by Trip Id field
-    const tripFormula = encodeURIComponent(`{Trip Id} = ${parseInt(tripId)}`);
+    const tripFormula = encodeURIComponent(`{Trip Id} = "${tripId}"`);
     const tripUrl = `https://api.airtable.com/v0/${BASE_ID}/tbl8KGVwkIHi26plq?filterByFormula=${tripFormula}&fields[]=Trip+Id`;
     const tripRes = await fetch(tripUrl, { headers: { Authorization: `Bearer ${AIRTABLE_API_KEY}` } });
     const tripData = await tripRes.json();
