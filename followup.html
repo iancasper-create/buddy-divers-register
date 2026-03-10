@@ -583,7 +583,7 @@ async function searchTrip() {
     let allBookings = [];
     let offset = null;
     do {
-      const pageUrl = `https://api.airtable.com/v0/${BASE_ID}/${BOOKINGS_TABLE}?fields[]=Trip&fields[]=Total+Price&fields[]=Divers&fields[]=First+Name+%28from+Divers%29&fields[]=Last+Name+%28from+Divers%29` + (offset ? `&offset=${offset}` : '');
+      const pageUrl = `https://api.airtable.com/v0/${BASE_ID}/${BOOKINGS_TABLE}?fields[]=Trip&fields[]=Total+Price&fields[]=Diver+ID&fields[]=First+Name+%28from+Divers%29&fields[]=Last+Name+%28from+Divers%29` + (offset ? `&offset=${offset}` : '');
       const pageRes = await fetch(pageUrl, { headers: { Authorization: `Bearer ${AIRTABLE_API_KEY}` } });
       const pageData = await pageRes.json();
       if (pageData.error) {
@@ -616,7 +616,7 @@ async function searchTrip() {
 async function processBookings(records, tripId) {
   currentBookings = [];
   for (const rec of records) {
-    const diverIds = rec.fields['Divers'] || [];
+    const diverIds = rec.fields['Diver ID'] || [];
     const diverId = diverIds[0] || null;
     // Use lookup fields already present on the booking record
     const fnArr = rec.fields['First Name (from Divers)'] || [];
@@ -665,7 +665,7 @@ async function loadDiver() {
     const data = await res.json();
 
     // Match by diverId in JS (Divers is a linked array field)
-    const matchedRec = (data.records || []).find(r => (r.fields['Diver'] || r.fields['Divers'] || []).includes(booking.diverId));
+    const matchedRec = (data.records || []).find(r => (r.fields['Diver ID'] || []).includes(booking.diverId));
     if (matchedRec) {
       const rec = matchedRec;
       currentPaymentRecordId = rec.id;
@@ -776,7 +776,7 @@ async function saveRecord() {
 
   const fields = {
     'Trip ID': booking.tripId,
-    'Diver': [booking.diverId],
+    'Diver ID': [booking.diverId],
     'Booking': [booking.bookingId],
     'Flight Cost': parseFloatOrNull('flightCost'),
     'Hotel Cost': parseFloatOrNull('hotelCost'),
