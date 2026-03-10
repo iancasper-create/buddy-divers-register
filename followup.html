@@ -564,8 +564,8 @@ async function searchTrip() {
 
   try {
     // Search Bookings table for records matching this trip ID
-    const formula = encodeURIComponent(`{Trip ID} = "${tripId}"`);
-    const url = `https://api.airtable.com/v0/${BASE_ID}/${BOOKINGS_TABLE}?filterByFormula=${formula}&fields[]=Trip+ID&fields[]=Total+Price&fields[]=Diver`;
+    const formula = encodeURIComponent(`{Trip} = "${tripId}"`);
+    const url = `https://api.airtable.com/v0/${BASE_ID}/${BOOKINGS_TABLE}?filterByFormula=${formula}&fields[]=Trip&fields[]=Total+Price&fields[]=Diver`;
     const res = await fetch(url, { headers: { Authorization: `Bearer ${AIRTABLE_API_KEY}` } });
     const data = await res.json();
 
