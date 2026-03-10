@@ -583,7 +583,7 @@ async function searchTrip() {
     let allBookings = [];
     let offset = null;
     do {
-      const pageUrl = `https://api.airtable.com/v0/${BASE_ID}/${BOOKINGS_TABLE}?fields[]=Trip&fields[]=Total+Price&fields[]=Divers` + (offset ? `&offset=${offset}` : '');
+      const pageUrl = `https://api.airtable.com/v0/${BASE_ID}/${BOOKINGS_TABLE}?fields[]=Trip&fields[]=Total+Price&fields[]=Divers&fields[]=First+Name+%28from+Divers%29&fields[]=Last+Name+%28from+Divers%29` + (offset ? `&offset=${offset}` : '');
       const pageRes = await fetch(pageUrl, { headers: { Authorization: `Bearer ${AIRTABLE_API_KEY}` } });
       const pageData = await pageRes.json();
       if (pageData.error) {
@@ -618,16 +618,12 @@ async function processBookings(records, tripId) {
   for (const rec of records) {
     const diverIds = rec.fields['Divers'] || [];
     const diverId = diverIds[0] || null;
-    let diverName = 'Unknown Diver';
-    if (diverId) {
-      const dRes = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${DIVERS_TABLE}/${diverId}?fields[]=First+Name&fields[]=Last+Name`, {
-        headers: { Authorization: `Bearer ${AIRTABLE_API_KEY}` }
-      });
-      const dData = await dRes.json();
-      const fn = dData.fields?.['First Name'] || '';
-      const ln = dData.fields?.['Last Name'] || '';
-      diverName = `${fn} ${ln}`.trim() || 'Unknown Diver';
-    }
+    // Use lookup fields already present on the booking record
+    const fnArr = rec.fields['First Name (from Divers)'] || [];
+    const lnArr = rec.fields['Last Name (from Divers)'] || [];
+    const fn = Array.isArray(fnArr) ? fnArr[0] : fnArr;
+    const ln = Array.isArray(lnArr) ? lnArr[0] : lnArr;
+    const diverName = `${fn || ''} ${ln || ''}`.trim() || 'Unknown Diver';
     currentBookings.push({
       bookingId: rec.id,
       diverId,
