@@ -570,7 +570,6 @@ async function searchTrip() {
     const tripData = await tripRes.json();
 
     let tripRecordId = null;
-    console.log('Trips response:', JSON.stringify(tripData));
     if (tripData.records && tripData.records.length > 0) {
       tripRecordId = tripData.records[0].id;
     }
