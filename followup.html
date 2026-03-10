@@ -579,30 +579,25 @@ async function searchTrip() {
       btn.disabled = false; btn.innerHTML = 'Search'; return;
     }
 
-    // DEBUG Step 2a: fetch a few raw bookings to see actual field structure
-    const debugUrl = `https://api.airtable.com/v0/${BASE_ID}/${BOOKINGS_TABLE}?maxRecords=3`;
-    const debugRes = await fetch(debugUrl, { headers: { Authorization: `Bearer ${AIRTABLE_API_KEY}` } });
-    const debugData = await debugRes.json();
-    console.log('RAW BOOKINGS:', JSON.stringify(debugData, null, 2));
-    if (debugData.records && debugData.records.length > 0) {
-      const s = debugData.records[0];
-      const tripVal = JSON.stringify(s.fields['Trip'] ?? s.fields['Trips'] ?? 'NOT FOUND');
-      showMsg('searchMsg', 'info', `DEBUG — tripRecordId=${tripRecordId} | sample Trip field=${tripVal} | fields=${Object.keys(s.fields).join(', ')}`);
-    } else {
-      showMsg('searchMsg', 'error', 'DEBUG — Bookings table empty or no access: ' + JSON.stringify(debugData));
-      btn.disabled = false; btn.innerHTML = 'Search'; return;
+    // DEBUG: probe all 4 table IDs to identify which is which
+    const tableIds = {
+      'tblMCB8nCSoRuiTKI': 'Divers(config)',
+      'tblE9d3rE4uDv2uxO': 'Bookings(config)',
+      'tbl8KGVwkIHi26plq': 'Trips(config)',
+      'tbl0oLEDoa4PCQOOp': 'Payments(config)'
+    };
+    let debugLines = [`tripRecordId = ${tripRecordId}`, '--- TABLE PROBE ---'];
+    for (const [tid, label] of Object.entries(tableIds)) {
+      const r = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${tid}?maxRecords=1`, { headers: { Authorization: `Bearer ${AIRTABLE_API_KEY}` } });
+      const d = await r.json();
+      if (d.records && d.records.length > 0) {
+        debugLines.push(`${label} [${tid}]: fields = ${Object.keys(d.records[0].fields).slice(0,4).join(', ')}`);
+      } else {
+        debugLines.push(`${label} [${tid}]: ${d.error ? d.error.message : 'empty'}`);
+      }
     }
-
-    // Step 2: Find bookings linked to this trip record
-    const bookingFormula = encodeURIComponent(`{Trip} = "${tripRecordId}"`);
-    const url = `https://api.airtable.com/v0/${BASE_ID}/${BOOKINGS_TABLE}?filterByFormula=${bookingFormula}&fields[]=Trip&fields[]=Total+Price&fields[]=Diver`;
-    const res = await fetch(url, { headers: { Authorization: `Bearer ${AIRTABLE_API_KEY}` } });
-    const data = await res.json();
-
-    if (!data.records || data.records.length === 0) {
-      showMsg('searchMsg', 'error', `No bookings found. tripRecordId=${tripRecordId}. Check console for raw data.`);
-      btn.disabled = false; btn.innerHTML = 'Search'; return;
-    }
+    showMsg('searchMsg', 'info', debugLines.join(' | '));
+    btn.disabled = false; btn.innerHTML = 'Search'; return;
 
     await processBookings(data.records, tripId);
     showMsg('searchMsg', 'info', `Found ${data.records.length} diver(s) on trip ${tripId}.`);
