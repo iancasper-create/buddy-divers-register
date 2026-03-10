@@ -629,7 +629,7 @@ async function processBookings(records, tripId) {
       diverId,
       diverName,
       tripId,
-      totalPrice: rec.fields['Total Price'] || 0
+      totalPrice: (Array.isArray(rec.fields['Total Price']) ? rec.fields['Total Price'][0] : rec.fields['Total Price']) || 0
     });
   }
 
