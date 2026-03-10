@@ -580,7 +580,8 @@ async function searchTrip() {
     }
 
     // Step 2: Find bookings linked to this trip record
-    const bookingFormula = encodeURIComponent(`FIND("${tripRecordId}", ARRAYJOIN({Trip}))`);
+    // Airtable linked record fields support direct record ID comparison in filterByFormula
+    const bookingFormula = encodeURIComponent(`{Trip} = "${tripRecordId}"`);
     const url = `https://api.airtable.com/v0/${BASE_ID}/${BOOKINGS_TABLE}?filterByFormula=${bookingFormula}&fields[]=Trip&fields[]=Total+Price&fields[]=Diver`;
     const res = await fetch(url, { headers: { Authorization: `Bearer ${AIRTABLE_API_KEY}` } });
     const data = await res.json();
