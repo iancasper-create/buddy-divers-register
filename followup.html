@@ -563,37 +563,24 @@ async function searchTrip() {
   document.getElementById('formWrap').style.display = 'none';
 
   try {
-    // Step 1: Find the Trip record ID from the Trips table
-    const tripFormula = encodeURIComponent(`{Trip ID} = "${tripId}"`);
-    const tripUrl = `https://api.airtable.com/v0/${BASE_ID}/tbl8KGVwkIHi26plq?filterByFormula=${tripFormula}&fields[]=Trip+ID`;
-    const tripRes = await fetch(tripUrl, { headers: { Authorization: `Bearer ${AIRTABLE_API_KEY}` } });
-    const tripData = await tripRes.json();
+    // Step 1: Find the Trip record ID from the Trips table by primary field
+    const allTripsUrl = `https://api.airtable.com/v0/${BASE_ID}/tbl8KGVwkIHi26plq`;
+    const allTripsRes = await fetch(allTripsUrl, { headers: { Authorization: `Bearer ${AIRTABLE_API_KEY}` } });
+    const allTripsData = await allTripsRes.json();
 
-    // If Trip ID field doesn't work, try searching by record name
     let tripRecordId = null;
-    if (tripData.records && tripData.records.length > 0) {
-      tripRecordId = tripData.records[0].id;
-    } else {
-      // Try fetching all trips and match by name/primary field
-      const allTripsUrl = `https://api.airtable.com/v0/${BASE_ID}/tbl8KGVwkIHi26plq`;
-      const allTripsRes = await fetch(allTripsUrl, { headers: { Authorization: `Bearer ${AIRTABLE_API_KEY}` } });
-      const allTripsData = await allTripsRes.json();
-      const match = allTripsData.records?.find(r => r.fields?.['Trip ID'] === tripId || r.id === tripId || Object.values(r.fields || {}).includes(tripId));
+    if (allTripsData.records) {
+      // Primary field is the trip number e.g. "271014"
+      const match = allTripsData.records.find(r => {
+        return r.fields?.['Trip Id'] === tripId || 
+               r.fields?.['Trip Id'] === parseInt(tripId) ||
+               String(r.fields?.['Trip Id']) === tripId;
+      });
       if (match) tripRecordId = match.id;
     }
 
     if (!tripRecordId) {
-      // Fall back: search bookings where linked Trip name contains tripId
-      const formula2 = encodeURIComponent(`FIND("${tripId}", ARRAYJOIN({Trip}))`);
-      const url2 = `https://api.airtable.com/v0/${BASE_ID}/${BOOKINGS_TABLE}?filterByFormula=${formula2}&fields[]=Trip&fields[]=Total+Price&fields[]=Diver`;
-      const res2 = await fetch(url2, { headers: { Authorization: `Bearer ${AIRTABLE_API_KEY}` } });
-      const data2 = await res2.json();
-      if (!data2.records || data2.records.length === 0) {
-        showMsg('searchMsg', 'error', `No bookings found for Trip ID "${tripId}".`);
-        btn.disabled = false; btn.innerHTML = 'Search'; return;
-      }
-      await processBookings(data2.records, tripId);
-      showMsg('searchMsg', 'info', `Found ${data2.records.length} diver(s) on trip ${tripId}.`);
+      showMsg('searchMsg', 'error', `Trip "${tripId}" not found in Trips table.`);
       btn.disabled = false; btn.innerHTML = 'Search'; return;
     }
 
