@@ -519,9 +519,9 @@
 <script>
 let AIRTABLE_API_KEY = sessionStorage.getItem('bd_airtable_token') || '';
 const BASE_ID = 'app2RAeuaXaWrHOan';
-const BOOKINGS_TABLE = 'tblE9d3rE4uDv2uxO';
+const BOOKINGS_TABLE = 'tblMCB8nCSoRuiTKI';
 const PAYMENTS_TABLE = 'tbl0oLEDoa4PCQOOp';
-const DIVERS_TABLE = 'tblMCB8nCSoRuiTKI';
+const DIVERS_TABLE = 'tblE9d3rE4uDv2uxO';
 
 let currentBookings = []; // [{bookingId, diverId, diverName, tripId, totalPrice}]
 let currentPaymentRecordId = null; // existing payment record id if found
@@ -579,24 +579,18 @@ async function searchTrip() {
       btn.disabled = false; btn.innerHTML = 'Search'; return;
     }
 
-    // DEBUG: probe all 4 table IDs to identify which is which
-    const tableIds = {
-      'tblMCB8nCSoRuiTKI': 'Divers(config)',
-      'tblE9d3rE4uDv2uxO': 'Bookings(config)',
-      'tbl8KGVwkIHi26plq': 'Trips(config)',
-      'tbl0oLEDoa4PCQOOp': 'Payments(config)'
-    };
-    let debugLines = [`tripRecordId = ${tripRecordId}`, '--- TABLE PROBE ---'];
-    for (const [tid, label] of Object.entries(tableIds)) {
-      const r = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${tid}?maxRecords=1`, { headers: { Authorization: `Bearer ${AIRTABLE_API_KEY}` } });
-      const d = await r.json();
-      if (d.records && d.records.length > 0) {
-        debugLines.push(`${label} [${tid}]: fields = ${Object.keys(d.records[0].fields).slice(0,4).join(', ')}`);
-      } else {
-        debugLines.push(`${label} [${tid}]: ${d.error ? d.error.message : 'empty'}`);
-      }
+    // DEBUG: fetch one raw booking record to confirm all field names
+    const debugRes = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${BOOKINGS_TABLE}?maxRecords=1`, { headers: { Authorization: `Bearer ${AIRTABLE_API_KEY}` } });
+    const debugData = await debugRes.json();
+    console.log('RAW BOOKING RECORD:', JSON.stringify(debugData, null, 2));
+    if (debugData.records && debugData.records.length > 0) {
+      const s = debugData.records[0];
+      const allFields = Object.keys(s.fields).join(', ');
+      const tripVal = JSON.stringify(s.fields['Trip'] ?? s.fields['Trips'] ?? s.fields['Trip Name'] ?? 'NOT FOUND');
+      showMsg('searchMsg', 'info', `DEBUG — tripRecordId=${tripRecordId} | Trip field value=${tripVal} | ALL fields: ${allFields}`);
+    } else {
+      showMsg('searchMsg', 'error', 'DEBUG — No bookings records found: ' + JSON.stringify(debugData));
     }
-    showMsg('searchMsg', 'info', debugLines.join(' | '));
     btn.disabled = false; btn.innerHTML = 'Search'; return;
 
     await processBookings(data.records, tripId);
