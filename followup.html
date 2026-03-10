@@ -563,9 +563,43 @@ async function searchTrip() {
   document.getElementById('formWrap').style.display = 'none';
 
   try {
-    // Search Bookings table for records matching this trip ID
-    const formula = encodeURIComponent(`{Trip} = "${tripId}"`);
-    const url = `https://api.airtable.com/v0/${BASE_ID}/${BOOKINGS_TABLE}?filterByFormula=${formula}&fields[]=Trip&fields[]=Total+Price&fields[]=Diver`;
+    // Step 1: Find the Trip record ID from the Trips table
+    const tripFormula = encodeURIComponent(`{Trip ID} = "${tripId}"`);
+    const tripUrl = `https://api.airtable.com/v0/${BASE_ID}/tbl8KGVwkIHi26plq?filterByFormula=${tripFormula}&fields[]=Trip+ID`;
+    const tripRes = await fetch(tripUrl, { headers: { Authorization: `Bearer ${AIRTABLE_API_KEY}` } });
+    const tripData = await tripRes.json();
+
+    // If Trip ID field doesn't work, try searching by record name
+    let tripRecordId = null;
+    if (tripData.records && tripData.records.length > 0) {
+      tripRecordId = tripData.records[0].id;
+    } else {
+      // Try fetching all trips and match by name/primary field
+      const allTripsUrl = `https://api.airtable.com/v0/${BASE_ID}/tbl8KGVwkIHi26plq`;
+      const allTripsRes = await fetch(allTripsUrl, { headers: { Authorization: `Bearer ${AIRTABLE_API_KEY}` } });
+      const allTripsData = await allTripsRes.json();
+      const match = allTripsData.records?.find(r => r.fields?.['Trip ID'] === tripId || r.id === tripId || Object.values(r.fields || {}).includes(tripId));
+      if (match) tripRecordId = match.id;
+    }
+
+    if (!tripRecordId) {
+      // Fall back: search bookings where linked Trip name contains tripId
+      const formula2 = encodeURIComponent(`FIND("${tripId}", ARRAYJOIN({Trip}))`);
+      const url2 = `https://api.airtable.com/v0/${BASE_ID}/${BOOKINGS_TABLE}?filterByFormula=${formula2}&fields[]=Trip&fields[]=Total+Price&fields[]=Diver`;
+      const res2 = await fetch(url2, { headers: { Authorization: `Bearer ${AIRTABLE_API_KEY}` } });
+      const data2 = await res2.json();
+      if (!data2.records || data2.records.length === 0) {
+        showMsg('searchMsg', 'error', `No bookings found for Trip ID "${tripId}".`);
+        btn.disabled = false; btn.innerHTML = 'Search'; return;
+      }
+      await processBookings(data2.records, tripId);
+      showMsg('searchMsg', 'info', `Found ${data2.records.length} diver(s) on trip ${tripId}.`);
+      btn.disabled = false; btn.innerHTML = 'Search'; return;
+    }
+
+    // Step 2: Find bookings linked to this trip record
+    const bookingFormula = encodeURIComponent(`FIND("${tripRecordId}", ARRAYJOIN({Trip}))`);
+    const url = `https://api.airtable.com/v0/${BASE_ID}/${BOOKINGS_TABLE}?filterByFormula=${bookingFormula}&fields[]=Trip&fields[]=Total+Price&fields[]=Diver`;
     const res = await fetch(url, { headers: { Authorization: `Bearer ${AIRTABLE_API_KEY}` } });
     const data = await res.json();
 
@@ -574,41 +608,7 @@ async function searchTrip() {
       btn.disabled = false; btn.innerHTML = 'Search'; return;
     }
 
-    // For each booking, get diver name
-    currentBookings = [];
-    for (const rec of data.records) {
-      const diverIds = rec.fields['Diver'] || [];
-      const diverId = diverIds[0] || null;
-      let diverName = 'Unknown Diver';
-      if (diverId) {
-        const dRes = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${DIVERS_TABLE}/${diverId}?fields[]=First+Name&fields[]=Last+Name`, {
-          headers: { Authorization: `Bearer ${AIRTABLE_API_KEY}` }
-        });
-        const dData = await dRes.json();
-        const fn = dData.fields?.['First Name'] || '';
-        const ln = dData.fields?.['Last Name'] || '';
-        diverName = `${fn} ${ln}`.trim() || 'Unknown Diver';
-      }
-      currentBookings.push({
-        bookingId: rec.id,
-        diverId,
-        diverName,
-        tripId,
-        totalPrice: rec.fields['Total Price'] || 0
-      });
-    }
-
-    // Populate diver dropdown
-    const sel = document.getElementById('diverSelect');
-    sel.innerHTML = '<option value="">— Select a diver —</option>';
-    currentBookings.forEach((b, i) => {
-      const opt = document.createElement('option');
-      opt.value = i;
-      opt.textContent = b.diverName;
-      sel.appendChild(opt);
-    });
-
-    document.getElementById('diverSelectWrap').style.display = 'block';
+    await processBookings(data.records, tripId);
     showMsg('searchMsg', 'info', `Found ${data.records.length} diver(s) on trip ${tripId}.`);
 
   } catch(e) {
@@ -617,6 +617,43 @@ async function searchTrip() {
   }
 
   btn.disabled = false; btn.innerHTML = 'Search';
+}
+
+async function processBookings(records, tripId) {
+  currentBookings = [];
+  for (const rec of records) {
+    const diverIds = rec.fields['Diver'] || [];
+    const diverId = diverIds[0] || null;
+    let diverName = 'Unknown Diver';
+    if (diverId) {
+      const dRes = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${DIVERS_TABLE}/${diverId}?fields[]=First+Name&fields[]=Last+Name`, {
+        headers: { Authorization: `Bearer ${AIRTABLE_API_KEY}` }
+      });
+      const dData = await dRes.json();
+      const fn = dData.fields?.['First Name'] || '';
+      const ln = dData.fields?.['Last Name'] || '';
+      diverName = `${fn} ${ln}`.trim() || 'Unknown Diver';
+    }
+    currentBookings.push({
+      bookingId: rec.id,
+      diverId,
+      diverName,
+      tripId,
+      totalPrice: rec.fields['Total Price'] || 0
+    });
+  }
+
+  // Populate diver dropdown
+  const sel = document.getElementById('diverSelect');
+  sel.innerHTML = '<option value="">— Select a diver —</option>';
+  currentBookings.forEach((b, i) => {
+    const opt = document.createElement('option');
+    opt.value = i;
+    opt.textContent = b.diverName;
+    sel.appendChild(opt);
+  });
+
+  document.getElementById('diverSelectWrap').style.display = 'block';
 }
 
 // ── LOAD DIVER ───────────────────────────────────────────────────
