@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Buddy-Divers — Follow-Up Manager</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+
+  :root {
+    --teal: #007289;
+    --navy: #1B4F8A;
+    --bg: #f0f7f9;
+    --white: #ffffff;
+    --border: #c5dfe6;
+    --text: #1a3a4a;
+    --muted: #5a7a8a;
+    --green: #22a06b;
+    --orange: #c47d00;
+    --red: #d93f3f;
+    --card-shadow: 0 2px 16px rgba(0,114,137,0.10);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  .header {
+    background: linear-gradient(135deg, #007289, #1B4F8A);
+    padding: 14px 32px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+  }
+  .header img { height: 48px; }
+  .header-title {
+    color: white;
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+  }
+  .header-sub {
+    color: rgba(255,255,255,0.7);
+    font-size: 12px;
+    margin-top: 2px;
+  }
+
+  /* MAIN LAYOUT */
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 32px 24px 64px;
+  }
+
+  /* STEP CARD */
+  .card {
+    background: var(--white);
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    box-shadow: var(--card-shadow);
+    padding: 28px 32px;
+    margin-bottom: 20px;
+  }
+
+  .card-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--teal);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card-title .step-badge {
+    background: var(--teal);
+    color: white;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  /* FORM ELEMENTS */
+  .field-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+  .field-row.full { grid-template-columns: 1fr; }
+  .field-row.three { grid-template-columns: 1fr 1fr 1fr; }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .field label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .field input, .field select, .field textarea {
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    color: var(--text);
+    background: white;
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus {
+    border-color: var(--teal);
+    box-shadow: 0 0 0 3px rgba(0,114,137,0.08);
+  }
+  .field textarea { resize: vertical; min-height: 80px; }
+  .field input[readonly] {
+    background: var(--bg);
+    color: var(--muted);
+    cursor: default;
+  }
+
+  /* TRIP ID SEARCH ROW */
+  .search-row {
+    display: flex;
+    gap: 12px;
+    align-items: flex-end;
+  }
+  .search-row .field { flex: 1; }
+  .btn {
+    padding: 10px 24px;
+    border-radius: 8px;
+    border: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .btn-primary {
+    background: var(--teal);
+    color: white;
+  }
+  .btn-primary:hover { background: #005f73; }
+  .btn-primary:disabled { background: #aac8cf; cursor: not-allowed; }
+
+  .btn-save {
+    background: var(--green);
+    color: white;
+    width: 100%;
+    padding: 14px;
+    font-size: 16px;
+    border-radius: 10px;
+    margin-top: 8px;
+  }
+  .btn-save:hover { background: #1a8a5a; }
+  .btn-save:disabled { background: #9dd4bc; cursor: not-allowed; }
+
+  /* DIVER SELECT */
+  #diverSelectWrap { display: none; }
+  #formWrap { display: none; }
+
+  /* SUMMARY BOXES */
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .summary-box {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    text-align: center;
+  }
+  .summary-box .s-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+  }
+  .summary-box .s-value {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+  }
+  .summary-box.owed .s-value { color: var(--navy); }
+  .summary-box.paid .s-value { color: var(--green); }
+  .summary-box.balance .s-value { color: var(--orange); }
+  .summary-box.balance.cleared .s-value { color: var(--green); }
+  .summary-box.balance.overdue .s-value { color: var(--red); }
+
+  /* SECTION DIVIDER */
+  .section-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 20px 0;
+  }
+  .section-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--teal);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 14px;
+  }
+
+  /* DIVER INFO BANNER */
+  .diver-banner {
+    background: linear-gradient(135deg, #007289, #1B4F8A);
+    border-radius: 10px;
+    padding: 14px 20px;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  .diver-banner .diver-name {
+    font-size: 18px;
+    font-weight: 700;
+  }
+  .diver-banner .diver-trip {
+    font-size: 13px;
+    opacity: 0.75;
+    margin-top: 2px;
+  }
+  .diver-banner .badge {
+    margin-left: auto;
+    background: rgba(255,255,255,0.2);
+    border-radius: 6px;
+    padding: 4px 12px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .badge.new-record { background: rgba(255,165,0,0.3); }
+  .badge.existing { background: rgba(34,160,107,0.4); }
+
+  /* STATUS MESSAGES */
+  .msg {
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    margin-top: 12px;
+    display: none;
+  }
+  .msg.success { background: #e6f7ef; color: #1a7a4f; border: 1px solid #a3dfc0; }
+  .msg.error { background: #fdeaea; color: #a33; border: 1px solid #f5b0b0; }
+  .msg.info { background: #e6f3f7; color: var(--teal); border: 1px solid var(--border); }
+
+  /* SPINNER */
+  .spinner {
+    display: inline-block;
+    width: 18px; height: 18px;
+    border: 2px solid rgba(255,255,255,0.4);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    vertical-align: middle;
+    margin-right: 6px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* CURRENCY PREFIX */
+  .currency-wrap {
+    position: relative;
+  }
+  .currency-wrap input {
+    padding-left: 28px !important;
+  }
+  .currency-wrap::before {
+    content: '$';
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted);
+    font-size: 14px;
+    pointer-events: none;
+  }
+
+  @media (max-width: 600px) {
+    .field-row, .field-row.three { grid-template-columns: 1fr; }
+    .summary-grid { grid-template-columns: 1fr; }
+    .container { padding: 16px 12px 48px; }
+    .card { padding: 20px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <img src="https://res.cloudinary.com/dccbsfte0/image/upload/v1773063708/logo_hnmilh.png" alt="Buddy-Divers"/>
+  <div>
+    <div class="header-title">Follow-Up Manager</div>
+    <div class="header-sub">Payments · Flights · Hotels · Extras</div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- STEP 1: TRIP ID -->
+  <div class="card">
+    <div class="card-title"><span class="step-badge">1</span> Find Trip</div>
+    <div class="search-row">
+      <div class="field">
+        <label>Trip ID</label>
+        <input type="text" id="tripIdInput" placeholder="e.g. 271014" maxlength="10"/>
+      </div>
+      <button class="btn btn-primary" id="searchBtn" onclick="searchTrip()">Search</button>
+    </div>
+    <div class="msg info" id="searchMsg"></div>
+  </div>
+
+  <!-- STEP 2: SELECT DIVER -->
+  <div class="card" id="diverSelectWrap">
+    <div class="card-title"><span class="step-badge">2</span> Select Diver</div>
+    <div class="field">
+      <label>Diver on this trip</label>
+      <select id="diverSelect" onchange="loadDiver()">
+        <option value="">— Select a diver —</option>
+      </select>
+    </div>
+    <div class="msg info" id="diverMsg"></div>
+  </div>
+
+  <!-- STEP 3: FORM -->
+  <div id="formWrap">
+
+    <!-- DIVER BANNER -->
+    <div class="diver-banner" id="diverBanner">
+      <div>
+        <div class="diver-name" id="bannerName"></div>
+        <div class="diver-trip" id="bannerTrip"></div>
+      </div>
+      <div class="badge" id="bannerBadge"></div>
+    </div>
+
+    <!-- FINANCIAL SUMMARY -->
+    <div class="card">
+      <div class="card-title"><span class="step-badge">3</span> Financial Summary</div>
+      <div class="summary-grid">
+        <div class="summary-box owed">
+          <div class="s-label">Total Owed</div>
+          <div class="s-value" id="sumOwed">$0</div>
+        </div>
+        <div class="summary-box paid">
+          <div class="s-label">Total Paid</div>
+          <div class="s-value" id="sumPaid">$0</div>
+        </div>
+        <div class="summary-box balance" id="sumBalanceBox">
+          <div class="s-label">Balance</div>
+          <div class="s-value" id="sumBalance">$0</div>
+        </div>
+      </div>
+
+      <!-- COSTS -->
+      <div class="section-label">💰 Costs</div>
+      <div class="field-row">
+        <div class="field">
+          <label>Safari Price (from booking)</label>
+          <div class="currency-wrap">
+            <input type="number" id="safariPrice" readonly placeholder="0"/>
+          </div>
+        </div>
+        <div class="field">
+          <label>Flight Cost</label>
+          <div class="currency-wrap">
+            <input type="number" id="flightCost" placeholder="0" oninput="updateSummary()"/>
+          </div>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Hotel Cost</label>
+          <div class="currency-wrap">
+            <input type="number" id="hotelCost" placeholder="0" oninput="updateSummary()"/>
+          </div>
+        </div>
+        <div class="field">
+          <label>Extras Amount</label>
+          <div class="currency-wrap">
+            <input type="number" id="extrasAmount" placeholder="0" oninput="updateSummary()"/>
+          </div>
+        </div>
+      </div>
+      <div class="field-row full">
+        <div class="field">
+          <label>Extras Notes</label>
+          <textarea id="extrasNotes" placeholder="Describe any extras..."></textarea>
+        </div>
+      </div>
+
+      <hr class="section-divider"/>
+
+      <!-- PAYMENTS -->
+      <div class="section-label">💳 Payments Received</div>
+      <div class="field-row three">
+        <div class="field">
+          <label>Trip Payment</label>
+          <div class="currency-wrap">
+            <input type="number" id="tripPayment" placeholder="0" oninput="updateSummary()"/>
+          </div>
+        </div>
+        <div class="field">
+          <label>Flight Payment</label>
+          <div class="currency-wrap">
+            <input type="number" id="flightPayment" placeholder="0" oninput="updateSummary()"/>
+          </div>
+        </div>
+        <div class="field">
+          <label>Hotel Payment</label>
+          <div class="currency-wrap">
+            <input type="number" id="hotelPayment" placeholder="0" oninput="updateSummary()"/>
+          </div>
+        </div>
+      </div>
+      <div class="field-row full">
+        <div class="field">
+          <label>Extras Payment</label>
+          <div class="currency-wrap" style="max-width:280px;">
+            <input type="number" id="extrasPayment" placeholder="0" oninput="updateSummary()"/>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FLIGHTS & HOTELS -->
+    <div class="card">
+      <div class="card-title"><span class="step-badge">4</span> Flights & Hotels</div>
+
+      <div class="section-label">✈️ Flight</div>
+      <div class="field-row full">
+        <div class="field">
+          <label>PNR (Booking Reference)</label>
+          <input type="text" id="pnr" placeholder="e.g. ABC123" style="text-transform:uppercase;"/>
+        </div>
+      </div>
+
+      <hr class="section-divider"/>
+
+      <div class="section-label">🏨 Hotel</div>
+      <div class="field-row">
+        <div class="field">
+          <label>Hotel Name</label>
+          <input type="text" id="hotelName" placeholder="e.g. Hilton Galapagos"/>
+        </div>
+        <div class="field">
+          <label>Confirmation Number</label>
+          <input type="text" id="hotelConfirmation" placeholder="e.g. HTL-789456"/>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Check-in Date</label>
+          <input type="date" id="hotelCheckin"/>
+        </div>
+        <div class="field">
+          <label>Check-out Date</label>
+          <input type="date" id="hotelCheckout"/>
+        </div>
+      </div>
+    </div>
+
+    <!-- NOTES & SAVE -->
+    <div class="card">
+      <div class="card-title"><span class="step-badge">5</span> Notes & Save</div>
+      <div class="field-row full">
+        <div class="field">
+          <label>General Notes</label>
+          <textarea id="notes" placeholder="Any additional notes about this diver's booking..."></textarea>
+        </div>
+      </div>
+      <button class="btn btn-save" id="saveBtn" onclick="saveRecord()">💾 Save Record</button>
+      <div class="msg success" id="saveSuccess"></div>
+      <div class="msg error" id="saveError"></div>
+    </div>
+
+  </div><!-- end formWrap -->
+</div><!-- end container -->
+
+<script>
+const AIRTABLE_API_KEY = 'patc7ZZECSr9mf5Ie.201b69397c65187a2d5d3685e29757e1f5c1f37aab1bf2fde41428e79f967ffe';
+const BASE_ID = 'app2RAeuaXaWrHOan';
+const BOOKINGS_TABLE = 'tblE9d3rE4uDv2uxO';
+const PAYMENTS_TABLE = 'tbl0oLEDoa4PCQOOp';
+const DIVERS_TABLE = 'tblMCB8nCSoRuiTKI';
+
+let currentBookings = []; // [{bookingId, diverId, diverName, tripId, totalPrice}]
+let currentPaymentRecordId = null; // existing payment record id if found
+
+// ── SEARCH TRIP ──────────────────────────────────────────────────
+async function searchTrip() {
+  const tripId = document.getElementById('tripIdInput').value.trim();
+  if (!tripId) { showMsg('searchMsg', 'info', 'Please enter a Trip ID.'); return; }
+
+  const btn = document.getElementById('searchBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Searching...';
+  hideMsg('searchMsg');
+  document.getElementById('diverSelectWrap').style.display = 'none';
+  document.getElementById('formWrap').style.display = 'none';
+
+  try {
+    // Search Bookings table for records matching this trip ID
+    const formula = encodeURIComponent(`{Trip ID} = "${tripId}"`);
+    const url = `https://api.airtable.com/v0/${BASE_ID}/${BOOKINGS_TABLE}?filterByFormula=${formula}&fields[]=Trip+ID&fields[]=Total+Price&fields[]=Diver`;
+    const res = await fetch(url, { headers: { Authorization: `Bearer ${AIRTABLE_API_KEY}` } });
+    const data = await res.json();
+
+    if (!data.records || data.records.length === 0) {
+      showMsg('searchMsg', 'error', `No bookings found for Trip ID "${tripId}".`);
+      btn.disabled = false; btn.innerHTML = 'Search'; return;
+    }
+
+    // For each booking, get diver name
+    currentBookings = [];
+    for (const rec of data.records) {
+      const diverIds = rec.fields['Diver'] || [];
+      const diverId = diverIds[0] || null;
+      let diverName = 'Unknown Diver';
+      if (diverId) {
+        const dRes = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${DIVERS_TABLE}/${diverId}?fields[]=First+Name&fields[]=Last+Name`, {
+          headers: { Authorization: `Bearer ${AIRTABLE_API_KEY}` }
+        });
+        const dData = await dRes.json();
+        const fn = dData.fields?.['First Name'] || '';
+        const ln = dData.fields?.['Last Name'] || '';
+        diverName = `${fn} ${ln}`.trim() || 'Unknown Diver';
+      }
+      currentBookings.push({
+        bookingId: rec.id,
+        diverId,
+        diverName,
+        tripId,
+        totalPrice: rec.fields['Total Price'] || 0
+      });
+    }
+
+    // Populate diver dropdown
+    const sel = document.getElementById('diverSelect');
+    sel.innerHTML = '<option value="">— Select a diver —</option>';
+    currentBookings.forEach((b, i) => {
+      const opt = document.createElement('option');
+      opt.value = i;
+      opt.textContent = b.diverName;
+      sel.appendChild(opt);
+    });
+
+    document.getElementById('diverSelectWrap').style.display = 'block';
+    showMsg('searchMsg', 'info', `Found ${data.records.length} diver(s) on trip ${tripId}.`);
+
+  } catch(e) {
+    showMsg('searchMsg', 'error', 'Error connecting to Airtable. Check your connection.');
+    console.error(e);
+  }
+
+  btn.disabled = false; btn.innerHTML = 'Search';
+}
+
+// ── LOAD DIVER ───────────────────────────────────────────────────
+async function loadDiver() {
+  const idx = document.getElementById('diverSelect').value;
+  if (idx === '') { document.getElementById('formWrap').style.display = 'none'; return; }
+
+  const booking = currentBookings[idx];
+  hideMsg('diverMsg');
+  showMsg('diverMsg', 'info', 'Loading diver record...');
+
+  // Check if a Payment record already exists for this diver + trip
+  currentPaymentRecordId = null;
+  try {
+    const formula = encodeURIComponent(`AND({Trip ID} = "${booking.tripId}", FIND("${booking.diverId}", ARRAYJOIN({Diver})))`);
+    const url = `https://api.airtable.com/v0/${BASE_ID}/${PAYMENTS_TABLE}?filterByFormula=${formula}`;
+    const res = await fetch(url, { headers: { Authorization: `Bearer ${AIRTABLE_API_KEY}` } });
+    const data = await res.json();
+
+    if (data.records && data.records.length > 0) {
+      const rec = data.records[0];
+      currentPaymentRecordId = rec.id;
+      populateForm(rec.fields, booking);
+      showMsg('diverMsg', 'info', '✅ Existing record loaded — update and save.');
+      document.getElementById('bannerBadge').textContent = 'Existing Record';
+      document.getElementById('bannerBadge').className = 'badge existing';
+    } else {
+      clearForm(booking);
+      showMsg('diverMsg', 'info', '🆕 New record — fill in the details and save.');
+      document.getElementById('bannerBadge').textContent = 'New Record';
+      document.getElementById('bannerBadge').className = 'badge new-record';
+    }
+  } catch(e) {
+    showMsg('diverMsg', 'error', 'Error loading diver record.');
+    console.error(e);
+    return;
+  }
+
+  // Update banner
+  document.getElementById('bannerName').textContent = booking.diverName;
+  document.getElementById('bannerTrip').textContent = `Trip ${booking.tripId}`;
+  document.getElementById('formWrap').style.display = 'block';
+  window.scrollTo({ top: document.getElementById('formWrap').offsetTop - 20, behavior: 'smooth' });
+}
+
+// ── POPULATE FORM ─────────────────────────────────────────────────
+function populateForm(fields, booking) {
+  setVal('safariPrice', fields['Safari Price'] ?? booking.totalPrice ?? 0);
+  setVal('flightCost', fields['Flight Cost'] ?? '');
+  setVal('hotelCost', fields['Hotel Cost'] ?? '');
+  setVal('extrasAmount', fields['Extras Amount'] ?? '');
+  setVal('extrasNotes', fields['Extras Notes'] ?? '');
+  setVal('tripPayment', fields['Trip Payment'] ?? '');
+  setVal('flightPayment', fields['Flight Payment'] ?? '');
+  setVal('hotelPayment', fields['Hotel Payment'] ?? '');
+  setVal('extrasPayment', fields['Extras Payment'] ?? '');
+  setVal('pnr', fields['PNR'] ?? '');
+  setVal('hotelName', fields['Hotel Name'] ?? '');
+  setVal('hotelConfirmation', fields['Hotel Confirmation'] ?? '');
+  setVal('hotelCheckin', fields['Hotel Check-in'] ?? '');
+  setVal('hotelCheckout', fields['Hotel Check-out'] ?? '');
+  setVal('notes', fields['Notes'] ?? '');
+  updateSummary();
+}
+
+function clearForm(booking) {
+  ['flightCost','hotelCost','extrasAmount','extrasNotes',
+   'tripPayment','flightPayment','hotelPayment','extrasPayment',
+   'pnr','hotelName','hotelConfirmation','hotelCheckin','hotelCheckout','notes'].forEach(id => setVal(id, ''));
+  setVal('safariPrice', booking.totalPrice ?? 0);
+  updateSummary();
+}
+
+// ── UPDATE SUMMARY ────────────────────────────────────────────────
+function updateSummary() {
+  const safari = parseFloat(document.getElementById('safariPrice').value) || 0;
+  const flight = parseFloat(document.getElementById('flightCost').value) || 0;
+  const hotel = parseFloat(document.getElementById('hotelCost').value) || 0;
+  const extras = parseFloat(document.getElementById('extrasAmount').value) || 0;
+  const owed = safari + flight + hotel + extras;
+
+  const tp = parseFloat(document.getElementById('tripPayment').value) || 0;
+  const fp = parseFloat(document.getElementById('flightPayment').value) || 0;
+  const hp = parseFloat(document.getElementById('hotelPayment').value) || 0;
+  const ep = parseFloat(document.getElementById('extrasPayment').value) || 0;
+  const paid = tp + fp + hp + ep;
+  const balance = owed - paid;
+
+  document.getElementById('sumOwed').textContent = formatCurrency(owed);
+  document.getElementById('sumPaid').textContent = formatCurrency(paid);
+  document.getElementById('sumBalance').textContent = formatCurrency(balance);
+
+  const box = document.getElementById('sumBalanceBox');
+  box.className = 'summary-box balance';
+  if (balance === 0 && owed > 0) box.classList.add('cleared');
+  else if (balance < 0) box.classList.add('overdue');
+}
+
+// ── SAVE RECORD ───────────────────────────────────────────────────
+async function saveRecord() {
+  const idx = document.getElementById('diverSelect').value;
+  if (idx === '') return;
+  const booking = currentBookings[idx];
+
+  const btn = document.getElementById('saveBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Saving...';
+  hideMsg('saveSuccess'); hideMsg('saveError');
+
+  const fields = {
+    'Trip ID': booking.tripId,
+    'Diver': [booking.diverId],
+    'Booking': [booking.bookingId],
+    'Flight Cost': parseFloatOrNull('flightCost'),
+    'Hotel Cost': parseFloatOrNull('hotelCost'),
+    'Extras Amount': parseFloatOrNull('extrasAmount'),
+    'Extras Notes': document.getElementById('extrasNotes').value || null,
+    'Trip Payment': parseFloatOrNull('tripPayment'),
+    'Flight Payment': parseFloatOrNull('flightPayment'),
+    'Hotel Payment': parseFloatOrNull('hotelPayment'),
+    'Extras Payment': parseFloatOrNull('extrasPayment'),
+    'PNR': document.getElementById('pnr').value.trim() || null,
+    'Hotel Name': document.getElementById('hotelName').value.trim() || null,
+    'Hotel Confirmation': document.getElementById('hotelConfirmation').value.trim() || null,
+    'Hotel Check-in': document.getElementById('hotelCheckin').value || null,
+    'Hotel Check-out': document.getElementById('hotelCheckout').value || null,
+    'Notes': document.getElementById('notes').value || null,
+  };
+
+  // Remove null fields
+  Object.keys(fields).forEach(k => { if (fields[k] === null) delete fields[k]; });
+
+  try {
+    let res;
+    if (currentPaymentRecordId) {
+      // PATCH existing
+      res = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${PAYMENTS_TABLE}/${currentPaymentRecordId}`, {
+        method: 'PATCH',
+        headers: { Authorization: `Bearer ${AIRTABLE_API_KEY}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fields })
+      });
+    } else {
+      // POST new
+      res = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${PAYMENTS_TABLE}`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${AIRTABLE_API_KEY}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fields })
+      });
+    }
+
+    const data = await res.json();
+    if (data.id) {
+      currentPaymentRecordId = data.id;
+      showMsg('saveSuccess', 'success', `✅ Record saved successfully for ${booking.diverName}!`);
+      document.getElementById('bannerBadge').textContent = 'Existing Record';
+      document.getElementById('bannerBadge').className = 'badge existing';
+    } else {
+      showMsg('saveError', 'error', 'Save failed: ' + (data.error?.message || JSON.stringify(data)));
+    }
+  } catch(e) {
+    showMsg('saveError', 'error', 'Error saving record. Check your connection.');
+    console.error(e);
+  }
+
+  btn.disabled = false; btn.innerHTML = '💾 Save Record';
+}
+
+// ── HELPERS ───────────────────────────────────────────────────────
+function setVal(id, val) { document.getElementById(id).value = val ?? ''; }
+function parseFloatOrNull(id) { const v = parseFloat(document.getElementById(id).value); return isNaN(v) ? null : v; }
+function formatCurrency(n) { return '$' + n.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 }); }
+function showMsg(id, type, text) { const el = document.getElementById(id); el.className = `msg ${type}`; el.textContent = text; el.style.display = 'block'; }
+function hideMsg(id) { document.getElementById(id).style.display = 'none'; }
+
+// Allow pressing Enter in trip ID field
+document.getElementById('tripIdInput').addEventListener('keydown', e => { if (e.key === 'Enter') searchTrip(); });
+</script>
+</body>
+</html>
