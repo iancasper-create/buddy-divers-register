@@ -579,20 +579,31 @@ async function searchTrip() {
       btn.disabled = false; btn.innerHTML = 'Search'; return;
     }
 
-    // Step 2: Find bookings linked to this trip record
-    // Trip is a linked record array — FIND() coerces it to string for matching
-    const bookingFormula = encodeURIComponent(`FIND("${tripRecordId}", {Trip})`);
-    const bookingUrl = `https://api.airtable.com/v0/${BASE_ID}/${BOOKINGS_TABLE}?filterByFormula=${bookingFormula}&fields[]=Trip&fields[]=Total+Price&fields[]=Divers`;
-    const res = await fetch(bookingUrl, { headers: { Authorization: `Bearer ${AIRTABLE_API_KEY}` } });
-    const data = await res.json();
+    // Step 2: Fetch ALL bookings and filter in JS (avoids Airtable linked-record formula issues)
+    let allBookings = [];
+    let offset = null;
+    do {
+      const pageUrl = `https://api.airtable.com/v0/${BASE_ID}/${BOOKINGS_TABLE}?fields[]=Trip&fields[]=Total+Price&fields[]=Divers` + (offset ? `&offset=${offset}` : '');
+      const pageRes = await fetch(pageUrl, { headers: { Authorization: `Bearer ${AIRTABLE_API_KEY}` } });
+      const pageData = await pageRes.json();
+      if (pageData.error) {
+        showMsg('searchMsg', 'error', 'Airtable error: ' + pageData.error.message);
+        btn.disabled = false; btn.innerHTML = 'Search'; return;
+      }
+      allBookings = allBookings.concat(pageData.records || []);
+      offset = pageData.offset || null;
+    } while (offset);
 
-    if (!data.records || data.records.length === 0) {
+    // Filter bookings where Trip array contains our tripRecordId
+    const matched = allBookings.filter(r => (r.fields['Trip'] || []).includes(tripRecordId));
+
+    if (matched.length === 0) {
       showMsg('searchMsg', 'error', `No bookings found for Trip ID "${tripId}".`);
       btn.disabled = false; btn.innerHTML = 'Search'; return;
     }
 
-    await processBookings(data.records, tripId);
-    showMsg('searchMsg', 'info', `Found ${data.records.length} diver(s) on trip ${tripId}.`);
+    await processBookings(matched, tripId);
+    showMsg('searchMsg', 'info', `Found ${matched.length} diver(s) on trip ${tripId}.`);
 
   } catch(e) {
     showMsg('searchMsg', 'error', 'Error connecting to Airtable. Check your connection.');
