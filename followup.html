@@ -691,18 +691,25 @@ async function loadDiver() {
 
 // ── POPULATE FORM ─────────────────────────────────────────────────
 function populateForm(fields, booking) {
+  // Helper: unwrap Airtable lookup arrays or return plain value
+  const f = (key, fallback='') => {
+    const v = fields[key];
+    if (v === undefined || v === null) return fallback;
+    return Array.isArray(v) ? (v[0] ?? fallback) : v;
+  };
+
   // Load all fields except payment received (those accumulate — left blank for new entry)
-  setVal('safariPrice', fields['Safari Price'] ?? booking.totalPrice ?? 0);
-  setVal('flightCost', fields['Flight Cost'] ?? '');
-  setVal('hotelCost', fields['Hotel Cost'] ?? '');
-  setVal('extrasAmount', fields['Extras Amount'] ?? '');
-  setVal('extrasNotes', fields['Extras Notes'] ?? '');
-  setVal('pnr', fields['PNR'] ?? '');
-  setVal('hotelName', fields['Hotel Name'] ?? '');
-  setVal('hotelConfirmation', fields['Hotel Confirmation'] ?? '');
-  setVal('hotelCheckin', fields['Hotel Check-in'] ?? '');
-  setVal('hotelCheckout', fields['Hotel Check-out'] ?? '');
-  setVal('notes', fields['Notes'] ?? '');
+  setVal('safariPrice', f('Safari Price', booking.totalPrice ?? 0));
+  setVal('flightCost', f('Flight Cost'));
+  setVal('hotelCost', f('Hotel Cost'));
+  setVal('extrasAmount', f('Extras Amount'));
+  setVal('extrasNotes', f('Extras Notes'));
+  setVal('pnr', f('PNR'));
+  setVal('hotelName', f('Hotel Name'));
+  setVal('hotelConfirmation', f('Hotel Confirmation'));
+  setVal('hotelCheckin', f('Hotel Check-in'));
+  setVal('hotelCheckout', f('Hotel Check-out'));
+  setVal('notes', f('Notes'));
   // Payment fields always blank on load — new entries accumulate into stored totals
   setVal('tripPayment', '');
   setVal('flightPayment', '');
@@ -710,10 +717,10 @@ function populateForm(fields, booking) {
   setVal('extrasPayment', '');
   // Store existing payment totals so we can add to them on save
   window._existingPayments = {
-    tripPayment: fields['Trip Payment'] ?? 0,
-    flightPayment: fields['Flight Payment'] ?? 0,
-    hotelPayment: fields['Hotel Payment'] ?? 0,
-    extrasPayment: fields['Extras Payment'] ?? 0,
+    tripPayment: f('Trip Payment', 0),
+    flightPayment: f('Flight Payment', 0),
+    hotelPayment: f('Hotel Payment', 0),
+    extrasPayment: f('Extras Payment', 0),
   };
   updateSummary();
 }
