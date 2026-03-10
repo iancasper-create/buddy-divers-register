@@ -579,19 +579,17 @@ async function searchTrip() {
       btn.disabled = false; btn.innerHTML = 'Search'; return;
     }
 
-    // DEBUG: fetch one raw booking record to confirm all field names
-    const debugRes = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${BOOKINGS_TABLE}?maxRecords=1`, { headers: { Authorization: `Bearer ${AIRTABLE_API_KEY}` } });
-    const debugData = await debugRes.json();
-    console.log('RAW BOOKING RECORD:', JSON.stringify(debugData, null, 2));
-    if (debugData.records && debugData.records.length > 0) {
-      const s = debugData.records[0];
-      const allFields = Object.keys(s.fields).join(', ');
-      const tripVal = JSON.stringify(s.fields['Trip'] ?? s.fields['Trips'] ?? s.fields['Trip Name'] ?? 'NOT FOUND');
-      showMsg('searchMsg', 'info', `DEBUG — tripRecordId=${tripRecordId} | Trip field value=${tripVal} | ALL fields: ${allFields}`);
-    } else {
-      showMsg('searchMsg', 'error', 'DEBUG — No bookings records found: ' + JSON.stringify(debugData));
+    // Step 2: Find bookings linked to this trip record
+    // Trip is a linked record array — FIND() coerces it to string for matching
+    const bookingFormula = encodeURIComponent(`FIND("${tripRecordId}", {Trip})`);
+    const bookingUrl = `https://api.airtable.com/v0/${BASE_ID}/${BOOKINGS_TABLE}?filterByFormula=${bookingFormula}&fields[]=Trip&fields[]=Total+Price&fields[]=Divers`;
+    const res = await fetch(bookingUrl, { headers: { Authorization: `Bearer ${AIRTABLE_API_KEY}` } });
+    const data = await res.json();
+
+    if (!data.records || data.records.length === 0) {
+      showMsg('searchMsg', 'error', `No bookings found for Trip ID "${tripId}".`);
+      btn.disabled = false; btn.innerHTML = 'Search'; return;
     }
-    btn.disabled = false; btn.innerHTML = 'Search'; return;
 
     await processBookings(data.records, tripId);
     showMsg('searchMsg', 'info', `Found ${data.records.length} diver(s) on trip ${tripId}.`);
@@ -607,7 +605,7 @@ async function searchTrip() {
 async function processBookings(records, tripId) {
   currentBookings = [];
   for (const rec of records) {
-    const diverIds = rec.fields['Diver'] || [];
+    const diverIds = rec.fields['Divers'] || [];
     const diverId = diverIds[0] || null;
     let diverName = 'Unknown Diver';
     if (diverId) {
