@@ -318,22 +318,22 @@
     .otp-box .otp-title { font-weight:700; font-size:15px; margin-bottom:6px; color:#007289; }
     .otp-box .otp-hint { font-size:13px; color:#5a7a8a; margin-bottom:12px; }
     .otp-box .otp-input-row { display:flex; align-items:center; gap:10px; margin-bottom:10px; flex-wrap:wrap; }
-    .otp-digit-boxes { display:inline-flex; gap:8px; direction:ltr; margin-bottom:10px; }
-    .otp-digit-box {
-      width:48px !important; min-width:48px !important; max-width:48px !important;
-      height:52px; font-size:22px; font-weight:700;
-      text-align:center; border:2px solid #b0c8d0; border-radius:8px;
-      color:#007289; background:#fff; outline:none; box-sizing:border-box;
-      transition: border-color 0.2s; padding:0;
-    }
-    .otp-digit-box:focus { border-color:#f07830; }
     .otp-info-text { font-size:13px; color:#5a7a8a; text-align:center; margin-bottom:10px; }
-    .otp-box input[type="text"] {
-      width:120px; font-size:22px; letter-spacing:8px; text-align:center;
-      border:2px solid #007289; border-radius:8px; padding:8px 12px;
-      font-family:monospace; color:#224560;
+    .otp-single-wrap { position:relative; display:flex; justify-content:center; margin:0 auto 12px; direction:ltr; width:100%; }
+    .otp-digits-display { display:inline-flex; gap:12px; direction:ltr; }
+    .otp-digit-slot {
+      width:52px; height:58px; font-size:26px; font-weight:700;
+      text-align:center; line-height:58px;
+      background:#fff; border:2px solid #b0c8d0;
+      border-radius:10px; color:#007289;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
     }
-    .otp-box input[type="text"]:focus { outline:none; border-color:#f07830; }
+    @media(max-width:400px) {
+      .otp-digit-slot { width:44px; height:52px; font-size:22px; line-height:52px; }
+    }
+    .otp-digit-slot.active { border-color:#f07830; box-shadow:0 0 0 3px rgba(240,120,48,0.15); }
+    .otp-digit-slot.filled { border-color:#007289; }
     .otp-box .otp-verify-btn {
       background:#007289; color:white; border:none; border-radius:8px;
       padding:10px 20px; font-size:14px; font-weight:600; cursor:pointer;
@@ -403,11 +403,16 @@
         <div class="otp-hint" id="otpHint">שלחנו קוד אימות לכתובת המייל שלך / We sent a verification code to your email</div>
         <div class="otp-error" id="otpError">קוד שגוי — נסה שנית / Incorrect code — please try again</div>
         <div style="text-align:center;">
-        <div class="otp-digit-boxes" style="display:inline-flex;">
-          <input type="text" class="otp-digit-box" id="otpD1" maxlength="1" inputmode="numeric" autocomplete="one-time-code" />
-          <input type="text" class="otp-digit-box" id="otpD2" maxlength="1" inputmode="numeric" />
-          <input type="text" class="otp-digit-box" id="otpD3" maxlength="1" inputmode="numeric" />
-          <input type="text" class="otp-digit-box" id="otpD4" maxlength="1" inputmode="numeric" />
+        <div class="otp-single-wrap" id="otpSingleWrap">
+          <div class="otp-digits-display" id="otpDigitsDisplay">
+            <div class="otp-digit-slot" id="otpSlot0"></div>
+            <div class="otp-digit-slot" id="otpSlot1"></div>
+            <div class="otp-digit-slot" id="otpSlot2"></div>
+            <div class="otp-digit-slot" id="otpSlot3"></div>
+          </div>
+          <input type="text" id="otpSingleInput" inputmode="numeric" maxlength="4"
+            autocomplete="one-time-code" pattern="\d{4}"
+            style="position:absolute;top:0;left:0;width:100%;height:100%;opacity:0;font-size:22px;border:none;background:transparent;outline:none;cursor:text;z-index:2;caret-color:transparent;" />
         </div>
         </div>
         <div class="otp-info-text">הזן את קוד האימות בן 4 הספרות / Enter your 4 digit code</div>
@@ -1967,8 +1972,10 @@ function showOtpBox(maskedEmail) {
     ? 'שלחנו קוד אימות ל־' + maskedEmail + ' / We sent a code to ' + maskedEmail
     : 'שלחנו קוד אימות לכתובת המייל שלך / We sent a verification code to your email';
   document.getElementById('otpBox').classList.add('show');
-  ['otpD1','otpD2','otpD3','otpD4'].forEach(id => document.getElementById(id).value = '');
-  document.getElementById('otpD1').focus();
+  const si = document.getElementById('otpSingleInput');
+  si.value = '';
+  updateOtpSlots('');
+  si.focus();
   document.getElementById('otpError').classList.remove('show');
   document.getElementById('otpResend').classList.remove('show');
   startOtpCountdown();
@@ -2016,15 +2023,34 @@ function startOtpCountdown() {
   otpTimer = setInterval(update, 1000);
 }
 
+function updateOtpSlots(val) {
+  for (let i = 0; i < 4; i++) {
+    const slot = document.getElementById('otpSlot' + i);
+    if (!slot) continue;
+    slot.textContent = val[i] || '';
+    slot.classList.toggle('filled', i < val.length);
+    slot.classList.toggle('active', i === val.length && val.length < 4);
+  }
+}
+
+function resetOtpInput() {
+  const si = document.getElementById('otpSingleInput');
+  si.disabled = false;
+  si.value = '';
+  updateOtpSlots('');
+  si.focus();
+}
+
 async function verifyOtp() {
-  const code = ['otpD1','otpD2','otpD3','otpD4'].map(id => document.getElementById(id).value).join('');
+  const si = document.getElementById('otpSingleInput');
+  const code = (si.value || '').replace(/\D/g,'');
   if (code.length !== 4) {
     document.getElementById('otpError').textContent = 'נא להזין קוד בן 4 ספרות / Please enter the 4-digit code';
     document.getElementById('otpError').classList.add('show');
     return;
   }
   document.getElementById('otpError').classList.remove('show');
-  ['otpD1','otpD2','otpD3','otpD4'].forEach(id => document.getElementById(id).disabled = true);
+  si.disabled = true;
   try {
     const resp = await fetch(OTP_VALIDATE_WEBHOOK_URL, {
       method: 'POST',
@@ -2036,24 +2062,16 @@ async function verifyOtp() {
 
     let data;
     try {
-      // Strip every control character (cc 0-31) from the entire response.
-      // This is safe — JSON structure only needs quotes, braces, colons, commas.
-      // Newlines inside string values (Make.com bug) and outside (formatting) are all removed.
-      // Strip control chars AND common invisible Unicode chars
       var stripped = '';
       for (var i = 0; i < rawText.length; i++) {
         var cc = rawText.charCodeAt(i);
-        // Keep only printable ASCII and valid Unicode text chars
-        // Skip: control chars (0-31), DEL (127), non-breaking space (160),
-        // zero-width chars (8203-8207), BOM (65279), and other invisible Unicode
         if (cc < 32) continue;
         if (cc === 127) continue;
-        if (cc === 160) continue;  // non-breaking space
-        if (cc >= 8192 && cc <= 8207) continue;  // Unicode spaces/zero-width
-        if (cc === 65279) continue;  // BOM
+        if (cc === 160) continue;
+        if (cc >= 8192 && cc <= 8207) continue;
+        if (cc === 65279) continue;
         stripped += rawText[i];
       }
-      // Make.com appends an extra } - balance braces before parsing
       var opens = 0, closes = 0;
       for (var k = 0; k < stripped.length; k++) {
         if (stripped[k] === '{') opens++;
@@ -2064,7 +2082,6 @@ async function verifyOtp() {
         closes--;
       }
       data = JSON.parse(stripped);
-
     } catch(e) {
       throw new Error('invalid response from server');
     }
@@ -2080,19 +2097,16 @@ async function verifyOtp() {
     } else if (data && data.expired) {
       document.getElementById('otpError').textContent = 'הקוד פג תוקף — בקש קוד חדש / Code expired — please request a new code';
       document.getElementById('otpError').classList.add('show');
-      ['otpD1','otpD2','otpD3','otpD4'].forEach(id => { document.getElementById(id).disabled = false; document.getElementById(id).value = ''; });
-      document.getElementById('otpD1').focus();
+      resetOtpInput();
     } else {
       document.getElementById('otpError').textContent = 'קוד שגוי — נסה שנית / Incorrect code — please try again';
       document.getElementById('otpError').classList.add('show');
-      ['otpD1','otpD2','otpD3','otpD4'].forEach(id => { document.getElementById(id).disabled = false; document.getElementById(id).value = ''; });
-      document.getElementById('otpD1').focus();
+      resetOtpInput();
     }
   } catch(e) {
     document.getElementById('otpError').textContent = 'שגיאה — נסה שנית / Error — please try again';
     document.getElementById('otpError').classList.add('show');
-    ['otpD1','otpD2','otpD3','otpD4'].forEach(id => { document.getElementById(id).disabled = false; document.getElementById(id).value = ''; });
-    document.getElementById('otpD1').focus();
+    resetOtpInput();
   }
 }
 
@@ -2338,24 +2352,19 @@ document.addEventListener('DOMContentLoaded', function() {
       hideOtpBox();
     }
   });
-  // 4-digit box auto-advance and auto-submit
-  ['otpD1','otpD2','otpD3','otpD4'].forEach((id, idx, arr) => {
-    const el = document.getElementById(id);
-    el.addEventListener('input', function() {
-      this.value = this.value.replace(/[^0-9]/g, '').slice(-1);
-      if (this.value && idx < arr.length - 1) {
-        document.getElementById(arr[idx + 1]).focus();
-      }
-      if (idx === arr.length - 1 && this.value) {
-        verifyOtp();
-      }
+  // Single OTP input — updates visual slots and auto-submits on 4 digits
+  const otpSingleInput = document.getElementById('otpSingleInput');
+  if (otpSingleInput) {
+    otpSingleInput.addEventListener('input', function() {
+      const val = this.value.replace(/\D/g,'').slice(0,4);
+      this.value = val;
+      updateOtpSlots(val);
+      if (val.length === 4) verifyOtp();
     });
-    el.addEventListener('keydown', function(e) {
-      if (e.key === 'Backspace' && !this.value && idx > 0) {
-        document.getElementById(arr[idx - 1]).focus();
-      }
+    document.getElementById('otpDigitsDisplay').addEventListener('click', function() {
+      otpSingleInput.focus();
     });
-  });
+  }
 });
 
 // Auto-format date fields as user types (inserts / after DD and MM)
