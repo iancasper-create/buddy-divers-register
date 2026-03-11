@@ -305,21 +305,23 @@
     .otp-box .otp-hint { font-size:13px; color:#5a7a8a; margin-bottom:12px; }
     .otp-box .otp-input-row { display:flex; align-items:center; gap:10px; margin-bottom:10px; flex-wrap:wrap; }
     .otp-info-text { font-size:13px; color:#5a7a8a; text-align:center; margin-bottom:10px; }
-    .otp-single-wrap { position:relative; display:inline-flex; flex-direction:column; align-items:center; margin-bottom:10px; direction:ltr; }
-    .otp-single-input {
-      position:absolute; top:0; left:0; width:100%; height:100%;
-      opacity:0; font-size:22px; letter-spacing:20px; text-align:center;
-      border:none; background:transparent; outline:none; cursor:text; z-index:2;
-      caret-color:transparent;
+    .otp-single-wrap {
+      position:relative; display:flex; justify-content:center;
+      margin:0 auto 12px; direction:ltr; width:100%;
     }
-    .otp-digits-display { display:inline-flex; gap:12px; direction:ltr; }
+    .otp-digits-display { display:inline-flex; gap:10px; direction:ltr; }
     .otp-digit-slot {
-      width:48px; height:52px; font-size:24px; font-weight:700;
-      text-align:center; line-height:52px;
-      border-bottom:3px solid #b0c8d0; color:#007289;
-      transition: border-color 0.2s;
+      width:52px; height:58px; font-size:26px; font-weight:700;
+      text-align:center; line-height:58px;
+      background:#fff; border:2px solid #b0c8d0;
+      border-radius:10px; color:#007289;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
     }
-    .otp-digit-slot.active { border-color:#f07830; }
+    @media(max-width:400px) {
+      .otp-digit-slot { width:44px; height:52px; font-size:22px; line-height:52px; }
+    }
+    .otp-digit-slot.active { border-color:#f07830; box-shadow:0 0 0 3px rgba(240,120,48,0.15); }
     .otp-digit-slot.filled { border-color:#007289; }
     .otp-box .otp-verify-btn {
       background:#007289; color:white; border:none; border-radius:8px;
@@ -391,15 +393,15 @@
         <div class="otp-error" id="otpError">קוד שגוי — נסה שנית / Incorrect code — please try again</div>
         <div style="text-align:center;">
         <div class="otp-single-wrap" id="otpSingleWrap">
-          <input type="text" id="otpSingleInput" inputmode="numeric" maxlength="4"
-            autocomplete="one-time-code" pattern="\d{4}"
-            style="position:absolute;top:0;left:0;width:100%;height:100%;opacity:0;font-size:22px;border:none;background:transparent;outline:none;cursor:text;z-index:2;caret-color:transparent;" />
           <div class="otp-digits-display" id="otpDigitsDisplay">
             <div class="otp-digit-slot" id="otpSlot0"></div>
             <div class="otp-digit-slot" id="otpSlot1"></div>
             <div class="otp-digit-slot" id="otpSlot2"></div>
             <div class="otp-digit-slot" id="otpSlot3"></div>
           </div>
+          <input type="text" id="otpSingleInput" inputmode="numeric" maxlength="4"
+            autocomplete="one-time-code" pattern="\d{4}"
+            style="position:absolute;top:0;left:0;width:100%;height:100%;opacity:0;font-size:22px;border:none;background:transparent;outline:none;cursor:text;z-index:2;caret-color:transparent;" />
         </div>
         </div>
         <div class="otp-info-text">הזן את קוד האימות בן 4 הספרות / Enter your 4 digit code</div>
