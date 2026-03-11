@@ -2125,16 +2125,25 @@ function continueManually() {
   otpCurrentId = null;
 }
 
+function cleanPhone(cc, num) {
+  // Remove all spaces, dashes, brackets, dots
+  num = num.replace(/[\s\-().]/g, '');
+  // Remove leading zero (Israeli 05X -> 5X after +972)
+  num = num.replace(/^0+/, '');
+  // Return E.164-style: +972542323567
+  return cc + num;
+}
+
 function updateEmergencyPhoneHidden() {
   var cc = document.getElementById('emergencyPhoneCountryCode').value;
   var num = document.getElementById('emergencyPhoneNumberInput').value.trim();
-  document.getElementById('emergencyPhoneHidden').value = cc + ' ' + num;
+  document.getElementById('emergencyPhoneHidden').value = cleanPhone(cc, num);
 }
 
 function updatePhoneHidden() {
   var cc = document.getElementById('phoneCountryCode').value;
   var num = document.getElementById('phoneNumberInput').value.trim();
-  document.getElementById('phoneHidden').value = cc + ' ' + num;
+  document.getElementById('phoneHidden').value = cleanPhone(cc, num);
 }
 
 function setVal(name, value) {
