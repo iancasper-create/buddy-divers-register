@@ -156,10 +156,16 @@
 
     .field-hint { font-size:11px; color:var(--muted); margin-top:2px; }
     .field-error { font-size:11px; color:var(--error); margin-top:2px; display:none; }
-    .field.invalid input, .field.invalid select {
-      border-color: var(--error);
-    }
+    .field.invalid input, .field.invalid select { border-color: var(--error); }
     .field.invalid .field-error { display:block; }
+
+    /* PHONE WITH COUNTRY CODE */
+    .phone-input-wrap { display:flex; flex-direction:row; direction:ltr; border:1.5px solid var(--border); border-radius:9px; overflow:hidden; background:#fff; transition:border-color 0.2s, box-shadow 0.2s; }
+    .phone-input-wrap:focus-within { border-color:var(--teal); box-shadow:0 0 0 3px rgba(0,114,137,0.12); }
+    .field.invalid .phone-input-wrap { border-color:var(--error); }
+    .phone-country-select { border:none; outline:none; background:var(--light-bg); padding:8px 4px 8px 8px; font-size:13px; color:var(--text); font-family:'Heebo',sans-serif; cursor:pointer; border-right:1.5px solid var(--border); width:90px; min-width:90px; max-width:90px; direction:ltr; flex-shrink:0; appearance:none; }
+    .phone-number-input { border:none; outline:none; flex:1; padding:11px 14px; font-size:14px; color:var(--text); font-family:'Heebo',sans-serif; background:transparent; direction:ltr; min-width:0; width:100%; }
+    .phone-number-input::placeholder { color:#b0c4cc; }
 
     /* RADIO / CHECKBOX OPTIONS */
     .options-group { display:flex; flex-direction:column; gap:10px; }
@@ -305,25 +311,22 @@
     .otp-box .otp-title { font-weight:700; font-size:15px; margin-bottom:6px; color:#007289; }
     .otp-box .otp-hint { font-size:13px; color:#5a7a8a; margin-bottom:12px; }
     .otp-box .otp-input-row { display:flex; align-items:center; gap:10px; margin-bottom:10px; flex-wrap:wrap; }
+    .otp-digit-boxes { display:inline-flex; gap:8px; direction:ltr; margin-bottom:10px; }
+    .otp-digit-box {
+      width:48px !important; min-width:48px !important; max-width:48px !important;
+      height:52px; font-size:22px; font-weight:700;
+      text-align:center; border:2px solid #b0c8d0; border-radius:8px;
+      color:#007289; background:#fff; outline:none; box-sizing:border-box;
+      transition: border-color 0.2s; padding:0;
+    }
+    .otp-digit-box:focus { border-color:#f07830; }
     .otp-info-text { font-size:13px; color:#5a7a8a; text-align:center; margin-bottom:10px; }
-    .otp-single-wrap {
-      position:relative; display:flex; justify-content:center;
-      margin:0 auto 12px; direction:ltr; width:100%;
+    .otp-box input[type="text"] {
+      width:120px; font-size:22px; letter-spacing:8px; text-align:center;
+      border:2px solid #007289; border-radius:8px; padding:8px 12px;
+      font-family:monospace; color:#224560;
     }
-    .otp-digits-display { display:inline-flex; gap:10px; direction:ltr; }
-    .otp-digit-slot {
-      width:52px; height:58px; font-size:26px; font-weight:700;
-      text-align:center; line-height:58px;
-      background:#fff; border:2px solid #b0c8d0;
-      border-radius:10px; color:#007289;
-      transition: border-color 0.2s, box-shadow 0.2s;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
-    }
-    @media(max-width:400px) {
-      .otp-digit-slot { width:44px; height:52px; font-size:22px; line-height:52px; }
-    }
-    .otp-digit-slot.active { border-color:#f07830; box-shadow:0 0 0 3px rgba(240,120,48,0.15); }
-    .otp-digit-slot.filled { border-color:#007289; }
+    .otp-box input[type="text"]:focus { outline:none; border-color:#f07830; }
     .otp-box .otp-verify-btn {
       background:#007289; color:white; border:none; border-radius:8px;
       padding:10px 20px; font-size:14px; font-weight:600; cursor:pointer;
@@ -393,16 +396,11 @@
         <div class="otp-hint" id="otpHint">שלחנו קוד אימות לכתובת המייל שלך / We sent a verification code to your email</div>
         <div class="otp-error" id="otpError">קוד שגוי — נסה שנית / Incorrect code — please try again</div>
         <div style="text-align:center;">
-        <div class="otp-single-wrap" id="otpSingleWrap">
-          <div class="otp-digits-display" id="otpDigitsDisplay">
-            <div class="otp-digit-slot" id="otpSlot0"></div>
-            <div class="otp-digit-slot" id="otpSlot1"></div>
-            <div class="otp-digit-slot" id="otpSlot2"></div>
-            <div class="otp-digit-slot" id="otpSlot3"></div>
-          </div>
-          <input type="text" id="otpSingleInput" inputmode="numeric" maxlength="4"
-            autocomplete="one-time-code" pattern="\d{4}"
-            style="position:absolute;top:0;left:0;width:100%;height:100%;opacity:0;font-size:22px;border:none;background:transparent;outline:none;cursor:text;z-index:2;caret-color:transparent;" />
+        <div class="otp-digit-boxes" style="display:inline-flex;">
+          <input type="text" class="otp-digit-box" id="otpD1" maxlength="1" inputmode="numeric" autocomplete="one-time-code" />
+          <input type="text" class="otp-digit-box" id="otpD2" maxlength="1" inputmode="numeric" />
+          <input type="text" class="otp-digit-box" id="otpD3" maxlength="1" inputmode="numeric" />
+          <input type="text" class="otp-digit-box" id="otpD4" maxlength="1" inputmode="numeric" />
         </div>
         </div>
         <div class="otp-info-text">הזן את קוד האימות בן 4 הספרות / Enter your 4 digit code</div>
@@ -444,7 +442,38 @@
         </div>
         <div class="field" id="f-phone">
           <label>טלפון נייד <span class="en">Mobile</span><span class="req">*</span></label>
-          <input type="tel" name="phone" placeholder="05X-XXXXXXX" autocomplete="tel" />
+          <div class="phone-input-wrap">
+            <select class="phone-country-select" id="phoneCountryCode" onchange="updatePhoneHidden()">
+              <option value="+972">🇮🇱 +972</option>
+              <option value="+1">🇺🇸 +1</option>
+              <option value="+44">🇬🇧 +44</option>
+              <option value="+33">🇫🇷 +33</option>
+              <option value="+49">🇩🇪 +49</option>
+              <option value="+39">🇮🇹 +39</option>
+              <option value="+34">🇪🇸 +34</option>
+              <option value="+31">🇳🇱 +31</option>
+              <option value="+32">🇧🇪 +32</option>
+              <option value="+41">🇨🇭 +41</option>
+              <option value="+43">🇦🇹 +43</option>
+              <option value="+48">🇵🇱 +48</option>
+              <option value="+7">🇷🇺 +7</option>
+              <option value="+380">🇺🇦 +380</option>
+              <option value="+90">🇹🇷 +90</option>
+              <option value="+20">🇪🇬 +20</option>
+              <option value="+27">🇿🇦 +27</option>
+              <option value="+61">🇦🇺 +61</option>
+              <option value="+64">🇳🇿 +64</option>
+              <option value="+81">🇯🇵 +81</option>
+              <option value="+82">🇰🇷 +82</option>
+              <option value="+86">🇨🇳 +86</option>
+              <option value="+91">🇮🇳 +91</option>
+              <option value="+55">🇧🇷 +55</option>
+              <option value="+52">🇲🇽 +52</option>
+              <option value="+54">🇦🇷 +54</option>
+            </select>
+            <input type="tel" id="phoneNumberInput" class="phone-number-input" placeholder="05X-XXXXXXX" autocomplete="tel-national" oninput="updatePhoneHidden()" />
+          </div>
+          <input type="hidden" name="phone" id="phoneHidden" />
           <span class="field-error">שדה חובה / Required</span>
         </div>
       </div>
@@ -1224,8 +1253,7 @@ const TRIPS = {
         value: "single_9790",
         he: "מחיר לאדם",
         en: "Price per person",
-        price: "$9,790",
-        priceNum: 9790
+        price: "$9,790"
       }
     ]
   },
@@ -1238,8 +1266,7 @@ const TRIPS = {
         value: "single_7300",
         he: "מחיר לאדם",
         en: "Price per person",
-        price: "$7,300",
-        priceNum: 7300
+        price: "$7,300"
       }
     ]
   },
@@ -1252,8 +1279,7 @@ const TRIPS = {
         value: "single_7350",
         he: "מחיר לאדם",
         en: "Price per person",
-        price: "$7,350",
-        priceNum: 7350
+        price: "$7,350"
       }
     ]
   },
@@ -1501,7 +1527,6 @@ async function handleUpload(input, areaId, urlFieldId, statusId, folder, docType
     const formData = new FormData();
     formData.append('file', file);
     formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-    formData.append('angle', 'auto_right');
     // Build folder as divers/ID_LastName_FirstName/subfolder
     const diverId = (document.getElementById('idNumberInput') ? document.getElementById('idNumberInput').value : '') || 'unknown';
     const diverFirst = (document.getElementById('firstNameInput') ? document.getElementById('firstNameInput').value : '').trim().replace(/\s+/g, '-') || 'unknown';
@@ -1524,11 +1549,6 @@ async function handleUpload(input, areaId, urlFieldId, statusId, folder, docType
       area.classList.add('upload-done');
       const shortName = file.name.length > 30 ? file.name.substring(0,27)+'...' : file.name;
       statusEl.innerHTML = `<span class="upload-success">✓ הועלה בהצלחה / Uploaded: ${shortName}</span>`;
-      // Restore all view buttons from data-url (Android can lose display state)
-      ['passportViewBtn','certViewBtn','nitroxViewBtn','insuranceViewBtn'].forEach(function(id) {
-        var btn = document.getElementById(id);
-        if (btn && btn.getAttribute('data-url')) { btn.style.display = 'inline-flex'; }
-      });
     } else {
       throw new Error('No URL in response');
     }
@@ -1565,7 +1585,13 @@ function isoToDmy(val) {
 function validateField(fieldId, name, type) {
   const fieldEl = document.getElementById(fieldId);
   if (!fieldEl) return true;
-  const input = fieldEl.querySelector(`[name="${name}"]`) || fieldEl.querySelector('input,select,textarea');
+  // Phone field uses a visible input + hidden field — validate the visible one
+  let input;
+  if (name === 'phone') {
+    input = document.getElementById('phoneNumberInput');
+  } else {
+    input = fieldEl.querySelector(`[name="${name}"]`) || fieldEl.querySelector('input,select,textarea');
+  }
   if (!input) return true;
   const val = input.value.trim();
   let ok = true;
@@ -1676,6 +1702,16 @@ function attachBlurValidation() {
     input.addEventListener('input', () => { if (fieldEl.classList.contains('invalid')) validateField(fieldId, name, type); });
     input.addEventListener('change', () => validateField(fieldId, name, type));
   });
+
+  // Phone field — wire blur validation to the visible number input
+  const phoneNumInput = document.getElementById('phoneNumberInput');
+  if (phoneNumInput) {
+    phoneNumInput.addEventListener('blur', () => validateField('f-phone', 'phone', 'text'));
+    phoneNumInput.addEventListener('input', () => {
+      updatePhoneHidden();
+      if (document.getElementById('f-phone').classList.contains('invalid')) validateField('f-phone', 'phone', 'text');
+    });
+  }
 
   // Last dive - optional but validate if filled
   const lastDiveEl = document.getElementById('lastDiveInput');
@@ -1893,10 +1929,8 @@ function showOtpBox(maskedEmail) {
     ? 'שלחנו קוד אימות ל־' + maskedEmail + ' / We sent a code to ' + maskedEmail
     : 'שלחנו קוד אימות לכתובת המייל שלך / We sent a verification code to your email';
   document.getElementById('otpBox').classList.add('show');
-  const si = document.getElementById('otpSingleInput');
-  si.value = '';
-  updateOtpSlots('');
-  si.focus();
+  ['otpD1','otpD2','otpD3','otpD4'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('otpD1').focus();
   document.getElementById('otpError').classList.remove('show');
   document.getElementById('otpResend').classList.remove('show');
   startOtpCountdown();
@@ -1944,26 +1978,15 @@ function startOtpCountdown() {
   otpTimer = setInterval(update, 1000);
 }
 
-function updateOtpSlots(val) {
-  for (let i = 0; i < 4; i++) {
-    const slot = document.getElementById('otpSlot' + i);
-    if (!slot) continue;
-    slot.textContent = val[i] || '';
-    slot.classList.toggle('filled', i < val.length);
-    slot.classList.toggle('active', i === val.length && val.length < 4);
-  }
-}
-
 async function verifyOtp() {
-  const si = document.getElementById('otpSingleInput');
-  const code = (si.value || '').replace(/\D/g,'');
+  const code = ['otpD1','otpD2','otpD3','otpD4'].map(id => document.getElementById(id).value).join('');
   if (code.length !== 4) {
     document.getElementById('otpError').textContent = 'נא להזין קוד בן 4 ספרות / Please enter the 4-digit code';
     document.getElementById('otpError').classList.add('show');
     return;
   }
   document.getElementById('otpError').classList.remove('show');
-  si.disabled = true;
+  ['otpD1','otpD2','otpD3','otpD4'].forEach(id => document.getElementById(id).disabled = true);
   try {
     const resp = await fetch(OTP_VALIDATE_WEBHOOK_URL, {
       method: 'POST',
@@ -2019,25 +2042,20 @@ async function verifyOtp() {
     } else if (data && data.expired) {
       document.getElementById('otpError').textContent = 'הקוד פג תוקף — בקש קוד חדש / Code expired — please request a new code';
       document.getElementById('otpError').classList.add('show');
-      resetOtpInput();
+      ['otpD1','otpD2','otpD3','otpD4'].forEach(id => { document.getElementById(id).disabled = false; document.getElementById(id).value = ''; });
+      document.getElementById('otpD1').focus();
     } else {
       document.getElementById('otpError').textContent = 'קוד שגוי — נסה שנית / Incorrect code — please try again';
       document.getElementById('otpError').classList.add('show');
-      resetOtpInput();
+      ['otpD1','otpD2','otpD3','otpD4'].forEach(id => { document.getElementById(id).disabled = false; document.getElementById(id).value = ''; });
+      document.getElementById('otpD1').focus();
     }
   } catch(e) {
     document.getElementById('otpError').textContent = 'שגיאה — נסה שנית / Error — please try again';
     document.getElementById('otpError').classList.add('show');
-    resetOtpInput();
+    ['otpD1','otpD2','otpD3','otpD4'].forEach(id => { document.getElementById(id).disabled = false; document.getElementById(id).value = ''; });
+    document.getElementById('otpD1').focus();
   }
-}
-
-function resetOtpInput() {
-  const si = document.getElementById('otpSingleInput');
-  si.disabled = false;
-  si.value = '';
-  updateOtpSlots('');
-  si.focus();
 }
 
 async function resendOtp() {
@@ -2053,6 +2071,12 @@ function continueManually() {
   hideOtpBox();
   setLookupStatus('ממשיך מילוי ידני / Continuing manually', '#5a7a8a');
   otpCurrentId = null;
+}
+
+function updatePhoneHidden() {
+  var cc = document.getElementById('phoneCountryCode').value;
+  var num = document.getElementById('phoneNumberInput').value.trim();
+  document.getElementById('phoneHidden').value = cc + ' ' + num;
 }
 
 function setVal(name, value) {
@@ -2078,7 +2102,20 @@ function prefillForm(d) {
   setVal('firstName', d.firstName);
   setVal('lastName', d.lastName);
   setVal('email', d.email);
-  setVal('phone', d.phone);
+  // Phone — split stored "+XXX XXXXXXX" back into country code + number
+  if (d.phone) {
+    var phoneVal = d.phone;
+    var ccMatch = phoneVal.match(/^(\+\d+)\s*(.*)/);
+    if (ccMatch) {
+      var ccSel = document.getElementById('phoneCountryCode');
+      var matchOpt = Array.from(ccSel.options).find(o => o.value === ccMatch[1]);
+      if (matchOpt) ccSel.value = ccMatch[1];
+      document.getElementById('phoneNumberInput').value = ccMatch[2];
+    } else {
+      document.getElementById('phoneNumberInput').value = phoneVal;
+    }
+    updatePhoneHidden();
+  }
   setVal('dob', isoToDmy(d.dob));
   setSelect('gender', d.gender);
   setVal('city', d.city);
@@ -2126,26 +2163,22 @@ function prefillForm(d) {
   if (d.passportPhoto) {
     document.getElementById('passportPhotoUrl').value = d.passportPhoto;
     var ps = document.getElementById('passportUploadStatus');
-    if (ps) { ps.innerHTML = '<span class="existing-file">✅ תמונה קיימת במערכת / Photo on file</span>'; }
-    var pvb = document.getElementById('passportViewBtn'); if (pvb && d.passportPhoto) { pvb.href = d.passportPhoto; pvb.setAttribute('data-url', d.passportPhoto); pvb.style.display = 'inline-flex'; }
+    if (ps) { ps.innerHTML = '<span class="existing-file">✅ תמונה קיימת במערכת / Photo on file</span><br><a href="' + d.passportPhoto + '" target="_blank"><img src="' + d.passportPhoto + '" style="max-width:100%;max-height:120px;border-radius:8px;margin-top:6px;border:1.5px solid #c5dfe6;" /></a>'; }
   }
   if (d.nitroxPhoto) {
     document.getElementById('nitroxPhotoUrl').value = d.nitroxPhoto;
     var ns = document.getElementById('nitroxUploadStatus');
-    if (ns) { ns.innerHTML = '<span class="existing-file">✅ תמונה קיימת במערכת / Photo on file</span>'; }
-    var nvb = document.getElementById('nitroxViewBtn'); if (nvb && d.nitroxPhoto) { nvb.href = d.nitroxPhoto; nvb.setAttribute('data-url', d.nitroxPhoto); nvb.style.display = 'inline-flex'; }
+    if (ns) { ns.innerHTML = '<span class="existing-file">✅ תמונה קיימת במערכת / Photo on file</span><br><a href="' + d.nitroxPhoto + '" target="_blank"><img src="' + d.nitroxPhoto + '" style="max-width:100%;max-height:120px;border-radius:8px;margin-top:6px;border:1.5px solid #c5dfe6;" /></a>'; }
   }
   if (d.diveInsurancePhotoUrl) {
     document.getElementById('insurancePhotoUrl').value = d.diveInsurancePhotoUrl;
     var is2 = document.getElementById('insuranceUploadStatus');
-    if (is2) { is2.innerHTML = '<span class="existing-file">✅ תמונה קיימת במערכת / Photo on file</span>'; }
-    var ivb = document.getElementById('insuranceViewBtn'); if (ivb && d.diveInsurancePhotoUrl) { ivb.href = d.diveInsurancePhotoUrl; ivb.setAttribute('data-url', d.diveInsurancePhotoUrl); ivb.style.display = 'inline-flex'; }
+    if (is2) { is2.innerHTML = '<span class="existing-file">✅ תמונה קיימת במערכת / Photo on file</span><br><a href="' + d.diveInsurancePhotoUrl + '" target="_blank"><img src="' + d.diveInsurancePhotoUrl + '" style="max-width:100%;max-height:120px;border-radius:8px;margin-top:6px;border:1.5px solid #c5dfe6;" /></a>'; }
   }
   if (d.diveCertPhoto) {
     document.getElementById('certPhotoUrl').value = d.diveCertPhoto;
     var cs = document.getElementById('certUploadStatus');
-    if (cs) { cs.innerHTML = '<span class="existing-file">✅ תמונה קיימת במערכת / Photo on file</span>'; }
-    var cvb = document.getElementById('certViewBtn'); if (cvb && d.diveCertPhoto) { cvb.href = d.diveCertPhoto; cvb.setAttribute('data-url', d.diveCertPhoto); cvb.style.display = 'inline-flex'; }
+    if (cs) { cs.innerHTML = '<span class="existing-file">✅ תמונה קיימת במערכת / Photo on file</span><br><a href="' + d.diveCertPhoto + '" target="_blank"><img src="' + d.diveCertPhoto + '" style="max-width:100%;max-height:120px;border-radius:8px;margin-top:6px;border:1.5px solid #c5dfe6;" /></a>'; }
   }
   // Auto-check "returning customer" checkbox
   const returningCb = document.querySelector('[name="returningCustomer"]');
@@ -2204,20 +2237,24 @@ document.addEventListener('DOMContentLoaded', function() {
       hideOtpBox();
     }
   });
-  // Single OTP input — updates visual slots and auto-submits on 4 digits
-  const otpSingleInput = document.getElementById('otpSingleInput');
-  if (otpSingleInput) {
-    otpSingleInput.addEventListener('input', function() {
-      const val = this.value.replace(/\D/g,'').slice(0,4);
-      this.value = val;
-      updateOtpSlots(val);
-      if (val.length === 4) verifyOtp();
+  // 4-digit box auto-advance and auto-submit
+  ['otpD1','otpD2','otpD3','otpD4'].forEach((id, idx, arr) => {
+    const el = document.getElementById(id);
+    el.addEventListener('input', function() {
+      this.value = this.value.replace(/[^0-9]/g, '').slice(-1);
+      if (this.value && idx < arr.length - 1) {
+        document.getElementById(arr[idx + 1]).focus();
+      }
+      if (idx === arr.length - 1 && this.value) {
+        verifyOtp();
+      }
     });
-    // Make the visible slots clickable to focus the hidden input
-    document.getElementById('otpDigitsDisplay').addEventListener('click', function() {
-      otpSingleInput.focus();
+    el.addEventListener('keydown', function(e) {
+      if (e.key === 'Backspace' && !this.value && idx > 0) {
+        document.getElementById(arr[idx - 1]).focus();
+      }
     });
-  }
+  });
 });
 
 // Auto-format date fields as user types (inserts / after DD and MM)
