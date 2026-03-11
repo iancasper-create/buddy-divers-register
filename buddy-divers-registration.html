@@ -160,11 +160,13 @@
     .field.invalid .field-error { display:block; }
 
     /* PHONE WITH COUNTRY CODE */
-    .phone-input-wrap { display:flex; flex-direction:row; direction:ltr; border:1.5px solid var(--border); border-radius:9px; overflow:hidden; background:#fff; transition:border-color 0.2s, box-shadow 0.2s; }
-    .phone-input-wrap:focus-within { border-color:var(--teal); box-shadow:0 0 0 3px rgba(0,114,137,0.12); }
-    .field.invalid .phone-input-wrap { border-color:var(--error); }
-    .phone-country-select { border:none; outline:none; background:var(--light-bg); padding:8px 4px 8px 8px; font-size:13px; color:var(--text); font-family:'Heebo',sans-serif; cursor:pointer; border-right:1.5px solid var(--border); width:90px; min-width:90px; max-width:90px; direction:ltr; flex-shrink:0; appearance:none; }
-    .phone-number-input { border:none; outline:none; flex:1; padding:11px 8px 11px 10px; font-size:14px; color:var(--text); font-family:'Heebo',sans-serif; background:transparent; direction:ltr; min-width:0; width:100%; }
+    .phone-input-wrap { display:flex; flex-direction:row; direction:ltr; gap:8px; background:transparent; }
+    .phone-input-wrap:focus-within { }
+    .field.invalid .phone-country-select, .field.invalid .phone-number-input { border-color:var(--error); }
+    .phone-country-select { border:1.5px solid var(--border); border-radius:9px; outline:none; background:#fff; padding:11px 8px; font-size:13px; color:var(--text); font-family:'Heebo',sans-serif; cursor:pointer; width:90px; min-width:90px; max-width:90px; direction:ltr; flex-shrink:0; appearance:none; transition:border-color 0.2s, box-shadow 0.2s; }
+    .phone-country-select:focus { border-color:var(--teal); box-shadow:0 0 0 3px rgba(0,114,137,0.12); }
+    .phone-number-input { border:1.5px solid var(--border); border-radius:9px; outline:none; flex:1; padding:11px 14px; font-size:14px; color:var(--text); font-family:'Heebo',sans-serif; background:#fff; direction:ltr; min-width:0; width:100%; transition:border-color 0.2s, box-shadow 0.2s; }
+    .phone-number-input:focus { border-color:var(--teal); box-shadow:0 0 0 3px rgba(0,114,137,0.12); }
     .phone-number-input::placeholder { color:#b0c4cc; }
     /* EXISTING PHOTO PREVIEW LAYOUT */
     .upload-box-inner { display:flex; gap:12px; align-items:flex-start; }
