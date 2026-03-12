@@ -1050,7 +1050,7 @@ let _diverPhone = null;
 
 async function fetchDiverPhone(diverId) {
   try {
-    const res = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${DIVERS_TABLE}/${diverId}?fields[]=Phone`, {
+    const res = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${DIVERS_TABLE}/${diverId}`, {
       headers: { Authorization: `Bearer ${AIRTABLE_API_KEY}` }
     });
     const data = await res.json();
