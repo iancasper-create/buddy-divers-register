@@ -621,8 +621,6 @@
       <div class="rate-row">
         <span class="rate-label">שער דולר (ש"ח)</span>
         <input type="number" id="exchangeRate" step="0.0001" placeholder="0.0000" oninput="updateNisPreview()"/>
-        <span class="rate-label" style="margin-right:4px;">סימון בנק</span>
-        <input type="number" id="rateMarkup" step="0.01" value="0.05" style="width:80px;" oninput="applyMarkup()"/>
         <span id="rateStatus" class="rate-status loading">טוען שער...</span>
       </div>
 
@@ -1036,9 +1034,7 @@ async function fetchBoiRate() {
 
 function applyMarkup() {
   if (_boiBaseRate === null) return;
-  const markup = parseFloat(document.getElementById('rateMarkup').value) || 0;
-  const adjusted = _boiBaseRate + markup;
-  document.getElementById('exchangeRate').value = adjusted.toFixed(4);
+  document.getElementById('exchangeRate').value = _boiBaseRate.toFixed(4);
   updateNisPreview();
 }
 
@@ -1054,18 +1050,23 @@ let _diverPhone = null;
 
 async function fetchDiverPhone(diverId) {
   try {
-    // Fetch full diver record (no fields filter) so we can find the phone field whatever it's named
     const res = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${DIVERS_TABLE}/${diverId}`, {
       headers: { Authorization: `Bearer ${AIRTABLE_API_KEY}` }
     });
     const data = await res.json();
     const fields = data.fields || {};
-    // Log all field names to console so we can identify the correct one
-    console.log('Diver fields:', Object.keys(fields));
-    // Try common phone field name variants
-    const phoneField = fields['Mobile'] || fields['Phone'] || fields['טלפון'] || fields['נייד']
-      || fields['Mobile Phone'] || fields['Phone Number'] || fields['WhatsApp'] || null;
-    return phoneField || null;
+    console.log('Diver fields:', Object.keys(fields), fields);
+    // Only accept values that look like phone numbers (start with + or digit, no http)
+    const isPhone = v => v && typeof v === 'string' && !v.includes('http') && /^[\+\d]/.test(v.replace(/\s/g,''));
+    const candidates = ['Mobile', 'Phone', 'טלפון', 'נייד', 'Mobile Phone', 'Phone Number', 'WhatsApp'];
+    for (const key of candidates) {
+      if (isPhone(fields[key])) return fields[key];
+    }
+    // Last resort: scan all string fields for phone-like value
+    for (const val of Object.values(fields)) {
+      if (isPhone(val)) return val;
+    }
+    return null;
   } catch(e) {
     console.error('Phone fetch error:', e);
     return null;
