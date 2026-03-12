@@ -1075,9 +1075,12 @@ function buildPaymentHTML(booking, amount, nisAmount, rate, notes, paidSoFar, sa
           <div style="font-size:13px;color:#888;margin-top:4px;">${today}</div>
         </div>
         <div style="text-align:left;">
-          <div style="font-size:28px;font-weight:800;color:#007289;letter-spacing:-0.5px;">BUDDY</div>
-          <div style="font-size:13px;font-weight:600;color:#1B4F8A;letter-spacing:2px;margin-top:-4px;">DIVERS</div>
-          <div style="font-size:10px;color:#aaa;letter-spacing:1px;margin-top:1px;">LIVE YOUR DREAM</div>
+          <img id="paymentLogo" src="" style="height:62px;display:none;" alt="Buddy-Divers"/>
+          <div id="paymentLogoText">
+            <div style="font-size:28px;font-weight:800;color:#007289;letter-spacing:-0.5px;">BUDDY</div>
+            <div style="font-size:13px;font-weight:600;color:#1B4F8A;letter-spacing:2px;margin-top:-4px;">DIVERS</div>
+            <div style="font-size:10px;color:#aaa;letter-spacing:1px;margin-top:1px;">LIVE YOUR DREAM</div>
+          </div>
         </div>
       </div>
 
@@ -1150,6 +1153,23 @@ function buildPaymentHTML(booking, amount, nisAmount, rate, notes, paidSoFar, sa
   `;
 }
 
+// Pre-load logo as base64 to avoid CORS issues with html2canvas
+let _logoBase64 = null;
+async function preloadLogo() {
+  try {
+    const res = await fetch('https://res.cloudinary.com/dccbsfte0/image/upload/v1773063708/logo_hnmilh.png');
+    const blob = await res.blob();
+    return await new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onloadend = () => { _logoBase64 = reader.result; resolve(reader.result); };
+      reader.onerror = () => resolve(null);
+      reader.readAsDataURL(blob);
+    });
+  } catch(e) { return null; }
+}
+// Start loading logo immediately on page load
+preloadLogo();
+
 async function generatePaymentImage() {
   const idx = document.getElementById('diverSelect').value;
   if (idx === '') { alert('נא לבחור צולל תחילה'); return; }
@@ -1188,6 +1208,17 @@ async function generatePaymentImage() {
   // Render into hidden target
   const target = document.getElementById('jpgRenderTarget');
   target.innerHTML = buildPaymentHTML(booking, amount, nisAmount, rate, notes, paidSoFar, safari, typeLabel, today, tripDisplayName);
+
+  // Inject base64 logo if available, otherwise keep text fallback
+  if (_logoBase64) {
+    const logoEl = target.querySelector('#paymentLogo');
+    if (logoEl) {
+      logoEl.src = _logoBase64;
+      logoEl.style.display = 'block';
+      const textLogo = target.querySelector('#paymentLogoText');
+      if (textLogo) textLogo.style.display = 'none';
+    }
+  }
 
   // Wait a tick for images to load, then capture
   await new Promise(r => setTimeout(r, 600));
