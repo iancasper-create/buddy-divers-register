@@ -1056,13 +1056,12 @@ async function fetchDiverPhone(diverId) {
     const data = await res.json();
     const fields = data.fields || {};
     console.log('Diver fields:', Object.keys(fields), fields);
-    // Only accept values that look like phone numbers (start with + or digit, no http)
-    const isPhone = v => v && typeof v === 'string' && !v.includes('http') && /^[\+\d]/.test(v.replace(/\s/g,''));
+    // Strict phone pattern: only +, digits, spaces, dashes, parens — no letters, no slashes
+    const isPhone = v => v && typeof v === 'string' && /^\+?[\d\s\-().]{7,20}$/.test(v.trim());
     const candidates = ['Mobile', 'Phone', 'טלפון', 'נייד', 'Mobile Phone', 'Phone Number', 'WhatsApp'];
     for (const key of candidates) {
       if (isPhone(fields[key])) return fields[key];
     }
-    // Last resort: scan all string fields for phone-like value
     for (const val of Object.values(fields)) {
       if (isPhone(val)) return val;
     }
