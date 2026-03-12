@@ -1050,22 +1050,13 @@ let _diverPhone = null;
 
 async function fetchDiverPhone(diverId) {
   try {
-    const res = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${DIVERS_TABLE}/${diverId}`, {
+    const res = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${DIVERS_TABLE}/${diverId}?fields[]=Phone`, {
       headers: { Authorization: `Bearer ${AIRTABLE_API_KEY}` }
     });
     const data = await res.json();
-    const fields = data.fields || {};
-    console.log('Diver fields:', Object.keys(fields), fields);
-    // Strict phone pattern: only +, digits, spaces, dashes, parens — no letters, no slashes
-    const isPhone = v => v && typeof v === 'string' && /^\+?[\d\s\-().]{7,20}$/.test(v.trim());
-    const candidates = ['Mobile', 'Phone', 'טלפון', 'נייד', 'Mobile Phone', 'Phone Number', 'WhatsApp'];
-    for (const key of candidates) {
-      if (isPhone(fields[key])) return fields[key];
-    }
-    for (const val of Object.values(fields)) {
-      if (isPhone(val)) return val;
-    }
-    return null;
+    const phone = data.fields?.Phone || null;
+    console.log('Phone field value:', phone);
+    return phone;
   } catch(e) {
     console.error('Phone fetch error:', e);
     return null;
