@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-FOLLOWUP 2026-03-12 | Payments manager, sessionStorage token, E.164 phone -->
+<!-- BD-FOLLOWUP 2026-03-12 | Payment request JPG generator + WhatsApp button, BOI exchange rate -->
 <html lang="en" dir="ltr">
 <head>
 <meta charset="UTF-8"/>
@@ -305,13 +305,97 @@
     pointer-events: none;
   }
 
+  /* PAYMENT REQUEST */
+  .payment-type-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  .payment-type-btn {
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 8px;
+    text-align: center;
+    cursor: pointer;
+    background: white;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    transition: all 0.2s;
+    line-height: 1.4;
+  }
+  .payment-type-btn:hover { border-color: var(--teal); color: var(--teal); }
+  .payment-type-btn.selected { border-color: var(--teal); background: #e6f3f7; color: var(--teal); }
+  .payment-type-btn .pt-emoji { font-size: 20px; display: block; margin-bottom: 4px; }
+
+  .rate-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  .rate-row .rate-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+  }
+  .rate-row input {
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 7px 12px;
+    font-family: 'DM Mono', monospace;
+    font-size: 15px;
+    color: var(--text);
+    width: 110px;
+    outline: none;
+  }
+  .rate-row input:focus { border-color: var(--teal); }
+  .rate-row .rate-status {
+    font-size: 12px;
+    color: var(--green);
+    font-weight: 500;
+  }
+  .rate-row .rate-status.loading { color: var(--muted); }
+  .rate-row .rate-status.error { color: var(--red); }
+
+  .btn-generate {
+    background: linear-gradient(135deg, #007289, #1B4F8A);
+    color: white;
+    width: 100%;
+    padding: 14px;
+    font-size: 16px;
+    border-radius: 10px;
+    margin-top: 8px;
+    border: none;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-generate:hover { opacity: 0.92; }
+  .btn-generate:disabled { opacity: 0.5; cursor: not-allowed; }
+
   @media (max-width: 600px) {
     .field-row, .field-row.three { grid-template-columns: 1fr; }
     .summary-grid { grid-template-columns: 1fr; }
     .container { padding: 16px 12px 48px; }
     .card { padding: 20px 16px; }
+    .payment-type-grid { grid-template-columns: repeat(2, 1fr); }
   }
+
+
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
 
@@ -514,8 +598,77 @@
       <div class="msg error" id="saveError"></div>
     </div>
 
+    <!-- PAYMENT REQUEST -->
+    <div class="card">
+      <div class="card-title"><span class="step-badge">6</span> בקשת תשלום — Payment Request</div>
+
+      <div class="section-label">סוג תשלום</div>
+      <div class="payment-type-grid">
+        <div class="payment-type-btn selected" data-type="downpayment" onclick="selectPaymentType(this)">
+          <span class="pt-emoji">🔑</span>מקדמה<br/>Downpayment
+        </div>
+        <div class="payment-type-btn" data-type="final" onclick="selectPaymentType(this)">
+          <span class="pt-emoji">✅</span>תשלום סופי<br/>Final Payment
+        </div>
+        <div class="payment-type-btn" data-type="extras" onclick="selectPaymentType(this)">
+          <span class="pt-emoji">➕</span>תוספות<br/>Extras
+        </div>
+        <div class="payment-type-btn" data-type="custom" onclick="selectPaymentType(this)">
+          <span class="pt-emoji">✏️</span>מותאם אישית<br/>Custom
+        </div>
+      </div>
+
+      <div class="rate-row">
+        <span class="rate-label">שער דולר (ש"ח)</span>
+        <input type="number" id="exchangeRate" step="0.0001" placeholder="0.0000" oninput="updateNisPreview()"/>
+        <span class="rate-label" style="margin-right:4px;">סימון בנק</span>
+        <input type="number" id="rateMarkup" step="0.01" value="0.05" style="width:80px;" oninput="applyMarkup()"/>
+        <span id="rateStatus" class="rate-status loading">טוען שער...</span>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label>סכום לתשלום ($)</label>
+          <div class="currency-wrap">
+            <input type="number" id="paymentRequestAmount" placeholder="0" oninput="updateNisPreview()"/>
+          </div>
+        </div>
+        <div class="field">
+          <label>סכום בש"ח (חישוב אוטומטי)</label>
+          <input type="text" id="nisPreview" readonly placeholder="—" style="background:var(--bg);font-weight:700;color:var(--navy);"/>
+        </div>
+      </div>
+
+      <div class="field-row full">
+        <div class="field">
+          <label>פירוט / הערות לתשלום</label>
+          <textarea id="paymentRequestNotes" placeholder="לדוגמה: שדרוג קבין, ביטוח, כולל מיסים..." style="min-height:60px;"></textarea>
+        </div>
+      </div>
+
+      <button class="btn btn-generate" onclick="generatePaymentImage()">📸 צור תמונה לוואטסאפ</button>
+    </div>
+
   </div><!-- end formWrap -->
 </div><!-- end container -->
+
+<!-- JPG PREVIEW OVERLAY -->
+<div id="jpgPreviewOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:2000;overflow-y:auto;padding:24px 16px;">
+  <div style="background:white;border-radius:16px;max-width:520px;margin:0 auto;box-shadow:0 8px 40px rgba(0,0,0,0.3);overflow:hidden;">
+    <div style="background:#f0f7f9;padding:16px 20px;display:flex;gap:10px;align-items:center;border-bottom:1px solid #c5dfe6;flex-wrap:wrap;">
+      <button id="downloadJpgBtn" onclick="downloadJpg()" style="background:#007289;color:white;border:none;border-radius:8px;padding:10px 18px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;">⬇️ הורד תמונה</button>
+      <button id="whatsappBtn" onclick="openWhatsApp()" style="background:#25D366;color:white;border:none;border-radius:8px;padding:10px 18px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;">💬 פתח וואטסאפ</button>
+      <button onclick="document.getElementById('jpgPreviewOverlay').style.display='none'" style="background:white;color:#1a3a4a;border:1.5px solid #c5dfe6;border-radius:8px;padding:10px 16px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;">סגור</button>
+    </div>
+    <div style="padding:16px;background:#f8f8f8;text-align:center;">
+      <div id="jpgRenderMsg" style="font-size:13px;color:#5a7a8a;margin-bottom:8px;">מייצר תמונה...</div>
+      <img id="jpgOutput" style="max-width:100%;border-radius:8px;box-shadow:0 2px 12px rgba(0,0,0,0.15);display:none;" alt="Payment Request"/>
+    </div>
+  </div>
+</div>
+
+<!-- HIDDEN CANVAS RENDER TARGET (square 900x900) -->
+<div id="jpgRenderTarget" style="position:fixed;left:-9999px;top:0;width:900px;height:900px;overflow:hidden;background:white;font-family:Arial,sans-serif;" dir="rtl"></div>
 
 <script>
 let AIRTABLE_API_KEY = sessionStorage.getItem('bd_airtable_token') || '';
@@ -840,8 +993,257 @@ function formatCurrency(n) { return '$' + n.toLocaleString('en-US', { minimumFra
 function showMsg(id, type, text) { const el = document.getElementById(id); el.className = `msg ${type}`; el.textContent = text; el.style.display = 'block'; }
 function hideMsg(id) { document.getElementById(id).style.display = 'none'; }
 
+
+// ── PAYMENT REQUEST ───────────────────────────────────────────────
+let _boiBaseRate = null;
+let _selectedPaymentType = 'downpayment';
+
+function selectPaymentType(el) {
+  document.querySelectorAll('.payment-type-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+  _selectedPaymentType = el.dataset.type;
+  // Auto-suggest amount based on type and current summary
+  const safari = parseFloat(document.getElementById('safariPrice').value) || 0;
+  const existing = window._existingPayments || {};
+  const paidSoFar = (existing.tripPayment || 0);
+  if (_selectedPaymentType === 'downpayment' && safari > 0) {
+    document.getElementById('paymentRequestAmount').value = Math.round(safari / 2);
+  } else if (_selectedPaymentType === 'final' && safari > 0) {
+    document.getElementById('paymentRequestAmount').value = Math.max(0, safari - paidSoFar);
+  } else if (_selectedPaymentType !== 'custom') {
+    document.getElementById('paymentRequestAmount').value = '';
+  }
+  updateNisPreview();
+}
+
+async function fetchBoiRate() {
+  const statusEl = document.getElementById('rateStatus');
+  try {
+    const url = 'https://edge.boi.gov.il/FusionEdgeServer/sdmx/v2/data/dataflow/BOI.STATISTICS/EXR/1.0/RER_USD_ILS?format=json&startperiod=last';
+    const res = await fetch(url);
+    const data = await res.json();
+    // Navigate BOI JSON structure
+    const series = data?.data?.dataSets?.[0]?.series;
+    const seriesKey = Object.keys(series || {})[0];
+    const obs = series?.[seriesKey]?.observations;
+    const obsKey = Object.keys(obs || {}).sort().pop(); // latest
+    const rate = parseFloat(obs?.[obsKey]?.[0]);
+    if (isNaN(rate)) throw new Error('parse');
+    _boiBaseRate = rate;
+    applyMarkup();
+    statusEl.className = 'rate-status';
+    statusEl.textContent = `✅ בנק ישראל ${rate.toFixed(4)}`;
+  } catch(e) {
+    statusEl.className = 'rate-status error';
+    statusEl.textContent = 'שגיאה בטעינת שער — הזן ידנית';
+  }
+}
+
+function applyMarkup() {
+  if (_boiBaseRate === null) return;
+  const markup = parseFloat(document.getElementById('rateMarkup').value) || 0;
+  const adjusted = _boiBaseRate + markup;
+  document.getElementById('exchangeRate').value = adjusted.toFixed(4);
+  updateNisPreview();
+}
+
+function updateNisPreview() {
+  const rate = parseFloat(document.getElementById('exchangeRate').value) || 0;
+  const amount = parseFloat(document.getElementById('paymentRequestAmount').value) || 0;
+  const nis = amount * rate;
+  document.getElementById('nisPreview').value = nis > 0 ? '₪' + Math.round(nis).toLocaleString('he-IL') : '—';
+}
+
+let _jpgDataUrl = null;
+let _diverPhone = null;
+
+async function fetchDiverPhone(diverId) {
+  try {
+    const res = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${DIVERS_TABLE}/${diverId}?fields[]=Mobile`, {
+      headers: { Authorization: `Bearer ${AIRTABLE_API_KEY}` }
+    });
+    const data = await res.json();
+    return data.fields?.Mobile || null;
+  } catch(e) { return null; }
+}
+
+function buildPaymentHTML(booking, amount, nisAmount, rate, notes, paidSoFar, safari, typeLabel, today, tripDisplayName) {
+  return `
+    <div style="width:900px;height:900px;box-sizing:border-box;padding:52px 60px;background:white;display:flex;flex-direction:column;justify-content:space-between;">
+
+      <!-- HEADER -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0;">
+        <div>
+          <div style="font-size:26px;font-weight:700;color:#007289;">בקשת תשלום</div>
+          <div style="font-size:16px;color:#1B4F8A;font-weight:600;margin-top:2px;">${typeLabel}</div>
+          <div style="font-size:13px;color:#888;margin-top:4px;">${today}</div>
+        </div>
+        <img src="https://res.cloudinary.com/dccbsfte0/image/upload/v1773063708/logo_hnmilh.png" style="height:62px;" crossorigin="anonymous"/>
+      </div>
+
+      <div style="height:2px;background:linear-gradient(90deg,#007289,#1B4F8A);border-radius:2px;margin:18px 0;"></div>
+
+      <!-- DIVER + TRIP ROW -->
+      <div style="display:flex;gap:24px;margin-bottom:18px;">
+        <div style="flex:1;background:#f0f7f9;border-radius:12px;padding:16px 20px;">
+          <div style="font-size:11px;font-weight:700;color:#007289;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">צולל.ת</div>
+          <div style="font-size:19px;font-weight:700;color:#1a3a4a;">${booking.diverName}</div>
+        </div>
+        <div style="flex:1;background:#f0f7f9;border-radius:12px;padding:16px 20px;">
+          <div style="font-size:11px;font-weight:700;color:#007289;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">טיול</div>
+          <div style="font-size:17px;font-weight:600;color:#1a3a4a;">${tripDisplayName}</div>
+        </div>
+      </div>
+
+      <!-- AMOUNTS ROW -->
+      <div style="display:flex;gap:16px;margin-bottom:18px;">
+        ${safari > 0 ? `<div style="flex:1;border:1.5px solid #c5dfe6;border-radius:10px;padding:12px 16px;text-align:center;">
+          <div style="font-size:11px;color:#888;font-weight:600;margin-bottom:4px;">מחיר סאפרי</div>
+          <div style="font-size:17px;font-weight:700;color:#1a3a4a;">$${safari.toLocaleString('en-US')}</div>
+        </div>` : ''}
+        ${paidSoFar > 0 ? `<div style="flex:1;border:1.5px solid #c5dfe6;border-radius:10px;padding:12px 16px;text-align:center;">
+          <div style="font-size:11px;color:#888;font-weight:600;margin-bottom:4px;">שולם עד כה</div>
+          <div style="font-size:17px;font-weight:700;color:#22a06b;">$${paidSoFar.toLocaleString('en-US')}</div>
+        </div>` : ''}
+        ${notes ? `<div style="flex:2;border:1.5px solid #c5dfe6;border-radius:10px;padding:12px 16px;">
+          <div style="font-size:11px;color:#888;font-weight:600;margin-bottom:4px;">פירוט</div>
+          <div style="font-size:14px;color:#1a3a4a;">${notes}</div>
+        </div>` : ''}
+      </div>
+
+      <!-- BIG AMOUNT BOX -->
+      <div style="background:linear-gradient(135deg,#007289,#1B4F8A);border-radius:16px;padding:24px 32px;color:white;margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;">
+        <div>
+          <div style="font-size:13px;opacity:0.75;margin-bottom:6px;">סכום לתשלום</div>
+          <div style="font-size:48px;font-weight:700;line-height:1;">$${amount.toLocaleString('en-US')}</div>
+          <div style="font-size:22px;opacity:0.85;margin-top:8px;">₪${nisAmount.toLocaleString('he-IL')}</div>
+        </div>
+        <div style="text-align:left;opacity:0.7;font-size:13px;">
+          <div>שער</div>
+          <div style="font-size:18px;font-weight:600;opacity:1;">₪${rate.toFixed(4)}</div>
+          <div>לדולר</div>
+        </div>
+      </div>
+
+      <!-- BANK DETAILS -->
+      <div style="display:flex;gap:16px;margin-bottom:18px;">
+        <div style="flex:1;border:2px solid #c5dfe6;border-radius:12px;padding:16px 20px;background:#f8fcfd;">
+          <div style="font-size:12px;font-weight:700;color:#007289;margin-bottom:10px;">העברה בנקאית</div>
+          <div style="font-size:13px;color:#1a3a4a;line-height:2;">
+            <span style="color:#888;">שם:</span> באדי-דייברס בע"מ<br/>
+            <span style="color:#888;">בנק:</span> 20 — מזרחי טפחות<br/>
+            <span style="color:#888;">סניף:</span> 422 פולג<br/>
+            <span style="color:#888;">חשבון:</span> 625145
+          </div>
+        </div>
+        <div style="flex:1;border:2px dashed #c5dfe6;border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#f8fcfd;">
+          <div style="font-size:13px;font-weight:600;color:#1a3a4a;margin-bottom:8px;">💳 תשלום מאובטח</div>
+          <div style="font-size:14px;font-weight:700;color:#007289;">https://bit.ly/3lisAOd</div>
+        </div>
+      </div>
+
+      <!-- FOOTER -->
+      <div style="text-align:center;font-size:11px;color:#bbb;border-top:1px solid #eee;padding-top:12px;">
+        Buddy-Divers · buddy-divers.com
+      </div>
+    </div>
+  `;
+}
+
+async function generatePaymentImage() {
+  const idx = document.getElementById('diverSelect').value;
+  if (idx === '') { alert('נא לבחור צולל תחילה'); return; }
+  const booking = currentBookings[idx];
+
+  const amount = parseFloat(document.getElementById('paymentRequestAmount').value) || 0;
+  if (amount === 0) { alert('נא להזין סכום לתשלום'); return; }
+
+  const rate = parseFloat(document.getElementById('exchangeRate').value) || 0;
+  const nisAmount = Math.round(amount * rate);
+  const notes = document.getElementById('paymentRequestNotes').value.trim();
+  const safari = parseFloat(document.getElementById('safariPrice').value) || 0;
+  const existing = window._existingPayments || {};
+  const paidSoFar = (existing.tripPayment||0)+(existing.flightPayment||0)+(existing.hotelPayment||0)+(existing.extrasPayment||0);
+
+  const typeLabels = { downpayment:'מקדמה', final:'תשלום סופי', extras:'תוספות', custom:'בקשת תשלום' };
+  const typeLabel = typeLabels[_selectedPaymentType] || 'בקשת תשלום';
+  const today = new Date().toLocaleDateString('he-IL', { day:'2-digit', month:'2-digit', year:'numeric' });
+
+  const tripNames = {
+    '260301':'תאילנד — מרץ 2026', '260828':'פיג׳י / טונגה — אוגוסט 2026',
+    '261022':'גלפגוס — אוקטובר 2026', '271014':'גלפגוס — אוקטובר 2027',
+  };
+  const tripDisplayName = tripNames[booking.tripId] || `טיול ${booking.tripId}`;
+
+  // Show overlay with loading state
+  _jpgDataUrl = null;
+  _diverPhone = null;
+  document.getElementById('jpgOutput').style.display = 'none';
+  document.getElementById('jpgRenderMsg').textContent = 'מייצר תמונה...';
+  document.getElementById('jpgPreviewOverlay').style.display = 'block';
+  document.getElementById('downloadJpgBtn').disabled = true;
+  document.getElementById('whatsappBtn').textContent = '💬 טוען מספר...';
+  document.getElementById('whatsappBtn').disabled = true;
+
+  // Render into hidden target
+  const target = document.getElementById('jpgRenderTarget');
+  target.innerHTML = buildPaymentHTML(booking, amount, nisAmount, rate, notes, paidSoFar, safari, typeLabel, today, tripDisplayName);
+
+  // Wait a tick for images to load, then capture
+  await new Promise(r => setTimeout(r, 600));
+
+  try {
+    const canvas = await html2canvas(target, {
+      width: 900, height: 900, scale: 2,
+      useCORS: true, allowTaint: false,
+      backgroundColor: '#ffffff', logging: false
+    });
+    _jpgDataUrl = canvas.toDataURL('image/jpeg', 0.92);
+    const img = document.getElementById('jpgOutput');
+    img.src = _jpgDataUrl;
+    img.style.display = 'block';
+    document.getElementById('jpgRenderMsg').textContent = 'מוכן לשליחה 👇';
+    document.getElementById('downloadJpgBtn').disabled = false;
+  } catch(e) {
+    document.getElementById('jpgRenderMsg').textContent = 'שגיאה ביצירת תמונה';
+    console.error(e);
+  }
+
+  // Fetch diver phone in parallel
+  if (booking.diverId) {
+    _diverPhone = await fetchDiverPhone(booking.diverId);
+  }
+  if (_diverPhone) {
+    document.getElementById('whatsappBtn').textContent = '💬 פתח וואטסאפ';
+    document.getElementById('whatsappBtn').disabled = false;
+  } else {
+    document.getElementById('whatsappBtn').textContent = '💬 מספר לא נמצא';
+  }
+}
+
+function downloadJpg() {
+  if (!_jpgDataUrl) return;
+  const idx = document.getElementById('diverSelect').value;
+  const booking = currentBookings[idx];
+  const a = document.createElement('a');
+  a.href = _jpgDataUrl;
+  a.download = `payment-request-${booking.diverName.replace(/\s+/g,'-')}-${booking.tripId}.jpg`;
+  a.click();
+}
+
+function openWhatsApp() {
+  if (!_diverPhone) return;
+  // Phone is stored in E.164 format e.g. +972542323567 — strip + for wa.me
+  const phone = _diverPhone.replace(/\D/g, '');
+  window.open(`https://wa.me/${phone}`, '_blank');
+}
+
 // Allow pressing Enter in trip ID field
 document.getElementById('tripIdInput').addEventListener('keydown', e => { if (e.key === 'Enter') searchTrip(); });
+
+// Fetch BOI rate on page load
+fetchBoiRate();
+
 </script>
 </body>
 </html>
