@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-FOLLOWUP 2026-03-12 | Payment request JPG generator + WhatsApp button, BOI exchange rate -->
+<!-- BD-FOLLOWUP 2026-03-12 | WhatsApp send via Cloudinary upload + Make webhook (Scenario 4) -->
 <html lang="en" dir="ltr">
 <head>
 <meta charset="UTF-8"/>
@@ -655,7 +655,7 @@
   <div style="background:white;border-radius:16px;max-width:520px;margin:0 auto;box-shadow:0 8px 40px rgba(0,0,0,0.3);overflow:hidden;">
     <div style="background:#f0f7f9;padding:16px 20px;display:flex;gap:10px;align-items:center;border-bottom:1px solid #c5dfe6;flex-wrap:wrap;">
       <button id="downloadJpgBtn" onclick="downloadJpg()" style="background:#007289;color:white;border:none;border-radius:8px;padding:10px 18px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;">⬇️ הורד תמונה</button>
-      <button id="whatsappBtn" onclick="openWhatsApp()" style="background:#25D366;color:white;border:none;border-radius:8px;padding:10px 18px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;">💬 פתח וואטסאפ</button>
+      <button id="whatsappBtn" onclick="openWhatsApp()" style="background:#25D366;color:white;border:none;border-radius:8px;padding:10px 18px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;">💬 שלח וואטסאפ</button>
       <button onclick="document.getElementById('jpgPreviewOverlay').style.display='none'" style="background:white;color:#1a3a4a;border:1.5px solid #c5dfe6;border-radius:8px;padding:10px 16px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;">סגור</button>
     </div>
     <div style="padding:16px;background:#f8f8f8;text-align:center;">
@@ -1245,7 +1245,7 @@ async function generatePaymentImage() {
     _diverPhone = await fetchDiverPhone(booking.diverId);
   }
   if (_diverPhone) {
-    document.getElementById('whatsappBtn').textContent = '💬 פתח וואטסאפ';
+    document.getElementById('whatsappBtn').textContent = '💬 שלח וואטסאפ';
     document.getElementById('whatsappBtn').disabled = false;
   } else {
     document.getElementById('whatsappBtn').textContent = '💬 מספר לא נמצא';
@@ -1262,11 +1262,71 @@ function downloadJpg() {
   a.click();
 }
 
-function openWhatsApp() {
-  if (!_diverPhone) return;
-  // Phone is stored in E.164 format e.g. +972542323567 — strip + for wa.me
-  const phone = _diverPhone.replace(/\D/g, '');
-  window.open(`https://wa.me/${phone}`, '_blank');
+async function openWhatsApp() {
+  if (!_diverPhone || !_jpgDataUrl) return;
+
+  const btn = document.getElementById('whatsappBtn');
+  btn.disabled = true;
+  btn.textContent = '💬 מעלה תמונה...';
+
+  try {
+    // Step 1: Upload JPG to Cloudinary
+    const blob = await (await fetch(_jpgDataUrl)).blob();
+    const formData = new FormData();
+    formData.append('file', blob, 'payment-request.jpg');
+    formData.append('upload_preset', 'buddy_divers_uploads');
+    formData.append('folder', 'payment_requests');
+
+    const cloudRes = await fetch('https://api.cloudinary.com/v1_1/dccbsfte0/image/upload', {
+      method: 'POST',
+      body: formData
+    });
+    const cloudData = await cloudRes.json();
+    if (!cloudData.secure_url) throw new Error('Cloudinary upload failed');
+
+    const imageUrl = cloudData.secure_url;
+    btn.textContent = '💬 שולח וואטסאפ...';
+
+    // Step 2: Send to Make webhook → WhatsApp API
+    const idx = document.getElementById('diverSelect').value;
+    const booking = currentBookings[idx];
+    const amount = parseFloat(document.getElementById('paymentRequestAmount').value) || 0;
+    const typeLabels = { downpayment:'מקדמה', final:'תשלום סופי', extras:'תוספות', custom:'בקשת תשלום' };
+    const typeLabel = typeLabels[_selectedPaymentType] || 'בקשת תשלום';
+    const caption = `${typeLabel} — ${booking.diverName} — $${amount.toLocaleString('en-US')}`;
+
+    const makeRes = await fetch('https://hook.eu1.make.com/yabs6aeja0bz6eoxw29p8t9tpgqi7tio', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        phone: _diverPhone,
+        imageUrl: imageUrl,
+        caption: caption
+      })
+    });
+
+    if (makeRes.ok) {
+      btn.textContent = '✅ נשלח!';
+      btn.style.background = '#22a06b';
+      setTimeout(() => {
+        btn.textContent = '💬 שלח וואטסאפ';
+        btn.style.background = '#25D366';
+        btn.disabled = false;
+      }, 3000);
+    } else {
+      throw new Error('Make webhook failed');
+    }
+
+  } catch(e) {
+    console.error('WhatsApp send error:', e);
+    btn.textContent = '❌ שגיאה — נסה שוב';
+    btn.style.background = '#d93f3f';
+    btn.disabled = false;
+    setTimeout(() => {
+      btn.textContent = '💬 שלח וואטסאפ';
+      btn.style.background = '#25D366';
+    }, 3000);
+  }
 }
 
 // Allow pressing Enter in trip ID field
