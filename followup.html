@@ -1019,20 +1019,15 @@ function selectPaymentType(el) {
 async function fetchBoiRate() {
   const statusEl = document.getElementById('rateStatus');
   try {
-    const url = 'https://edge.boi.gov.il/FusionEdgeServer/sdmx/v2/data/dataflow/BOI.STATISTICS/EXR/1.0/RER_USD_ILS?format=json&startperiod=last';
-    const res = await fetch(url);
+    // Use frankfurter API - no CORS issues, reliable USD/ILS rate
+    const res = await fetch('https://api.frankfurter.app/latest?from=USD&to=ILS');
     const data = await res.json();
-    // Navigate BOI JSON structure
-    const series = data?.data?.dataSets?.[0]?.series;
-    const seriesKey = Object.keys(series || {})[0];
-    const obs = series?.[seriesKey]?.observations;
-    const obsKey = Object.keys(obs || {}).sort().pop(); // latest
-    const rate = parseFloat(obs?.[obsKey]?.[0]);
-    if (isNaN(rate)) throw new Error('parse');
+    const rate = data?.rates?.ILS;
+    if (!rate || isNaN(rate)) throw new Error('parse');
     _boiBaseRate = rate;
     applyMarkup();
     statusEl.className = 'rate-status';
-    statusEl.textContent = `✅ בנק ישראל ${rate.toFixed(4)}`;
+    statusEl.textContent = `✅ שער בסיס ${rate.toFixed(4)}`;
   } catch(e) {
     statusEl.className = 'rate-status error';
     statusEl.textContent = 'שגיאה בטעינת שער — הזן ידנית';
@@ -1059,12 +1054,22 @@ let _diverPhone = null;
 
 async function fetchDiverPhone(diverId) {
   try {
-    const res = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${DIVERS_TABLE}/${diverId}?fields[]=Mobile`, {
+    // Fetch full diver record (no fields filter) so we can find the phone field whatever it's named
+    const res = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${DIVERS_TABLE}/${diverId}`, {
       headers: { Authorization: `Bearer ${AIRTABLE_API_KEY}` }
     });
     const data = await res.json();
-    return data.fields?.Mobile || null;
-  } catch(e) { return null; }
+    const fields = data.fields || {};
+    // Log all field names to console so we can identify the correct one
+    console.log('Diver fields:', Object.keys(fields));
+    // Try common phone field name variants
+    const phoneField = fields['Mobile'] || fields['Phone'] || fields['טלפון'] || fields['נייד']
+      || fields['Mobile Phone'] || fields['Phone Number'] || fields['WhatsApp'] || null;
+    return phoneField || null;
+  } catch(e) {
+    console.error('Phone fetch error:', e);
+    return null;
+  }
 }
 
 function buildPaymentHTML(booking, amount, nisAmount, rate, notes, paidSoFar, safari, typeLabel, today, tripDisplayName) {
