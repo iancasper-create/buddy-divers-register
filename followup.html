@@ -1146,7 +1146,7 @@ function buildPaymentHTML(booking, amount, nisAmount, rate, notes, paidSoFar, sa
       </div>`;
     } else {
       const total = safari + (flightAmt||0) + (hotelAmt||0) + (extrasAmt||0);
-      const row = (label, val) => `<tr><td style="color:#555;font-weight:400;padding:2px 12px 2px 0;white-space:nowrap;">${label}:</td><td style="font-weight:700;text-align:left;padding:2px 0;">$${val.toLocaleString('en-US')}</td></tr>`;
+      const row = (label, val) => `<tr><td style="color:#555;font-weight:400;padding:2px 0 2px 16px;white-space:nowrap;text-align:right;">${label}:</td><td style="font-weight:700;text-align:right;padding:2px 0;white-space:nowrap;direction:ltr;">$${val.toLocaleString('en-US')}</td></tr>`;
       costsHTML = `<div style="background:#f0f7f9;border:1.5px solid #c5dfe6;border-radius:10px;padding:12px 16px;">
         <div style="font-size:17px;color:#007289;font-weight:700;margin-bottom:8px;">פירוט עלויות</div>
         <table style="width:100%;border-collapse:collapse;font-size:14px;color:#1a3a4a;direction:rtl;">
@@ -1155,7 +1155,7 @@ function buildPaymentHTML(booking, amount, nisAmount, rate, notes, paidSoFar, sa
           ${hotelAmt > 0 ? row('מלון', hotelAmt) : ''}
           ${extrasAmt > 0 ? row('תוספות', extrasAmt) : ''}
           <tr><td colspan="2" style="padding:0;"><div style="border-top:1px solid #c5dfe6;margin:4px 0;"></div></td></tr>
-          <tr><td style="color:#007289;font-weight:700;padding:2px 12px 2px 0;">סה"כ:</td><td style="font-weight:700;color:#007289;text-align:left;">$${total.toLocaleString('en-US')}</td></tr>
+          <tr><td style="color:#007289;font-weight:700;padding:2px 0 2px 16px;text-align:right;">סה"כ:</td><td style="font-weight:700;color:#007289;text-align:right;direction:ltr;">$${total.toLocaleString('en-US')}</td></tr>
         </table>
       </div>`;
     }
