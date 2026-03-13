@@ -1142,18 +1142,18 @@ function buildPaymentHTML(booking, amount, nisAmount, rate, notes, paidSoFar, sa
     if (!hasExtras) {
       costsHTML = `<div style="flex:1;border:1.5px solid #c5dfe6;border-radius:10px;padding:12px 16px;text-align:center;">
         <div style="font-size:11px;color:#888;font-weight:600;margin-bottom:4px;">מחיר סאפרי</div>
-        <div style="font-size:17px;font-weight:700;color:#1a3a4a;">$\${safari.toLocaleString('en-US')}</div>
+        <div style="font-size:17px;font-weight:700;color:#1a3a4a;">$${safari.toLocaleString('en-US')}</div>
       </div>`;
     } else {
       const total = safari + (flightAmt||0) + (hotelAmt||0) + (extrasAmt||0);
       costsHTML = `<div style="flex:2;border:1.5px solid #c5dfe6;border-radius:10px;padding:12px 16px;">
         <div style="font-size:11px;color:#888;font-weight:600;margin-bottom:6px;">פירוט עלויות</div>
         <div style="font-size:13px;color:#1a3a4a;line-height:1.9;">
-          <span style="color:#888;">סאפרי:</span> <strong>$\${safari.toLocaleString('en-US')}</strong><br/>
-          \${flightAmt > 0 ? '<span style="color:#888;">טיסות:</span> <strong>$' + flightAmt.toLocaleString('en-US') + '</strong><br/>' : ''}
-          \${hotelAmt > 0 ? '<span style="color:#888;">מלון:</span> <strong>$' + hotelAmt.toLocaleString('en-US') + '</strong><br/>' : ''}
-          \${extrasAmt > 0 ? '<span style="color:#888;">תוספות:</span> <strong>$' + extrasAmt.toLocaleString('en-US') + '</strong><br/>' : ''}
-          <div style="border-top:1px solid #c5dfe6;margin-top:4px;padding-top:4px;font-size:13px;font-weight:700;color:#007289;">סה"כ: $\${total.toLocaleString('en-US')}</div>
+          <span style="color:#888;">סאפרי:</span> <strong>$${safari.toLocaleString('en-US')}</strong><br/>
+          ${flightAmt > 0 ? '<span style="color:#888;">טיסות:</span> <strong>$' + flightAmt.toLocaleString('en-US') + '</strong><br/>' : ''}
+          ${hotelAmt > 0 ? '<span style="color:#888;">מלון:</span> <strong>$' + hotelAmt.toLocaleString('en-US') + '</strong><br/>' : ''}
+          ${extrasAmt > 0 ? '<span style="color:#888;">תוספות:</span> <strong>$' + extrasAmt.toLocaleString('en-US') + '</strong><br/>' : ''}
+          <div style="border-top:1px solid #c5dfe6;margin-top:4px;padding-top:4px;font-size:13px;font-weight:700;color:#007289;">סה"כ: $${total.toLocaleString('en-US')}</div>
         </div>
       </div>`;
     }
@@ -1166,8 +1166,8 @@ function buildPaymentHTML(booking, amount, nisAmount, rate, notes, paidSoFar, sa
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0;">
         <div>
           <div style="font-size:26px;font-weight:700;color:#007289;">בקשת תשלום</div>
-          <div style="font-size:16px;color:#1B4F8A;font-weight:600;margin-top:2px;">\${typeLabel}</div>
-          <div style="font-size:13px;color:#888;margin-top:4px;">\${today}</div>
+          <div style="font-size:16px;color:#1B4F8A;font-weight:600;margin-top:2px;">${typeLabel}</div>
+          <div style="font-size:13px;color:#888;margin-top:4px;">${today}</div>
         </div>
         <div style="text-align:left;">
           <img id="paymentLogo" src="" style="height:62px;display:none;" alt="Buddy-Divers"/>
@@ -1185,34 +1185,34 @@ function buildPaymentHTML(booking, amount, nisAmount, rate, notes, paidSoFar, sa
       <div style="display:flex;gap:24px;margin-bottom:18px;">
         <div style="flex:1;background:#f0f7f9;border-radius:12px;padding:16px 20px;">
           <div style="font-size:17px;font-weight:700;color:#007289;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">צולל.ת</div>
-          <div style="font-size:19px;font-weight:700;color:#1a3a4a;">\${booking.diverName}</div>
+          <div style="font-size:19px;font-weight:700;color:#1a3a4a;">${booking.diverName}</div>
         </div>
         <div style="flex:1;background:#f0f7f9;border-radius:12px;padding:16px 20px;">
           <div style="font-size:17px;font-weight:700;color:#007289;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">הזמנה</div>
-          <div style="font-size:15px;font-weight:700;color:#1a3a4a;">\${booking.tripId}</div>
-          \${tripCountry ? '<div style="font-size:13px;color:#555;margin-top:3px;">' + tripCountry + '</div>' : ''}
+          <div style="font-size:15px;font-weight:700;color:#1a3a4a;">${booking.tripId}</div>
+          ${tripCountry ? '<div style="font-size:13px;color:#555;margin-top:3px;">' + tripCountry + '</div>' : ''}
         </div>
       </div>
 
       <!-- AMOUNTS ROW -->
       <div style="display:flex;gap:16px;margin-bottom:18px;">
-        \${costsHTML}
-        \${paidSoFar > 0 ? '<div style="flex:1;border:1.5px solid #c5dfe6;border-radius:10px;padding:12px 16px;text-align:center;"><div style="font-size:11px;color:#888;font-weight:600;margin-bottom:4px;">שולם עד כה</div><div style="font-size:17px;font-weight:700;color:#22a06b;">$' + paidSoFar.toLocaleString('en-US') + '</div></div>' : ''}
-        \${notes ? '<div style="flex:2;border:1.5px solid #c5dfe6;border-radius:10px;padding:12px 16px;"><div style="font-size:11px;color:#888;font-weight:600;margin-bottom:4px;">פירוט</div><div style="font-size:14px;color:#1a3a4a;">' + notes + '</div></div>' : ''}
+        ${costsHTML}
+        ${paidSoFar > 0 ? '<div style="flex:1;border:1.5px solid #c5dfe6;border-radius:10px;padding:12px 16px;text-align:center;"><div style="font-size:11px;color:#888;font-weight:600;margin-bottom:4px;">שולם עד כה</div><div style="font-size:17px;font-weight:700;color:#22a06b;">$' + paidSoFar.toLocaleString('en-US') + '</div></div>' : ''}
+        ${notes ? '<div style="flex:2;border:1.5px solid #c5dfe6;border-radius:10px;padding:12px 16px;"><div style="font-size:11px;color:#888;font-weight:600;margin-bottom:4px;">פירוט</div><div style="font-size:14px;color:#1a3a4a;">' + notes + '</div></div>' : ''}
       </div>
 
       <!-- BIG AMOUNT BOX -->
       <div style="background:linear-gradient(135deg,#007289,#1B4F8A);border-radius:16px;padding:24px 32px;color:white;margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;">
         <div>
           <div style="font-size:13px;opacity:0.75;margin-bottom:6px;">סכום לתשלום</div>
-          <div style="font-size:42px;font-weight:700;line-height:1;">₪\${nisAmount.toLocaleString('he-IL')}</div>
-          <div style="font-size:20px;opacity:0.75;margin-top:8px;">$\${amount.toLocaleString('en-US')}</div>
+          <div style="font-size:42px;font-weight:700;line-height:1;">₪${nisAmount.toLocaleString('he-IL')}</div>
+          <div style="font-size:20px;opacity:0.75;margin-top:8px;">$${amount.toLocaleString('en-US')}</div>
         </div>
         <div style="text-align:left;opacity:0.7;font-size:12px;">
           <div>שער העברה</div>
-          <div style="font-size:17px;font-weight:600;opacity:1;">₪\${rate.toFixed(4)}</div>
+          <div style="font-size:17px;font-weight:600;opacity:1;">₪${rate.toFixed(4)}</div>
           <div>לדולר</div>
-          \${rateTime ? '<div style="font-size:10px;margin-top:4px;opacity:0.6;">' + rateTime + '</div>' : ''}
+          ${rateTime ? '<div style="font-size:10px;margin-top:4px;opacity:0.6;">' + rateTime + '</div>' : ''}
         </div>
       </div>
 
