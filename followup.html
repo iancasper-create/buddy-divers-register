@@ -1296,9 +1296,9 @@ async function generatePaymentImage() {
   // Render into hidden target
   const target = document.getElementById('jpgRenderTarget');
   const rateTimeStr = (document.getElementById('boiRateTime') && document.getElementById('boiRateTime').textContent) || '';
-  const flightAmt = (window._existingPayments && window._existingPayments.flightPayment) || 0;
-  const hotelAmt = (window._existingPayments && window._existingPayments.hotelPayment) || 0;
-  const extrasAmt = (window._existingPayments && window._existingPayments.extrasPayment) || 0;
+  const flightAmt = (parseFloat(document.getElementById('flightPayment').value) || 0) + ((window._existingPayments && window._existingPayments.flightPayment) || 0);
+  const hotelAmt = (parseFloat(document.getElementById('hotelPayment').value) || 0) + ((window._existingPayments && window._existingPayments.hotelPayment) || 0);
+  const extrasAmt = (parseFloat(document.getElementById('extrasPayment').value) || 0) + ((window._existingPayments && window._existingPayments.extrasPayment) || 0);
   target.innerHTML = buildPaymentHTML(booking, amount, nisAmount, rate, notes, paidSoFar, safari, typeLabel, today, tripDisplayName, rateTimeStr, flightAmt, hotelAmt, extrasAmt);
 
   // Inject base64 logo if available, otherwise keep text fallback
