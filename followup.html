@@ -1127,7 +1127,7 @@ async function fetchDiverPhone(diverId) {
   }
 }
 
-function buildPaymentHTML(booking, amount, nisAmount, rate, notes, paidSoFar, safari, typeLabel, today, tripDisplayName, rateTime, flightAmt, hotelAmt, extrasAmt) {
+function buildPaymentHTML(booking, amount, nisAmount, rate, notes, paidSoFar, safari, typeLabel, today, tripDisplayName, rateTime, flightAmt, hotelAmt, extrasAmt, extrasNotes) {
   // Trip country mapping
   const tripCountries = {
     '260301': 'תאילנד', '260328': 'תאילנד', '260828': 'פיג׳י / טונגה',
@@ -1141,7 +1141,7 @@ function buildPaymentHTML(booking, amount, nisAmount, rate, notes, paidSoFar, sa
   if (safari > 0) {
     if (!hasExtras) {
       costsHTML = `<div style="flex:1;background:#f0f7f9;border:1.5px solid #c5dfe6;border-radius:10px;padding:12px 16px;text-align:center;">
-        <div style="font-size:17px;color:#007289;font-weight:700;margin-bottom:4px;">מחיר סאפרי</div>
+        <div style="font-size:17px;color:#007289;font-weight:700;margin-bottom:4px;">מחיר ספארי</div>
         <div style="font-size:18px;font-weight:700;color:#1a3a4a;">$${safari.toLocaleString('en-US')}</div>
       </div>`;
     } else {
@@ -1149,7 +1149,7 @@ function buildPaymentHTML(booking, amount, nisAmount, rate, notes, paidSoFar, sa
       costsHTML = `<div style="flex:2;background:#f0f7f9;border:1.5px solid #c5dfe6;border-radius:10px;padding:12px 16px;">
         <div style="font-size:17px;color:#007289;font-weight:700;margin-bottom:6px;">פירוט עלויות</div>
         <div style="font-size:14px;color:#1a3a4a;line-height:1.9;font-weight:600;">
-          <span style="color:#555;font-weight:400;">סאפרי:</span> <strong>$${safari.toLocaleString('en-US')}</strong><br/>
+          <span style="color:#555;font-weight:400;">ספארי:</span> <strong>$${safari.toLocaleString('en-US')}</strong><br/>
           ${flightAmt > 0 ? '<span style="color:#555;font-weight:400;">טיסות:</span> <strong>$' + flightAmt.toLocaleString('en-US') + '</strong><br/>' : ''}
           ${hotelAmt > 0 ? '<span style="color:#555;font-weight:400;">מלון:</span> <strong>$' + hotelAmt.toLocaleString('en-US') + '</strong><br/>' : ''}
           ${extrasAmt > 0 ? '<span style="color:#555;font-weight:400;">תוספות:</span> <strong>$' + extrasAmt.toLocaleString('en-US') + '</strong><br/>' : ''}
@@ -1197,7 +1197,10 @@ function buildPaymentHTML(booking, amount, nisAmount, rate, notes, paidSoFar, sa
       <div style="display:flex;gap:16px;margin-bottom:18px;">
         ${costsHTML}
         ${paidSoFar > 0 ? '<div style="flex:1;background:#f0f7f9;border:1.5px solid #c5dfe6;border-radius:10px;padding:12px 16px;text-align:center;"><div style="font-size:17px;color:#007289;font-weight:700;margin-bottom:4px;">שולם עד כה</div><div style="font-size:17px;font-weight:700;color:#22a06b;">$' + paidSoFar.toLocaleString('en-US') + '</div></div>' : ''}
-        ${notes ? '<div style="flex:2;background:#f0f7f9;border:1.5px solid #c5dfe6;border-radius:10px;padding:12px 16px;"><div style="font-size:17px;color:#007289;font-weight:700;margin-bottom:6px;">הערות</div><div style="font-size:14px;font-weight:600;color:#1a3a4a;">' + notes + '</div></div>' : ''}
+        ${(notes || extrasNotes) ? `<div style="flex:2;display:flex;flex-direction:column;gap:8px;">
+          ${extrasNotes ? '<div style="flex:1;background:#f0f7f9;border:1.5px solid #c5dfe6;border-radius:10px;padding:12px 16px;"><div style="font-size:17px;color:#007289;font-weight:700;margin-bottom:6px;">הערות תוספות</div><div style="font-size:14px;font-weight:600;color:#1a3a4a;">' + extrasNotes + '</div></div>' : ''}
+          ${notes ? '<div style="flex:1;background:#f0f7f9;border:1.5px solid #c5dfe6;border-radius:10px;padding:12px 16px;"><div style="font-size:17px;color:#007289;font-weight:700;margin-bottom:6px;">הערות לתשלום</div><div style="font-size:14px;font-weight:600;color:#1a3a4a;">' + notes + '</div></div>' : ''}
+        </div>` : ''}
       </div>
 
       <!-- BIG AMOUNT BOX -->
@@ -1297,7 +1300,8 @@ async function generatePaymentImage() {
   const flightAmt = parseFloat(document.getElementById('flightCost').value) || 0;
   const hotelAmt = parseFloat(document.getElementById('hotelCost').value) || 0;
   const extrasAmt = parseFloat(document.getElementById('extrasAmount').value) || 0;
-  target.innerHTML = buildPaymentHTML(booking, amount, nisAmount, rate, notes, paidSoFar, safari, typeLabel, today, tripDisplayName, rateTimeStr, flightAmt, hotelAmt, extrasAmt);
+  const extrasNotes = document.getElementById('extrasNotes').value.trim();
+  target.innerHTML = buildPaymentHTML(booking, amount, nisAmount, rate, notes, paidSoFar, safari, typeLabel, today, tripDisplayName, rateTimeStr, flightAmt, hotelAmt, extrasAmt, extrasNotes);
 
   // Inject base64 logo if available, otherwise keep text fallback
   if (_logoBase64) {
