@@ -1140,13 +1140,13 @@ function buildPaymentHTML(booking, amount, nisAmount, rate, notes, paidSoFar, sa
   let costsHTML = '';
   if (safari > 0) {
     if (!hasExtras) {
-      costsHTML = `<div style="flex:1;background:#f0f7f9;border:1.5px solid #c5dfe6;border-radius:10px;padding:12px 16px;text-align:center;">
+      costsHTML = `<div style="background:#f0f7f9;border:1.5px solid #c5dfe6;border-radius:10px;padding:12px 16px;text-align:center;">
         <div style="font-size:17px;color:#007289;font-weight:700;margin-bottom:4px;">מחיר ספארי</div>
         <div style="font-size:18px;font-weight:700;color:#1a3a4a;">$${safari.toLocaleString('en-US')}</div>
       </div>`;
     } else {
       const total = safari + (flightAmt||0) + (hotelAmt||0) + (extrasAmt||0);
-      costsHTML = `<div style="flex:2;background:#f0f7f9;border:1.5px solid #c5dfe6;border-radius:10px;padding:12px 16px;">
+      costsHTML = `<div style="background:#f0f7f9;border:1.5px solid #c5dfe6;border-radius:10px;padding:12px 16px;">
         <div style="font-size:17px;color:#007289;font-weight:700;margin-bottom:6px;">פירוט עלויות</div>
         <div style="font-size:14px;color:#1a3a4a;line-height:1.9;font-weight:600;">
           <span style="color:#555;font-weight:400;">ספארי:</span> <strong>$${safari.toLocaleString('en-US')}</strong><br/>
@@ -1193,14 +1193,18 @@ function buildPaymentHTML(booking, amount, nisAmount, rate, notes, paidSoFar, sa
         </div>
       </div>
 
-      <!-- AMOUNTS ROW -->
-      <div style="display:flex;gap:16px;margin-bottom:18px;">
-        ${costsHTML}
-        ${paidSoFar > 0 ? '<div style="flex:1;background:#f0f7f9;border:1.5px solid #c5dfe6;border-radius:10px;padding:12px 16px;text-align:center;"><div style="font-size:17px;color:#007289;font-weight:700;margin-bottom:4px;">שולם עד כה</div><div style="font-size:17px;font-weight:700;color:#22a06b;">$' + paidSoFar.toLocaleString('en-US') + '</div></div>' : ''}
-        ${(notes || extrasNotes) ? `<div style="flex:2;display:flex;flex-direction:column;gap:8px;">
-          ${extrasNotes ? '<div style="flex:1;background:#f0f7f9;border:1.5px solid #c5dfe6;border-radius:10px;padding:12px 16px;"><div style="font-size:17px;color:#007289;font-weight:700;margin-bottom:6px;">הערות תוספות</div><div style="font-size:14px;font-weight:600;color:#1a3a4a;">' + extrasNotes + '</div></div>' : ''}
-          ${notes ? '<div style="flex:1;background:#f0f7f9;border:1.5px solid #c5dfe6;border-radius:10px;padding:12px 16px;"><div style="font-size:17px;color:#007289;font-weight:700;margin-bottom:6px;">הערות לתשלום</div><div style="font-size:14px;font-weight:600;color:#1a3a4a;">' + notes + '</div></div>' : ''}
-        </div>` : ''}
+      <!-- AMOUNTS ROW: strict 2-column grid -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px;">
+        <!-- LEFT COL: notes stacked -->
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          ${extrasNotes ? '<div style="flex:1;background:#f0f7f9;border:1.5px solid #c5dfe6;border-radius:10px;padding:12px 16px;"><div style="font-size:17px;color:#007289;font-weight:700;margin-bottom:6px;">פירוט התוספת</div><div style="font-size:14px;font-weight:600;color:#1a3a4a;">' + extrasNotes + '</div></div>' : '<div style="flex:1;"></div>'}
+          ${notes ? '<div style="flex:1;background:#f0f7f9;border:1.5px solid #c5dfe6;border-radius:10px;padding:12px 16px;"><div style="font-size:17px;color:#007289;font-weight:700;margin-bottom:6px;">הערות לתשלום</div><div style="font-size:14px;font-weight:600;color:#1a3a4a;">' + notes + '</div></div>' : '<div style="flex:1;"></div>'}
+        </div>
+        <!-- RIGHT COL: costs + paid so far -->
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          ${costsHTML || ''}
+          ${paidSoFar > 0 ? '<div style="background:#f0f7f9;border:1.5px solid #c5dfe6;border-radius:10px;padding:12px 16px;text-align:center;"><div style="font-size:17px;color:#007289;font-weight:700;margin-bottom:4px;">שולם עד כה</div><div style="font-size:17px;font-weight:700;color:#22a06b;">$' + paidSoFar.toLocaleString('en-US') + '</div></div>' : ''}
+        </div>
       </div>
 
       <!-- BIG AMOUNT BOX -->
