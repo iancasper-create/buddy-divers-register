@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-FOLLOWUP 2026-03-12 | WhatsApp send via Cloudinary upload + Make webhook (Scenario 4) -->
+<!-- BD-FOLLOWUP 2026-03-13 | BOI API rate + markup field (0.02 default), shows יציג + markup + final separately -->
 <html lang="en" dir="ltr">
 <head>
 <meta charset="UTF-8"/>
@@ -618,10 +618,22 @@
         </div>
       </div>
 
-      <div class="rate-row">
-        <span class="rate-label">שער דולר (ש"ח)</span>
-        <input type="number" id="exchangeRate" step="0.0001" placeholder="0.0000" oninput="updateNisPreview()"/>
-        <span id="rateStatus" class="rate-status loading">טוען שער...</span>
+      <div class="rate-row" style="flex-direction:column;align-items:flex-start;gap:10px;">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;width:100%;">
+          <span class="rate-label">שער יציג בנק ישראל</span>
+          <span id="boiYatzigDisplay" style="font-family:'DM Mono',monospace;font-size:15px;color:var(--navy);font-weight:600;">—</span>
+          <span id="rateStatus" class="rate-status loading">טוען שער...</span>
+          <span id="boiRateTime" style="font-size:11px;color:var(--muted);margin-right:4px;"></span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;width:100%;">
+          <span class="rate-label">העברות מכירה (לאומי)</span>
+          <span id="boiRateDisplay" style="font-family:'DM Mono',monospace;font-size:15px;color:#c0392b;font-weight:700;">—</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;width:100%;border-top:1px solid var(--border);padding-top:10px;">
+          <span class="rate-label" style="color:var(--teal);">שער סופי לחיוב</span>
+          <input type="number" id="exchangeRate" step="0.0001" placeholder="0.0000" oninput="updateNisPreview()" style="width:110px;border:2px solid var(--teal);border-radius:8px;padding:7px 12px;font-family:'DM Mono',monospace;font-size:16px;font-weight:700;color:var(--navy);outline:none;"/>
+          <span style="font-size:12px;color:var(--muted);">זה השער שיופיע בתמונה</span>
+        </div>
       </div>
 
       <div class="field-row">
@@ -1017,20 +1029,48 @@ function selectPaymentType(el) {
 async function fetchBoiRate() {
   const statusEl = document.getElementById('rateStatus');
   try {
-    // Use frankfurter API - no CORS issues, reliable USD/ILS rate
-    const res = await fetch('https://api.frankfurter.app/latest?from=USD&to=ILS');
+    const ts = Date.now();
+    const res = await fetch('https://www.bankleumi.co.il/Rates/Api3.5/ForeignExchange/LatestSelectedRates.aspx?lang=he&ver=440&_=' + ts);
     const data = await res.json();
-    const rate = data?.rates?.ILS;
-    if (!rate || isNaN(rate)) throw new Error('parse');
-    _boiBaseRate = rate;
+    const usd = data && data.data && data.data.find(function(r){ return r.currencyID === 1; });
+    if (!usd) throw new Error('no usd');
+    const yatzig = parseFloat(usd.yatzig);
+    const hamchaotMechira = parseFloat(usd.hamchaot && usd.hamchaot.mechira);
+    const rateTime = (data.topHeaderText && data.topHeaderText.time) || '';
+    const rateDate = (data.topHeaderText && data.topHeaderText.date) || '';
+    if (isNaN(hamchaotMechira)) throw new Error('parse');
+    _boiBaseRate = hamchaotMechira;
+    document.getElementById('boiRateDisplay').textContent = '₪' + hamchaotMechira.toFixed(4);
+    var yatzigEl = document.getElementById('boiYatzigDisplay');
+    if (yatzigEl) yatzigEl.textContent = '₪' + yatzig.toFixed(4);
+    var timeEl = document.getElementById('boiRateTime');
+    if (timeEl) timeEl.textContent = rateDate + ' שעה ' + rateTime;
     applyMarkup();
     statusEl.className = 'rate-status';
-    statusEl.textContent = `✅ שער בסיס ${rate.toFixed(4)}`;
+    statusEl.textContent = '✅ לאומי — העברות מכירה';
   } catch(e) {
-    statusEl.className = 'rate-status error';
-    statusEl.textContent = 'שגיאה בטעינת שער — הזן ידנית';
+    try {
+      const today = new Date();
+      const yyyy = today.getFullYear(), mm = String(today.getMonth()+1).padStart(2,'0'), dd = String(today.getDate()).padStart(2,'0');
+      const res2 = await fetch('https://edge.boi.gov.il/FusionEdgeServer/sdmx/v2/data/dataflow/BOI.STATISTICS/EXR/1.0/RER_USD_ILS?startperiod=' + yyyy + '-' + mm + '-' + dd + '&endperiod=' + yyyy + '-' + mm + '-' + dd + '&format=sdmx-json');
+      const data2 = await res2.json();
+      const obs = data2 && data2.data && data2.data.dataSets && data2.data.dataSets[0] && data2.data.dataSets[0].series && data2.data.dataSets[0].series['0:0:0:0'] && data2.data.dataSets[0].series['0:0:0:0'].observations;
+      if (!obs) throw new Error('parse');
+      const vals = Object.values(obs);
+      const rate = parseFloat(vals[vals.length-1][0]);
+      if (isNaN(rate)) throw new Error('parse');
+      _boiBaseRate = rate;
+      document.getElementById('boiRateDisplay').textContent = '₪' + rate.toFixed(4);
+      applyMarkup();
+      statusEl.className = 'rate-status';
+      statusEl.textContent = '✅ בנק ישראל (גיבוי)';
+    } catch(e2) {
+      statusEl.className = 'rate-status error';
+      statusEl.textContent = 'שגיאה — הזן ידנית';
+    }
   }
 }
+
 
 function applyMarkup() {
   if (_boiBaseRate === null) return;
