@@ -1195,15 +1195,15 @@ function buildPaymentHTML(booking, amount, nisAmount, rate, notes, paidSoFar, sa
 
       <!-- AMOUNTS ROW: strict 2-column grid -->
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px;">
-        <!-- LEFT COL: notes stacked -->
-        <div style="display:flex;flex-direction:column;gap:8px;">
-          ${extrasNotes ? '<div style="flex:1;background:#f0f7f9;border:1.5px solid #c5dfe6;border-radius:10px;padding:12px 16px;"><div style="font-size:17px;color:#007289;font-weight:700;margin-bottom:6px;">פירוט התוספת</div><div style="font-size:14px;font-weight:600;color:#1a3a4a;">' + extrasNotes + '</div></div>' : '<div style="flex:1;"></div>'}
-          ${notes ? '<div style="flex:1;background:#f0f7f9;border:1.5px solid #c5dfe6;border-radius:10px;padding:12px 16px;"><div style="font-size:17px;color:#007289;font-weight:700;margin-bottom:6px;">הערות לתשלום</div><div style="font-size:14px;font-weight:600;color:#1a3a4a;">' + notes + '</div></div>' : '<div style="flex:1;"></div>'}
-        </div>
-        <!-- RIGHT COL: costs + paid so far -->
+        <!-- LEFT COL: costs + paid so far -->
         <div style="display:flex;flex-direction:column;gap:8px;">
           ${costsHTML || ''}
           ${paidSoFar > 0 ? '<div style="background:#f0f7f9;border:1.5px solid #c5dfe6;border-radius:10px;padding:12px 16px;text-align:center;"><div style="font-size:17px;color:#007289;font-weight:700;margin-bottom:4px;">שולם עד כה</div><div style="font-size:17px;font-weight:700;color:#22a06b;">$' + paidSoFar.toLocaleString('en-US') + '</div></div>' : ''}
+        </div>
+        <!-- RIGHT COL: notes stacked -->
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          ${extrasNotes ? '<div style="flex:1;background:#f0f7f9;border:1.5px solid #c5dfe6;border-radius:10px;padding:12px 16px;"><div style="font-size:17px;color:#007289;font-weight:700;margin-bottom:6px;">פירוט התוספת</div><div style="font-size:14px;font-weight:600;color:#1a3a4a;">' + extrasNotes + '</div></div>' : '<div style="flex:1;"></div>'}
+          ${notes ? '<div style="flex:1;background:#f0f7f9;border:1.5px solid #c5dfe6;border-radius:10px;padding:12px 16px;"><div style="font-size:17px;color:#007289;font-weight:700;margin-bottom:6px;">הערות לתשלום</div><div style="font-size:14px;font-weight:600;color:#1a3a4a;">' + notes + '</div></div>' : '<div style="flex:1;"></div>'}
         </div>
       </div>
 
@@ -1213,7 +1213,7 @@ function buildPaymentHTML(booking, amount, nisAmount, rate, notes, paidSoFar, sa
           <div style="font-size:12px;opacity:0.75;margin-bottom:6px;">סכום לתשלום כעת</div>
           <div style="font-size:32px;font-weight:700;line-height:1;">₪${nisAmount.toLocaleString('he-IL')}</div>
           <div style="font-size:18px;opacity:0.75;margin-top:8px;">$${amount.toLocaleString('en-US')}</div>
-          <div style="font-size:11px;opacity:0.55;margin-top:10px;">שער העברה ₪${rate.toFixed(4)}${rateTime ? ' · ' + rateTime : ''}</div>
+          <div style="font-size:11px;opacity:0.55;margin-top:10px;">שער העברה ₪${rate.toFixed(4)}${rateTime ? ' · ' + rateTime.replace(/\s*\d{2}:\d{2}:\d{2}/, '') : ''}</div>
         </div>
         <div style="flex:1;background:linear-gradient(135deg,#007289,#1B4F8A);border-radius:16px;padding:24px 28px;color:white;text-align:right;">
           <div style="font-size:12px;opacity:0.75;margin-bottom:6px;">יתרה לתשלום עד 90 יום לפני היציאה לספארי</div>
