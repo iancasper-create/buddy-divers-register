@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-FOLLOWUP 2026-03-14-v24 | refresh _existingPayments after save so balance box updates correctly -->
+<!-- BD-FOLLOWUP 2026-03-14-v25 | WA Messages: add Israel ID, First Name, Last Name fields -->
 <html lang="en" dir="ltr">
 <head>
 <meta charset="UTF-8"/>
@@ -1204,6 +1204,9 @@ function updateNisPreview() {
 let _jpgDataUrl = null;
 let _diverPhone = null;
 let _diverPaymentMethod = null;
+let _diverIsraelId = null;
+let _diverFirstName = null;
+let _diverLastName = null;
 
 async function fetchDiverDetails(diverId) {
   try {
@@ -1215,11 +1218,14 @@ async function fetchDiverDetails(diverId) {
     console.log('Payment Method raw value:', JSON.stringify(pm));
     return {
       phone: data.fields?.Phone || null,
-      paymentMethod: pm
+      paymentMethod: pm,
+      israelId: data.fields?.['ID Number'] || null,
+      firstName: data.fields?.['First Name'] || null,
+      lastName: data.fields?.['Last Name'] || null
     };
   } catch(e) {
     console.error('Diver fetch error:', e);
-    return { phone: null, paymentMethod: null };
+    return { phone: null, paymentMethod: null, israelId: null, firstName: null, lastName: null };
   }
 }
 
@@ -1413,6 +1419,9 @@ async function generatePaymentImage() {
     const diverDetails = await fetchDiverDetails(booking.diverId);
     _diverPhone = diverDetails.phone;
     _diverPaymentMethod = diverDetails.paymentMethod;
+    _diverIsraelId = diverDetails.israelId;
+    _diverFirstName = diverDetails.firstName;
+    _diverLastName = diverDetails.lastName;
   }
 
   // Show overlay with loading state
@@ -1550,7 +1559,10 @@ async function openWhatsApp() {
           'Payment Type': _selectedPaymentType === 'custom'
             ? (document.getElementById('customPaymentLabel').value.trim() || 'Custom')
             : _selectedPaymentType,
-          'Status': 'Sent'
+          'Status': 'Sent',
+          'Israel ID': _diverIsraelId || undefined,
+          'First Name': _diverFirstName || undefined,
+          'Last Name': _diverLastName || undefined
         };
         await fetch(`https://api.airtable.com/v0/${BASE_ID}/${WA_MESSAGES_TABLE}`, {
           method: 'POST',
