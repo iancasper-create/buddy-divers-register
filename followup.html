@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-FOLLOWUP 2026-03-14-v18 | restore Returning Customer Discount save (lost in v16 base copy) -->
+<!-- BD-FOLLOWUP 2026-03-14-v19 | discount: use saved Airtable value on reload, only auto-calc 5% for new records -->
 <html lang="en" dir="ltr">
 <head>
 <meta charset="UTF-8"/>
@@ -900,9 +900,14 @@ function populateForm(fields, booking) {
   setVal('hotelCost', f('Hotel Cost'));
   setVal('extrasAmount', f('Extras Amount'));
   setVal('extrasNotes', f('Extras Notes'));
-  // Auto-calculate returning customer discount as 5% of safari — only if Returning Customer === 'yes'
+  // Use saved discount if exists, otherwise auto-calculate 5% for returning customers
   const safariVal = parseFloat(f('Safari Price', booking.totalPrice ?? 0)) || 0;
-  setVal('returningDiscount', (booking.returningCustomer && safariVal > 0) ? Math.round(safariVal * 0.05) : 0);
+  const savedDiscount = f('Returning Customer Discount', null);
+  if (savedDiscount !== null && savedDiscount !== '') {
+    setVal('returningDiscount', savedDiscount);
+  } else {
+    setVal('returningDiscount', (booking.returningCustomer && safariVal > 0) ? Math.round(safariVal * 0.05) : 0);
+  }
   setVal('pnr', f('PNR'));
   setVal('hotelName', f('Hotel Name'));
   setVal('hotelConfirmation', f('Hotel Confirmation'));
