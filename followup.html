@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-FOLLOWUP 2026-03-14-v25 | WA Messages: add Israel ID, First Name, Last Name fields -->
+<!-- BD-FOLLOWUP 2026-03-14-v26 | fix Israeli ID field name in fetchDiverDetails -->
 <html lang="en" dir="ltr">
 <head>
 <meta charset="UTF-8"/>
@@ -1219,7 +1219,7 @@ async function fetchDiverDetails(diverId) {
     return {
       phone: data.fields?.Phone || null,
       paymentMethod: pm,
-      israelId: data.fields?.['ID Number'] || null,
+      israelId: data.fields?.['Israeli ID'] || null,
       firstName: data.fields?.['First Name'] || null,
       lastName: data.fields?.['Last Name'] || null
     };
