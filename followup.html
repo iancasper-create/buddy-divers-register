@@ -1046,6 +1046,7 @@ function hideMsg(id) { document.getElementById(id).style.display = 'none'; }
 // ── PAYMENT REQUEST ───────────────────────────────────────────────
 let _boiBaseRate = null;
 let _eurBaseRate = null;
+let _eurYatzig = null;
 let _selectedPaymentType = 'downpayment';
 
 function selectPaymentType(el) {
@@ -1079,15 +1080,20 @@ async function fetchBoiRate() {
     const yatzig = parseFloat(usd.yatzig);
     const hamchaotMechira = parseFloat(usd.hamchaot && usd.hamchaot.mechira);
     const eurMechira = eur ? parseFloat(eur.hamchaot && eur.hamchaot.mechira) : null;
+    const eurYatzig = eur ? parseFloat(eur.yatzig) : null;
     const rateTime = (data.topHeaderText && data.topHeaderText.time) || '';
     const rateDate = (data.topHeaderText && data.topHeaderText.date) || '';
     if (isNaN(hamchaotMechira)) throw new Error('parse');
     _boiBaseRate = hamchaotMechira;
     if (eurMechira && !isNaN(eurMechira)) _eurBaseRate = eurMechira;
+    if (eurYatzig && !isNaN(eurYatzig)) _eurYatzig = eurYatzig;
     console.log('Rates loaded — USD:', _boiBaseRate, 'EUR:', _eurBaseRate);
     document.getElementById('boiRateDisplay').textContent = '₪' + hamchaotMechira.toFixed(4);
     var yatzigEl = document.getElementById('boiYatzigDisplay');
-    if (yatzigEl) yatzigEl.textContent = '₪' + yatzig.toFixed(4);
+    if (yatzigEl) {
+      yatzigEl.textContent = '₪' + yatzig.toFixed(4);
+      yatzigEl.dataset.usd = yatzig.toFixed(4);
+    }
     var timeEl = document.getElementById('boiRateTime');
     if (timeEl) timeEl.textContent = rateDate + ' שעה ' + rateTime;
     applyMarkup();
@@ -1130,6 +1136,14 @@ function applyMarkup() {
   // Update rate display spans to reflect active currency
   const rateDisplayEl = document.getElementById('boiRateDisplay');
   if (rateDisplayEl) rateDisplayEl.textContent = '₪' + rate.toFixed(4);
+  const yatzigEl = document.getElementById('boiYatzigDisplay');
+  if (yatzigEl) {
+    if (currency === 'EUR' && _eurYatzig) {
+      yatzigEl.textContent = '₪' + _eurYatzig.toFixed(4);
+    } else if (yatzigEl.dataset.usd) {
+      yatzigEl.textContent = '₪' + parseFloat(yatzigEl.dataset.usd).toFixed(4);
+    }
+  }
 
   // Update currency badge and label
   const badge = document.getElementById('activeCurrencyBadge');
