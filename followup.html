@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-FOLLOWUP 2026-03-14-v11 | fix payment method matching case-insensitive; fix finger; remove long hyphens -->
+<!-- BD-FOLLOWUP 2026-03-14-v12 | swap bank/payment box order; fix standing order grammar; fix finger direction -->
 <html lang="en" dir="ltr">
 <head>
 <meta charset="UTF-8"/>
@@ -1256,6 +1256,21 @@ function buildPaymentHTML(booking, amount, nisAmount, rate, notes, paidSoFar, sa
       <!-- BANK DETAILS -->
       <div style="display:flex;gap:16px;margin-bottom:18px;">
         <div style="flex:1;border:2px solid #c5dfe6;border-radius:12px;padding:16px 20px;background:#f8fcfd;">
+          <div style="font-size:17px;font-weight:700;color:#007289;margin-bottom:8px;">שיטת התשלום אותה בחרת בטופס ההרשמה:</div>
+          <div style="font-size:17px;color:#1a3a4a;line-height:1.5;">${(() => {
+            const pm = (paymentMethod || '').toLowerCase();
+            if (pm.includes('bank')) {
+              return '<span style="font-weight:700;">בהעברה בנקאית</span> יש לבצע העברה בנקאית לפי פרטי החשבון המופיעים משמאל 👈';
+            } else if (pm.includes('credit')) {
+              return '<span style="font-weight:700;">בכרטיס אשראי</span> עד 3 תשלומים ללא ריבית, קישור לתשלום באשראי ישלח בהודעה הבאה';
+            } else if (pm.includes('standing') || pm.includes('order')) {
+              return '<span style="font-weight:700;">בהוראת קבע</span> עד 3 תשלומים ללא ריבית. אנא העבירו אלינו העתק של הוראת הקבע, התשלום האחרון חייב להתבצע לפני מועד היציאה של הספארי.';
+            } else {
+              return '<a href="https://bit.ly/3lisAOd" style="color:#007289;font-weight:700;">https://bit.ly/3lisAOd</a>';
+            }
+          })()}</div>
+        </div>
+        <div style="flex:1;border:2px solid #c5dfe6;border-radius:12px;padding:16px 20px;background:#f8fcfd;">
           <div style="font-size:17px;font-weight:700;color:#007289;margin-bottom:8px;">העברה בנקאית</div>
           <table style="border-collapse:collapse;font-size:17px;color:#1a3a4a;direction:rtl;margin-left:auto;">
             <tr><td style="color:#888;font-weight:400;padding:3px 0;white-space:nowrap;text-align:right;min-width:140px;">חשבון על שם:</td><td style="font-weight:700;padding:3px 0 3px 16px;white-space:nowrap;">באדי-דייברס בע"מ</td></tr>
@@ -1263,21 +1278,6 @@ function buildPaymentHTML(booking, amount, nisAmount, rate, notes, paidSoFar, sa
             <tr><td style="color:#888;font-weight:400;padding:3px 0;white-space:nowrap;text-align:right;min-width:140px;">סניף:</td><td style="font-weight:700;padding:3px 0 3px 16px;white-space:nowrap;">422 מרכז עסקים פולג</td></tr>
             <tr><td style="color:#888;font-weight:400;padding:3px 0;white-space:nowrap;text-align:right;min-width:140px;">חשבון:</td><td style="font-weight:700;padding:3px 0 3px 16px;white-space:nowrap;">625145</td></tr>
           </table>
-        </div>
-        <div style="flex:1;border:2px solid #c5dfe6;border-radius:12px;padding:16px 20px;background:#f8fcfd;">
-          <div style="font-size:17px;font-weight:700;color:#007289;margin-bottom:8px;">שיטת התשלום אותה בחרת בטופס ההרשמה:</div>
-          <div style="font-size:17px;color:#1a3a4a;line-height:1.5;">${(() => {
-            const pm = (paymentMethod || '').toLowerCase();
-            if (pm.includes('bank')) {
-              return '<span style="font-weight:700;">בהעברה בנקאית</span> יש לבצע העברה בנקאית לפי פרטי החשבון המופיעים מימין 👉';
-            } else if (pm.includes('credit')) {
-              return '<span style="font-weight:700;">בכרטיס אשראי</span> עד 3 תשלומים ללא ריבית, קישור לתשלום באשראי ישלח בהודעה הבאה';
-            } else if (pm.includes('standing') || pm.includes('order')) {
-              return '<span style="font-weight:700;">בהוראת קבע</span> עד 3 תשלומים ללא ריבית (אנא העבירו אלינו העתק של הוראת הקבע, התשלום האחרון חייב להתבצע לפני מועד היציאה של הספארי)';
-            } else {
-              return '<a href="https://bit.ly/3lisAOd" style="color:#007289;font-weight:700;">https://bit.ly/3lisAOd</a>';
-            }
-          })()}</div>
         </div>
       </div>
 
