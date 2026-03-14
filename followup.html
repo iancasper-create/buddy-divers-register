@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-FOLLOWUP 2026-03-14-v2 | Payment image: font sizing pass, spacing fixes, colon after לאומי -->
+<!-- BD-FOLLOWUP 2026-03-14-v3 | Payment image: header typeLabel inline, date 17px, logo 64px -->
 <html lang="en" dir="ltr">
 <head>
 <meta charset="UTF-8"/>
@@ -1167,12 +1167,11 @@ function buildPaymentHTML(booking, amount, nisAmount, rate, notes, paidSoFar, sa
       <!-- HEADER -->
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0;">
         <div>
-          <div style="font-size:26px;font-weight:700;color:#007289;">בקשת תשלום</div>
-          <div style="font-size:16px;color:#1B4F8A;font-weight:600;margin-top:2px;">${typeLabel}</div>
-          <div style="font-size:13px;color:#888;margin-top:4px;">${today}</div>
+          <div style="font-size:26px;font-weight:700;color:#007289;">בקשת תשלום <span style="color:#1B4F8A;">${typeLabel}</span></div>
+          <div style="font-size:17px;color:#888;margin-top:4px;">${today}</div>
         </div>
         <div style="text-align:left;">
-          <img id="paymentLogo" src="" style="height:62px;display:none;" alt="Buddy-Divers"/>
+          <img id="paymentLogo" src="" style="height:64px;display:none;" alt="Buddy-Divers"/>
           <div id="paymentLogoText">
             <div style="font-size:28px;font-weight:800;color:#007289;letter-spacing:-0.5px;">BUDDY</div>
             <div style="font-size:13px;font-weight:600;color:#1B4F8A;letter-spacing:2px;margin-top:-4px;">DIVERS</div>
