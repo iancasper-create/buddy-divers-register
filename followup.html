@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-FOLLOWUP 2026-03-14-v9 | dynamic payment method box; second WA message for credit card link; no caption -->
+<!-- BD-FOLLOWUP 2026-03-14-v10 | fix fetchDiverDetails timing; fetch before render; fix אותה grammar -->
 <html lang="en" dir="ltr">
 <head>
 <meta charset="UTF-8"/>
@@ -1263,7 +1263,7 @@ function buildPaymentHTML(booking, amount, nisAmount, rate, notes, paidSoFar, sa
           </table>
         </div>
         <div style="flex:1;border:2px solid #c5dfe6;border-radius:12px;padding:16px 20px;background:#f8fcfd;">
-          <div style="font-size:17px;font-weight:700;color:#007289;margin-bottom:8px;">שיטת התשלום אותו בחרת בטופס ההרשמה:</div>
+          <div style="font-size:17px;font-weight:700;color:#007289;margin-bottom:8px;">שיטת התשלום אותה בחרת בטופס ההרשמה:</div>
           <div style="font-size:17px;color:#1a3a4a;line-height:1.5;">${(() => {
             if (paymentMethod === 'Bank Transfer') {
               return '<span style="font-weight:700;">בהעברה בנקאית</span> יש לבצע העברה בנקאית לפי פרטי החשבון המופיעים מימין 👈';
@@ -1330,10 +1330,15 @@ async function generatePaymentImage() {
   };
   const tripDisplayName = tripNames[booking.tripId] || `טיול ${booking.tripId}`;
 
+  // Fetch diver details BEFORE rendering image — paymentMethod needed for image content
+  if (booking.diverId) {
+    const diverDetails = await fetchDiverDetails(booking.diverId);
+    _diverPhone = diverDetails.phone;
+    _diverPaymentMethod = diverDetails.paymentMethod;
+  }
+
   // Show overlay with loading state
   _jpgDataUrl = null;
-  _diverPhone = null;
-  _diverPaymentMethod = null;
   document.getElementById('jpgOutput').style.display = 'none';
   document.getElementById('jpgRenderMsg').textContent = 'מייצר תמונה...';
   document.getElementById('jpgPreviewOverlay').style.display = 'block';
@@ -1382,12 +1387,6 @@ async function generatePaymentImage() {
     console.error(e);
   }
 
-  // Fetch diver phone in parallel
-  if (booking.diverId) {
-    const diverDetails = await fetchDiverDetails(booking.diverId);
-    _diverPhone = diverDetails.phone;
-    _diverPaymentMethod = diverDetails.paymentMethod;
-  }
   if (_diverPhone) {
     document.getElementById('whatsappBtn').textContent = '💬 שלח וואטסאפ';
     document.getElementById('whatsappBtn').disabled = false;
