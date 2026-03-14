@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-FOLLOWUP 2026-03-14-v7 | returning discount only if Returning Customer=yes in Bookings -->
+<!-- BD-FOLLOWUP 2026-03-14-v8 | returning discount driven by Returning Customer field in Bookings fetch -->
 <html lang="en" dir="ltr">
 <head>
 <meta charset="UTF-8"/>
@@ -769,7 +769,7 @@ async function searchTrip() {
     let allBookings = [];
     let offset = null;
     do {
-      const pageUrl = `https://api.airtable.com/v0/${BASE_ID}/${BOOKINGS_TABLE}?fields[]=Trip&fields[]=Total+Price&fields[]=Diver+ID&fields[]=First+Name+%28from+Divers%29&fields[]=Last+Name+%28from+Divers%29` + (offset ? `&offset=${offset}` : '');
+      const pageUrl = `https://api.airtable.com/v0/${BASE_ID}/${BOOKINGS_TABLE}?fields[]=Trip&fields[]=Total+Price&fields[]=Diver+ID&fields[]=First+Name+%28from+Divers%29&fields[]=Last+Name+%28from+Divers%29&fields[]=Returning+Customer` + (offset ? `&offset=${offset}` : '');
       const pageRes = await fetch(pageUrl, { headers: { Authorization: `Bearer ${AIRTABLE_API_KEY}` } });
       const pageData = await pageRes.json();
       if (pageData.error) {
@@ -815,7 +815,8 @@ async function processBookings(records, tripId) {
       diverId,
       diverName,
       tripId,
-      totalPrice: (Array.isArray(rec.fields['Total Price']) ? rec.fields['Total Price'][0] : rec.fields['Total Price']) || 0
+      totalPrice: (Array.isArray(rec.fields['Total Price']) ? rec.fields['Total Price'][0] : rec.fields['Total Price']) || 0,
+      returningCustomer: (rec.fields['Returning Customer'] || '').toString().trim().toLowerCase() === 'yes'
     });
   }
 
@@ -895,8 +896,7 @@ function populateForm(fields, booking) {
   setVal('extrasNotes', f('Extras Notes'));
   // Auto-calculate returning customer discount as 5% of safari — only if Returning Customer === 'yes'
   const safariVal = parseFloat(f('Safari Price', booking.totalPrice ?? 0)) || 0;
-  const isReturning = (f('Returning Customer') || '').toString().trim().toLowerCase() === 'yes';
-  setVal('returningDiscount', (isReturning && safariVal > 0) ? Math.round(safariVal * 0.05) : 0);
+  setVal('returningDiscount', (booking.returningCustomer && safariVal > 0) ? Math.round(safariVal * 0.05) : 0);
   setVal('pnr', f('PNR'));
   setVal('hotelName', f('Hotel Name'));
   setVal('hotelConfirmation', f('Hotel Confirmation'));
