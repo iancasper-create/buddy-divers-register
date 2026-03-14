@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-FOLLOWUP 2026-03-14-v26 | fix Israeli ID field name in fetchDiverDetails -->
+<!-- BD-FOLLOWUP 2026-03-14-v27 | allow negative balance for overpayment in UI and payment image -->
 <html lang="en" dir="ltr">
 <head>
 <meta charset="UTF-8"/>
@@ -1193,7 +1193,7 @@ function updateNisPreview() {
   const balanceDisplay = document.getElementById('balanceDisplay');
   if (totalPrice > 0 && amount > 0) {
     const balance = totalPrice - paidSoFar - amount;
-    balanceDisplay.textContent = getActiveCurrencySymbol() + Math.max(0, balance).toLocaleString('en-US');
+    balanceDisplay.textContent = getActiveCurrencySymbol() + balance.toLocaleString('en-US');
     balanceDisplay.style.color = balance <= 0 ? '#22a06b' : '#1B4F8A';
     balanceBox.style.display = 'flex';
   } else {
@@ -1325,7 +1325,7 @@ function buildPaymentHTML(booking, amount, nisAmount, rate, notes, paidSoFar, sa
         </div>
         <div style="flex:1;background:linear-gradient(135deg,#007289,#1B4F8A);border-radius:16px;padding:24px 28px;color:white;text-align:right;">
           <div style="font-size:16px;opacity:0.75;margin-bottom:6px;">יתרה לתשלום עד 90 יום לפני היציאה לספארי</div>
-          <div style="font-size:28px;font-weight:700;line-height:1;">${currencySymbol}${Math.max(0, safari + flightAmt + hotelAmt + extrasAmt - discountAmt - paidSoFar - amount).toLocaleString('en-US')}</div>
+          <div style="font-size:28px;font-weight:700;line-height:1;">${currencySymbol}${(safari + flightAmt + hotelAmt + extrasAmt - discountAmt - paidSoFar - amount).toLocaleString('en-US')}</div>
         </div>
       </div>
 
