@@ -1074,7 +1074,7 @@ async function fetchBoiRate() {
     const res = await fetch('https://www.bankleumi.co.il/Rates/Api3.5/ForeignExchange/LatestSelectedRates.aspx?lang=he&ver=440&_=' + ts);
     const data = await res.json();
     const usd = data && data.data && data.data.find(function(r){ return r.currencyID === 1; });
-    const eur = data && data.data && data.data.find(function(r){ return r.currencyID === 2; });
+    const eur = data && data.data && data.data.find(function(r){ return r.currencyID === 49; });
     if (!usd) throw new Error('no usd');
     const yatzig = parseFloat(usd.yatzig);
     const hamchaotMechira = parseFloat(usd.hamchaot && usd.hamchaot.mechira);
