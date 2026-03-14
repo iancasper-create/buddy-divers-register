@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-REG 2026-03-12 | Phone E.164 + Emergency phone CC + OTP single input + Photo layout + Red hints -->
+<!-- BD-REG 2026-03-14 | diveComputer validation added to validateForm -->
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8" />
@@ -1803,6 +1803,12 @@ function validateForm() {
       missingFields.push(label);
     }
   });
+
+  // Dive computer selection
+  const diveComputer = document.querySelector('[name="diveComputer"]:checked');
+  const diveComputerOk = !!diveComputer;
+  document.getElementById('diveComputerError').style.display = diveComputerOk ? 'none' : 'block';
+  if (!diveComputerOk) { valid = false; missingFields.push('מחשב צלילה / Dive Computer'); }
 
   // Pricing selection
   const pricing = document.querySelector('[name="pricing"]:checked');
