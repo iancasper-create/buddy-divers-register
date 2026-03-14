@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-FOLLOWUP 2026-03-14-v5 | returning customer discount + custom payment label -->
+<!-- BD-FOLLOWUP 2026-03-14-v6 | discount above extras notes; orange color; deducted from יתרה -->
 <html lang="en" dir="ltr">
 <head>
 <meta charset="UTF-8"/>
@@ -506,12 +506,6 @@
           </div>
         </div>
       </div>
-      <div class="field-row full">
-        <div class="field">
-          <label>Extras Notes</label>
-          <textarea id="extrasNotes" placeholder="Describe any extras..."></textarea>
-        </div>
-      </div>
       <div class="field-row">
         <div class="field">
           <label>Returning Customer Discount (5%)</label>
@@ -521,6 +515,12 @@
         </div>
         <div class="field" style="align-self:flex-end;">
           <div style="font-size:12px;color:var(--muted);padding-bottom:8px;">Auto-calculated as 5% of safari price. Edit if needed. Leave 0 to exclude from image.</div>
+        </div>
+      </div>
+      <div class="field-row full">
+        <div class="field">
+          <label>Extras Notes</label>
+          <textarea id="extrasNotes" placeholder="Describe any extras..."></textarea>
         </div>
       </div>
 
@@ -1117,8 +1117,9 @@ function updateNisPreview() {
   const flightCost = parseFloat(document.getElementById('flightCost').value) || 0;
   const hotelCost = parseFloat(document.getElementById('hotelCost').value) || 0;
   const extrasCost = parseFloat(document.getElementById('extrasAmount').value) || 0;
+  const discountCost = parseFloat(document.getElementById('returningDiscount').value) || 0;
   const existing = window._existingPayments || {};
-  const totalPrice = safari + flightCost + hotelCost + extrasCost;
+  const totalPrice = safari + flightCost + hotelCost + extrasCost - discountCost;
   const paidSoFar = (existing.tripPayment||0)+(existing.flightPayment||0)+(existing.hotelPayment||0)+(existing.extrasPayment||0);
   const balanceBox = document.getElementById('balanceBox');
   const balanceDisplay = document.getElementById('balanceDisplay');
@@ -1171,7 +1172,7 @@ function buildPaymentHTML(booking, amount, nisAmount, rate, notes, paidSoFar, sa
     } else {
       const total = safari + (flightAmt||0) + (hotelAmt||0) + (extrasAmt||0) - discountAmt;
       const row = (label, val) => `<tr><td style="color:#555;font-weight:400;padding:3px 0 3px 0;white-space:nowrap;text-align:right;min-width:80px;">${label}:</td><td style="font-weight:700;padding:3px 0 3px 20px;white-space:nowrap;direction:ltr;text-align:right;min-width:70px;">$${val.toLocaleString('en-US')}</td></tr>`;
-      const discountRow = discountAmt > 0 ? `<tr><td style="color:#d93f3f;font-weight:400;padding:3px 0 3px 0;white-space:nowrap;text-align:right;min-width:80px;">הנחת לקוח חוזר:</td><td style="font-weight:700;padding:3px 0 3px 20px;white-space:nowrap;direction:ltr;text-align:right;min-width:70px;color:#d93f3f;">-$${discountAmt.toLocaleString('en-US')}</td></tr>` : '';
+      const discountRow = discountAmt > 0 ? `<tr><td style="color:#c47d00;font-weight:400;padding:3px 0 3px 0;white-space:nowrap;text-align:right;min-width:80px;">הנחת לקוח חוזר:</td><td style="font-weight:700;padding:3px 0 3px 20px;white-space:nowrap;direction:ltr;text-align:right;min-width:70px;color:#c47d00;">-$${discountAmt.toLocaleString('en-US')}</td></tr>` : '';
       costsHTML = `<div style="background:#f0f7f9;border:1.5px solid #c5dfe6;border-radius:10px;padding:12px 16px;">
         <div style="font-size:17px;color:#007289;font-weight:700;margin-bottom:8px;">פירוט עלויות</div>
         <table style="border-collapse:collapse;font-size:17px;color:#1a3a4a;direction:rtl;margin-left:auto;">
