@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-FOLLOWUP 2026-03-14-v3 | Payment image: header typeLabel inline, date 17px, logo 64px -->
+<!-- BD-FOLLOWUP 2026-03-14-v4 | Payment image: fix duplicate תשלום for final payment type -->
 <html lang="en" dir="ltr">
 <head>
 <meta charset="UTF-8"/>
@@ -1279,7 +1279,7 @@ async function generatePaymentImage() {
   const existing = window._existingPayments || {};
   const paidSoFar = (existing.tripPayment||0)+(existing.flightPayment||0)+(existing.hotelPayment||0)+(existing.extrasPayment||0);
 
-  const typeLabels = { downpayment:'מקדמה', final:'תשלום סופי', extras:'תוספות', custom:'בקשת תשלום' };
+  const typeLabels = { downpayment:'מקדמה', final:'סופי', extras:'תוספות', custom:'בקשת תשלום' };
   const typeLabel = typeLabels[_selectedPaymentType] || 'בקשת תשלום';
   const today = new Date().toLocaleDateString('he-IL', { day:'2-digit', month:'2-digit', year:'numeric' });
 
@@ -1390,7 +1390,7 @@ async function openWhatsApp() {
     const idx = document.getElementById('diverSelect').value;
     const booking = currentBookings[idx];
     const amount = parseFloat(document.getElementById('paymentRequestAmount').value) || 0;
-    const typeLabels = { downpayment:'מקדמה', final:'תשלום סופי', extras:'תוספות', custom:'בקשת תשלום' };
+    const typeLabels = { downpayment:'מקדמה', final:'סופי', extras:'תוספות', custom:'בקשת תשלום' };
     const typeLabel = typeLabels[_selectedPaymentType] || 'בקשת תשלום';
     const caption = `${typeLabel} — ${booking.diverName} — $${amount.toLocaleString('en-US')}`;
 
