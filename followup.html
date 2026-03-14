@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-FOLLOWUP 2026-03-14-v22 | WA logging to WA Messages table (one row per send) -->
+<!-- BD-FOLLOWUP 2026-03-14-v23 | clearForm: auto-calc 5% discount for returning customers on new records -->
 <html lang="en" dir="ltr">
 <head>
 <meta charset="UTF-8"/>
@@ -935,7 +935,8 @@ function clearForm(booking) {
    'tripPayment','flightPayment','hotelPayment','extrasPayment',
    'pnr','hotelName','hotelConfirmation','hotelCheckin','hotelCheckout','notes'].forEach(id => setVal(id, ''));
   setVal('safariPrice', booking.totalPrice ?? 0);
-  setVal('returningDiscount', 0);
+  const safariVal = parseFloat(booking.totalPrice) || 0;
+  setVal('returningDiscount', (booking.returningCustomer && safariVal > 0) ? Math.round(safariVal * 0.05) : 0);
   window._existingPayments = { tripPayment: 0, flightPayment: 0, hotelPayment: 0, extrasPayment: 0 };
   updateSummary();
 }
