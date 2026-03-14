@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-FOLLOWUP 2026-03-14-v13 | bank header to פרטי חשבון בנק; line breaks and full stops in payment method box -->
+<!-- BD-FOLLOWUP 2026-03-14-v14 | standing order new line + bank details sentence; credit card full stop -->
 <html lang="en" dir="ltr">
 <head>
 <meta charset="UTF-8"/>
@@ -1262,9 +1262,9 @@ function buildPaymentHTML(booking, amount, nisAmount, rate, notes, paidSoFar, sa
             if (pm.includes('bank')) {
               return '<span style="font-weight:700;">בהעברה בנקאית.</span><br/>יש לבצע העברה בנקאית לפי פרטי החשבון המופיעים משמאל 👈';
             } else if (pm.includes('credit')) {
-              return '<span style="font-weight:700;">בכרטיס אשראי</span> עד 3 תשלומים ללא ריבית.<br/>קישור לתשלום באשראי ישלח בהודעה הבאה';
+              return '<span style="font-weight:700;">בכרטיס אשראי</span> עד 3 תשלומים ללא ריבית.<br/>קישור לתשלום באשראי ישלח בהודעה הבאה.';
             } else if (pm.includes('standing') || pm.includes('order')) {
-              return '<span style="font-weight:700;">בהוראת קבע</span> עד 3 תשלומים ללא ריבית. אנא העבירו אלינו העתק של הוראת הקבע, התשלום האחרון חייב להתבצע לפני מועד היציאה של הספארי.';
+              return '<span style="font-weight:700;">בהוראת קבע</span> עד 3 תשלומים ללא ריבית.<br/>אנא העבירו אלינו העתק של הוראת הקבע, התשלום האחרון חייב להתבצע לפני מועד היציאה של הספארי. פרטי הבנק לצורך הקמת הוראת קבע 👈';
             } else {
               return '<a href="https://bit.ly/3lisAOd" style="color:#007289;font-weight:700;">https://bit.ly/3lisAOd</a>';
             }
