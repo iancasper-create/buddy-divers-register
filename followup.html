@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-FOLLOWUP 2026-03-14-v16 | multi-currency support: EUR/USD from Airtable Trips.Currency field -->
+<!-- BD-FOLLOWUP 2026-03-14-v17 | Trip Link auto-populated on save; EUR currencyID fix (49) -->
 <html lang="en" dir="ltr">
 <head>
 <meta charset="UTF-8"/>
@@ -791,7 +791,7 @@ async function searchTrip() {
       btn.disabled = false; btn.innerHTML = 'Search'; return;
     }
 
-    await processBookings(matched, tripId, tripCurrency);
+    await processBookings(matched, tripId, tripCurrency, tripRecordId);
     showMsg('searchMsg', 'info', `Found ${matched.length} diver(s) on trip ${tripId}.`);
 
   } catch(e) {
@@ -802,13 +802,12 @@ async function searchTrip() {
   btn.disabled = false; btn.innerHTML = 'Search';
 }
 
-async function processBookings(records, tripId, tripCurrency) {
+async function processBookings(records, tripId, tripCurrency, tripRecordId) {
   tripCurrency = tripCurrency || 'USD';
   currentBookings = [];
   for (const rec of records) {
     const diverIds = rec.fields['Diver ID'] || [];
     const diverId = diverIds[0] || null;
-    // Use lookup fields already present on the booking record
     const fnArr = rec.fields['First Name (from Divers)'] || [];
     const lnArr = rec.fields['Last Name (from Divers)'] || [];
     const fn = Array.isArray(fnArr) ? fnArr[0] : fnArr;
@@ -819,6 +818,7 @@ async function processBookings(records, tripId, tripCurrency) {
       diverId,
       diverName,
       tripId,
+      tripRecordId: tripRecordId || null,
       currency: tripCurrency,
       totalPrice: (Array.isArray(rec.fields['Total Price']) ? rec.fields['Total Price'][0] : rec.fields['Total Price']) || 0,
       returningCustomer: (rec.fields['Returning Customer'] || '').toString().trim().toLowerCase() === 'yes'
@@ -974,6 +974,7 @@ async function saveRecord() {
 
   const fields = {
     'Trip ID': booking.tripId,
+    'Trip Link': booking.tripRecordId ? [booking.tripRecordId] : undefined,
     'Diver ID': [booking.diverId],
     'Booking': [booking.bookingId],
     'Flight Cost': parseFloatOrNull('flightCost'),
@@ -992,8 +993,8 @@ async function saveRecord() {
     'Notes': document.getElementById('notes').value || null,
   };
 
-  // Remove null fields
-  Object.keys(fields).forEach(k => { if (fields[k] === null) delete fields[k]; });
+  // Remove null/undefined fields
+  Object.keys(fields).forEach(k => { if (fields[k] === null || fields[k] === undefined) delete fields[k]; });
 
   try {
     let res;
