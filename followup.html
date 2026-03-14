@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-FOLLOWUP 2026-03-14-v17 | Trip Link auto-populated on save; EUR currencyID fix (49) -->
+<!-- BD-FOLLOWUP 2026-03-14-v18 | restore Returning Customer Discount save (lost in v16 base copy) -->
 <html lang="en" dir="ltr">
 <head>
 <meta charset="UTF-8"/>
@@ -981,6 +981,7 @@ async function saveRecord() {
     'Hotel Cost': parseFloatOrNull('hotelCost'),
     'Extras Amount': parseFloatOrNull('extrasAmount'),
     'Extras Notes': document.getElementById('extrasNotes').value || null,
+    'Returning Customer Discount': parseFloatOrNull('returningDiscount'),
     'Trip Payment': ((parseFloat(document.getElementById('tripPayment').value) || 0) + ((window._existingPayments||{}).tripPayment || 0)) || null,
     'Flight Payment': ((parseFloat(document.getElementById('flightPayment').value) || 0) + ((window._existingPayments||{}).flightPayment || 0)) || null,
     'Hotel Payment': ((parseFloat(document.getElementById('hotelPayment').value) || 0) + ((window._existingPayments||{}).hotelPayment || 0)) || null,
