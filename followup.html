@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-FOLLOWUP 2026-03-14-v4 | Payment image: fix duplicate תשלום for final payment type -->
+<!-- BD-FOLLOWUP 2026-03-14-v5 | returning customer discount + custom payment label -->
 <html lang="en" dir="ltr">
 <head>
 <meta charset="UTF-8"/>
@@ -512,6 +512,17 @@
           <textarea id="extrasNotes" placeholder="Describe any extras..."></textarea>
         </div>
       </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Returning Customer Discount (5%)</label>
+          <div class="currency-wrap">
+            <input type="number" id="returningDiscount" placeholder="0" oninput="updateSummary()" step="1"/>
+          </div>
+        </div>
+        <div class="field" style="align-self:flex-end;">
+          <div style="font-size:12px;color:var(--muted);padding-bottom:8px;">Auto-calculated as 5% of safari price. Edit if needed. Leave 0 to exclude from image.</div>
+        </div>
+      </div>
 
       <hr class="section-divider"/>
 
@@ -616,6 +627,11 @@
         <div class="payment-type-btn" data-type="custom" onclick="selectPaymentType(this)">
           <span class="pt-emoji">✏️</span>מותאם אישית<br/>Custom
         </div>
+      </div>
+
+      <div id="customLabelWrap" style="display:none;margin-top:10px;">
+        <label style="font-size:13px;font-weight:600;color:var(--teal);display:block;margin-bottom:4px;">טקסט חופשי אחרי "בקשת תשלום"</label>
+        <input type="text" id="customPaymentLabel" placeholder="לדוגמה: ציוד, תוספת מיוחדת..." style="width:100%;border:2px solid var(--teal);border-radius:8px;padding:8px 12px;font-size:15px;color:var(--navy);outline:none;"/>
       </div>
 
       <div class="rate-row" style="flex-direction:column;align-items:flex-start;gap:10px;">
@@ -877,6 +893,9 @@ function populateForm(fields, booking) {
   setVal('hotelCost', f('Hotel Cost'));
   setVal('extrasAmount', f('Extras Amount'));
   setVal('extrasNotes', f('Extras Notes'));
+  // Auto-calculate returning customer discount as 5% of safari
+  const safariVal = parseFloat(f('Safari Price', booking.totalPrice ?? 0)) || 0;
+  setVal('returningDiscount', safariVal > 0 ? Math.round(safariVal * 0.05) : '');
   setVal('pnr', f('PNR'));
   setVal('hotelName', f('Hotel Name'));
   setVal('hotelConfirmation', f('Hotel Confirmation'));
@@ -903,6 +922,8 @@ function clearForm(booking) {
    'tripPayment','flightPayment','hotelPayment','extrasPayment',
    'pnr','hotelName','hotelConfirmation','hotelCheckin','hotelCheckout','notes'].forEach(id => setVal(id, ''));
   setVal('safariPrice', booking.totalPrice ?? 0);
+  const safariClear = parseFloat(booking.totalPrice) || 0;
+  setVal('returningDiscount', safariClear > 0 ? Math.round(safariClear * 0.05) : '');
   window._existingPayments = { tripPayment: 0, flightPayment: 0, hotelPayment: 0, extrasPayment: 0 };
   updateSummary();
 }
@@ -913,7 +934,8 @@ function updateSummary() {
   const flight = parseFloat(document.getElementById('flightCost').value) || 0;
   const hotel = parseFloat(document.getElementById('hotelCost').value) || 0;
   const extras = parseFloat(document.getElementById('extrasAmount').value) || 0;
-  const owed = safari + flight + hotel + extras;
+  const discount = parseFloat(document.getElementById('returningDiscount').value) || 0;
+  const owed = safari + flight + hotel + extras - discount;
 
   const existing = window._existingPayments || { tripPayment:0, flightPayment:0, hotelPayment:0, extrasPayment:0 };
   const tp = (parseFloat(document.getElementById('tripPayment').value) || 0) + (existing.tripPayment || 0);
@@ -1018,6 +1040,7 @@ function selectPaymentType(el) {
   document.querySelectorAll('.payment-type-btn').forEach(b => b.classList.remove('selected'));
   el.classList.add('selected');
   _selectedPaymentType = el.dataset.type;
+  document.getElementById('customLabelWrap').style.display = (_selectedPaymentType === 'custom') ? 'block' : 'none';
   // Auto-suggest amount based on type and current summary
   const safari = parseFloat(document.getElementById('safariPrice').value) || 0;
   const existing = window._existingPayments || {};
@@ -1127,7 +1150,8 @@ async function fetchDiverPhone(diverId) {
   }
 }
 
-function buildPaymentHTML(booking, amount, nisAmount, rate, notes, paidSoFar, safari, typeLabel, today, tripDisplayName, rateTime, flightAmt, hotelAmt, extrasAmt, extrasNotes) {
+function buildPaymentHTML(booking, amount, nisAmount, rate, notes, paidSoFar, safari, typeLabel, today, tripDisplayName, rateTime, flightAmt, hotelAmt, extrasAmt, extrasNotes, discountAmt) {
+  discountAmt = discountAmt || 0;
   // Trip country mapping
   const tripCountries = {
     '260301': 'תאילנד', '260328': 'תאילנד', '260828': 'פיג׳י / טונגה',
@@ -1136,7 +1160,7 @@ function buildPaymentHTML(booking, amount, nisAmount, rate, notes, paidSoFar, sa
   const tripCountry = tripCountries[booking.tripId] || '';
 
   // Itemized costs block
-  const hasExtras = (flightAmt > 0) || (hotelAmt > 0) || (extrasAmt > 0);
+  const hasExtras = (flightAmt > 0) || (hotelAmt > 0) || (extrasAmt > 0) || (discountAmt > 0);
   let costsHTML = '';
   if (safari > 0) {
     if (!hasExtras) {
@@ -1145,12 +1169,14 @@ function buildPaymentHTML(booking, amount, nisAmount, rate, notes, paidSoFar, sa
         <div style="font-size:18px;font-weight:700;color:#1a3a4a;">$${safari.toLocaleString('en-US')}</div>
       </div>`;
     } else {
-      const total = safari + (flightAmt||0) + (hotelAmt||0) + (extrasAmt||0);
+      const total = safari + (flightAmt||0) + (hotelAmt||0) + (extrasAmt||0) - discountAmt;
       const row = (label, val) => `<tr><td style="color:#555;font-weight:400;padding:3px 0 3px 0;white-space:nowrap;text-align:right;min-width:80px;">${label}:</td><td style="font-weight:700;padding:3px 0 3px 20px;white-space:nowrap;direction:ltr;text-align:right;min-width:70px;">$${val.toLocaleString('en-US')}</td></tr>`;
+      const discountRow = discountAmt > 0 ? `<tr><td style="color:#d93f3f;font-weight:400;padding:3px 0 3px 0;white-space:nowrap;text-align:right;min-width:80px;">הנחת לקוח חוזר:</td><td style="font-weight:700;padding:3px 0 3px 20px;white-space:nowrap;direction:ltr;text-align:right;min-width:70px;color:#d93f3f;">-$${discountAmt.toLocaleString('en-US')}</td></tr>` : '';
       costsHTML = `<div style="background:#f0f7f9;border:1.5px solid #c5dfe6;border-radius:10px;padding:12px 16px;">
         <div style="font-size:17px;color:#007289;font-weight:700;margin-bottom:8px;">פירוט עלויות</div>
         <table style="border-collapse:collapse;font-size:17px;color:#1a3a4a;direction:rtl;margin-left:auto;">
           ${row('ספארי', safari)}
+          ${discountRow}
           ${flightAmt > 0 ? row('טיסות', flightAmt) : ''}
           ${hotelAmt > 0 ? row('מלון', hotelAmt) : ''}
           ${extrasAmt > 0 ? row('תוספות', extrasAmt) : ''}
@@ -1218,7 +1244,7 @@ function buildPaymentHTML(booking, amount, nisAmount, rate, notes, paidSoFar, sa
         </div>
         <div style="flex:1;background:linear-gradient(135deg,#007289,#1B4F8A);border-radius:16px;padding:24px 28px;color:white;text-align:right;">
           <div style="font-size:16px;opacity:0.75;margin-bottom:6px;">יתרה לתשלום עד 90 יום לפני היציאה לספארי</div>
-          <div style="font-size:28px;font-weight:700;line-height:1;">$${Math.max(0, safari + flightAmt + hotelAmt + extrasAmt - paidSoFar - amount).toLocaleString('en-US')}</div>
+          <div style="font-size:28px;font-weight:700;line-height:1;">$${Math.max(0, safari + flightAmt + hotelAmt + extrasAmt - discountAmt - paidSoFar - amount).toLocaleString('en-US')}</div>
         </div>
       </div>
 
@@ -1279,8 +1305,10 @@ async function generatePaymentImage() {
   const existing = window._existingPayments || {};
   const paidSoFar = (existing.tripPayment||0)+(existing.flightPayment||0)+(existing.hotelPayment||0)+(existing.extrasPayment||0);
 
-  const typeLabels = { downpayment:'מקדמה', final:'סופי', extras:'תוספות', custom:'בקשת תשלום' };
-  const typeLabel = typeLabels[_selectedPaymentType] || 'בקשת תשלום';
+  const typeLabels = { downpayment:'מקדמה', final:'סופי', extras:'תוספות' };
+  const typeLabel = _selectedPaymentType === 'custom'
+    ? (document.getElementById('customPaymentLabel').value.trim() || '')
+    : (typeLabels[_selectedPaymentType] || '');
   const today = new Date().toLocaleDateString('he-IL', { day:'2-digit', month:'2-digit', year:'numeric' });
 
   const tripNames = {
@@ -1306,7 +1334,8 @@ async function generatePaymentImage() {
   const hotelAmt = parseFloat(document.getElementById('hotelCost').value) || 0;
   const extrasAmt = parseFloat(document.getElementById('extrasAmount').value) || 0;
   const extrasNotes = document.getElementById('extrasNotes').value.trim();
-  target.innerHTML = buildPaymentHTML(booking, amount, nisAmount, rate, notes, paidSoFar, safari, typeLabel, today, tripDisplayName, rateTimeStr, flightAmt, hotelAmt, extrasAmt, extrasNotes);
+  const discountAmt = parseFloat(document.getElementById('returningDiscount').value) || 0;
+  target.innerHTML = buildPaymentHTML(booking, amount, nisAmount, rate, notes, paidSoFar, safari, typeLabel, today, tripDisplayName, rateTimeStr, flightAmt, hotelAmt, extrasAmt, extrasNotes, discountAmt);
 
   // Inject base64 logo if available, otherwise keep text fallback
   if (_logoBase64) {
@@ -1390,8 +1419,10 @@ async function openWhatsApp() {
     const idx = document.getElementById('diverSelect').value;
     const booking = currentBookings[idx];
     const amount = parseFloat(document.getElementById('paymentRequestAmount').value) || 0;
-    const typeLabels = { downpayment:'מקדמה', final:'סופי', extras:'תוספות', custom:'בקשת תשלום' };
-    const typeLabel = typeLabels[_selectedPaymentType] || 'בקשת תשלום';
+    const typeLabels = { downpayment:'מקדמה', final:'סופי', extras:'תוספות' };
+    const typeLabel = _selectedPaymentType === 'custom'
+      ? (document.getElementById('customPaymentLabel').value.trim() || 'מותאם אישית')
+      : (typeLabels[_selectedPaymentType] || '');
     const caption = `${typeLabel} — ${booking.diverName} — $${amount.toLocaleString('en-US')}`;
 
     const makeRes = await fetch('https://hook.eu1.make.com/yabs6aeja0bz6eoxw29p8t9tpgqi7tio', {
