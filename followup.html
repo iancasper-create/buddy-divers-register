@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-FOLLOWUP 2026-03-14-v20 | payment image: צולל.ת → שם הלקוח.ה -->
+<!-- BD-FOLLOWUP 2026-03-14-v22 | WA logging to WA Messages table (one row per send) -->
 <html lang="en" dir="ltr">
 <head>
 <meta charset="UTF-8"/>
@@ -708,6 +708,7 @@ let AIRTABLE_API_KEY = sessionStorage.getItem('bd_airtable_token') || '';
 const BASE_ID = 'app2RAeuaXaWrHOan';
 const BOOKINGS_TABLE = 'tblMCB8nCSoRuiTKI';
 const PAYMENTS_TABLE = 'tbl0oLEDoa4PCQOOp';
+const WA_MESSAGES_TABLE = 'tblxcQFC35tOSH8l6';
 const DIVERS_TABLE = 'tblE9d3rE4uDv2uxO';
 
 let currentBookings = []; // [{bookingId, diverId, diverName, tripId, totalPrice}]
@@ -1525,6 +1526,30 @@ async function openWhatsApp() {
     }
     btn.textContent = '✅ נשלח!';
     btn.style.background = '#22a06b';
+
+    // Step 4: Log send to WA Messages table
+    if (currentPaymentRecordId) {
+      try {
+        const waFields = {
+          'Payment': [currentPaymentRecordId],
+          'Sent At': new Date().toISOString(),
+          'Image URL': imageUrl,
+          'Amount': parseFloat(document.getElementById('paymentRequestAmount').value) || 0,
+          'Payment Type': _selectedPaymentType === 'custom'
+            ? (document.getElementById('customPaymentLabel').value.trim() || 'Custom')
+            : _selectedPaymentType,
+          'Status': 'Sent'
+        };
+        await fetch(`https://api.airtable.com/v0/${BASE_ID}/${WA_MESSAGES_TABLE}`, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${AIRTABLE_API_KEY}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ fields: waFields })
+        });
+      } catch(logErr) {
+        console.warn('WA logging failed (non-critical):', logErr);
+      }
+    }
+
     setTimeout(() => {
       btn.textContent = '💬 שלח וואטסאפ';
       btn.style.background = '#25D366';
