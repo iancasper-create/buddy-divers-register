@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-FOLLOWUP 2026-03-14-v23 | clearForm: auto-calc 5% discount for returning customers on new records -->
+<!-- BD-FOLLOWUP 2026-03-14-v24 | refresh _existingPayments after save so balance box updates correctly -->
 <html lang="en" dir="ltr">
 <head>
 <meta charset="UTF-8"/>
@@ -1028,6 +1028,17 @@ async function saveRecord() {
       showMsg('saveSuccess', 'success', `✅ Record saved successfully for ${booking.diverName}!`);
       document.getElementById('bannerBadge').textContent = 'Existing Record';
       document.getElementById('bannerBadge').className = 'badge existing';
+      // Refresh _existingPayments so balance box reflects newly saved payments
+      window._existingPayments = {
+        tripPayment:   ((parseFloat(document.getElementById('tripPayment').value)   || 0) + ((window._existingPayments||{}).tripPayment   || 0)),
+        flightPayment: ((parseFloat(document.getElementById('flightPayment').value) || 0) + ((window._existingPayments||{}).flightPayment || 0)),
+        hotelPayment:  ((parseFloat(document.getElementById('hotelPayment').value)  || 0) + ((window._existingPayments||{}).hotelPayment  || 0)),
+        extrasPayment: ((parseFloat(document.getElementById('extrasPayment').value) || 0) + ((window._existingPayments||{}).extrasPayment || 0)),
+      };
+      // Clear payment input fields after save
+      ['tripPayment','flightPayment','hotelPayment','extrasPayment'].forEach(id => setVal(id, ''));
+      updateSummary();
+      updateNisPreview();
     } else {
       showMsg('saveError', 'error', 'Save failed: ' + (data.error?.message || JSON.stringify(data)));
     }
