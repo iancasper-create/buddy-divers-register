@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-FOLLOWUP 2026-03-14-v12 | swap bank/payment box order; fix standing order grammar; fix finger direction -->
+<!-- BD-FOLLOWUP 2026-03-14-v13 | bank header to פרטי חשבון בנק; line breaks and full stops in payment method box -->
 <html lang="en" dir="ltr">
 <head>
 <meta charset="UTF-8"/>
@@ -1260,9 +1260,9 @@ function buildPaymentHTML(booking, amount, nisAmount, rate, notes, paidSoFar, sa
           <div style="font-size:17px;color:#1a3a4a;line-height:1.5;">${(() => {
             const pm = (paymentMethod || '').toLowerCase();
             if (pm.includes('bank')) {
-              return '<span style="font-weight:700;">בהעברה בנקאית</span> יש לבצע העברה בנקאית לפי פרטי החשבון המופיעים משמאל 👈';
+              return '<span style="font-weight:700;">בהעברה בנקאית.</span><br/>יש לבצע העברה בנקאית לפי פרטי החשבון המופיעים משמאל 👈';
             } else if (pm.includes('credit')) {
-              return '<span style="font-weight:700;">בכרטיס אשראי</span> עד 3 תשלומים ללא ריבית, קישור לתשלום באשראי ישלח בהודעה הבאה';
+              return '<span style="font-weight:700;">בכרטיס אשראי</span> עד 3 תשלומים ללא ריבית.<br/>קישור לתשלום באשראי ישלח בהודעה הבאה';
             } else if (pm.includes('standing') || pm.includes('order')) {
               return '<span style="font-weight:700;">בהוראת קבע</span> עד 3 תשלומים ללא ריבית. אנא העבירו אלינו העתק של הוראת הקבע, התשלום האחרון חייב להתבצע לפני מועד היציאה של הספארי.';
             } else {
@@ -1271,7 +1271,7 @@ function buildPaymentHTML(booking, amount, nisAmount, rate, notes, paidSoFar, sa
           })()}</div>
         </div>
         <div style="flex:1;border:2px solid #c5dfe6;border-radius:12px;padding:16px 20px;background:#f8fcfd;">
-          <div style="font-size:17px;font-weight:700;color:#007289;margin-bottom:8px;">העברה בנקאית</div>
+          <div style="font-size:17px;font-weight:700;color:#007289;margin-bottom:8px;">פרטי חשבון בנק:</div>
           <table style="border-collapse:collapse;font-size:17px;color:#1a3a4a;direction:rtl;margin-left:auto;">
             <tr><td style="color:#888;font-weight:400;padding:3px 0;white-space:nowrap;text-align:right;min-width:140px;">חשבון על שם:</td><td style="font-weight:700;padding:3px 0 3px 16px;white-space:nowrap;">באדי-דייברס בע"מ</td></tr>
             <tr><td style="color:#888;font-weight:400;padding:3px 0;white-space:nowrap;text-align:right;min-width:140px;">בנק מזרחי טפחות:</td><td style="font-weight:700;padding:3px 0 3px 16px;white-space:nowrap;">20</td></tr>
