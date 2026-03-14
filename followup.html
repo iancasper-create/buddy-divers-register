@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-FOLLOWUP 2026-03-14-v6 | discount above extras notes; orange color; deducted from יתרה -->
+<!-- BD-FOLLOWUP 2026-03-14-v7 | returning discount only if Returning Customer=yes in Bookings -->
 <html lang="en" dir="ltr">
 <head>
 <meta charset="UTF-8"/>
@@ -893,9 +893,10 @@ function populateForm(fields, booking) {
   setVal('hotelCost', f('Hotel Cost'));
   setVal('extrasAmount', f('Extras Amount'));
   setVal('extrasNotes', f('Extras Notes'));
-  // Auto-calculate returning customer discount as 5% of safari
+  // Auto-calculate returning customer discount as 5% of safari — only if Returning Customer === 'yes'
   const safariVal = parseFloat(f('Safari Price', booking.totalPrice ?? 0)) || 0;
-  setVal('returningDiscount', safariVal > 0 ? Math.round(safariVal * 0.05) : '');
+  const isReturning = (f('Returning Customer') || '').toString().trim().toLowerCase() === 'yes';
+  setVal('returningDiscount', (isReturning && safariVal > 0) ? Math.round(safariVal * 0.05) : 0);
   setVal('pnr', f('PNR'));
   setVal('hotelName', f('Hotel Name'));
   setVal('hotelConfirmation', f('Hotel Confirmation'));
@@ -922,8 +923,7 @@ function clearForm(booking) {
    'tripPayment','flightPayment','hotelPayment','extrasPayment',
    'pnr','hotelName','hotelConfirmation','hotelCheckin','hotelCheckout','notes'].forEach(id => setVal(id, ''));
   setVal('safariPrice', booking.totalPrice ?? 0);
-  const safariClear = parseFloat(booking.totalPrice) || 0;
-  setVal('returningDiscount', safariClear > 0 ? Math.round(safariClear * 0.05) : '');
+  setVal('returningDiscount', 0);
   window._existingPayments = { tripPayment: 0, flightPayment: 0, hotelPayment: 0, extrasPayment: 0 };
   updateSummary();
 }
