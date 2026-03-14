@@ -1126,6 +1126,11 @@ function applyMarkup() {
   const rate = (currency === 'EUR' && _eurBaseRate) ? _eurBaseRate : _boiBaseRate;
 
   document.getElementById('exchangeRate').value = rate.toFixed(4);
+
+  // Update rate display spans to reflect active currency
+  const rateDisplayEl = document.getElementById('boiRateDisplay');
+  if (rateDisplayEl) rateDisplayEl.textContent = '₪' + rate.toFixed(4);
+
   // Update currency badge and label
   const badge = document.getElementById('activeCurrencyBadge');
   if (badge) badge.textContent = currency;
