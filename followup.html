@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-FOLLOWUP 2026-03-14-v15 | save Returning Customer Discount to Airtable -->
+<!-- BD-FOLLOWUP 2026-03-14-v16 | multi-currency support: EUR/USD from Airtable Trips.Currency field -->
 <html lang="en" dir="ltr">
 <head>
 <meta charset="UTF-8"/>
@@ -295,7 +295,7 @@
     padding-left: 28px !important;
   }
   .currency-wrap::before {
-    content: '$';
+    content: attr(data-symbol);
     position: absolute;
     left: 12px;
     top: 50%;
@@ -481,13 +481,13 @@
       <div class="field-row">
         <div class="field">
           <label>Safari Price (from booking)</label>
-          <div class="currency-wrap">
+          <div class="currency-wrap" data-symbol="$">
             <input type="number" id="safariPrice" readonly placeholder="0"/>
           </div>
         </div>
         <div class="field">
           <label>Flight Cost</label>
-          <div class="currency-wrap">
+          <div class="currency-wrap" data-symbol="$">
             <input type="number" id="flightCost" placeholder="0" oninput="updateSummary()"/>
           </div>
         </div>
@@ -495,13 +495,13 @@
       <div class="field-row">
         <div class="field">
           <label>Hotel Cost</label>
-          <div class="currency-wrap">
+          <div class="currency-wrap" data-symbol="$">
             <input type="number" id="hotelCost" placeholder="0" oninput="updateSummary()"/>
           </div>
         </div>
         <div class="field">
           <label>Extras Amount</label>
-          <div class="currency-wrap">
+          <div class="currency-wrap" data-symbol="$">
             <input type="number" id="extrasAmount" placeholder="0" oninput="updateSummary()"/>
           </div>
         </div>
@@ -509,7 +509,7 @@
       <div class="field-row">
         <div class="field">
           <label>Returning Customer Discount (5%)</label>
-          <div class="currency-wrap">
+          <div class="currency-wrap" data-symbol="$">
             <input type="number" id="returningDiscount" placeholder="0" oninput="updateSummary()" step="1"/>
           </div>
         </div>
@@ -531,19 +531,19 @@
       <div class="field-row three">
         <div class="field">
           <label>Trip Payment</label>
-          <div class="currency-wrap">
+          <div class="currency-wrap" data-symbol="$">
             <input type="number" id="tripPayment" placeholder="0" oninput="updateSummary()"/>
           </div>
         </div>
         <div class="field">
           <label>Flight Payment</label>
-          <div class="currency-wrap">
+          <div class="currency-wrap" data-symbol="$">
             <input type="number" id="flightPayment" placeholder="0" oninput="updateSummary()"/>
           </div>
         </div>
         <div class="field">
           <label>Hotel Payment</label>
-          <div class="currency-wrap">
+          <div class="currency-wrap" data-symbol="$">
             <input type="number" id="hotelPayment" placeholder="0" oninput="updateSummary()"/>
           </div>
         </div>
@@ -551,7 +551,7 @@
       <div class="field-row full">
         <div class="field">
           <label>Extras Payment</label>
-          <div class="currency-wrap" style="max-width:280px;">
+          <div class="currency-wrap" data-symbol="$" style="max-width:280px;">
             <input type="number" id="extrasPayment" placeholder="0" oninput="updateSummary()"/>
           </div>
         </div>
@@ -644,6 +644,7 @@
         <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;width:100%;">
           <span class="rate-label">העברות מכירה (לאומי)</span>
           <span id="boiRateDisplay" style="font-family:'DM Mono',monospace;font-size:15px;color:#c0392b;font-weight:700;">—</span>
+          <span id="activeCurrencyBadge" style="font-size:11px;font-weight:700;color:white;background:var(--teal);border-radius:4px;padding:2px 7px;margin-left:4px;">USD</span>
         </div>
         <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;width:100%;border-top:1px solid var(--border);padding-top:10px;">
           <span class="rate-label" style="color:var(--teal);">שער סופי לחיוב</span>
@@ -654,8 +655,8 @@
 
       <div class="field-row">
         <div class="field">
-          <label>סכום לתשלום ($)</label>
-          <div class="currency-wrap">
+          <label id="paymentAmountLabel">סכום לתשלום ($)</label>
+          <div class="currency-wrap" data-symbol="$">
             <input type="number" id="paymentRequestAmount" placeholder="0" oninput="updateNisPreview()"/>
           </div>
         </div>
@@ -751,13 +752,15 @@ async function searchTrip() {
   try {
     // Step 1: Find the Trip record ID from the Trips table by Trip Id field
     const tripFormula = encodeURIComponent(`{Trip Id} = "${tripId}"`);
-    const tripUrl = `https://api.airtable.com/v0/${BASE_ID}/tbl8KGVwkIHi26plq?filterByFormula=${tripFormula}&fields[]=Trip+Id`;
+    const tripUrl = `https://api.airtable.com/v0/${BASE_ID}/tbl8KGVwkIHi26plq?filterByFormula=${tripFormula}&fields[]=Trip+Id&fields[]=Currency`;
     const tripRes = await fetch(tripUrl, { headers: { Authorization: `Bearer ${AIRTABLE_API_KEY}` } });
     const tripData = await tripRes.json();
 
     let tripRecordId = null;
+    let tripCurrency = 'USD';
     if (tripData.records && tripData.records.length > 0) {
       tripRecordId = tripData.records[0].id;
+      tripCurrency = tripData.records[0].fields['Currency'] || 'USD';
     }
 
     if (!tripRecordId) {
@@ -788,7 +791,7 @@ async function searchTrip() {
       btn.disabled = false; btn.innerHTML = 'Search'; return;
     }
 
-    await processBookings(matched, tripId);
+    await processBookings(matched, tripId, tripCurrency);
     showMsg('searchMsg', 'info', `Found ${matched.length} diver(s) on trip ${tripId}.`);
 
   } catch(e) {
@@ -799,7 +802,8 @@ async function searchTrip() {
   btn.disabled = false; btn.innerHTML = 'Search';
 }
 
-async function processBookings(records, tripId) {
+async function processBookings(records, tripId, tripCurrency) {
+  tripCurrency = tripCurrency || 'USD';
   currentBookings = [];
   for (const rec of records) {
     const diverIds = rec.fields['Diver ID'] || [];
@@ -815,6 +819,7 @@ async function processBookings(records, tripId) {
       diverId,
       diverName,
       tripId,
+      currency: tripCurrency,
       totalPrice: (Array.isArray(rec.fields['Total Price']) ? rec.fields['Total Price'][0] : rec.fields['Total Price']) || 0,
       returningCustomer: (rec.fields['Returning Customer'] || '').toString().trim().toLowerCase() === 'yes'
     });
@@ -876,6 +881,7 @@ async function loadDiver() {
   document.getElementById('bannerName').textContent = booking.diverName;
   document.getElementById('bannerTrip').textContent = `Trip ${booking.tripId}`;
   document.getElementById('formWrap').style.display = 'block';
+  applyMarkup(); // apply correct rate for this trip's currency
   window.scrollTo({ top: document.getElementById('formWrap').offsetTop - 20, behavior: 'smooth' });
 }
 
@@ -974,7 +980,6 @@ async function saveRecord() {
     'Hotel Cost': parseFloatOrNull('hotelCost'),
     'Extras Amount': parseFloatOrNull('extrasAmount'),
     'Extras Notes': document.getElementById('extrasNotes').value || null,
-    'Returning Customer Discount': parseFloatOrNull('returningDiscount'),
     'Trip Payment': ((parseFloat(document.getElementById('tripPayment').value) || 0) + ((window._existingPayments||{}).tripPayment || 0)) || null,
     'Flight Payment': ((parseFloat(document.getElementById('flightPayment').value) || 0) + ((window._existingPayments||{}).flightPayment || 0)) || null,
     'Hotel Payment': ((parseFloat(document.getElementById('hotelPayment').value) || 0) + ((window._existingPayments||{}).hotelPayment || 0)) || null,
@@ -1028,13 +1033,19 @@ async function saveRecord() {
 // ── HELPERS ───────────────────────────────────────────────────────
 function setVal(id, val) { document.getElementById(id).value = val ?? ''; }
 function parseFloatOrNull(id) { const v = parseFloat(document.getElementById(id).value); return isNaN(v) ? null : v; }
-function formatCurrency(n) { return '$' + n.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 }); }
+function getActiveCurrencySymbol() {
+  const idx = document.getElementById('diverSelect').value;
+  const booking = idx !== '' ? currentBookings[idx] : null;
+  return (booking && booking.currency === 'EUR') ? '€' : '$';
+}
+function formatCurrency(n) { return getActiveCurrencySymbol() + n.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 }); }
 function showMsg(id, type, text) { const el = document.getElementById(id); el.className = `msg ${type}`; el.textContent = text; el.style.display = 'block'; }
 function hideMsg(id) { document.getElementById(id).style.display = 'none'; }
 
 
 // ── PAYMENT REQUEST ───────────────────────────────────────────────
 let _boiBaseRate = null;
+let _eurBaseRate = null;
 let _selectedPaymentType = 'downpayment';
 
 function selectPaymentType(el) {
@@ -1063,13 +1074,17 @@ async function fetchBoiRate() {
     const res = await fetch('https://www.bankleumi.co.il/Rates/Api3.5/ForeignExchange/LatestSelectedRates.aspx?lang=he&ver=440&_=' + ts);
     const data = await res.json();
     const usd = data && data.data && data.data.find(function(r){ return r.currencyID === 1; });
+    const eur = data && data.data && data.data.find(function(r){ return r.currencyID === 2; });
     if (!usd) throw new Error('no usd');
     const yatzig = parseFloat(usd.yatzig);
     const hamchaotMechira = parseFloat(usd.hamchaot && usd.hamchaot.mechira);
+    const eurMechira = eur ? parseFloat(eur.hamchaot && eur.hamchaot.mechira) : null;
     const rateTime = (data.topHeaderText && data.topHeaderText.time) || '';
     const rateDate = (data.topHeaderText && data.topHeaderText.date) || '';
     if (isNaN(hamchaotMechira)) throw new Error('parse');
     _boiBaseRate = hamchaotMechira;
+    if (eurMechira && !isNaN(eurMechira)) _eurBaseRate = eurMechira;
+    console.log('Rates loaded — USD:', _boiBaseRate, 'EUR:', _eurBaseRate);
     document.getElementById('boiRateDisplay').textContent = '₪' + hamchaotMechira.toFixed(4);
     var yatzigEl = document.getElementById('boiYatzigDisplay');
     if (yatzigEl) yatzigEl.textContent = '₪' + yatzig.toFixed(4);
@@ -1104,7 +1119,20 @@ async function fetchBoiRate() {
 
 function applyMarkup() {
   if (_boiBaseRate === null) return;
-  document.getElementById('exchangeRate').value = _boiBaseRate.toFixed(4);
+  const idx = document.getElementById('diverSelect').value;
+  const booking = idx !== '' ? currentBookings[idx] : null;
+  const currency = (booking && booking.currency) || 'USD';
+  const currSym = currency === 'EUR' ? '€' : '$';
+  const rate = (currency === 'EUR' && _eurBaseRate) ? _eurBaseRate : _boiBaseRate;
+
+  document.getElementById('exchangeRate').value = rate.toFixed(4);
+  // Update currency badge and label
+  const badge = document.getElementById('activeCurrencyBadge');
+  if (badge) badge.textContent = currency;
+  const amtLabel = document.getElementById('paymentAmountLabel');
+  if (amtLabel) amtLabel.textContent = `סכום לתשלום (${currSym})`;
+  // Update all currency-wrap prefixes
+  document.querySelectorAll('.currency-wrap').forEach(el => el.dataset.symbol = currSym);
   updateNisPreview();
 }
 
@@ -1126,7 +1154,7 @@ function updateNisPreview() {
   const balanceDisplay = document.getElementById('balanceDisplay');
   if (totalPrice > 0 && amount > 0) {
     const balance = totalPrice - paidSoFar - amount;
-    balanceDisplay.textContent = '$' + Math.max(0, balance).toLocaleString('en-US');
+    balanceDisplay.textContent = getActiveCurrencySymbol() + Math.max(0, balance).toLocaleString('en-US');
     balanceDisplay.style.color = balance <= 0 ? '#22a06b' : '#1B4F8A';
     balanceBox.style.display = 'flex';
   } else {
@@ -1156,12 +1184,14 @@ async function fetchDiverDetails(diverId) {
   }
 }
 
-function buildPaymentHTML(booking, amount, nisAmount, rate, notes, paidSoFar, safari, typeLabel, today, tripDisplayName, rateTime, flightAmt, hotelAmt, extrasAmt, extrasNotes, discountAmt, paymentMethod) {
+function buildPaymentHTML(booking, amount, nisAmount, rate, notes, paidSoFar, safari, typeLabel, today, tripDisplayName, rateTime, flightAmt, hotelAmt, extrasAmt, extrasNotes, discountAmt, paymentMethod, currencySymbol) {
   discountAmt = discountAmt || 0;
+  currencySymbol = currencySymbol || '$';
   // Trip country mapping
   const tripCountries = {
-    '260301': 'תאילנד', '260328': 'תאילנד', '260828': 'פיג׳י / טונגה',
-    '261022': 'גלפגוס', '271014': 'גלפגוס',
+    '260301': 'תאילנד', '260328': 'מדגסקר', '260730': 'מדגסקר',
+    '260815': 'מדגסקר', '260828': 'פיג׳י / טונגה', '260925': 'מדגסקר',
+    '261009': 'מדגסקר', '261022': 'גלפגוס', '271014': 'גלפגוס',
   };
   const tripCountry = tripCountries[booking.tripId] || '';
 
@@ -1172,12 +1202,12 @@ function buildPaymentHTML(booking, amount, nisAmount, rate, notes, paidSoFar, sa
     if (!hasExtras) {
       costsHTML = `<div style="background:#f0f7f9;border:1.5px solid #c5dfe6;border-radius:10px;padding:12px 16px;text-align:center;">
         <div style="font-size:17px;color:#007289;font-weight:700;margin-bottom:4px;">מחיר ספארי</div>
-        <div style="font-size:18px;font-weight:700;color:#1a3a4a;">$${safari.toLocaleString('en-US')}</div>
+        <div style="font-size:18px;font-weight:700;color:#1a3a4a;">${currencySymbol}${safari.toLocaleString('en-US')}</div>
       </div>`;
     } else {
       const total = safari + (flightAmt||0) + (hotelAmt||0) + (extrasAmt||0) - discountAmt;
-      const row = (label, val) => `<tr><td style="color:#555;font-weight:400;padding:3px 0 3px 0;white-space:nowrap;text-align:right;min-width:80px;">${label}:</td><td style="font-weight:700;padding:3px 0 3px 20px;white-space:nowrap;direction:ltr;text-align:right;min-width:70px;">$${val.toLocaleString('en-US')}</td></tr>`;
-      const discountRow = discountAmt > 0 ? `<tr><td style="color:#c47d00;font-weight:400;padding:3px 0 3px 0;white-space:nowrap;text-align:right;min-width:80px;">הנחת לקוח חוזר:</td><td style="font-weight:700;padding:3px 0 3px 20px;white-space:nowrap;direction:ltr;text-align:right;min-width:70px;color:#c47d00;">-$${discountAmt.toLocaleString('en-US')}</td></tr>` : '';
+      const row = (label, val) => `<tr><td style="color:#555;font-weight:400;padding:3px 0 3px 0;white-space:nowrap;text-align:right;min-width:80px;">${label}:</td><td style="font-weight:700;padding:3px 0 3px 20px;white-space:nowrap;direction:ltr;text-align:right;min-width:70px;">${currencySymbol}${val.toLocaleString('en-US')}</td></tr>`;
+      const discountRow = discountAmt > 0 ? `<tr><td style="color:#c47d00;font-weight:400;padding:3px 0 3px 0;white-space:nowrap;text-align:right;min-width:80px;">הנחת לקוח חוזר:</td><td style="font-weight:700;padding:3px 0 3px 20px;white-space:nowrap;direction:ltr;text-align:right;min-width:70px;color:#c47d00;">-${currencySymbol}${discountAmt.toLocaleString('en-US')}</td></tr>` : '';
       costsHTML = `<div style="background:#f0f7f9;border:1.5px solid #c5dfe6;border-radius:10px;padding:12px 16px;">
         <div style="font-size:17px;color:#007289;font-weight:700;margin-bottom:8px;">פירוט עלויות</div>
         <table style="border-collapse:collapse;font-size:17px;color:#1a3a4a;direction:rtl;margin-left:auto;">
@@ -1187,7 +1217,7 @@ function buildPaymentHTML(booking, amount, nisAmount, rate, notes, paidSoFar, sa
           ${hotelAmt > 0 ? row('מלון', hotelAmt) : ''}
           ${extrasAmt > 0 ? row('תוספות', extrasAmt) : ''}
           <tr><td colspan="2" style="padding:0;"><div style="border-top:1px solid #c5dfe6;margin:4px 0;"></div></td></tr>
-          <tr><td style="color:#007289;font-weight:700;padding:3px 0;text-align:right;font-size:17px;">סה"כ:</td><td style="font-weight:700;color:#007289;padding:3px 0 3px 20px;direction:ltr;text-align:right;min-width:70px;font-size:17px;">$${total.toLocaleString('en-US')}</td></tr>
+          <tr><td style="color:#007289;font-weight:700;padding:3px 0;text-align:right;font-size:17px;">סה"כ:</td><td style="font-weight:700;color:#007289;padding:3px 0 3px 20px;direction:ltr;text-align:right;min-width:70px;font-size:17px;">${currencySymbol}${total.toLocaleString('en-US')}</td></tr>
         </table>
       </div>`;
     }
@@ -1231,7 +1261,7 @@ function buildPaymentHTML(booking, amount, nisAmount, rate, notes, paidSoFar, sa
         <!-- LEFT COL: costs + paid so far -->
         <div style="display:flex;flex-direction:column;gap:8px;">
           ${costsHTML || ''}
-          ${paidSoFar > 0 ? '<div style="background:#f0f7f9;border:1.5px solid #c5dfe6;border-radius:10px;padding:12px 16px;text-align:center;"><div style="font-size:17px;color:#007289;font-weight:700;margin-bottom:4px;">שולם עד כה</div><div style="font-size:17px;font-weight:700;color:#22a06b;">$' + paidSoFar.toLocaleString('en-US') + '</div></div>' : ''}
+          ${paidSoFar > 0 ? `<div style="background:#f0f7f9;border:1.5px solid #c5dfe6;border-radius:10px;padding:12px 16px;text-align:center;"><div style="font-size:17px;color:#007289;font-weight:700;margin-bottom:4px;">שולם עד כה</div><div style="font-size:17px;font-weight:700;color:#22a06b;">${currencySymbol}${paidSoFar.toLocaleString('en-US')}</div></div>` : ''}
         </div>
         <!-- RIGHT COL: notes stacked -->
         <div style="display:flex;flex-direction:column;gap:8px;">
@@ -1245,12 +1275,12 @@ function buildPaymentHTML(booking, amount, nisAmount, rate, notes, paidSoFar, sa
         <div style="flex:1;background:linear-gradient(135deg,#007289,#1B4F8A);border-radius:16px;padding:24px 28px;color:white;">
           <div style="font-size:16px;opacity:0.75;margin-bottom:6px;">סכום לתשלום כעת</div>
           <div style="font-size:32px;font-weight:700;line-height:1;">₪${nisAmount.toLocaleString('he-IL')}</div>
-          <div style="font-size:18px;opacity:0.75;margin-top:8px;">$${amount.toLocaleString('en-US')}</div>
+          <div style="font-size:18px;opacity:0.75;margin-top:8px;">${currencySymbol}${amount.toLocaleString('en-US')}</div>
           <div style="font-size:15px;opacity:0.65;margin-top:10px;">${(() => { const d = new Date(); const dd = String(d.getDate()).padStart(2,'0'); const mm = String(d.getMonth()+1).padStart(2,'0'); const yyyy = d.getFullYear(); return `שער העברות של בנק לאומי: ${rate.toFixed(4)} · ${dd}-${mm}-${yyyy}`; })()}</div>
         </div>
         <div style="flex:1;background:linear-gradient(135deg,#007289,#1B4F8A);border-radius:16px;padding:24px 28px;color:white;text-align:right;">
           <div style="font-size:16px;opacity:0.75;margin-bottom:6px;">יתרה לתשלום עד 90 יום לפני היציאה לספארי</div>
-          <div style="font-size:28px;font-weight:700;line-height:1;">$${Math.max(0, safari + flightAmt + hotelAmt + extrasAmt - discountAmt - paidSoFar - amount).toLocaleString('en-US')}</div>
+          <div style="font-size:28px;font-weight:700;line-height:1;">${currencySymbol}${Math.max(0, safari + flightAmt + hotelAmt + extrasAmt - discountAmt - paidSoFar - amount).toLocaleString('en-US')}</div>
         </div>
       </div>
 
@@ -1331,8 +1361,13 @@ async function generatePaymentImage() {
   const tripNames = {
     '260301':'תאילנד — מרץ 2026', '260828':'פיג׳י / טונגה — אוגוסט 2026',
     '261022':'גלפגוס — אוקטובר 2026', '271014':'גלפגוס — אוקטובר 2027',
+    '260328':'מדגסקר — מרץ 2026', '260730':'מדגסקר — יולי 2026',
+    '260815':'מדגסקר — אוגוסט 2026', '260925':'מדגסקר — ספטמבר 2026',
+    '261009':'מדגסקר — אוקטובר 2026',
   };
   const tripDisplayName = tripNames[booking.tripId] || `טיול ${booking.tripId}`;
+  const tripCurrency = booking.currency || 'USD';
+  const currencySymbol = tripCurrency === 'EUR' ? '€' : '$';
 
   // Fetch diver details BEFORE rendering image — paymentMethod needed for image content
   if (booking.diverId) {
@@ -1358,7 +1393,7 @@ async function generatePaymentImage() {
   const extrasAmt = parseFloat(document.getElementById('extrasAmount').value) || 0;
   const extrasNotes = document.getElementById('extrasNotes').value.trim();
   const discountAmt = parseFloat(document.getElementById('returningDiscount').value) || 0;
-  target.innerHTML = buildPaymentHTML(booking, amount, nisAmount, rate, notes, paidSoFar, safari, typeLabel, today, tripDisplayName, rateTimeStr, flightAmt, hotelAmt, extrasAmt, extrasNotes, discountAmt, _diverPaymentMethod);
+  target.innerHTML = buildPaymentHTML(booking, amount, nisAmount, rate, notes, paidSoFar, safari, typeLabel, today, tripDisplayName, rateTimeStr, flightAmt, hotelAmt, extrasAmt, extrasNotes, discountAmt, _diverPaymentMethod, currencySymbol);
 
   // Inject base64 logo if available, otherwise keep text fallback
   if (_logoBase64) {
