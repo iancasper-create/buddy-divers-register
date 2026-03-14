@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-FOLLOWUP 2026-03-14 | Payment image: font sizing pass, bank section spacing, date format fix, rate text update -->
+<!-- BD-FOLLOWUP 2026-03-14-v2 | Payment image: font sizing pass, spacing fixes, colon after לאומי -->
 <html lang="en" dir="ltr">
 <head>
 <meta charset="UTF-8"/>
@@ -1146,7 +1146,7 @@ function buildPaymentHTML(booking, amount, nisAmount, rate, notes, paidSoFar, sa
       </div>`;
     } else {
       const total = safari + (flightAmt||0) + (hotelAmt||0) + (extrasAmt||0);
-      const row = (label, val) => `<tr><td style="color:#555;font-weight:400;padding:3px 0 3px 0;white-space:nowrap;text-align:right;">${label}:</td><td style="font-weight:700;padding:3px 0 3px 20px;white-space:nowrap;direction:ltr;text-align:right;min-width:70px;">$${val.toLocaleString('en-US')}</td></tr>`;
+      const row = (label, val) => `<tr><td style="color:#555;font-weight:400;padding:3px 0 3px 0;white-space:nowrap;text-align:right;min-width:80px;">${label}:</td><td style="font-weight:700;padding:3px 0 3px 20px;white-space:nowrap;direction:ltr;text-align:right;min-width:70px;">$${val.toLocaleString('en-US')}</td></tr>`;
       costsHTML = `<div style="background:#f0f7f9;border:1.5px solid #c5dfe6;border-radius:10px;padding:12px 16px;">
         <div style="font-size:17px;color:#007289;font-weight:700;margin-bottom:8px;">פירוט עלויות</div>
         <table style="border-collapse:collapse;font-size:17px;color:#1a3a4a;direction:rtl;margin-left:auto;">
@@ -1204,8 +1204,8 @@ function buildPaymentHTML(booking, amount, nisAmount, rate, notes, paidSoFar, sa
         </div>
         <!-- RIGHT COL: notes stacked -->
         <div style="display:flex;flex-direction:column;gap:8px;">
-          ${extrasNotes ? '<div style="flex:1;background:#f0f7f9;border:1.5px solid #c5dfe6;border-radius:10px;padding:12px 16px;"><div style="font-size:17px;color:#007289;font-weight:700;margin-bottom:6px;">פירוט התוספת</div><div style="font-size:14px;font-weight:400;color:#1a3a4a;">' + extrasNotes + '</div></div>' : '<div style="flex:1;"></div>'}
-          ${notes ? '<div style="flex:1;background:#f0f7f9;border:1.5px solid #c5dfe6;border-radius:10px;padding:12px 16px;"><div style="font-size:17px;color:#007289;font-weight:700;margin-bottom:6px;">הערות לתשלום</div><div style="font-size:14px;font-weight:400;color:#1a3a4a;">' + notes + '</div></div>' : '<div style="flex:1;"></div>'}
+          ${extrasNotes ? '<div style="flex:1;background:#f0f7f9;border:1.5px solid #c5dfe6;border-radius:10px;padding:12px 16px;"><div style="font-size:17px;color:#007289;font-weight:700;margin-bottom:6px;">פירוט התוספת</div><div style="font-size:17px;font-weight:400;color:#1a3a4a;">' + extrasNotes + '</div></div>' : '<div style="flex:1;"></div>'}
+          ${notes ? '<div style="flex:1;background:#f0f7f9;border:1.5px solid #c5dfe6;border-radius:10px;padding:12px 16px;"><div style="font-size:17px;color:#007289;font-weight:700;margin-bottom:6px;">הערות לתשלום</div><div style="font-size:17px;font-weight:400;color:#1a3a4a;">' + notes + '</div></div>' : '<div style="flex:1;"></div>'}
         </div>
       </div>
 
@@ -1215,7 +1215,7 @@ function buildPaymentHTML(booking, amount, nisAmount, rate, notes, paidSoFar, sa
           <div style="font-size:16px;opacity:0.75;margin-bottom:6px;">סכום לתשלום כעת</div>
           <div style="font-size:32px;font-weight:700;line-height:1;">₪${nisAmount.toLocaleString('he-IL')}</div>
           <div style="font-size:18px;opacity:0.75;margin-top:8px;">$${amount.toLocaleString('en-US')}</div>
-          <div style="font-size:15px;opacity:0.65;margin-top:10px;">${(() => { const d = new Date(); const dd = String(d.getDate()).padStart(2,'0'); const mm = String(d.getMonth()+1).padStart(2,'0'); const yyyy = d.getFullYear(); return `שער העברות של בנק לאומי ${rate.toFixed(4)} · ${dd}-${mm}-${yyyy}`; })()}</div>
+          <div style="font-size:15px;opacity:0.65;margin-top:10px;">${(() => { const d = new Date(); const dd = String(d.getDate()).padStart(2,'0'); const mm = String(d.getMonth()+1).padStart(2,'0'); const yyyy = d.getFullYear(); return `שער העברות של בנק לאומי: ${rate.toFixed(4)} · ${dd}-${mm}-${yyyy}`; })()}</div>
         </div>
         <div style="flex:1;background:linear-gradient(135deg,#007289,#1B4F8A);border-radius:16px;padding:24px 28px;color:white;text-align:right;">
           <div style="font-size:16px;opacity:0.75;margin-bottom:6px;">יתרה לתשלום עד 90 יום לפני היציאה לספארי</div>
@@ -1227,11 +1227,11 @@ function buildPaymentHTML(booking, amount, nisAmount, rate, notes, paidSoFar, sa
       <div style="display:flex;gap:16px;margin-bottom:18px;">
         <div style="flex:1;border:2px solid #c5dfe6;border-radius:12px;padding:16px 20px;background:#f8fcfd;">
           <div style="font-size:17px;font-weight:700;color:#007289;margin-bottom:8px;">העברה בנקאית</div>
-          <table style="border-collapse:collapse;font-size:14px;color:#1a3a4a;direction:rtl;margin-left:auto;">
-            <tr><td style="color:#888;font-weight:400;padding:3px 0;white-space:nowrap;text-align:right;">חשבון על שם:</td><td style="font-weight:700;padding:3px 0 3px 16px;white-space:nowrap;">באדי-דייברס בע"מ</td></tr>
-            <tr><td style="color:#888;font-weight:400;padding:3px 0;white-space:nowrap;text-align:right;">בנק מזרחי טפחות:</td><td style="font-weight:700;padding:3px 0 3px 16px;white-space:nowrap;">20</td></tr>
-            <tr><td style="color:#888;font-weight:400;padding:3px 0;white-space:nowrap;text-align:right;">סניף:</td><td style="font-weight:700;padding:3px 0 3px 16px;white-space:nowrap;">422 מרכז עסקים פולג</td></tr>
-            <tr><td style="color:#888;font-weight:400;padding:3px 0;white-space:nowrap;text-align:right;">חשבון:</td><td style="font-weight:700;padding:3px 0 3px 16px;white-space:nowrap;">625145</td></tr>
+          <table style="border-collapse:collapse;font-size:17px;color:#1a3a4a;direction:rtl;margin-left:auto;">
+            <tr><td style="color:#888;font-weight:400;padding:3px 0;white-space:nowrap;text-align:right;min-width:140px;">חשבון על שם:</td><td style="font-weight:700;padding:3px 0 3px 16px;white-space:nowrap;">באדי-דייברס בע"מ</td></tr>
+            <tr><td style="color:#888;font-weight:400;padding:3px 0;white-space:nowrap;text-align:right;min-width:140px;">בנק מזרחי טפחות:</td><td style="font-weight:700;padding:3px 0 3px 16px;white-space:nowrap;">20</td></tr>
+            <tr><td style="color:#888;font-weight:400;padding:3px 0;white-space:nowrap;text-align:right;min-width:140px;">סניף:</td><td style="font-weight:700;padding:3px 0 3px 16px;white-space:nowrap;">422 מרכז עסקים פולג</td></tr>
+            <tr><td style="color:#888;font-weight:400;padding:3px 0;white-space:nowrap;text-align:right;min-width:140px;">חשבון:</td><td style="font-weight:700;padding:3px 0 3px 16px;white-space:nowrap;">625145</td></tr>
           </table>
         </div>
         <div style="flex:1;border:2px dashed #c5dfe6;border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#f8fcfd;">
