@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-FOLLOWUP 2026-03-14-v8 | returning discount driven by Returning Customer field in Bookings fetch -->
+<!-- BD-FOLLOWUP 2026-03-14-v9 | dynamic payment method box; second WA message for credit card link; no caption -->
 <html lang="en" dir="ltr">
 <head>
 <meta charset="UTF-8"/>
@@ -1135,23 +1135,25 @@ function updateNisPreview() {
 
 let _jpgDataUrl = null;
 let _diverPhone = null;
+let _diverPaymentMethod = null;
 
-async function fetchDiverPhone(diverId) {
+async function fetchDiverDetails(diverId) {
   try {
     const res = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${DIVERS_TABLE}/${diverId}`, {
       headers: { Authorization: `Bearer ${AIRTABLE_API_KEY}` }
     });
     const data = await res.json();
-    const phone = data.fields?.Phone || null;
-    console.log('Phone field value:', phone);
-    return phone;
+    return {
+      phone: data.fields?.Phone || null,
+      paymentMethod: data.fields?.['Payment Method'] || null
+    };
   } catch(e) {
-    console.error('Phone fetch error:', e);
-    return null;
+    console.error('Diver fetch error:', e);
+    return { phone: null, paymentMethod: null };
   }
 }
 
-function buildPaymentHTML(booking, amount, nisAmount, rate, notes, paidSoFar, safari, typeLabel, today, tripDisplayName, rateTime, flightAmt, hotelAmt, extrasAmt, extrasNotes, discountAmt) {
+function buildPaymentHTML(booking, amount, nisAmount, rate, notes, paidSoFar, safari, typeLabel, today, tripDisplayName, rateTime, flightAmt, hotelAmt, extrasAmt, extrasNotes, discountAmt, paymentMethod) {
   discountAmt = discountAmt || 0;
   // Trip country mapping
   const tripCountries = {
@@ -1260,9 +1262,19 @@ function buildPaymentHTML(booking, amount, nisAmount, rate, notes, paidSoFar, sa
             <tr><td style="color:#888;font-weight:400;padding:3px 0;white-space:nowrap;text-align:right;min-width:140px;">חשבון:</td><td style="font-weight:700;padding:3px 0 3px 16px;white-space:nowrap;">625145</td></tr>
           </table>
         </div>
-        <div style="flex:1;border:2px dashed #c5dfe6;border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#f8fcfd;">
-          <div style="font-size:13px;font-weight:600;color:#1a3a4a;margin-bottom:8px;">💳 תשלום מאובטח</div>
-          <div style="font-size:14px;font-weight:700;color:#007289;">https://bit.ly/3lisAOd</div>
+        <div style="flex:1;border:2px solid #c5dfe6;border-radius:12px;padding:16px 20px;background:#f8fcfd;">
+          <div style="font-size:17px;font-weight:700;color:#007289;margin-bottom:8px;">שיטת התשלום אותו בחרת בטופס ההרשמה:</div>
+          <div style="font-size:17px;color:#1a3a4a;line-height:1.5;">${(() => {
+            if (paymentMethod === 'Bank Transfer') {
+              return '<span style="font-weight:700;">בהעברה בנקאית</span> יש לבצע העברה בנקאית לפי פרטי החשבון המופיעים מימין 👈';
+            } else if (paymentMethod === 'Credit Card up to 3 payments') {
+              return '<span style="font-weight:700;">בכרטיס אשראי</span> עד 3 תשלומים ללא ריבית — קישור לתשלום באשראי ישלח בהודעה הבאה';
+            } else if (paymentMethod === 'Standing Order') {
+              return '<span style="font-weight:700;">בהוראת קבע</span> עד 3 תשלומים ללא ריבית (אנא העבירו אלינו העתק של הוראת הקבע — התשלום האחרון חייב להתבצע לפני מועד היציאה של הספארי)';
+            } else {
+              return '<a href="https://bit.ly/3lisAOd" style="color:#007289;font-weight:700;">https://bit.ly/3lisAOd</a>';
+            }
+          })()}</div>
         </div>
       </div>
 
@@ -1321,6 +1333,7 @@ async function generatePaymentImage() {
   // Show overlay with loading state
   _jpgDataUrl = null;
   _diverPhone = null;
+  _diverPaymentMethod = null;
   document.getElementById('jpgOutput').style.display = 'none';
   document.getElementById('jpgRenderMsg').textContent = 'מייצר תמונה...';
   document.getElementById('jpgPreviewOverlay').style.display = 'block';
@@ -1336,7 +1349,7 @@ async function generatePaymentImage() {
   const extrasAmt = parseFloat(document.getElementById('extrasAmount').value) || 0;
   const extrasNotes = document.getElementById('extrasNotes').value.trim();
   const discountAmt = parseFloat(document.getElementById('returningDiscount').value) || 0;
-  target.innerHTML = buildPaymentHTML(booking, amount, nisAmount, rate, notes, paidSoFar, safari, typeLabel, today, tripDisplayName, rateTimeStr, flightAmt, hotelAmt, extrasAmt, extrasNotes, discountAmt);
+  target.innerHTML = buildPaymentHTML(booking, amount, nisAmount, rate, notes, paidSoFar, safari, typeLabel, today, tripDisplayName, rateTimeStr, flightAmt, hotelAmt, extrasAmt, extrasNotes, discountAmt, _diverPaymentMethod);
 
   // Inject base64 logo if available, otherwise keep text fallback
   if (_logoBase64) {
@@ -1371,7 +1384,9 @@ async function generatePaymentImage() {
 
   // Fetch diver phone in parallel
   if (booking.diverId) {
-    _diverPhone = await fetchDiverPhone(booking.diverId);
+    const diverDetails = await fetchDiverDetails(booking.diverId);
+    _diverPhone = diverDetails.phone;
+    _diverPaymentMethod = diverDetails.paymentMethod;
   }
   if (_diverPhone) {
     document.getElementById('whatsappBtn').textContent = '💬 שלח וואטסאפ';
@@ -1416,15 +1431,9 @@ async function openWhatsApp() {
     const imageUrl = cloudData.secure_url;
     btn.textContent = '💬 שולח וואטסאפ...';
 
-    // Step 2: Send to Make webhook → WhatsApp API
+    // Step 2: Send image to Make webhook → WhatsApp API (no caption)
     const idx = document.getElementById('diverSelect').value;
     const booking = currentBookings[idx];
-    const amount = parseFloat(document.getElementById('paymentRequestAmount').value) || 0;
-    const typeLabels = { downpayment:'מקדמה', final:'סופי', extras:'תוספות' };
-    const typeLabel = _selectedPaymentType === 'custom'
-      ? (document.getElementById('customPaymentLabel').value.trim() || 'מותאם אישית')
-      : (typeLabels[_selectedPaymentType] || '');
-    const caption = `${typeLabel} — ${booking.diverName} — $${amount.toLocaleString('en-US')}`;
 
     const makeRes = await fetch('https://hook.eu1.make.com/yabs6aeja0bz6eoxw29p8t9tpgqi7tio', {
       method: 'POST',
@@ -1432,21 +1441,31 @@ async function openWhatsApp() {
       body: JSON.stringify({
         phone: _diverPhone,
         imageUrl: imageUrl,
-        caption: caption
+        caption: ''
       })
     });
 
-    if (makeRes.ok) {
-      btn.textContent = '✅ נשלח!';
-      btn.style.background = '#22a06b';
-      setTimeout(() => {
-        btn.textContent = '💬 שלח וואטסאפ';
-        btn.style.background = '#25D366';
-        btn.disabled = false;
-      }, 3000);
-    } else {
-      throw new Error('Make webhook failed');
+    if (!makeRes.ok) throw new Error('Make webhook failed');
+
+    // Step 3: If payment method is Credit Card — send payment link as second message
+    if (_diverPaymentMethod === 'Credit Card up to 3 payments') {
+      btn.textContent = '💬 שולח קישור תשלום...';
+      await fetch('https://hook.eu1.make.com/yabs6aeja0bz6eoxw29p8t9tpgqi7tio', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          phone: _diverPhone,
+          textMessage: 'קישור לתשלום באשראי: https://bit.ly/3lisAOd'
+        })
+      });
     }
+    btn.textContent = '✅ נשלח!';
+    btn.style.background = '#22a06b';
+    setTimeout(() => {
+      btn.textContent = '💬 שלח וואטסאפ';
+      btn.style.background = '#25D366';
+      btn.disabled = false;
+    }, 3000);
 
   } catch(e) {
     console.error('WhatsApp send error:', e);
