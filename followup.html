@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-FOLLOWUP 2026-03-15-v34 | Cloudinary folder structure: payment_requests/{ID_FirstName_LastName}/{TripID} -->
+<!-- BD-FOLLOWUP 2026-03-15-v35 | Cloudinary folder sanitize fixed to ASCII-only -->
 <html lang="en" dir="ltr">
 <head>
 <meta charset="UTF-8"/>
@@ -1504,9 +1504,9 @@ async function openWhatsApp() {
   try {
     // Step 1: Upload JPG to Cloudinary
     const blob = await (await fetch(_jpgDataUrl)).blob();
-    const sanitize = s => (s || '').toString().trim().replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_\u0590-\u05FF-]/g, '');
+    const sanitize = s => (s || '').toString().trim().replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_-]/g, '');
     const diverFolder = `${_diverIsraelId || 'unknown'}_${sanitize(_diverFirstName)}_${sanitize(_diverLastName)}`;
-    const tripFolder = booking.tripId || 'unknown_trip';
+    const tripFolder = sanitize(booking.tripId || 'unknown_trip');
     const cloudFolder = `payment_requests/${diverFolder}/${tripFolder}`;
     const formData = new FormData();
     formData.append('file', blob, 'payment-request.jpg');
