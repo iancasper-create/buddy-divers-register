@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-REG 2026-03-15 | currency field added to all trips and submit payload -->
+<!-- BD-REG 2026-03-15 | currency field on all trips + phone prefill fix for returning customers -->
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8" />
@@ -1299,7 +1299,7 @@ const TRIPS = {
     name: "🤿 ספארי פיג'י וטונגה — Fiji & Tonga Safari",
     dates: "28/08/2026 – 12/09/2026",
     note: "⛔ רשימת המתנה בלבד / Waiting list only",
-    currency: "USD",
+    currency: "USD", "⛔ רשימת המתנה בלבד / Waiting list only",
     pricing: [
       {
         value: "single_9790",
@@ -1313,7 +1313,7 @@ const TRIPS = {
     name: "🤿 ספארי גלאפגוס — Galapagos Safari",
     dates: "22/10/2026 – 29/10/2026",
     note: "2 מקומות אחרונים / Last 2 spaces",
-    currency: "USD",
+    currency: "USD", "2 מקומות אחרונים / Last 2 spaces",
     pricing: [
       {
         value: "single_7300",
@@ -1327,7 +1327,7 @@ const TRIPS = {
     name: "🤿 ספארי גלאפגוס — Galapagos Safari",
     dates: "14/10/2027 – 21/10/2027",
     note: "סוכות / Sukkot",
-    currency: "USD",
+    currency: "USD", "סוכות / Sukkot",
     pricing: [
       {
         value: "single_7350",
@@ -2193,15 +2193,15 @@ function prefillForm(d) {
   setVal('firstName', d.firstName);
   setVal('lastName', d.lastName);
   setVal('email', d.email);
-  // Phone — split stored "+XXX XXXXXXX" back into country code + number
+  // Phone — match country code from dropdown options (longest first to avoid +1 eating +972 etc)
   if (d.phone) {
     var phoneVal = d.phone;
-    var ccMatch = phoneVal.match(/^(\+\d+)\s*(.*)/);
-    if (ccMatch) {
-      var ccSel = document.getElementById('phoneCountryCode');
-      var matchOpt = Array.from(ccSel.options).find(o => o.value === ccMatch[1]);
-      if (matchOpt) ccSel.value = ccMatch[1];
-      document.getElementById('phoneNumberInput').value = ccMatch[2];
+    var ccSel = document.getElementById('phoneCountryCode');
+    var ccOpts = Array.from(ccSel.options).map(o => o.value).filter(v => v).sort((a,b) => b.length - a.length);
+    var matchedCc = ccOpts.find(cc => phoneVal.startsWith(cc));
+    if (matchedCc) {
+      ccSel.value = matchedCc;
+      document.getElementById('phoneNumberInput').value = phoneVal.slice(matchedCc.length);
     } else {
       document.getElementById('phoneNumberInput').value = phoneVal;
     }
@@ -2228,15 +2228,15 @@ function prefillForm(d) {
   setVal('medicalNotes', d.medicalNotes);
   setVal('emergencyName', d.emergencyName);
   setSelect('emergencyRelationship', d.emergencyRelationship);
-  // Emergency phone — split stored "+XXX XXXXXXX" back into country code + number
+  // Emergency phone — match country code from dropdown options (longest first)
   if (d.emergencyPhone) {
     var epVal = d.emergencyPhone;
-    var epMatch = epVal.match(/^(\+\d+)\s*(.*)/);
-    if (epMatch) {
-      var epSel = document.getElementById('emergencyPhoneCountryCode');
-      var epOpt = Array.from(epSel.options).find(o => o.value === epMatch[1]);
-      if (epOpt) epSel.value = epMatch[1];
-      document.getElementById('emergencyPhoneNumberInput').value = epMatch[2];
+    var epSel = document.getElementById('emergencyPhoneCountryCode');
+    var epOpts = Array.from(epSel.options).map(o => o.value).filter(v => v).sort((a,b) => b.length - a.length);
+    var matchedEpCc = epOpts.find(cc => epVal.startsWith(cc));
+    if (matchedEpCc) {
+      epSel.value = matchedEpCc;
+      document.getElementById('emergencyPhoneNumberInput').value = epVal.slice(matchedEpCc.length);
     } else {
       document.getElementById('emergencyPhoneNumberInput').value = epVal;
     }
