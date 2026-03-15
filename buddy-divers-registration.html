@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-REG 2026-03-14 | diveComputer validation added to validateForm -->
+<!-- BD-REG 2026-03-15 | currency field added to all trips and submit payload -->
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8" />
@@ -1098,6 +1098,7 @@ const TRIPS = {
   "260328": {
     name: "🤿 ספארי מדגסקר — Madagascar Safari",
     dates: "28/03/2026 – 05/04/2026",
+    currency: "EUR",
     pricing: [
       {
         value: "twin_2890",
@@ -1126,6 +1127,7 @@ const TRIPS = {
   "263007": {
     name: "🤿 ספארי מדגסקר — Madagascar Safari",
     dates: "30/07/2026 – 08/08/2026",
+    currency: "EUR",
     pricing: [
       {
         value: "twin_2890",
@@ -1154,6 +1156,7 @@ const TRIPS = {
   "260815": {
     name: "🤿 ספארי מדגסקר — Madagascar Safari",
     dates: "15/08/2026 – 24/08/2026",
+    currency: "EUR",
     pricing: [
       {
         value: "twin_2890",
@@ -1182,6 +1185,7 @@ const TRIPS = {
   "260915": {
     name: "🤿 ספארי מדגסקר — Madagascar Safari",
     dates: "15/09/2026 – 24/09/2026",
+    currency: "EUR",
     pricing: [
       {
         value: "twin_2890",
@@ -1210,6 +1214,7 @@ const TRIPS = {
   "260925": {
     name: "🤿 ספארי מדגסקר — Madagascar Safari",
     dates: "25/09/2026 – 04/10/2026",
+    currency: "EUR",
     pricing: [
       {
         value: "twin_2890",
@@ -1238,6 +1243,7 @@ const TRIPS = {
   "261009": {
     name: "🤿 ספארי מדגסקר — Madagascar Safari",
     dates: "09/10/2026 – 18/10/2026",
+    currency: "EUR",
     pricing: [
       {
         value: "twin_2890",
@@ -1266,6 +1272,7 @@ const TRIPS = {
   "270203": {
     name: "🤿 ספארי מיאנמר — Myanmar Safari",
     dates: "03/02/2027 – 10/02/2027",
+    currency: "USD",
     pricing: [
       {
         value: "upper_standard_2480",
@@ -1292,6 +1299,7 @@ const TRIPS = {
     name: "🤿 ספארי פיג'י וטונגה — Fiji & Tonga Safari",
     dates: "28/08/2026 – 12/09/2026",
     note: "⛔ רשימת המתנה בלבד / Waiting list only",
+    currency: "USD",
     pricing: [
       {
         value: "single_9790",
@@ -1305,6 +1313,7 @@ const TRIPS = {
     name: "🤿 ספארי גלאפגוס — Galapagos Safari",
     dates: "22/10/2026 – 29/10/2026",
     note: "2 מקומות אחרונים / Last 2 spaces",
+    currency: "USD",
     pricing: [
       {
         value: "single_7300",
@@ -1318,6 +1327,7 @@ const TRIPS = {
     name: "🤿 ספארי גלאפגוס — Galapagos Safari",
     dates: "14/10/2027 – 21/10/2027",
     note: "סוכות / Sukkot",
+    currency: "USD",
     pricing: [
       {
         value: "single_7350",
@@ -1330,6 +1340,7 @@ const TRIPS = {
   "261122": {
     name: "🤿 ספארי תאילנד — Thailand Safari",
     dates: "22/11/2026 – 29/11/2026",
+    currency: "USD",
     pricing: [
       {
         value: "upper_standard_2360",
@@ -1355,6 +1366,7 @@ const TRIPS = {
     name: "🤿 פיליפינים קומבו — Philippines Combo",
     dates: "15/12/2026 – 26/12/2026",
     note: "🏝️ Anilao (land - optional): 15/12–19/12 · $1,350 | 🚢 Infiniti Liveaboard: 19/12–26/12",
+    currency: "USD",
     pricing: [
       {
         value: "land_only_1350",
@@ -1380,6 +1392,7 @@ const TRIPS = {
     name: "🐋 מקסיקו קומבו — Mexico Combo 🦈",
     dates: "04/01/2027 – 16/01/2027",
     note: "🦭 La Paz (land - optional): 04/01–07/01 | Quino Del Mar: 07/01–16/01 🚢",
+    currency: "USD",
     pricing: [
       {
         value: "quino_4295",
@@ -1401,6 +1414,7 @@ const TRIPS = {
   "270106": {
     name: "🤿 ספארי מיאנמר — Myanmar Safari",
     dates: "06/01/2027 – 13/01/2027",
+    currency: "USD",
     pricing: [
       {
         value: "upper_standard_2480",
@@ -1903,6 +1917,9 @@ document.getElementById('regForm').addEventListener('submit', async function(e) 
   data['pricing'] = pricingLabel;
   const totalPriceCalc = mainPriceNum + supplementPriceNum;
   data['totalPrice'] = totalPriceCalc;
+
+  // Add currency (EUR for Madagascar trips, USD for all others)
+  data['currency'] = (tripPricingConf && tripPricingConf.currency) ? tripPricingConf.currency : 'USD';
 
   // Add trip ID and destination
   data.tripId = submitParams.get('trip') || 'default';
