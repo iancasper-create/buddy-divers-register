@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-FOLLOWUP 2026-03-15-v33 | summary labels updated: Total Cost to Customer, Balance Due -->
+<!-- BD-FOLLOWUP 2026-03-15-v34 | Cloudinary folder structure: payment_requests/{ID_FirstName_LastName}/{TripID} -->
 <html lang="en" dir="ltr">
 <head>
 <meta charset="UTF-8"/>
@@ -1504,10 +1504,14 @@ async function openWhatsApp() {
   try {
     // Step 1: Upload JPG to Cloudinary
     const blob = await (await fetch(_jpgDataUrl)).blob();
+    const sanitize = s => (s || '').toString().trim().replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_\u0590-\u05FF-]/g, '');
+    const diverFolder = `${_diverIsraelId || 'unknown'}_${sanitize(_diverFirstName)}_${sanitize(_diverLastName)}`;
+    const tripFolder = booking.tripId || 'unknown_trip';
+    const cloudFolder = `payment_requests/${diverFolder}/${tripFolder}`;
     const formData = new FormData();
     formData.append('file', blob, 'payment-request.jpg');
     formData.append('upload_preset', 'buddy_divers_uploads');
-    formData.append('folder', 'payment_requests');
+    formData.append('folder', cloudFolder);
 
     const cloudRes = await fetch('https://api.cloudinary.com/v1_1/dccbsfte0/image/upload', {
       method: 'POST',
