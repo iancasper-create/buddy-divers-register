@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-REG 2026-03-15 | currency field on all trips + phone prefill fix for returning customers -->
+<!-- BD-REG 2026-03-15 | currency fields + phone prefill fix + OTP input type restored to number -->
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8" />
@@ -411,7 +411,7 @@
             <div class="otp-digit-slot" id="otpSlot2"></div>
             <div class="otp-digit-slot" id="otpSlot3"></div>
           </div>
-          <input type="text" id="otpSingleInput" inputmode="numeric" maxlength="4"
+          <input type="number" id="otpSingleInput" inputmode="numeric" maxlength="4"
             autocomplete="one-time-code" pattern="\d{4}"
             style="position:absolute;top:0;left:0;width:100%;height:100%;opacity:0;font-size:22px;border:none;background:transparent;outline:none;cursor:text;z-index:2;caret-color:transparent;" />
         </div>
