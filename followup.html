@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-FOLLOWUP 2026-03-15-v35 | Cloudinary folder sanitize fixed to ASCII-only -->
+<!-- BD-FOLLOWUP 2026-03-15-v36 | fix booking declaration order in openWhatsApp -->
 <html lang="en" dir="ltr">
 <head>
 <meta charset="UTF-8"/>
@@ -1503,6 +1503,8 @@ async function openWhatsApp() {
 
   try {
     // Step 1: Upload JPG to Cloudinary
+    const idx = document.getElementById('diverSelect').value;
+    const booking = currentBookings[idx];
     const blob = await (await fetch(_jpgDataUrl)).blob();
     const sanitize = s => (s || '').toString().trim().replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_-]/g, '');
     const diverFolder = `${_diverIsraelId || 'unknown'}_${sanitize(_diverFirstName)}_${sanitize(_diverLastName)}`;
@@ -1524,8 +1526,6 @@ async function openWhatsApp() {
     btn.textContent = '💬 שולח וואטסאפ...';
 
     // Step 2: Send image to Make webhook → WhatsApp API (no caption)
-    const idx = document.getElementById('diverSelect').value;
-    const booking = currentBookings[idx];
 
     const makeRes = await fetch('https://hook.eu1.make.com/yabs6aeja0bz6eoxw29p8t9tpgqi7tio', {
       method: 'POST',
