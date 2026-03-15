@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-FOLLOWUP 2026-03-15-v30 | Total Owed label renamed to Total Cost to Customer -->
+<!-- BD-FOLLOWUP 2026-03-15-v31 | Returning Customer Discount stored and displayed as negative number throughout -->
 <html lang="en" dir="ltr">
 <head>
 <meta charset="UTF-8"/>
@@ -463,7 +463,7 @@
       <div class="card-title"><span class="step-badge">3</span> Financial Summary</div>
       <div class="summary-grid">
         <div class="summary-box owed">
-          <div class="s-label">Total Cost to Customer</div>
+          <div class="s-label">Total Owed</div>
           <div class="s-value" id="sumOwed">$0</div>
         </div>
         <div class="summary-box paid">
@@ -907,7 +907,7 @@ function populateForm(fields, booking) {
   if (savedDiscount !== null && savedDiscount !== '') {
     setVal('returningDiscount', savedDiscount);
   } else {
-    setVal('returningDiscount', (booking.returningCustomer && safariVal > 0) ? Math.round(safariVal * 0.05) : 0);
+    setVal('returningDiscount', (booking.returningCustomer && safariVal > 0) ? -Math.round(safariVal * 0.05) : 0);
   }
   setVal('pnr', f('PNR'));
   setVal('hotelName', f('Hotel Name'));
@@ -936,7 +936,7 @@ function clearForm(booking) {
    'pnr','hotelName','hotelConfirmation','hotelCheckin','hotelCheckout','notes'].forEach(id => setVal(id, ''));
   setVal('safariPrice', booking.totalPrice ?? 0);
   const safariVal = parseFloat(booking.totalPrice) || 0;
-  setVal('returningDiscount', (booking.returningCustomer && safariVal > 0) ? Math.round(safariVal * 0.05) : 0);
+  setVal('returningDiscount', (booking.returningCustomer && safariVal > 0) ? -Math.round(safariVal * 0.05) : 0);
   window._existingPayments = { tripPayment: 0, flightPayment: 0, hotelPayment: 0, extrasPayment: 0 };
   updateSummary();
 }
@@ -948,7 +948,7 @@ function updateSummary() {
   const hotel = parseFloat(document.getElementById('hotelCost').value) || 0;
   const extras = parseFloat(document.getElementById('extrasAmount').value) || 0;
   const discount = parseFloat(document.getElementById('returningDiscount').value) || 0;
-  const owed = safari + flight + hotel + extras - discount;
+  const owed = safari + flight + hotel + extras + discount;
 
   const existing = window._existingPayments || { tripPayment:0, flightPayment:0, hotelPayment:0, extrasPayment:0 };
   const tp = (parseFloat(document.getElementById('tripPayment').value) || 0) + (existing.tripPayment || 0);
@@ -1187,7 +1187,7 @@ function updateNisPreview() {
   const extrasCost = parseFloat(document.getElementById('extrasAmount').value) || 0;
   const discountCost = parseFloat(document.getElementById('returningDiscount').value) || 0;
   const existing = window._existingPayments || {};
-  const totalPrice = safari + flightCost + hotelCost + extrasCost - discountCost;
+  const totalPrice = safari + flightCost + hotelCost + extrasCost + discountCost;
   const paidSoFar = (existing.tripPayment||0)+(existing.flightPayment||0)+(existing.hotelPayment||0)+(existing.extrasPayment||0);
   const balanceBox = document.getElementById('balanceBox');
   const balanceDisplay = document.getElementById('balanceDisplay');
@@ -1244,7 +1244,7 @@ function buildPaymentHTML(booking, amount, nisAmount, rate, notes, paidSoFar, sa
   const tripCountry = tripCountries[booking.tripId] || '';
 
   // Itemized costs block
-  const hasExtras = (flightAmt > 0) || (hotelAmt > 0) || (extrasAmt > 0) || (discountAmt > 0);
+  const hasExtras = (flightAmt > 0) || (hotelAmt > 0) || (extrasAmt > 0) || (discountAmt !== 0);
   let costsHTML = '';
   if (safari > 0) {
     if (!hasExtras) {
@@ -1253,9 +1253,9 @@ function buildPaymentHTML(booking, amount, nisAmount, rate, notes, paidSoFar, sa
         <div style="font-size:18px;font-weight:700;color:#1a3a4a;">${currencySymbol}${safari.toLocaleString('en-US')}</div>
       </div>`;
     } else {
-      const total = safari + (flightAmt||0) + (hotelAmt||0) + (extrasAmt||0) - discountAmt;
+      const total = safari + (flightAmt||0) + (hotelAmt||0) + (extrasAmt||0) + discountAmt;
       const row = (label, val) => `<tr><td style="color:#555;font-weight:400;padding:3px 0 3px 0;white-space:nowrap;text-align:right;min-width:80px;">${label}:</td><td style="font-weight:700;padding:3px 0 3px 20px;white-space:nowrap;direction:ltr;text-align:right;min-width:70px;">${currencySymbol}${val.toLocaleString('en-US')}</td></tr>`;
-      const discountRow = discountAmt > 0 ? `<tr><td style="color:#c47d00;font-weight:400;padding:3px 0 3px 0;white-space:nowrap;text-align:right;min-width:80px;">הנחת לקוח חוזר:</td><td style="font-weight:700;padding:3px 0 3px 20px;white-space:nowrap;direction:ltr;text-align:right;min-width:70px;color:#c47d00;">-${currencySymbol}${discountAmt.toLocaleString('en-US')}</td></tr>` : '';
+      const discountRow = discountAmt !== 0 ? `<tr><td style="color:#c47d00;font-weight:400;padding:3px 0 3px 0;white-space:nowrap;text-align:right;min-width:80px;">הנחת לקוח חוזר:</td><td style="font-weight:700;padding:3px 0 3px 20px;white-space:nowrap;direction:ltr;text-align:right;min-width:70px;color:#c47d00;">${currencySymbol}${discountAmt.toLocaleString('en-US')}</td></tr>` : '';
       costsHTML = `<div style="background:#f0f7f9;border:1.5px solid #c5dfe6;border-radius:10px;padding:12px 16px;">
         <div style="font-size:17px;color:#007289;font-weight:700;margin-bottom:8px;">פירוט עלויות</div>
         <table style="border-collapse:collapse;font-size:17px;color:#1a3a4a;direction:rtl;margin-left:auto;">
@@ -1328,7 +1328,7 @@ function buildPaymentHTML(booking, amount, nisAmount, rate, notes, paidSoFar, sa
         </div>
         <div style="flex:1;background:linear-gradient(135deg,#007289,#1B4F8A);border-radius:16px;padding:24px 28px;color:white;text-align:right;">
           <div style="font-size:16px;opacity:0.75;margin-bottom:6px;">יתרה לתשלום עד 90 יום לפני היציאה לספארי</div>
-          ${(() => { const bal = safari + flightAmt + hotelAmt + extrasAmt - discountAmt - paidSoFar - amount; const absBal = Math.abs(bal); const balStr = bal < 0 ? '(' + currencySymbol + absBal.toLocaleString('en-US') + ')' : currencySymbol + bal.toLocaleString('en-US'); const balColor = bal < 0 ? '#ffaaaa' : 'white'; return `<div style="font-size:28px;font-weight:700;line-height:1;color:${balColor};">${balStr}</div>`; })()}
+          ${(() => { const bal = safari + flightAmt + hotelAmt + extrasAmt + discountAmt - paidSoFar - amount; const absBal = Math.abs(bal); const balStr = bal < 0 ? '(' + currencySymbol + absBal.toLocaleString('en-US') + ')' : currencySymbol + bal.toLocaleString('en-US'); const balColor = bal < 0 ? '#ffaaaa' : 'white'; return `<div style="font-size:28px;font-weight:700;line-height:1;color:${balColor};">${balStr}</div>`; })()}
         </div>
       </div>
 
