@@ -743,7 +743,7 @@ async function loadManifest(tripId) {
 
   // Fetch all bookings for this trip
   const bookingsData = await atFetch(TABLE_BOOKINGS,
-    `filterByFormula=({Trip+ID}="${tripId}")&fields[]=Diver+ID&fields[]=Cabin+Type&fields[]=Cabin+Number&fields[]=Notes`
+    `filterByFormula=({Trip}="${tripId}")&fields[]=Diver+ID&fields[]=Cabin+Type&fields[]=Cabin+Number&fields[]=Notes`
   );
 
   if (!bookingsData || !bookingsData.records || bookingsData.records.length === 0) {
