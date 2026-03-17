@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-<!-- BD-MANIFEST 2026-03-17 | English only, LTR layout -->
-<html lang="en" dir="ltr">
+<!-- BD-MANIFEST 2026-03-17 | English only, LTR, phone normalization, dates dd/mm/yyyy, admin phones+emails -->
+<html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -30,7 +30,7 @@
       background: var(--dark);
       color: var(--text);
       min-height: 100vh;
-      direction: ltr;
+      direction: rtl;
     }
 
     body::before {
@@ -286,14 +286,14 @@
     }
     .manifest-table thead th {
       padding: 12px 14px;
-      text-align: left;
+      text-align: right;
       font-weight: 700;
       font-size: 12px;
       letter-spacing: 0.5px;
       white-space: nowrap;
     }
-    .manifest-table thead th:first-child { border-radius: 0 0 0 12px; }
-    .manifest-table thead th:last-child  { border-radius: 0 0 12px 0; }
+    .manifest-table thead th:first-child { border-radius: 12px 0 0 0; }
+    .manifest-table thead th:last-child  { border-radius: 0 12px 0 0; }
 
     .manifest-table tbody tr:nth-child(even) { background: #f8fcfd; }
     .manifest-table tbody tr:hover { background: rgba(0,114,137,0.06); }
@@ -302,7 +302,6 @@
       border-bottom: 1px solid #e8f2f5;
       color: var(--text);
       vertical-align: middle;
-      text-align: left;
     }
     .manifest-table tbody tr:last-child td { border-bottom: none; }
 
@@ -461,7 +460,7 @@
       </div>
     </div>
     <div class="otp-resend">
-      Didn't receive it? <a onclick="requestOtp(true)">Resend</a>
+      Did not receive it? <a onclick="requestOtp(true)">Resend</a>
       &nbsp;·&nbsp; <a onclick="backToLogin()">Back</a>
     </div>
     <button class="btn-primary" id="btnVerifyOtp" onclick="verifyOtp()" style="margin-top:16px;">Verify</button>
@@ -643,14 +642,27 @@ async function requestOtp(resend = false) {
   const leaderName  = (rec.fields['Leader Name']  || '').trim();
   const tripName    = rec.fields['Name'] || tripId;
 
-  // Normalize phone for comparison
-  const normalize = p => p.replace(/[\s\-]/g,'');
-  if (!leaderPhone || normalize(leaderPhone) !== normalize(phone)) {
+  // Normalize phone: strip non-digits, take last 9 digits (handles +972, 972, 0 prefixes)
+  const normalize = p => p.replace(/\D/g,'').slice(-9);
+
+  // Admin phones — can access any trip regardless of Leader Phone
+  const ADMINS = {
+    '542323567': { name: 'Ian Casper',   email: 'ian@buddy-divers.com' },
+    '555563119': { name: 'Amir Fireman', email: 'amir@buddy-divers.com' }
+  };
+  const adminKey = normalize(phone);
+  const isAdmin  = !!ADMINS[adminKey];
+
+  // For admins, use their own name/email; otherwise use trip leader's
+  const resolvedName  = isAdmin ? ADMINS[adminKey].name  : leaderName;
+  const resolvedEmail = isAdmin ? ADMINS[adminKey].email : leaderEmail;
+
+  if (!isAdmin && (!leaderPhone || normalize(leaderPhone) !== normalize(phone))) {
     setLoading('btnRequestOtp', false, 'Send Verification Code');
     showStatus('loginStatus', 'error', 'Phone number not authorized for this trip.');
     return;
   }
-  if (!leaderEmail) {
+  if (!resolvedEmail) {
     setLoading('btnRequestOtp', false, 'Send Verification Code');
     showStatus('loginStatus', 'error', 'No email on file for this leader. Please contact Buddy-Divers.');
     return;
@@ -664,7 +676,7 @@ async function requestOtp(resend = false) {
     const resp = await fetch(MANIFEST_OTP_WEBHOOK, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'send_otp', tripId, leaderName, leaderEmail, leaderPhone: phone, tripName, otp })
+      body: JSON.stringify({ action: 'send_otp', tripId, leaderName: resolvedName, leaderEmail: resolvedEmail, leaderPhone: phone, tripName, otp })
     });
     if (!resp.ok) throw new Error('Webhook error');
   } catch(e) {
@@ -680,8 +692,8 @@ async function requestOtp(resend = false) {
   _tripRecordId = rec.id;
   _tripData     = rec.fields;
   _leaderPhone  = phone;
-  _leaderEmail  = leaderEmail;
-  _leaderName   = leaderName;
+  _leaderEmail  = resolvedEmail;
+  _leaderName   = resolvedName;
   _tripId       = tripId;
 
   setLoading('btnRequestOtp', false, 'Send Verification Code');
@@ -691,7 +703,7 @@ async function requestOtp(resend = false) {
   document.getElementById('otpSection').style.display   = 'block';
   clearOtp();
   document.getElementById('otpSentMsg').textContent =
-    `A verification code has been sent to ${leaderEmail}. Valid for ${OTP_EXPIRY_MINUTES} minutes.`;
+    `A verification code has been sent to ${resolvedEmail}. Valid for ${OTP_EXPIRY_MINUTES} minutes.`;
   setTimeout(() => document.getElementById('otpSingleInput').focus(), 100);
 }
 
@@ -724,8 +736,16 @@ async function verifyOtp() {
   // Show trip banner using state saved during login
   document.getElementById('leaderGreeting').textContent = `Hello ${_leaderName}`;
   document.getElementById('bannerTripName').textContent  = _tripData['Name'] || _tripId;
-  document.getElementById('bannerDates').textContent     =
-    `${_tripData['Start Date'] || ''} – ${_tripData['Return Date'] || _tripData['End Date'] || ''}`;
+  const fmtBannerDate = d => {
+    if (!d) return '';
+    const dt = new Date(d);
+    if (isNaN(dt)) return d;
+    return `${String(dt.getDate()).padStart(2,'0')}/${String(dt.getMonth()+1).padStart(2,'0')}/${dt.getFullYear()}`;
+  };
+  const startRaw = _tripData['Start Date'] || _tripData['Departure Date'] || _tripData['Date'] || '';
+  const endRaw   = _tripData['Return Date'] || _tripData['End Date'] || '';
+  document.getElementById('bannerDates').textContent =
+    `${fmtBannerDate(startRaw)} – ${fmtBannerDate(endRaw)}`;
   document.getElementById('bannerDestination').textContent = _tripData['Destination'] || '';
   document.getElementById('bannerVessel').textContent    = _tripData['Vessel'] || '';
   document.getElementById('bannerCapacity').textContent  = _tripData['Capacity'] ? `${_tripData['Capacity']} divers max` : '';
@@ -798,7 +818,7 @@ async function loadManifest(tripId) {
   }
 
   // Sort by last name
-  rows.sort((a,b) => a.lastName.localeCompare(b.lastName, 'en'));
+  rows.sort((a,b) => a.lastName.localeCompare(b.lastName, 'he'));
 
   const tbody = document.getElementById('manifestBody');
   tbody.innerHTML = '';
