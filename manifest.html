@@ -655,12 +655,15 @@ async function requestOtp(resend = false) {
     return;
   }
 
-  // 2. Post to Make webhook — Make generates OTP, stores in Airtable, sends email
+  // Generate OTP in JS — sent to Make which stores in Airtable and emails it
+  const otp = Math.floor(1000 + Math.random() * 9000).toString();
+
+  // 2. Post to Make webhook
   try {
     const resp = await fetch(MANIFEST_OTP_WEBHOOK, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'send_otp', tripId, leaderName, leaderEmail, leaderPhone: phone, tripName })
+      body: JSON.stringify({ action: 'send_otp', tripId, leaderName, leaderEmail, leaderPhone: phone, tripName, otp })
     });
     if (!resp.ok) throw new Error('Webhook error');
   } catch(e) {
@@ -668,6 +671,9 @@ async function requestOtp(resend = false) {
     showStatus('loginStatus', 'error', 'Failed to send OTP. Please try again.');
     return;
   }
+
+  // Save OTP in sessionStorage for verification
+  sessionStorage.setItem('bd-manifest-otp-' + tripId, otp);
 
   // Save state
   _tripRecordId = rec.id;
@@ -700,41 +706,28 @@ async function verifyOtp() {
 
   setLoading('btnVerifyOtp', true, 'אמת קוד / Verify');
 
-  // Re-fetch trip to get latest OTP stored by Make
-  const data = await atFetch(TABLE_TRIPS, `filterByFormula=({Trip+Id}="${_tripId}")&maxRecords=1`);
-  if (!data || !data.records || data.records.length === 0) {
-    setLoading('btnVerifyOtp', false, 'אמת קוד / Verify');
-    showStatus('otpStatus', 'error', 'Error verifying code. Please try again.');
-    return;
-  }
-
-  const rec       = data.records[0];
-  const storedOtp = (rec.fields['Leader OTP'] || '').trim();
-  const expiryStr = rec.fields['Leader OTP Expiry'] || '';
-  const expiry    = expiryStr ? new Date(expiryStr) : null;
-
+  // Verify against OTP stored in sessionStorage (generated in JS, sent to Make)
+  const storedOtp = sessionStorage.getItem('bd-manifest-otp-' + _tripId) || '';
   if (!storedOtp || entered !== storedOtp) {
     setLoading('btnVerifyOtp', false, 'אמת קוד / Verify');
     showStatus('otpStatus', 'error', 'Invalid code. Please try again.');
     return;
   }
-  if (expiry && Date.now() > expiry.getTime()) {
-    setLoading('btnVerifyOtp', false, 'אמת קוד / Verify');
-    showStatus('otpStatus', 'error', 'Code expired. Please request a new one.');
-    return;
-  }
+
+  // Clear OTP from sessionStorage
+  sessionStorage.removeItem('bd-manifest-otp-' + _tripId);
 
   setLoading('btnVerifyOtp', false, 'אמת קוד / Verify');
   document.getElementById('otpSection').style.display = 'none';
 
-  // Show trip banner with Vessel and Capacity
+  // Show trip banner using state saved during login
   document.getElementById('leaderGreeting').textContent = `שלום ${_leaderName} / Hello ${_leaderName}`;
-  document.getElementById('bannerTripName').textContent  = rec.fields['Name'] || _tripId;
+  document.getElementById('bannerTripName').textContent  = _tripData['Name'] || _tripId;
   document.getElementById('bannerDates').textContent     =
-    `${rec.fields['Start Date'] || ''} – ${rec.fields['Return Date'] || rec.fields['End Date'] || ''}`;
-  document.getElementById('bannerDestination').textContent = rec.fields['Destination'] || '';
-  document.getElementById('bannerVessel').textContent    = rec.fields['Vessel'] || '';
-  document.getElementById('bannerCapacity').textContent  = rec.fields['Capacity'] ? `${rec.fields['Capacity']} divers max` : '';
+    `${_tripData['Start Date'] || ''} – ${_tripData['Return Date'] || _tripData['End Date'] || ''}`;
+  document.getElementById('bannerDestination').textContent = _tripData['Destination'] || '';
+  document.getElementById('bannerVessel').textContent    = _tripData['Vessel'] || '';
+  document.getElementById('bannerCapacity').textContent  = _tripData['Capacity'] ? `${_tripData['Capacity']} divers max` : '';
   document.getElementById('tripBanner').classList.add('show');
 
   await loadManifest(_tripId);
