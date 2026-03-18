@@ -1770,7 +1770,7 @@ function validateField(fieldId, name, type) {
           minExpiry.setDate(minExpiry.getDate() + 180);
           if (d < minExpiry) {
             ok = false;
-            msg = '⚠️ הדרכון דורש חידוש — חובה תוקף 180 יום לאחר תאריך החזרה / Passport requires renewal — must be valid 180 days after return';
+            msg = '⚠️ הדרכון דורש חידוש — חובה תוקף חצי שנה לאחר תאריך החזרה / Passport requires renewal — must be valid 6 months after return';
           }
         }
       }
