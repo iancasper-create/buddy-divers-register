@@ -558,7 +558,7 @@
 
       <!-- Passport photo upload -->
       <div class="field" style="margin-top:8px;">
-        <label>תמונת דרכון <span class="en">Passport Photo Upload</span></label>
+        <label>תמונת דרכון <span class="en">Passport Photo Upload</span><span class="req">*</span></label>
         <div class="upload-box" id="passportUploadArea">
           <input type="file" id="passportFileInput" accept="image/jpeg, image/png" style="display:none"
             onchange="handleUpload(this,'passportUploadArea','passportPhotoUrl','passportUploadStatus','passports','passport')" />
@@ -573,6 +573,7 @@
           <div class="upload-hint">JPG, PNG · עד 5MB / up to 5MB</div>
         </div>
         <input type="hidden" name="passportPhoto" id="passportPhotoUrl" />
+        <span class="field-error" id="passportPhotoError" style="display:none;">יש להעלות תמונת דרכון / Passport photo is required</span>
       </div>
     </div>
 
@@ -1879,6 +1880,11 @@ function validateForm() {
       missingFields.push(label);
     }
   });
+
+  // Passport photo
+  const passportPhotoOk = !!document.getElementById('passportPhotoUrl').value;
+  document.getElementById('passportPhotoError').style.display = passportPhotoOk ? 'none' : 'block';
+  if (!passportPhotoOk) { valid = false; missingFields.push('תמונת דרכון / Passport Photo'); }
 
   // Dive computer selection
   const diveComputer = document.querySelector('[name="diveComputer"]:checked');
