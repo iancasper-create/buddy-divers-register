@@ -2259,6 +2259,7 @@ function setSelect(name, value) {
 
 function prefillForm(d) {
   setVal('firstName', d.firstName);
+  setVal('middleName', d.middleName);
   setVal('lastName', d.lastName);
   setVal('email', d.email);
   // Phone — match country code from dropdown options (longest first to avoid +1 eating +972 etc)
@@ -2278,6 +2279,7 @@ function prefillForm(d) {
   setVal('dob', isoToDmy(d.dob));
   setSelect('gender', d.gender);
   setVal('city', d.city);
+  setVal('boatName', d.boatName);
   setVal('nationality', d.nationality);
   setVal('passportNumber', d.passportNumber);
   setVal('passportIssue', isoToDmy(d.passportIssue));
