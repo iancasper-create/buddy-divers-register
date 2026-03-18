@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-REG 2026-03-16 | priceNum added to all trips missing it (Myanmar x3, Galapagos x2, Fiji, Thailand, Philippines) -->
+<!-- BD-REG 2026-03-18 | Upload orange→red, passportFullName removed, firstName/lastName/DOB moved to passport section, medicalNotes validation fixed -->
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8" />
@@ -155,7 +155,7 @@
     .field textarea { resize:vertical; min-height:80px; }
     .field select { appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23007289' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:left 12px center; padding-left:32px; }
 
-    .field-hint { font-size:11px; color:#c0392b; margin-top:2px; font-weight:600; }
+    .field-hint { font-size:11px; color:var(--orange); margin-top:2px; font-weight:600; }
     .field-error { font-size:11px; color:var(--error); margin-top:2px; display:none; }
     .field.invalid input, .field.invalid select { border-color: var(--error); }
     .field.invalid .field-error { display:block; }
@@ -212,7 +212,7 @@
       position:relative;
     }
     .file-upload-area:hover { border-color:var(--teal); background:rgba(0,148,149,0.04); }
-    .file-upload-area.uploading { border-color:var(--orange); background:rgba(245,166,35,0.05); cursor:wait; }
+    .file-upload-area.uploading { border-color:var(--error); background:rgba(224,85,85,0.05); cursor:wait; }
     .file-upload-area.upload-done { border-color:#27ae60; background:rgba(39,174,96,0.06); }
     .file-upload-area.upload-error { border-color:var(--error); background:rgba(224,85,85,0.06); }
     .file-upload-area input[type=file] {
@@ -227,7 +227,7 @@
     .upload-box { border:2px dashed var(--border); border-radius:12px; padding:14px 16px; background:var(--light-bg); transition:border-color 0.2s; }
     .upload-box.upload-done { border-color:#27ae60; background:rgba(39,174,96,0.06); }
     .upload-box.upload-error { border-color:var(--error); background:rgba(224,85,85,0.06); }
-    .upload-box.uploading { border-color:var(--orange); background:rgba(245,166,35,0.05); }
+    .upload-box.uploading { border-color:var(--error); background:rgba(224,85,85,0.05); }
     .upload-box-status { font-size:12px; color:var(--muted); margin-bottom:10px; min-height:18px; }
     .upload-box-heading { font-size:13px; font-weight:700; color:var(--navy); margin-bottom:10px; }
     .upload-box-buttons { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
@@ -240,8 +240,8 @@
     .upload-btn-camera:hover { background:#c8d8eb; }
     .upload-btn-view { background:#f5f5f5; color:#555; border:1.5px solid #ccc !important; }
     .upload-btn-view:hover { background:#ebebeb; }
-    .upload-hint { font-size:11px; color:#c0392b; margin-top:8px; font-weight:600; }
-    .upload-progress { font-size:12px; color:var(--orange); margin-top:6px; font-weight:500; }
+    .upload-hint { font-size:11px; color:var(--orange); margin-top:8px; font-weight:600; }
+    .upload-progress { font-size:12px; color:var(--error); margin-top:6px; font-weight:500; }
     .upload-success { font-size:12px; color:#27ae60; margin-top:6px; font-weight:600; }
     .upload-error-msg { font-size:12px; color:var(--error); margin-top:6px; font-weight:500; }
     .upload-retry { font-size:12px; color:var(--teal); margin-top:4px; text-decoration:underline; cursor:pointer; display:none; }
@@ -435,19 +435,6 @@
       </div>
 
       <div class="form-row">
-        <div class="field" id="f-firstName">
-          <label>שם פרטי (באנגלית) <span class="en">/ First Name</span><span class="req">*</span></label>
-          <input type="text" name="firstName" placeholder="John" autocomplete="given-name" id="firstNameInput" />
-          <span class="field-error">שדה חובה / Required</span>
-        </div>
-        <div class="field" id="f-lastName">
-          <label>שם משפחה (באנגלית) <span class="en">/ Last Name</span><span class="req">*</span></label>
-          <input type="text" name="lastName" placeholder="Smith" autocomplete="family-name" id="lastNameInput" />
-          <span class="field-error">שדה חובה / Required</span>
-        </div>
-      </div>
-
-      <div class="form-row">
         <div class="field" id="f-email">
           <label>אימייל <span class="en">Email</span><span class="req">*</span></label>
           <input type="email" name="email" placeholder="email@example.com" autocomplete="email" />
@@ -489,6 +476,29 @@
           <input type="hidden" name="phone" id="phoneHidden" />
           <span class="field-error">שדה חובה / Required</span>
         </div>
+        <div class="field">
+          <label>עיר מגורים <span class="en">City of Residence</span></label>
+          <input type="text" name="city" placeholder="ניתן להקליד בעברית או באנגלית / Can be keyed in Hebrew or English" />
+        </div>
+      </div>
+
+    </div>
+
+    <!-- SECTION 2: Passport -->
+    <div class="card">
+      <div class="section-title"><span class="icon">🛂</span> דרכון <span style="font-weight:400;color:var(--muted);font-size:12px;margin-right:6px;">Passport Details</span></div>
+
+      <div class="form-row">
+        <div class="field" id="f-firstName">
+          <label>שם פרטי (באנגלית) <span class="en">/ First Name</span><span class="req">*</span></label>
+          <input type="text" name="firstName" placeholder="John" autocomplete="given-name" id="firstNameInput" />
+          <span class="field-error">שדה חובה / Required</span>
+        </div>
+        <div class="field" id="f-lastName">
+          <label>שם משפחה (באנגלית) <span class="en">/ Last Name</span><span class="req">*</span></label>
+          <input type="text" name="lastName" placeholder="Smith" autocomplete="family-name" id="lastNameInput" />
+          <span class="field-error">שדה חובה / Required</span>
+        </div>
       </div>
 
       <div class="form-row">
@@ -497,12 +507,62 @@
           <input type="text" name="dob" id="dobInput" placeholder="DD/MM/YYYY" pattern="\d{2}/\d{2}/\d{4}" maxlength="10" />
           <span class="field-error">שדה חובה / Required</span>
         </div>
-        <div class="field">
-          <label>עיר מגורים <span class="en">City of Residence</span></label>
-          <input type="text" name="city" placeholder="ניתן להקליד בעברית או באנגלית / Can be keyed in Hebrew or English" />
+        <div class="field" id="f-nationality">
+          <label>אזרחות (באנגלית) <span class="en">/ Nationality</span><span class="req">*</span></label>
+          <input type="text" name="nationality" placeholder="לאום / Nationality" id="nationalityInput" />
+          <span class="field-error">אנגלית בלבד / English characters only</span>
         </div>
       </div>
 
+      <div class="form-row">
+        <div class="field" id="f-passportNumber">
+          <label>מספר דרכון <span class="en">Passport Number</span><span class="req">*</span></label>
+          <input type="text" name="passportNumber" placeholder="XX0000000" />
+          <span class="field-error">שדה חובה / Required</span>
+        </div>
+        <div class="field" id="f-gender">
+          <label>מין בדרכון <span class="en">Gender (as on passport)</span><span class="req">*</span></label>
+          <select name="gender">
+            <option value="">בחר.י / Select</option>
+            <option value="M">זכר / Male</option>
+            <option value="F">נקבה / Female</option>
+          </select>
+          <span class="field-error">שדה חובה / Required</span>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="field" id="f-passportIssue">
+          <label>תאריך הנפקת דרכון <span class="en">Passport Issue Date</span><span class="req">*</span></label>
+          <input type="text" name="passportIssue" id="passportIssueInput" placeholder="DD/MM/YYYY" pattern="\d{2}/\d{2}/\d{4}" maxlength="10" />
+          <span class="field-error" id="passportIssueError">שדה חובה / Required</span>
+        </div>
+        <div class="field" id="f-passportExpiry">
+          <label>תוקף דרכון <span class="en">Passport Expiry</span><span class="req">*</span></label>
+          <input type="text" name="passportExpiry" id="passportExpiryInput" placeholder="DD/MM/YYYY" pattern="\d{2}/\d{2}/\d{4}" maxlength="10" />
+          <span class="field-hint">⚠️ חובה 6 חודשים מעבר לתאריך חזרה / Must be valid 6 months after return</span>
+          <span class="field-error" id="passportExpiryError">שדה חובה / Required</span>
+        </div>
+      </div>
+
+      <!-- Passport photo upload -->
+      <div class="field" style="margin-top:8px;">
+        <label>תמונת דרכון <span class="en">Passport Photo Upload</span></label>
+        <div class="upload-box" id="passportUploadArea">
+          <input type="file" id="passportFileInput" accept="image/jpeg, image/png" style="display:none"
+            onchange="handleUpload(this,'passportUploadArea','passportPhotoUrl','passportUploadStatus','passports','passport')" />
+          <input type="file" id="passportCameraInput" accept="image/jpeg, image/png" capture="environment" style="display:none"
+            onchange="handleUpload(this,'passportUploadArea','passportPhotoUrl','passportUploadStatus','passports','passport')" />
+          <div class="upload-box-status" id="passportUploadStatus"></div>
+          <div class="upload-box-buttons">
+            <a id="passportViewBtn" class="upload-btn upload-btn-view" href="#" target="_blank" style="display:none">👁 צפה בתמונה הקיימת / View existing photo</a>
+            <button type="button" class="upload-btn upload-btn-gallery" onclick="document.getElementById('passportFileInput').click()">🖼 העלה.י תמונה מהגלריה / Upload from gallery</button>
+            <button type="button" class="upload-btn upload-btn-camera" onclick="document.getElementById('passportCameraInput').click()">📷 העלה.י תמונה באמצעות המצלמה / Upload using camera</button>
+          </div>
+          <div class="upload-hint">JPG, PNG · עד 5MB / up to 5MB</div>
+        </div>
+        <input type="hidden" name="passportPhoto" id="passportPhotoUrl" />
+      </div>
     </div>
 
     <!-- SECTION 5: Safari Pricing (DYNAMIC) -->
@@ -538,75 +598,6 @@
         </label>
       </div>
       <span class="field-error" id="flightsError" style="display:none;margin-top:8px;">יש לבחור אפשרות טיסה / Please select a flights option</span>
-    </div>
-
-    <!-- SECTION 2: Passport -->
-    <div class="card">
-      <div class="section-title"><span class="icon">🛂</span> דרכון <span style="font-weight:400;color:var(--muted);font-size:12px;margin-right:6px;">Passport Details</span></div>
-
-      <div class="form-row">
-        <div class="field" id="f-passportNumber">
-          <label>מספר דרכון <span class="en">Passport Number</span><span class="req">*</span></label>
-          <input type="text" name="passportNumber" placeholder="XX0000000" />
-          <span class="field-error">שדה חובה / Required</span>
-        </div>
-        <div class="field" id="f-nationality">
-          <label>אזרחות (באנגלית) <span class="en">/ Nationality</span><span class="req">*</span></label>
-          <input type="text" name="nationality" placeholder="לאום / Nationality" id="nationalityInput" />
-          <span class="field-error">אנגלית בלבד / English characters only</span>
-        </div>
-      </div>
-
-      <div class="form-row">
-        <div class="field" id="f-passportIssue">
-          <label>תאריך הנפקת דרכון <span class="en">Passport Issue Date</span><span class="req">*</span></label>
-          <input type="text" name="passportIssue" id="passportIssueInput" placeholder="DD/MM/YYYY" pattern="\d{2}/\d{2}/\d{4}" maxlength="10" />
-          <span class="field-error" id="passportIssueError">שדה חובה / Required</span>
-        </div>
-        <div class="field" id="f-passportExpiry">
-          <label>תוקף דרכון <span class="en">Passport Expiry</span><span class="req">*</span></label>
-          <input type="text" name="passportExpiry" id="passportExpiryInput" placeholder="DD/MM/YYYY" pattern="\d{2}/\d{2}/\d{4}" maxlength="10" />
-          <span class="field-hint">⚠️ חובה 6 חודשים מעבר לתאריך חזרה / Must be valid 6 months after return</span>
-          <span class="field-error" id="passportExpiryError">שדה חובה / Required</span>
-        </div>
-      </div>
-
-      <div class="form-row">
-        <div class="field" id="f-gender">
-          <label>מין בדרכון <span class="en">Gender (as on passport)</span><span class="req">*</span></label>
-          <select name="gender">
-            <option value="">בחר.י / Select</option>
-            <option value="M">זכר / Male</option>
-            <option value="F">נקבה / Female</option>
-          </select>
-          <span class="field-error">שדה חובה / Required</span>
-        </div>
-        <div class="field" id="f-passportFullName">
-          <label>שם מלא כבדרכון <span class="en">Full Name as on Passport</span></label>
-          <input type="text" name="passportFullName" placeholder="כמו בדרכון / As in passport" id="passportFullNameInput" />
-          <span class="field-hint">מלא רק אם שונה מהשם לעיל / Only if different from above</span>
-          <span class="field-error">אנגלית בלבד / English characters only</span>
-        </div>
-      </div>
-
-      <!-- Passport photo upload -->
-      <div class="field" style="margin-top:8px;">
-        <label>תמונת דרכון <span class="en">Passport Photo Upload</span></label>
-        <div class="upload-box" id="passportUploadArea">
-          <input type="file" id="passportFileInput" accept="image/jpeg, image/png" style="display:none"
-            onchange="handleUpload(this,'passportUploadArea','passportPhotoUrl','passportUploadStatus','passports','passport')" />
-          <input type="file" id="passportCameraInput" accept="image/jpeg, image/png" capture="environment" style="display:none"
-            onchange="handleUpload(this,'passportUploadArea','passportPhotoUrl','passportUploadStatus','passports','passport')" />
-          <div class="upload-box-status" id="passportUploadStatus"></div>
-          <div class="upload-box-buttons">
-            <a id="passportViewBtn" class="upload-btn upload-btn-view" href="#" target="_blank" style="display:none">👁 צפה בתמונה הקיימת / View existing photo</a>
-            <button type="button" class="upload-btn upload-btn-gallery" onclick="document.getElementById('passportFileInput').click()">🖼 העלה.י תמונה מהגלריה / Upload from gallery</button>
-            <button type="button" class="upload-btn upload-btn-camera" onclick="document.getElementById('passportCameraInput').click()">📷 העלה.י תמונה באמצעות המצלמה / Upload using camera</button>
-          </div>
-          <div class="upload-hint">JPG, PNG · עד 5MB / up to 5MB</div>
-        </div>
-        <input type="hidden" name="passportPhoto" id="passportPhotoUrl" />
-      </div>
     </div>
 
     <!-- SECTION 3: Diving Details -->
@@ -1786,7 +1777,6 @@ function attachBlurValidation() {
     ['f-passportNumber',  'passportNumber', 'text'],
     ['f-passportIssue',   'passportIssue',  'passportIssue'],
     ['f-passportExpiry',  'passportExpiry', 'passportExpiry'],
-    ['f-passportFullName','passportFullName','englishOnlyOptional'],
     ['f-gender',          'gender',         'select'],
     ['f-certLevel',       'certLevel',      'select'],
     ['f-medicalNotes',    'medicalNotes',   'text'],
@@ -2258,7 +2248,6 @@ function prefillForm(d) {
   setVal('passportNumber', d.passportNumber);
   setVal('passportIssue', isoToDmy(d.passportIssue));
   setVal('passportExpiry', isoToDmy(d.passportExpiry));
-  setVal('passportFullName', d.passportFullName);
   setSelect('certLevel', d.certLevel);
   setSelect('certAgency', d.certAgency);
   setVal('certNumber', d.certNumber);
