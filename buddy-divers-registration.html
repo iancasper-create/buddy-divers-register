@@ -1679,7 +1679,44 @@ function init() {
       addonsContainer.appendChild(label);
     });
 
-    // Show/hide fullPackageOnly addons depending on selected main package
+    // Bidirectional logic: credit_1400 ↔ flight options
+    const creditCheckbox = addonsContainer.querySelector('input[value="credit_1400"]');
+    const buddyFlightLabel = document.getElementById('opt-flight-buddy');
+    const selfFlightRadio = document.querySelector('input[name="flights"][value="SelfArranged"]');
+    const selfFlightLabel = document.getElementById('opt-flight-self');
+
+    if (creditCheckbox && buddyFlightLabel && selfFlightRadio && selfFlightLabel) {
+      // Credit checked → hide Buddy-Divers flights, auto-select self
+      creditCheckbox.addEventListener('change', function() {
+        if (creditCheckbox.checked) {
+          buddyFlightLabel.style.display = 'none';
+          selfFlightRadio.checked = true;
+          document.querySelectorAll('#flightOptions .option-item').forEach(function(i) { i.classList.remove('selected'); });
+          selfFlightLabel.classList.add('selected');
+        } else {
+          buddyFlightLabel.style.display = '';
+        }
+      });
+
+      // Self-arrange selected → auto-check credit
+      selfFlightRadio.addEventListener('change', function() {
+        if (selfFlightRadio.checked) {
+          creditCheckbox.checked = true;
+          creditCheckbox.closest('.option-item').classList.add('selected');
+        }
+      });
+
+      // Buddy-Divers selected → uncheck credit
+      const buddyFlightRadio = document.querySelector('input[name="flights"][value="BuddyArranged"]');
+      if (buddyFlightRadio) {
+        buddyFlightRadio.addEventListener('change', function() {
+          if (buddyFlightRadio.checked) {
+            creditCheckbox.checked = false;
+            creditCheckbox.closest('.option-item').classList.remove('selected');
+          }
+        });
+      }
+    }
     function updateAddonVisibility() {
       const selectedPkg = document.querySelector('[name="pricing"]:checked');
       const isFullPackage = selectedPkg && selectedPkg.value.indexOf('full_package') === 0;
