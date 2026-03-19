@@ -1615,10 +1615,7 @@ function init() {
           <span class="price">${opt.price}</span>
         </div>
       `;
-      if (i===0) {
-        label.classList.add('selected');
-        label.querySelector('input').checked = true;
-      }
+      if (i===0) label.classList.add('selected');
       label.addEventListener('click', () => {
         container.querySelectorAll('input[type="radio"]').forEach(r => {
           r.closest('.option-item').classList.remove('selected');
