@@ -589,7 +589,7 @@
 
     <!-- SECTION 5b: Cabin Type (shown only for trips with roomOptions) -->
     <div class="card" id="roomOptionsSection" style="display:none;">
-      <div class="section-title"><span class="icon">🛏️</span> סוג חדר על הספינה <span style="font-weight:400;color:var(--muted);font-size:12px;margin-right:6px;">Cabin Type</span><span class="req">*</span></div>
+      <div class="section-title"><span class="icon">🛏️</span> תוספות שדרוג עבור חדרים בספינה <span style="font-weight:400;color:var(--muted);font-size:12px;margin-right:6px;">Cabin Type</span><span class="req">*</span></div>
       <div class="options-group" id="roomOptions">
         <!-- Dynamically populated -->
       </div>
@@ -1444,37 +1444,37 @@ const TRIPS = {
     roomOptions: [
       {
         value: "lower_twin_0",
-        he: "מפלס תחתון, חדר טווין (שרותים ומקלחת משותפים)",
-        en: "Lower deck, twin room (shared bathroom)",
-        price: "+$0",
+        he: "מפלס תחתון, חדר טווין (מיטת קומתיים Bunk Bed)",
+        en: "Lower deck, twin room (Bunk Bed מיטת קומתיים)",
+        price: "$0",
         priceNum: 0
       },
       {
         value: "lower_triple_90",
-        he: "מפלס תחתון, חדר מוגדל לשלושה בתפוסה זוגית",
-        en: "Lower deck, triple room (double occupancy)",
-        price: "+$90",
+        he: "מפלס תחתון, חדר משולש לתפוסה זוגית בלבד",
+        en: "Lower deck, triple room for Double Occupancy Only",
+        price: "$90",
         priceNum: 90
       },
       {
         value: "main_front_140",
         he: "מפלס ראשי, חדר קדמי",
         en: "Main deck, front cabin",
-        price: "+$140",
+        price: "$140",
         priceNum: 140
       },
       {
         value: "main_premium_205",
         he: "מפלס ראשי, חדר פרמיום",
         en: "Main deck, premium cabin",
-        price: "+$205",
+        price: "$205",
         priceNum: 205
       },
       {
         value: "upper_premium_275",
         he: "מפלס עליון, חדר פרמיום",
         en: "Upper deck, premium cabin",
-        price: "+$275",
+        price: "$275",
         priceNum: 275
       }
     ],
@@ -1483,14 +1483,14 @@ const TRIPS = {
         value: "garden_suite_185",
         he: "שדרוג לחדר Garden Suite בריזורט",
         en: "Resort Garden Suite upgrade",
-        price: "+$185",
+        price: "$185",
         priceNum: 185,
         fullPackageOnly: true
       },
       {
         value: "credit_1400",
-        he: "זיכוי כספי",
-        en: "Cash credit",
+        he: "זיכוי כספי עבור רכישת טיסות עצמאית",
+        en: "Cash Credit for Self Flight Purchase",
         price: "-$1,400",
         priceNum: -1400
       }
