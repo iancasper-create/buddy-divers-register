@@ -1451,15 +1451,15 @@ const TRIPS = {
       },
       {
         value: "lower_triple_90",
-        he: "מפלס תחתון, חדר משולש לתפוסה זוגית בלבד",
+        he: "מפלס תחתון, חדר לשלושה בתפוסה זוגית בלבד",
         en: "Lower deck, triple room for Double Occupancy Only",
         price: "$90",
         priceNum: 90
       },
       {
         value: "main_front_140",
-        he: "מפלס ראשי, חדר קדמי",
-        en: "Main deck, front cabin",
+        he: "מפלס ראשי, חדר פרמיום קידמי",
+        en: "Main deck, front premium cabin",
         price: "$140",
         priceNum: 140
       },
@@ -1491,7 +1491,7 @@ const TRIPS = {
         value: "credit_1400",
         he: "זיכוי כספי עבור רכישת טיסות עצמאית",
         en: "Cash Credit for Self Flight Purchase",
-        price: "-$1,400",
+        price: "$1,400",
         priceNum: -1400
       }
     ]
@@ -1615,7 +1615,10 @@ function init() {
           <span class="price">${opt.price}</span>
         </div>
       `;
-      if (i===0) label.classList.add('selected');
+      if (i===0) {
+        label.classList.add('selected');
+        label.querySelector('input').checked = true;
+      }
       label.addEventListener('click', () => {
         container.querySelectorAll('input[type="radio"]').forEach(r => {
           r.closest('.option-item').classList.remove('selected');
