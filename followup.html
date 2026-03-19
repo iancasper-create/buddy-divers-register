@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-FOLLOWUP 2026-03-16-v37 | Myanmar Dec/Jan/Feb added to tripNames and tripCountries -->
+<!-- BD-FOLLOWUP 2026-03-19 | Trip 261219 Philippines added to tripNames and tripCountries -->
 <html lang="en" dir="ltr">
 <head>
 <meta charset="UTF-8"/>
@@ -1240,6 +1240,7 @@ function buildPaymentHTML(booking, amount, nisAmount, rate, notes, paidSoFar, sa
     '260815': 'מדגסקר', '260828': 'פיג׳י / טונגה', '260925': 'מדגסקר',
     '261009': 'מדגסקר', '261022': 'גלפגוס', '271014': 'גלפגוס',
     '261211': 'מיאנמר', '270106': 'מיאנמר', '270203': 'מיאנמר',
+    '261219': 'פיליפינים',
   };
   const tripCountry = tripCountries[booking.tripId] || '';
 
@@ -1413,6 +1414,7 @@ async function generatePaymentImage() {
     '260815':'מדגסקר — אוגוסט 2026', '260925':'מדגסקר — ספטמבר 2026',
     '261009':'מדגסקר — אוקטובר 2026',
     '261211':'מיאנמר — דצמבר 2026', '270106':'מיאנמר — ינואר 2027', '270203':'מיאנמר — פברואר 2027',
+    '261219':'פיליפינים — דצמבר 2026',
   };
   const tripDisplayName = tripNames[booking.tripId] || `טיול ${booking.tripId}`;
   const tripCurrency = booking.currency || 'USD';

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-REG 2026-03-18 | Upload orange→red, passportFullName removed, firstName/lastName/DOB moved to passport section, medicalNotes validation fixed -->
+<!-- BD-REG 2026-03-19 | Trip 261219 Philippines repriced: 2 main packages, 5 cabin options, Garden Suite + credit addons -->
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8" />
@@ -585,6 +585,23 @@
         <!-- Dynamically populated from trip config -->
       </div>
       <span class="field-error" id="pricingError" style="display:none;margin-top:8px;">יש לבחור אפשרות תמחור / Please select a pricing option</span>
+    </div>
+
+    <!-- SECTION 5b: Cabin Type (shown only for trips with roomOptions) -->
+    <div class="card" id="roomOptionsSection" style="display:none;">
+      <div class="section-title"><span class="icon">🛏️</span> סוג חדר על הספינה <span style="font-weight:400;color:var(--muted);font-size:12px;margin-right:6px;">Cabin Type</span><span class="req">*</span></div>
+      <div class="options-group" id="roomOptions">
+        <!-- Dynamically populated -->
+      </div>
+      <span class="field-error" id="roomOptionError" style="display:none;margin-top:8px;">יש לבחור סוג חדר / Please select a cabin type</span>
+    </div>
+
+    <!-- SECTION 5c: Add-ons (shown only for trips with addons) -->
+    <div class="card" id="addonsSection" style="display:none;">
+      <div class="section-title"><span class="icon">➕</span> תוספות ואפשרויות <span style="font-weight:400;color:var(--muted);font-size:12px;margin-right:6px;">Add-ons &amp; Options</span></div>
+      <div class="options-group" id="addonsOptions">
+        <!-- Dynamically populated -->
+      </div>
     </div>
 
     <!-- SECTION 6: Flights -->
@@ -1403,32 +1420,79 @@ const TRIPS = {
       }
     ]
   },
-  "261215": {
+  "261219": {
     name: "🤿 פיליפינים קומבו — Philippines Combo",
-    dates: "15/12/2026 – 26/12/2026",
-    note: "🏝️ Anilao (land - optional): 15/12–19/12 · $1,350 | 🚢 Infiniti Liveaboard: 19/12–26/12",
+    dates: "19/12/2026 – 30/12/2026",
+    note: "🚢 ספארי ימי בלבד: אינפיניטי לייבבורד 19/12–26/12/2026. 🏝️ החבילה המלאה: אנילאו יבשה + לייבבורד 19/12–30/12/2026.",
     currency: "USD",
     pricing: [
       {
-        value: "land_only_1350",
-        he: "אנילאו — יבשה בלבד (אופציונלי)",
-        en: "Anilao — land only (optional)",
-        price: "$1,350",
-        priceNum: 1350
+        value: "full_package_5990",
+        he: "החבילה המלאה, ים + יבשה, 11 לילות (כולל טיסות)",
+        en: "Full package, sea + land, 11 nights (flights included)",
+        price: "$5,990",
+        priceNum: 5990
       },
       {
-        value: "liveaboard_deluxe_twin_2995",
-        he: "אינפיניטי לייבבורד — חדר דלוקס טווין",
-        en: "Infiniti Liveaboard — Deluxe Twin room",
-        price: "$2,995",
-        priceNum: 2995
+        value: "boat_only_4310",
+        he: "ספארי ימי בלבד, 7 לילות (כולל טיסות)",
+        en: "Boat only, 7 nights (flights included)",
+        price: "$4,310",
+        priceNum: 4310
+      }
+    ],
+    roomOptions: [
+      {
+        value: "lower_twin_0",
+        he: "מפלס תחתון, חדר טווין (שרותים ומקלחת משותפים)",
+        en: "Lower deck, twin room (shared bathroom)",
+        price: "+$0",
+        priceNum: 0
       },
       {
-        value: "liveaboard_premium_deluxe_3195",
-        he: "אינפיניטי לייבבורד — חדר פרמיום דלוקס",
-        en: "Infiniti Liveaboard — Premium Deluxe room",
-        price: "$3,195",
-        priceNum: 3195
+        value: "lower_triple_90",
+        he: "מפלס תחתון, חדר מוגדל לשלושה בתפוסה זוגית",
+        en: "Lower deck, triple room (double occupancy)",
+        price: "+$90",
+        priceNum: 90
+      },
+      {
+        value: "main_front_140",
+        he: "מפלס ראשי, חדר קדמי",
+        en: "Main deck, front cabin",
+        price: "+$140",
+        priceNum: 140
+      },
+      {
+        value: "main_premium_205",
+        he: "מפלס ראשי, חדר פרמיום",
+        en: "Main deck, premium cabin",
+        price: "+$205",
+        priceNum: 205
+      },
+      {
+        value: "upper_premium_275",
+        he: "מפלס עליון, חדר פרמיום",
+        en: "Upper deck, premium cabin",
+        price: "+$275",
+        priceNum: 275
+      }
+    ],
+    addons: [
+      {
+        value: "garden_suite_185",
+        he: "שדרוג לחדר Garden Suite בריזורט",
+        en: "Resort Garden Suite upgrade",
+        price: "+$185",
+        priceNum: 185,
+        fullPackageOnly: true
+      },
+      {
+        value: "credit_1400",
+        he: "זיכוי כספי",
+        en: "Cash credit",
+        price: "-$1,400",
+        priceNum: -1400
       }
     ]
   },
@@ -1562,6 +1626,80 @@ function init() {
     container.appendChild(label);
   });
   
+  // Render cabin (room) options if present
+  const roomOptionsSection = document.getElementById('roomOptionsSection');
+  const roomContainer = document.getElementById('roomOptions');
+  if (tripConfig.roomOptions && tripConfig.roomOptions.length > 0) {
+    roomOptionsSection.style.display = 'block';
+    roomContainer.innerHTML = '';
+    tripConfig.roomOptions.forEach(function(opt, i) {
+      const label = document.createElement('label');
+      label.className = 'option-item';
+      label.innerHTML =
+        '<input type="radio" name="room_option" value="' + opt.value + '" />' +
+        '<div class="option-label">' +
+          '<span class="he">' + opt.he + '</span>' +
+          '<span class="en">' + opt.en + '</span>' +
+          '<span class="price">' + opt.price + '</span>' +
+        '</div>';
+      if (i === 0) label.classList.add('selected');
+      label.addEventListener('click', function() {
+        roomContainer.querySelectorAll('input[type="radio"]').forEach(function(r) {
+          r.closest('.option-item').classList.remove('selected');
+        });
+        label.classList.add('selected');
+      });
+      roomContainer.appendChild(label);
+    });
+  } else {
+    roomOptionsSection.style.display = 'none';
+    roomContainer.innerHTML = '';
+  }
+
+  // Render add-ons if present
+  const addonsSection = document.getElementById('addonsSection');
+  const addonsContainer = document.getElementById('addonsOptions');
+  if (tripConfig.addons && tripConfig.addons.length > 0) {
+    addonsSection.style.display = 'block';
+    addonsContainer.innerHTML = '';
+    tripConfig.addons.forEach(function(opt) {
+      const label = document.createElement('label');
+      label.className = 'option-item';
+      if (opt.fullPackageOnly) label.dataset.fullPackageOnly = 'true';
+      label.innerHTML =
+        '<input type="checkbox" name="pricing_addon" value="' + opt.value + '" />' +
+        '<div class="option-label">' +
+          '<span class="he">' + opt.he + '</span>' +
+          '<span class="en">' + opt.en + '</span>' +
+          '<span class="price">' + opt.price + '</span>' +
+        '</div>';
+      label.addEventListener('click', function() {
+        label.classList.toggle('selected', label.querySelector('input').checked);
+      });
+      addonsContainer.appendChild(label);
+    });
+
+    // Show/hide fullPackageOnly addons depending on selected main package
+    function updateAddonVisibility() {
+      const selectedPkg = document.querySelector('[name="pricing"]:checked');
+      const isFullPackage = selectedPkg && selectedPkg.value.indexOf('full_package') === 0;
+      addonsContainer.querySelectorAll('[data-full-package-only]').forEach(function(el) {
+        el.style.display = isFullPackage ? '' : 'none';
+        if (!isFullPackage) {
+          el.querySelector('input').checked = false;
+          el.classList.remove('selected');
+        }
+      });
+    }
+    document.querySelectorAll('[name="pricing"]').forEach(function(radio) {
+      radio.addEventListener('change', updateAddonVisibility);
+    });
+    updateAddonVisibility();
+  } else {
+    addonsSection.style.display = 'none';
+    addonsContainer.innerHTML = '';
+  }
+
   // Also for flight options
   document.querySelectorAll('#flightOptions .option-item').forEach(item => {
     item.addEventListener('click', () => {
@@ -1898,6 +2036,15 @@ function validateForm() {
   document.getElementById('pricingError').style.display = pricingOk ? 'none' : 'block';
   if (!pricingOk) { valid = false; missingFields.push('בחירת מחיר / Pricing Selection'); }
 
+  // Cabin type (only validate if section is visible)
+  const roomSectionVisible = document.getElementById('roomOptionsSection').style.display !== 'none';
+  if (roomSectionVisible) {
+    const roomOption = document.querySelector('[name="room_option"]:checked');
+    const roomOptionOk = !!roomOption;
+    document.getElementById('roomOptionError').style.display = roomOptionOk ? 'none' : 'block';
+    if (!roomOptionOk) { valid = false; missingFields.push('בחירת חדר / Cabin Selection'); }
+  }
+
   // Flights selection
   const flights = document.querySelector('[name="flights"]:checked');
   const flightsOk = !!flights;
@@ -1982,8 +2129,32 @@ document.getElementById('regForm').addEventListener('submit', async function(e) 
       }
     }
   }
+
+  // Room option (radio)
+  const selectedRoomValue = data['room_option'] || '';
+  let roomPriceNum = 0;
+  if (tripPricingConf && tripPricingConf.roomOptions && selectedRoomValue) {
+    const roomOpt = tripPricingConf.roomOptions.find(function(o) { return o.value === selectedRoomValue; });
+    if (roomOpt) {
+      roomPriceNum = roomOpt.priceNum * 1;
+      pricingLabel += ' + ' + selectedRoomValue;
+    }
+  }
+
+  // Add-ons (checkboxes — use getAll to handle multiple selections)
+  let addonTotal = 0;
+  const selectedAddons = fd.getAll('pricing_addon');
+  if (tripPricingConf && tripPricingConf.addons && selectedAddons.length > 0) {
+    tripPricingConf.addons.forEach(function(addon) {
+      if (selectedAddons.indexOf(addon.value) !== -1) {
+        addonTotal += addon.priceNum * 1;
+        pricingLabel += ' + ' + addon.value;
+      }
+    });
+  }
+
   data['pricing'] = pricingLabel;
-  const totalPriceCalc = mainPriceNum + supplementPriceNum;
+  const totalPriceCalc = mainPriceNum + supplementPriceNum + roomPriceNum + addonTotal;
   data['totalPrice'] = totalPriceCalc;
 
   // Add currency (EUR for Madagascar trips, USD for all others)
