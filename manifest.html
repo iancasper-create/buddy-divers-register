@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-MANIFEST 2026-03-17 | English only, LTR, phone normalization, dates dd/mm/yyyy, admin phones+emails -->
+<!-- BD-MANIFEST 2026-03-20 | Nitrox: green checkmark only / red X for non-nitrox -->
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -832,7 +832,7 @@ async function loadManifest(tripId) {
     };
 
     const nitroxHtml = (r.nitrox && r.nitrox.toLowerCase() === 'yes')
-      ? '<span class="nitrox-yes">✓ Yes</span>' : '<span style="color:var(--muted);font-size:12px;">—</span>';
+      ? '<span class="nitrox-yes">✓</span>' : '<span style="color:#c0392b;font-size:14px;font-weight:700;">✗</span>';
 
     const certHtml = r.certLevel
       ? `<span class="cert-badge">${r.certLevel}</span>` : '<span class="muted">—</span>';
