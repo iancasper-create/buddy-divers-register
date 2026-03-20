@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-REG 2026-03-20 | Madagascar Jun 2026 (260620) added -->
+<!-- BD-REG 2026-03-20 | Madagascar Jun 2026 (260620) added, phone validation fixed -->
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8" />
@@ -1913,6 +1913,8 @@ function validateField(fieldId, name, type) {
   let input;
   if (name === 'phone') {
     input = document.getElementById('phoneNumberInput');
+  } else if (name === 'emergencyPhone') {
+    input = document.getElementById('emergencyPhoneNumberInput');
   } else {
     input = fieldEl.querySelector(`[name="${name}"]`) || fieldEl.querySelector('input,select,textarea');
   }
@@ -2002,6 +2004,10 @@ function validateField(fieldId, name, type) {
     }
   } else if (type === 'select') {
     ok = val.length > 0;
+  } else if (name === 'phone' || name === 'emergencyPhone') {
+    const digits = val.replace(/\D/g, '');
+    ok = digits.length >= 7;
+    msg = 'נדרש מספר טלפון תקין / Valid phone number required';
   } else {
     ok = val.length > 0;
   }
@@ -2053,6 +2059,16 @@ function attachBlurValidation() {
     });
   }
 
+  // Emergency phone field — wire blur validation to the visible number input
+  const emergencyPhoneNumInput = document.getElementById('emergencyPhoneNumberInput');
+  if (emergencyPhoneNumInput) {
+    emergencyPhoneNumInput.addEventListener('blur', () => validateField('f-emergencyPhone', 'emergencyPhone', 'emergencyPhone'));
+    emergencyPhoneNumInput.addEventListener('input', () => {
+      updateEmergencyPhoneHidden();
+      if (document.getElementById('f-emergencyPhone').classList.contains('invalid')) validateField('f-emergencyPhone', 'emergencyPhone', 'emergencyPhone');
+    });
+  }
+
   // Last dive - optional but validate if filled
   const lastDiveEl = document.getElementById('lastDiveInput');
   if (lastDiveEl) {
@@ -2088,9 +2104,10 @@ function validateForm() {
     ['f-gender',          'gender',         'select',          'מגדר / Gender'],
     ['f-certLevel',       'certLevel',      'select',          'רמת הסמכה / Certification Level'],
     ['f-medicalNotes',    'medicalNotes',   'text',            'מצב בריאותי / Medical Notes'],
-    ['f-emergencyEmail',  'emergencyEmail', 'emailOptional',   'מייל איש קשר חירום / Emergency Email'],
-    ['f-emergencyName',   'emergencyName',  'englishOnly',     'שם איש קשר חירום / Emergency Contact Name'],
-    ['f-notes',           'notes',          'text',            'הערות / Notes'],
+    ['f-emergencyEmail',  'emergencyEmail',  'emailOptional',    'מייל איש קשר חירום / Emergency Email'],
+    ['f-emergencyName',   'emergencyName',   'englishOnly',      'שם איש קשר חירום / Emergency Contact Name'],
+    ['f-emergencyPhone',  'emergencyPhone',  'emergencyPhone',   'טלפון איש קשר חירום / Emergency Phone'],
+    ['f-notes',           'notes',           'text',             'הערות / Notes'],
   ];
 
   required.forEach(([fieldId, name, type, label]) => {
