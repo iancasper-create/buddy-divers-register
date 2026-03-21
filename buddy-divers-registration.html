@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-REG 2026-03-20 | Madagascar Jun 2026 (260620) added, phone validation fixed -->
+<!-- BD-REG 2026-03-21 | No-TZ checkbox: substitute passport field for non-Israeli divers -->
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8" />
@@ -426,11 +426,25 @@
       </div>
 
       <div class="form-row">
-        <div class="field" id="f-idNumber">
-          <label>מספר תעודת זהות <span class="en">ID Number</span><span class="req">*</span></label>
+        <div class="field" id="f-idNumber" style="flex:1;">
+          <label>מספר תעודת זהות <span class="en">ID Number</span><span class="req" id="idNumberReq">*</span></label>
           <input type="text" name="idNumber" id="idNumberInput" placeholder="XXXXXXXXX" inputmode="numeric" pattern="\d{9}" maxlength="9" title="9 ספרות בלבד / 9 digits only" />
-          <span class="field-error">שדה חובה / Required</span>
+          <span class="field-error" id="idNumberError">שדה חובה / Required</span>
           <span id="lookupStatus" style="font-size:12px;margin-top:4px;display:none;"></span>
+        </div>
+        <div class="field" style="flex:1;">
+          <label style="opacity:0;pointer-events:none;">x</label>
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;height:44px;padding:0 12px;border:1px solid var(--border);border-radius:8px;background:var(--card);">
+            <input type="checkbox" id="noTzIdCheckbox" style="margin:0;width:16px;height:16px;flex-shrink:0;" />
+            <span style="font-size:13px;color:var(--muted);">אין לי ת״ז ישראלית / I don't have an Israeli ID</span>
+          </label>
+        </div>
+      </div>
+      <div class="form-row" id="f-idSubstitute" style="display:none;">
+        <div class="field" style="flex:1;">
+          <label>מספר דרכון (במקום ת"ז) <span class="en">Passport Number (in place of ID)</span><span class="req">*</span></label>
+          <input type="text" name="idSubstitute" id="idSubstituteInput" placeholder="XX0000000" />
+          <span class="field-error" id="idSubstituteError">שדה חובה / Required</span>
         </div>
       </div>
 
@@ -1943,7 +1957,9 @@ function validateField(fieldId, name, type) {
       msg = 'אנגלית בלבד / English characters only';
     }
   } else if (type === 'idNumber') {
-    if (!/^\d{9}$/.test(val)) {
+    if (document.getElementById('noTzIdCheckbox') && document.getElementById('noTzIdCheckbox').checked) {
+      ok = true; // ID field hidden — validated via substitute field instead
+    } else if (!/^\d{9}$/.test(val)) {
       ok = false;
       msg = 'נדרשות בדיוק 9 ספרות / Exactly 9 digits required';
     } else {
@@ -2049,6 +2065,17 @@ function attachBlurValidation() {
     input.addEventListener('change', () => validateField(fieldId, name, type));
   });
 
+  // Substitute ID field — blur validation
+  const idSubstituteInput = document.getElementById('idSubstituteInput');
+  if (idSubstituteInput) {
+    idSubstituteInput.addEventListener('blur', () => validateField('f-idSubstitute', 'idSubstitute', 'text'));
+    idSubstituteInput.addEventListener('input', () => {
+      if (document.getElementById('f-idSubstitute').classList.contains('invalid')) {
+        validateField('f-idSubstitute', 'idSubstitute', 'text');
+      }
+    });
+  }
+
   // Phone field — wire blur validation to the visible number input
   const phoneNumInput = document.getElementById('phoneNumberInput');
   if (phoneNumInput) {
@@ -2091,7 +2118,6 @@ function validateForm() {
   const missingFields = [];
 
   const required = [
-    ['f-idNumber',        'idNumber',       'idNumber',        'מספר תעודת זהות / ID Number'],
     ['f-firstName',       'firstName',      'englishOnly',     'שם פרטי / First Name'],
     ['f-lastName',        'lastName',       'englishOnly',     'שם משפחה / Last Name'],
     ['f-email',           'email',          'email',           'אימייל / Email'],
@@ -2116,6 +2142,20 @@ function validateForm() {
       missingFields.push(label);
     }
   });
+
+  // ID or substitute — depends on checkbox
+  const noTzChecked = document.getElementById('noTzIdCheckbox') && document.getElementById('noTzIdCheckbox').checked;
+  if (noTzChecked) {
+    if (!validateField('f-idSubstitute', 'idSubstitute', 'text')) {
+      valid = false;
+      missingFields.push('מספר דרכון (במקום ת"ז) / Passport Number (in place of ID)');
+    }
+  } else {
+    if (!validateField('f-idNumber', 'idNumber', 'idNumber')) {
+      valid = false;
+      missingFields.push('מספר תעודת זהות / ID Number');
+    }
+  }
 
   // Passport photo
   const passportPhotoOk = !!document.getElementById('passportPhotoUrl').value;
@@ -2207,6 +2247,14 @@ document.getElementById('regForm').addEventListener('submit', async function(e) 
   const sanitize = v => typeof v === 'string' ? v.replace(/"/g, '״').replace(/\\/g, '') : v;
   const freeTextFields = ['allergies','medicalNotes','dietary','notes','emergencyName','emergencyRelationship','insuranceCompany','insuranceContact','policyNumber','referral'];
   fd.forEach((v,k) => { data[k] = freeTextFields.includes(k) ? sanitize(v) : v; });
+
+  // If no-TZ checkbox is checked, override idNumber with the substitute passport value
+  const noTzCheckedSubmit = document.getElementById('noTzIdCheckbox') && document.getElementById('noTzIdCheckbox').checked;
+  if (noTzCheckedSubmit) {
+    const subVal = (document.getElementById('idSubstituteInput').value || '').trim();
+    data['idNumber'] = subVal;
+    data['passportNumber'] = subVal;
+  }
   
   // Calculate totalPrice from selected pricing + supplement if checked
   const submitParams = new URLSearchParams(window.location.search);
@@ -2698,6 +2746,49 @@ async function lookupDiver(idNumber) {
     setLookupStatus('', '');
   }
 }
+
+// No-TZ checkbox: show/hide ID vs substitute field, mirror substitute to passport field
+document.addEventListener('DOMContentLoaded', function() {
+  const noTzCb = document.getElementById('noTzIdCheckbox');
+  if (!noTzCb) return;
+  noTzCb.addEventListener('change', function() {
+    const checked = this.checked;
+    const idField = document.getElementById('f-idNumber');
+    const subField = document.getElementById('f-idSubstitute');
+    const idInput = document.getElementById('idNumberInput');
+    const subInput = document.getElementById('idSubstituteInput');
+    const passportInput = document.querySelector('[name="passportNumber"]');
+    if (checked) {
+      idField.classList.remove('invalid');
+      idInput.value = '';
+      document.getElementById('lookupStatus').style.display = 'none';
+      document.getElementById('welcomeBackBanner').classList.remove('show');
+      idInput.removeAttribute('required');
+      subField.style.display = '';
+      subInput.focus();
+    } else {
+      subField.style.display = 'none';
+      subInput.value = '';
+      if (passportInput && passportInput.dataset.fromSubstitute === 'true') {
+        passportInput.value = '';
+        passportInput.dataset.fromSubstitute = '';
+      }
+      subField.classList.remove('invalid');
+    }
+  });
+
+  // Real-time mirror: substitute field → passport number field
+  const subInput = document.getElementById('idSubstituteInput');
+  if (subInput) {
+    subInput.addEventListener('input', function() {
+      const passportInput = document.querySelector('[name="passportNumber"]');
+      if (passportInput) {
+        passportInput.value = this.value;
+        passportInput.dataset.fromSubstitute = 'true';
+      }
+    });
+  }
+});
 
 // Wire up the Israeli ID field — trigger lookup when 9 valid digits entered
 document.addEventListener('DOMContentLoaded', function() {
