@@ -430,7 +430,6 @@
           <label>מספר תעודת זהות <span class="en">ID Number</span><span class="req" id="idNumberReq">*</span></label>
           <input type="text" name="idNumber" id="idNumberInput" placeholder="XXXXXXXXX" inputmode="numeric" pattern="\d{9}" maxlength="9" title="9 ספרות בלבד / 9 digits only" />
           <span class="field-error" id="idNumberError">שדה חובה / Required</span>
-          <span id="lookupStatus" style="font-size:12px;margin-top:4px;display:none;"></span>
         </div>
         <div class="field" style="flex:1;">
           <label style="opacity:0;pointer-events:none;">x</label>
@@ -447,6 +446,7 @@
           <span class="field-error" id="idSubstituteError">שדה חובה / Required</span>
         </div>
       </div>
+      <span id="lookupStatus" style="font-size:12px;margin-top:4px;display:none;padding:0 4px;"></span>
 
       <div class="form-row">
         <div class="field" id="f-email">
@@ -2761,14 +2761,18 @@ document.addEventListener('DOMContentLoaded', function() {
     if (checked) {
       idField.classList.remove('invalid');
       idInput.value = '';
-      document.getElementById('lookupStatus').style.display = 'none';
+      setLookupStatus('', '');
       document.getElementById('welcomeBackBanner').classList.remove('show');
+      hideOtpBox();
       idInput.removeAttribute('required');
       subField.style.display = '';
       subInput.focus();
     } else {
       subField.style.display = 'none';
       subInput.value = '';
+      setLookupStatus('', '');
+      document.getElementById('welcomeBackBanner').classList.remove('show');
+      hideOtpBox();
       if (passportInput && passportInput.dataset.fromSubstitute === 'true') {
         passportInput.value = '';
         passportInput.dataset.fromSubstitute = '';
@@ -2777,14 +2781,26 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 
-  // Real-time mirror: substitute field → passport number field
+  // Real-time mirror + debounced lookup: substitute field → passport number field
   const subInput = document.getElementById('idSubstituteInput');
   if (subInput) {
+    let subLookupTimer = null;
     subInput.addEventListener('input', function() {
+      const val = this.value.trim();
+      // Mirror to passport number field
       const passportInput = document.querySelector('[name="passportNumber"]');
       if (passportInput) {
-        passportInput.value = this.value;
+        passportInput.value = val;
         passportInput.dataset.fromSubstitute = 'true';
+      }
+      // Debounced lookup — fires 600ms after user stops typing, min 5 chars
+      clearTimeout(subLookupTimer);
+      if (val.length >= 5) {
+        subLookupTimer = setTimeout(function() { lookupDiver(val); }, 600);
+      } else {
+        setLookupStatus('', '');
+        document.getElementById('welcomeBackBanner').classList.remove('show');
+        hideOtpBox();
       }
     });
   }
