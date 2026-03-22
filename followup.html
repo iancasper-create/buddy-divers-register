@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-FOLLOWUP 2026-03-21 | Trip 260915 (Madagascar Sep 15) added to tripNames and tripCountries -->
+<!-- BD-FOLLOWUP 2026-03-22 | Safari Price field made editable; trip 260915 added -->
 <html lang="en" dir="ltr">
 <head>
 <meta charset="UTF-8"/>
@@ -481,9 +481,9 @@
       <div class="section-label">💰 Costs</div>
       <div class="field-row">
         <div class="field">
-          <label>Safari Price (from booking)</label>
+          <label>Safari Price <span style="font-size:11px;color:var(--muted);font-weight:400;">(from booking, editable)</span></label>
           <div class="currency-wrap" data-symbol="$">
-            <input type="number" id="safariPrice" readonly placeholder="0"/>
+            <input type="number" id="safariPrice" placeholder="0" oninput="updateSummary()"/>
           </div>
         </div>
         <div class="field">
