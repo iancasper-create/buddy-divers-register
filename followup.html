@@ -1394,7 +1394,7 @@ async function generatePaymentImage() {
   const booking = currentBookings[idx];
 
   const amount = parseFloat(document.getElementById('paymentRequestAmount').value) || 0;
-  if (amount === 0) { alert('נא להזין סכום לתשלום'); return; }
+  if (amount === 0 && document.getElementById('paymentRequestAmount').value.trim() === '') { alert('נא להזין סכום לתשלום'); return; }
 
   const rate = parseFloat(document.getElementById('exchangeRate').value) || 0;
   const nisAmount = Math.round(amount * rate);
