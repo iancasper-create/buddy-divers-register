@@ -2325,6 +2325,11 @@ document.getElementById('regForm').addEventListener('submit', async function(e) 
   }
   data.submittedAt = new Date().toISOString();
 
+  // Remove empty optional date fields — Airtable rejects empty strings for date fields
+  ['lastDive', 'passportIssue', 'passportExpiry', 'dob'].forEach(function(f) {
+    if (!data[f] || data[f].toString().trim() === '') delete data[f];
+  });
+
   // ⚠️ REPLACE THIS URL with your Make.com webhook URL
   const WEBHOOK_URL = 'https://hook.eu1.make.com/h3wexi08df15jvkk1uyfw0ix669qv1ms';
 
