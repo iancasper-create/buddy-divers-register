@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-FOLLOWUP 2026-03-22 | Safari Price field made editable; trip 260915 added -->
+<!-- BD-FOLLOWUP 2026-03-22 | Safari Price saved to Airtable on save; field made editable; trip 260915 added -->
 <html lang="en" dir="ltr">
 <head>
 <meta charset="UTF-8"/>
@@ -984,6 +984,7 @@ async function saveRecord() {
     'Trip Link': booking.tripRecordId ? [booking.tripRecordId] : undefined,
     'Diver ID': [booking.diverId],
     'Booking': [booking.bookingId],
+    'Safari Price': parseFloatOrNull('safariPrice'),
     'Flight Cost': parseFloatOrNull('flightCost'),
     'Hotel Cost': parseFloatOrNull('hotelCost'),
     'Extras Amount': parseFloatOrNull('extrasAmount'),
