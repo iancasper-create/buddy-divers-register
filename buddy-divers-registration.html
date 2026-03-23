@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-REG 2026-03-21 | No-TZ checkbox, undecided flights option added -->
+<!-- BD-REG 2026-03-23 | Empty and malformed date field fix -->
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8" />
@@ -2325,9 +2325,11 @@ document.getElementById('regForm').addEventListener('submit', async function(e) 
   }
   data.submittedAt = new Date().toISOString();
 
-  // Remove empty optional date fields — Airtable rejects empty strings for date fields
+  // Remove empty or malformed date fields — Airtable rejects empty strings and invalid formats
+  // Valid format is DD/MM/YYYY (4-digit year). Anything else is deleted rather than sent.
   ['lastDive', 'passportIssue', 'passportExpiry', 'dob'].forEach(function(f) {
-    if (!data[f] || data[f].toString().trim() === '') delete data[f];
+    var v = data[f] ? data[f].toString().trim() : '';
+    if (!v || !/^\d{2}\/\d{2}\/\d{4}$/.test(v)) delete data[f];
   });
 
   // ⚠️ REPLACE THIS URL with your Make.com webhook URL
