@@ -696,9 +696,10 @@
       </div>
 
       <div class="form-row">
-        <div class="field">
+        <div class="field" id="f-lastDive">
           <label>תאריך צלילה אחרונה <span class="en">Last Dive Date</span></label>
           <input type="text" name="lastDive" id="lastDiveInput" placeholder="DD/MM/YYYY" pattern="\d{2}/\d{2}/\d{4}" maxlength="10" />
+          <span class="field-error" id="lastDiveError">פורמט לא תקין — נא להזין DD/MM/YYYY / Invalid format — please enter DD/MM/YYYY</span>
         </div>
         <div class="field">
           <label>האם מוסמך נייטרוקס? <span class="en">Nitrox Certified?</span><span class="req">*</span></label>
@@ -2111,7 +2112,8 @@ function attachBlurValidation() {
   if (lastDiveEl) {
     lastDiveEl.addEventListener('change', () => {
       const val = lastDiveEl.value;
-      const fieldEl = lastDiveEl.closest('.field');
+      const fieldEl = document.getElementById('f-lastDive');
+      const errEl = document.getElementById('lastDiveError');
       if (!val) {
         if (fieldEl) fieldEl.classList.remove('invalid');
         return;
@@ -2119,7 +2121,6 @@ function attachBlurValidation() {
       const validFormat = /^\d{2}\/\d{2}\/\d{4}$/.test(val);
       const d = validFormat ? parseDate(val) : null;
       const ok = validFormat && d && d <= new Date();
-      const errEl = fieldEl ? fieldEl.querySelector('.field-error') : null;
       if (errEl) errEl.textContent = !validFormat
         ? 'פורמט לא תקין — נא להזין DD/MM/YYYY / Invalid format — please enter DD/MM/YYYY'
         : 'תאריך לא יכול להיות בעתיד / Date cannot be in the future';
