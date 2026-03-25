@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-REG 2026-03-23 | Empty and malformed date field fix -->
+<!-- BD-REG 2026-03-25 | No default pricing selection, last dive date format validation -->
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8" />
@@ -1680,7 +1680,6 @@ function init() {
           <span class="price">${opt.price}</span>
         </div>
       `;
-      if (i===0) label.classList.add('selected');
       label.addEventListener('click', () => {
         container.querySelectorAll('input[type="radio"]').forEach(r => {
           r.closest('.option-item').classList.remove('selected');
@@ -1707,7 +1706,6 @@ function init() {
           '<span class="en">' + opt.en + '</span>' +
           '<span class="price">' + opt.price + '</span>' +
         '</div>';
-      if (i === 0) label.classList.add('selected');
       label.addEventListener('click', function() {
         roomContainer.querySelectorAll('input[type="radio"]').forEach(function(r) {
           r.closest('.option-item').classList.remove('selected');
@@ -2021,9 +2019,14 @@ function validateField(fieldId, name, type) {
     }
   } else if (type === 'lastDive') {
     if (val) {
-      const d = parseDate(val);
-      ok = d && d <= new Date();
-      msg = 'תאריך לא יכול להיות בעתיד / Date cannot be in the future (DD/MM/YYYY)';
+      if (!/^\d{2}\/\d{2}\/\d{4}$/.test(val)) {
+        ok = false;
+        msg = 'פורמט לא תקין — נא להזין DD/MM/YYYY / Invalid format — please enter DD/MM/YYYY';
+      } else {
+        const d = parseDate(val);
+        ok = d && d <= new Date();
+        msg = 'תאריך לא יכול להיות בעתיד / Date cannot be in the future (DD/MM/YYYY)';
+      }
     }
   } else if (type === 'select') {
     ok = val.length > 0;
@@ -2108,9 +2111,18 @@ function attachBlurValidation() {
   if (lastDiveEl) {
     lastDiveEl.addEventListener('change', () => {
       const val = lastDiveEl.value;
-      const d = parseDate(val);
-      const ok = !val || (d && d <= new Date());
       const fieldEl = lastDiveEl.closest('.field');
+      if (!val) {
+        if (fieldEl) fieldEl.classList.remove('invalid');
+        return;
+      }
+      const validFormat = /^\d{2}\/\d{2}\/\d{4}$/.test(val);
+      const d = validFormat ? parseDate(val) : null;
+      const ok = validFormat && d && d <= new Date();
+      const errEl = fieldEl ? fieldEl.querySelector('.field-error') : null;
+      if (errEl) errEl.textContent = !validFormat
+        ? 'פורמט לא תקין — נא להזין DD/MM/YYYY / Invalid format — please enter DD/MM/YYYY'
+        : 'תאריך לא יכול להיות בעתיד / Date cannot be in the future';
       if (fieldEl) fieldEl.classList.toggle('invalid', !ok);
     });
   }
@@ -2325,11 +2337,9 @@ document.getElementById('regForm').addEventListener('submit', async function(e) 
   }
   data.submittedAt = new Date().toISOString();
 
-  // Remove empty or malformed date fields — Airtable rejects empty strings and invalid formats
-  // Valid format is DD/MM/YYYY (4-digit year). Anything else is deleted rather than sent.
+  // Remove empty optional date fields — Airtable rejects empty strings for date fields
   ['lastDive', 'passportIssue', 'passportExpiry', 'dob'].forEach(function(f) {
-    var v = data[f] ? data[f].toString().trim() : '';
-    if (!v || !/^\d{2}\/\d{2}\/\d{4}$/.test(v)) delete data[f];
+    if (!data[f] || data[f].toString().trim() === '') delete data[f];
   });
 
   // ⚠️ REPLACE THIS URL with your Make.com webhook URL
