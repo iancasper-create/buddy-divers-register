@@ -1,5 +1,5 @@
 # Buddy-Divers Registration System — Handover Document
-**Last Updated:** 21 March 2026 (session 12 — trip 260915 Madagascar Sep-A added to followup.html and HANDOVER)
+**Last Updated:** 25 March 2026 (session 15 — malformed/empty date fix, last dive validation, no default pricing selection, WA Messages logging order clarified)
 
 ---
 
@@ -44,14 +44,14 @@ Added via <link rel="icon" type="image/jpeg" href="..."> in <head>. When creatin
 CURRENT TRIP IDs — the #1 source of Make.com failures is a mismatch here:
 | Trip | ID | Currency |
 |---|---|---|
-| Madagascar Jun 2026 (new) | 260620 | EUR |
-| Madagascar Jul 2026 | 260730 | EUR | ← was wrongly 263007, fixed session 11 |
+| Madagascar Jun 2026 | 260620 | EUR |
+| Madagascar Jul 2026 | 260730 | EUR |
 | Madagascar Aug 2026 | 260815 | EUR |
 | Madagascar Sep 2026 (A) | 260915 | EUR |
 | Madagascar Sep 2026 (B) | 260925 | EUR |
 | Madagascar Oct 2026 | 261009 | EUR |
 | Myanmar Dec 2026 | 261211 | USD |
-| Philippines Dec 2026 | 261219 | USD | ← was 261215, fixed session 11 |
+| Philippines Dec 2026 | 261219 | USD |
 | Fiji & Tonga Aug 2026 | 260828 | USD |
 | Galapagos Oct 2026 | 261022 | USD |
 | Galapagos Oct 2027 | 271014 | USD |
@@ -61,6 +61,7 @@ CURRENT TRIP IDs — the #1 source of Make.com failures is a mismatch here:
 | Myanmar Jan 2027 | 270106 | USD |
 | Myanmar Feb 2027 | 270203 | USD |
 NOTE: Madagascar Mar 2026 (260328) removed from trips.html but kept in TRIPS object — old links still work.
+NOTE: 260915 and 260925 are both September Madagascar trips — same pricing, different dates (15/09 and 25/09).
 
 MULTI-CURRENCY SYSTEM:
 - Trips priced in USD or EUR — stored in Airtable Trips.Currency field
@@ -75,9 +76,20 @@ RETURNING CUSTOMER DISCOUNT — STORED AS NEGATIVE:
 - populateForm() reads saved Airtable value first; auto-calcs only for new records
 
 AIRTABLE PAYMENTS TABLE:
+- Safari Price is a COMPUTED/FORMULA field in Airtable — NEVER write to it via API
+- Safari Price Override — plain Number field added session 13 — this IS writable
 - Total Cost to Customer = {Safari Price} + {Flight Cost} + {Hotel Cost} + {Extras Amount} + {Returning Customer Discount}
 - Total Paid = {Trip Payment} + {Flight Payment} + {Hotel Payment} + {Extras Payment}
 - Balance Due = Total Cost to Customer minus Total Paid
+
+SAFARI PRICE OVERRIDE — KEY BEHAVIOUR (added session 13):
+- Payments table has a new plain Number field: "Safari Price Override"
+- followup.html safariPrice input loads from: Safari Price Override first, falls back to Safari Price (formula) from Bookings
+- On save: Safari Price Override is written to Payments table with the displayed value
+- Never write "Safari Price" (the formula field) via API — Airtable will reject it with "field is computed" error
+- The load logic in populateForm():
+  setVal('safariPrice', f('Safari Price Override') || f('Safari Price', booking.totalPrice ?? 0));
+- The safariVal calculation also uses the same priority
 
 CLOUDINARY:
 - Payment JPGs: payment_requests/{IsraeliID}_{FirstName}_{LastName}/{TripID}/
@@ -99,7 +111,7 @@ PERMANENT SYSTEM USER TOKEN:
 
 PRODUCTION WHATSAPP STATUS:
 - +972587232567, Phone Number ID: 1067652216421626, WABA ID: 927883142960562
-- BLOCKED by Meta business verification (submitted 13 March 2026) — still pending as of session 11
+- BLOCKED by Meta business verification (submitted 13 March 2026) — still pending as of session 13
 - Once verified: NO code changes needed — just test from followup.html
 - Check: business.facebook.com/settings/info → "Business verification status"
 
@@ -124,9 +136,52 @@ MULTI-ADDON PRICING SYSTEM (trip 261219 only — all other trips completely unaf
 
 PHONE VALIDATION (both fields fixed session 11):
 - Main phone and emergency contact phone both require minimum 7 digits
-- Emergency phone was previously missing from required fields entirely — now fixed
 - Both inputs have real-time blur feedback
 - Error: נדרש מספר טלפון תקין / Valid phone number required
+
+NO-TZ CHECKBOX — NON-ISRAELI DIVERS (added session 12):
+- Checkbox sits to the LEFT of the ID Number input in a two-column form-row
+- Checkbox label: "אין לי ת״ז ישראלית / I don't have an Israeli ID"
+- When checked:
+  - ID input clears, no longer required, Luhn skipped
+  - lookupStatus and OTP box reset/hidden
+  - Substitute field (f-idSubstitute) appears: "מספר דרכון (במקום ת״ז) / Passport Number (in place of ID)"
+  - Passport number field further down mirrors in real-time
+  - Debounced lookup fires 600ms after user stops typing (min 5 chars) — full OTP/populate flow
+  - On submit: substitute value → both data['idNumber'] AND data['passportNumber']
+- When unchecked: substitute clears, mirrored passport clears, OTP resets, Luhn resumes
+- lookupStatus span sits OUTSIDE both field containers so it stays visible either way
+- validateField(): type 'idNumber' returns ok=true immediately when checkbox is checked
+- validateForm(): checks substitute OR id field — never both
+
+FLIGHTS OPTIONS (3 choices as of session 12):
+- value="BuddyArranged" — הזמנת טיסות דרך באדי-דייברס / Flights arranged by Buddy-Divers
+- value="SelfArranged" — ארכוש טיסות באופן עצמאי / I will arrange my own flights
+- value="Undecided" — עדיין לא החלטתי, אעדכן בהמשך / Undecided, I will let you know
+
+PAYMENT AMOUNT VALIDATION (updated session 13):
+- סכום לתשלום (payment request amount) now accepts zero and negative values
+- Validation only blocks if field is completely empty (not typed into at all)
+- Negative amounts useful for refunds/credits
+
+DATE FIELD RULES (sessions 14 + 15):
+- All date fields sent to Make/Airtable must be full DD/MM/YYYY (4-digit year) or omitted entirely
+- Registration form strips empty or malformed dates before POST (regex: /^\d{2}\/\d{2}\/\d{4}$/)
+- Last Dive Date field: optional, but if entered must be valid DD/MM/YYYY and not in future
+- Last Dive Date has id="f-lastDive", field-error span with id="lastDiveError"
+
+PRICING OPTIONS — NO DEFAULT SELECTION (session 15):
+- All pricing and roomOptions radios start unselected on page load
+- User must actively choose — no option pre-highlighted
+
+WA MESSAGES LOGGING — ORDER MATTERS:
+- Always click Save BEFORE Send WhatsApp in followup.html
+- currentPaymentRecordId is null until Save — logging silently skipped if null
+
+MANIFEST OTP TROUBLESHOOTING:
+- If OTP not arriving: check Make "Integration Webhooks, Airtable" scenario
+- If Inactive: reactivate toggle top-right in editor
+- If webhook output Empty: Webhooks module → Redetermine data structure → trigger from manifest.html → Save → reactivate
 
 Ian's phones:
 - +972542323567 = main number, WhatsApp Business app
@@ -141,22 +196,29 @@ Ian's phones:
 
 2. **📨 Scenario 5 — incoming WhatsApp reply forwarding** — build after production number confirmed working. Forwards messages from +972587232567 to Ian's +972542323567.
 
-3. **🗺️ manifest.html testing** — OTP flow built. Test with a real trip + registered divers. Outstanding:
+3. **🗺️ manifest.html testing** — OTP flow built and working. Outstanding:
    - Phone normalization (Israeli 05X → +9725X) for leader login
    - WhatsApp OTP delivery — add after production WhatsApp confirmed
 
 4. **🌍 Trip 260620 Airtable row** — still needs manual entry: Trip Id `260620`, Currency `EUR`, Start `20/06/2026`, End `30/06/2026`.
 
+5. **🌍 Trip 260915 Airtable row** — needs manual entry: Trip Id `260915`, Currency `EUR`, Start `15/09/2026`, End `24/09/2026`.
+
+6. **📋 Bookings with blank Pricing field** — some manually-entered bookings have no Pricing value in Airtable, so Total Price formula = 0, and followup.html shows Safari Price = €0 for those divers. Fix: open each booking in Airtable and type the correct pricing value (e.g. `twin_2890`) into the Pricing field manually.
+
+✅ ~~**Safari Price Override field — editable, saved to Payments**~~ — DONE session 13
+✅ ~~**Payment amount allows zero/negative**~~ — DONE session 13
+✅ ~~**No-TZ checkbox for non-Israeli divers**~~ — DONE session 12
+✅ ~~**Trip 260915 (Madagascar Sep A) added to followup.html**~~ — DONE session 12
+✅ ~~**Boat name label → Preferred First Name on Boat**~~ — DONE session 12
+✅ ~~**Undecided flights option added**~~ — DONE session 12
 ✅ ~~**Favicon added to all 5 HTML files**~~ — DONE session 11
 ✅ ~~**Phone + emergency phone validation fixed**~~ — DONE session 11
 ✅ ~~**Manifest nitrox: checkmark / red X**~~ — DONE session 11
 ✅ ~~**Madagascar Jun 2026 (260620) added**~~ — DONE session 11
-✅ ~~**Madagascar Mar 2026 removed from trips.html**~~ — DONE session 11
 ✅ ~~**Trip ID 263007→260730 (Madagascar Jul)**~~ — DONE session 11
 ✅ ~~**Trip ID 261215→261219 (Philippines)**~~ — DONE session 11
-✅ ~~**Trip 261219 Philippines repriced**~~ — DONE session 11
 ✅ ~~**Multi-addon pricing system**~~ — DONE session 11
-✅ ~~**Bidirectional credit/flight logic**~~ — DONE session 11
 ✅ ~~**Multi-currency in followup.html**~~ — DONE session 8
 ✅ ~~**Permanent System User token**~~ — DONE session 4
 ✅ ~~**Business verification submitted**~~ — DONE session 4
@@ -226,10 +288,13 @@ Ian's phones:
 - **Diver ID** — Linked to Divers
 - **Total Price** — Lookup array — always unwrap before use
 - **Returning Customer** — "yes" = 5% safari discount
+- **Safari Price** — FORMULA field, read-only via API — do NOT write to this
 - **⚠️ Zero Price Alert:** `IF({Total Price} = 0, "⚠️ CHECK PRICE", "")`
 
 ### Payments table
 - **Returning Customer Discount** — NEGATIVE (e.g. -400)
+- **Safari Price** — FORMULA/COMPUTED — NEVER write via API (returns "field is computed" error)
+- **Safari Price Override** — plain Number field (added session 13) — writable, used by followup.html
 - **Total Cost to Customer** — `{Safari Price} + {Flight Cost} + {Hotel Cost} + {Extras Amount} + {Returning Customer Discount}`
 - **Total Paid** — `{Trip Payment} + {Flight Payment} + {Hotel Payment} + {Extras Payment}`
 - **Balance Due** — Total Cost to Customer minus Total Paid
@@ -237,6 +302,8 @@ Ian's phones:
 ### Divers table
 - **Payment Method** — `Bank Transfer`, `Credit Card up to 3 payments`, `Standing Order` — matched case-insensitively
 - **Phone** — E.164 format
+- **Boat Name** — Preferred First Name on Boat (form field: `boatName`)
+- **Middle Name** — optional (form field: `middleName`)
 
 ### WA Messages table
 - One row per WhatsApp send
@@ -274,7 +341,7 @@ Ian's phones:
 
 ## 🖥️ Dev Notes — buddy-divers-registration.html
 
-### Current version tag: BD-REG 2026-03-20
+### Current version tag: BD-REG 2026-03-25
 
 ### Favicon
 ```html
@@ -282,8 +349,34 @@ Ian's phones:
 ```
 Present in `<head>` of all 5 HTML files. Preserve on every edit.
 
-### Phone validation (fixed session 11)
-Both phone fields validated at submit — requires minimum 7 digits in the visible input:
+### Empty/malformed date fields (sessions 14 + 15)
+Before the payload is POSTed to Make, date fields are validated and stripped if empty or not full DD/MM/YYYY:
+```javascript
+['lastDive', 'passportIssue', 'passportExpiry', 'dob'].forEach(function(f) {
+  var v = data[f] ? data[f].toString().trim() : '';
+  if (!v || !/^\d{2}\/\d{2}\/\d{4}$/.test(v)) delete data[f];
+});
+```
+Airtable rejects empty strings AND malformed dates (e.g. 2-digit year). This strips both.
+
+### Last Dive Date field validation (session 15)
+- Field has `id="f-lastDive"` wrapper div and a `<span class="field-error" id="lastDiveError">` span
+- On blur/change: validates format is exactly DD/MM/YYYY (4-digit year) AND date is not in future
+- Error messages: format error in Hebrew+English, future date error in Hebrew+English
+- Field is optional — blank is always accepted
+
+### Pricing options — no default selection (session 15)
+- Removed `classList.add('selected')` on `i===0` in `init()` for both pricing and roomOptions
+- All options start unselected (white background) — user must actively choose
+
+### WA Messages logging — order matters
+- WA Messages table only gets a new row if `currentPaymentRecordId` exists
+- This ID is only set after clicking **Save** in followup.html
+- Workflow: fill details → **Save first** → then Send WhatsApp
+- If Send WhatsApp is clicked before Save, the image sends but nothing logs to WA Messages
+
+### Phone validation
+Both phone fields validated at submit — requires minimum 7 digits:
 ```javascript
 } else if (name === 'phone' || name === 'emergencyPhone') {
   const digits = val.replace(/\D/g, '');
@@ -291,8 +384,45 @@ Both phone fields validated at submit — requires minimum 7 digits in the visib
   msg = 'נדרש מספר טלפון תקין / Valid phone number required';
 }
 ```
-Emergency phone resolved to `emergencyPhoneNumberInput` in `validateField()`.
-Emergency phone is in the required fields array. Both inputs have blur + input event listeners.
+
+### No-TZ checkbox — non-Israeli divers (session 12)
+
+Two-column form-row:
+- **Right**: `id="f-idNumber"` — 9-digit Israeli ID with Luhn + diver lookup
+- **Left**: styled box with `id="noTzIdCheckbox"` — "אין לי ת״ז ישראלית / I don't have an Israeli ID"
+
+Hidden row below: `id="f-idSubstitute"` (a form-row div, not a field div):
+```html
+<div class="form-row" id="f-idSubstitute" style="display:none;">
+  <div class="field" style="flex:1;">
+    <label>מספר דרכון (במקום ת"ז) <span class="en">Passport Number (in place of ID)</span><span class="req">*</span></label>
+    <input type="text" name="idSubstitute" id="idSubstituteInput" placeholder="XX0000000" />
+    <span class="field-error" id="idSubstituteError">שדה חובה / Required</span>
+  </div>
+</div>
+```
+
+`id="lookupStatus"` span sits after the substitute row — visible for both paths.
+
+Substitute field: mirrors to `[name="passportNumber"]` in real-time + debounced lookup (600ms, min 5 chars).
+
+On submit when checked:
+```javascript
+data['idNumber'] = substituteValue;
+data['passportNumber'] = substituteValue;
+```
+
+### Flights options (3 choices)
+```html
+<input type="radio" name="flights" value="BuddyArranged" />   <!-- הזמנת טיסות דרך באדי-דייברס -->
+<input type="radio" name="flights" value="SelfArranged" />    <!-- ארכוש טיסות באופן עצמאי -->
+<input type="radio" name="flights" value="Undecided" />       <!-- עדיין לא החלטתי, אעדכן בהמשך -->
+```
+
+### Boat name field
+- Label: "שם פרטי מועדף על הספינה / Preferred First Name on Boat"
+- Form field name: `boatName` | Airtable field: `Boat Name`
+- Optional — placeholder: "אם שונה משם הדרכון / If different from passport name"
 
 ### Trip 261219 — Philippines Combo (full structure)
 
@@ -300,28 +430,29 @@ Emergency phone is in the required fields array. Both inputs have blur + input e
 - `full_package_5990` — החבילה המלאה, ים + יבשה, 11 לילות (כולל טיסות) — $5,990
 - `boat_only_4390` — ספארי ימי בלבד, 7 לילות (כולל טיסות) — $4,390
 
-**roomOptions** (radio, required — section header: תוספות שדרוג עבור חדרים בספינה):
-- `lower_twin_0` — מפלס תחתון, חדר טווין (מיטת קומתיים) / Lower deck, twin room (Bunk Bed) — $0
-- `lower_triple_90` — מפלס תחתון, חדר לשלושה בתפוסה זוגית בלבד / Lower deck, triple room for Double Occupancy Only — $90
-- `main_front_140` — מפלס ראשי, חדר פרמיום קידמי / Main deck, front premium cabin — $140
-- `main_premium_205` — מפלס ראשי, חדר פרמיום / Main deck, premium cabin — $205
-- `upper_premium_275` — מפלס עליון, חדר פרמיום / Upper deck, premium cabin — $275
+**roomOptions** (radio, required):
+- `lower_twin_0` — Lower deck, twin room (Bunk Bed) — $0
+- `lower_triple_90` — Lower deck, triple room for Double Occupancy Only — $90
+- `main_front_140` — Main deck, front premium cabin — $140
+- `main_premium_205` — Main deck, premium cabin — $205
+- `upper_premium_275` — Upper deck, premium cabin — $275
 
-**addons** (checkboxes, optional — section header: תוספות ואפשרויות):
-- `garden_suite_185` — שדרוג לחדר Garden Suite בריזורט / Resort Garden Suite upgrade — $185 — `fullPackageOnly: true`
-- `credit_1400` — זיכוי כספי עבור רכישת טיסות עצמאית / Cash Credit for Self Flight Purchase — $1,400 display, priceNum: **-1400**
-- `nitrox_boat_180` — נייטרוקס על הסירה / Nitrox Boat — $180
-- `nitrox_boat_resort_240` — נייטרוקס על הסירה ובריזורט / Nitrox Boat & Resort — $240
+**addons** (checkboxes, optional):
+- `garden_suite_185` — Resort Garden Suite upgrade — $185 — `fullPackageOnly: true`
+- `credit_1400` — Cash Credit for Self Flight — display $1,400, priceNum: **-1400**
+- `nitrox_boat_180` — Nitrox Boat — $180
+- `nitrox_boat_resort_240` — Nitrox Boat & Resort — $240
 
 **Grand total:** mainPriceNum + roomPriceNum + addonTotal
 
 ### Trip 260620 — Madagascar Jun 2026
 Same pricing as other Madagascar trips (twin_2890, twin_2690, single_supplement €690).
-Has `note: "⚠️ בכפוף למינימום נרשמים"` shown on the form.
+Has `note: "⚠️ בכפוף למינימום נרשמים"`.
+
+### Trip 260915 — Madagascar Sep 2026 (A)
+Same pricing as other Madagascar trips. Dates: 15/09/2026 – 24/09/2026. Same structure as 260925.
 
 ### OTP Implementation — CRITICAL, verify before every delivery
-
-**CORRECT:**
 ```html
 <div id="otpDigitsDisplay" style="display:flex;gap:10px;justify-content:center;cursor:text;">
   <div class="otp-slot" id="otpSlot0"></div>
@@ -333,14 +464,70 @@ Has `note: "⚠️ בכפוף למינימום נרשמים"` shown on the form.
   maxlength="4" style="position:absolute;opacity:0;width:1px;height:1px;" />
 ```
 
-### All validated mandatory fields:
-idNumber, firstName, lastName, email, **phone** (min 7 digits), dob, nationality, passportNumber, passportIssue, passportExpiry, gender, certLevel, medicalNotes, emergencyName, emergencyEmail, **emergencyPhone** (min 7 digits), notes, diveComputer (radio), pricing (radio), flights (radio), paymentMethod (radio), room_option (radio — only when roomOptionsSection visible), terms (checkbox)
+### All validated mandatory fields
+idNumber (OR idSubstitute when noTzIdCheckbox checked), firstName, lastName, email, phone (min 7 digits), dob, nationality, passportNumber, passportIssue, passportExpiry, gender, certLevel, medicalNotes, emergencyName, emergencyEmail, emergencyPhone (min 7 digits), notes, diveComputer (radio), pricing (radio), flights (radio), paymentMethod (radio), room_option (radio — only when roomOptionsSection visible), terms (checkbox)
+
+### Form field → Airtable field reference
+| Form `name` | Airtable field | Notes |
+|---|---|---|
+| idNumber | ID Number | 9-digit TZ, or substitute passport if no-TZ used |
+| firstName | First Name | English only |
+| lastName | Last Name | English only |
+| middleName | Middle Name | Optional |
+| boatName | Boat Name | Preferred First Name on Boat — optional |
+| email | Email | |
+| phone | Phone | E.164 via cleanPhone() |
+| dob | Date of Birth | ISO format |
+| nationality | Nationality | English only |
+| passportNumber | Passport Number | Auto-populated from substitute if no-TZ used |
+| passportIssue | Passport Issue Date | ISO format |
+| passportExpiry | Passport Expiry | ISO format |
+| gender | Gender | |
+| certLevel | Certification Level | |
+| pricing | Pricing | Label string e.g. "full_package_5990 + upper_premium_275" |
+| totalPrice | Total Price | Calculated integer |
+| currency | Currency | USD or EUR |
+| tripId | Trip ID | YYMMDD |
+| flights | Flights | BuddyArranged / SelfArranged / Undecided |
+| paymentMethod | Payment Method | |
+| medicalNotes | Medical Notes | |
+| emergencyName | Emergency Name | |
+| emergencyEmail | Emergency Email | |
+| emergencyPhone | Emergency Phone | |
+| notes | Notes | |
+| diveComputer | Dive Computer | |
+| dietary | Dietary Requirements | |
+| allergies | Allergies | |
+| insuranceCompany | Insurance Company | |
+| insuranceContact | Insurance Contact | |
+| policyNumber | Policy Number | |
+| lastDive | Last Dive Date | |
+| referral | How Did You Hear | |
 
 ---
 
 ## 🖥️ Dev Notes — followup.html
 
-### Current version tag: BD-FOLLOWUP 2026-03-20
+### Current version tag: BD-FOLLOWUP 2026-03-22
+
+### Safari Price — CRITICAL (sessions 12 + 13)
+- Airtable **Payments** table has TWO relevant fields:
+  - `Safari Price` — FORMULA/COMPUTED — **NEVER write via API** — will error with "field is computed"
+  - `Safari Price Override` — plain Number field — **writable** — added session 13
+- followup.html `safariPrice` input:
+  - **Loads**: `Safari Price Override` first, falls back to `Safari Price` from Bookings
+  - **Saves**: writes to `Safari Price Override` only
+  - **UI**: labelled "Safari Price (from booking, editable)" — editable, triggers `updateSummary()` on change
+- Load logic: `setVal('safariPrice', f('Safari Price Override') || f('Safari Price', booking.totalPrice ?? 0));`
+- Save: `'Safari Price Override': parseFloatOrNull('safariPrice')`
+
+### Payment amount — zero/negative allowed (session 13)
+- סכום לתשלום (paymentRequestAmount) accepts 0 and negative values
+- Validation only fires if field is completely empty:
+  ```javascript
+  if (amount === 0 && document.getElementById('paymentRequestAmount').value.trim() === '') { alert(...); return; }
+  ```
+- Useful for refunds, credits, zero-balance confirmations
 
 ### Trip names (tripNames):
 ```javascript
@@ -348,9 +535,10 @@ idNumber, firstName, lastName, email, **phone** (min 7 digits), dob, nationality
 '261022':'גלפגוס — אוקטובר 2026',  '271014':'גלפגוס — אוקטובר 2027',
 '260328':'מדגסקר — מרץ 2026',      '260620':'מדגסקר — יוני 2026',
 '260730':'מדגסקר — יולי 2026',     '260815':'מדגסקר — אוגוסט 2026',
-'260915':'מדגסקר — ספטמבר 2026 א׳', '260925':'מדגסקר — ספטמבר 2026 ב׳', '261009':'מדגסקר — אוקטובר 2026',
-'261211':'מיאנמר — דצמבר 2026',    '270106':'מיאנמר — ינואר 2027',
-'270203':'מיאנמר — פברואר 2027',   '261219':'פיליפינים — דצמבר 2026',
+'260915':'מדגסקר — ספטמבר 2026 א׳','260925':'מדגסקר — ספטמבר 2026 ב׳',
+'261009':'מדגסקר — אוקטובר 2026',  '261211':'מיאנמר — דצמבר 2026',
+'270106':'מיאנמר — ינואר 2027',    '270203':'מיאנמר — פברואר 2027',
+'261219':'פיליפינים — דצמבר 2026',
 ```
 
 ### Trip countries (tripCountries):
@@ -443,8 +631,6 @@ Standalone page — Myanmar trips only (261211, 270106, 270203). Same design as 
 }
 ```
 
-### Extended trip (261219 pattern): see Dev Notes above for full structure.
-
 ### Pre-upload checklist:
 1. Trip ID = YYMMDD — matches Airtable digit for digit
 2. priceNum on every pricing/roomOptions/addons entry
@@ -507,4 +693,15 @@ Standalone page — Myanmar trips only (261211, 270106, 270203). Same design as 
 | Phone field accepted empty | cleanPhone() returned country code only | Added 7-digit minimum check in validateField() |
 | Emergency phone not validated | Missing from required list entirely | Added to required array + validateField() + blur listeners |
 | Manifest nitrox showed "Yes" text | Hard-coded "✓ Yes" string | Changed to ✓ green badge / ✗ red X |
-| Favicon was base64 embedded in registration | Large inline blob, inconsistent across files | Replaced with Cloudinary URL, added to all 5 files |
+| Favicon was base64 embedded | Large inline blob, inconsistent across files | Replaced with Cloudinary URL, added to all 5 files |
+| Trip 260915 missing from followup.html | Never added — discovered session 12 | Added to tripNames and tripCountries |
+| Non-Israeli divers had no ID path | Form required 9-digit TZ for everyone | No-TZ checkbox + substitute passport field with full lookup/OTP flow |
+| Safari Price showed wrong value | saveRecord() never wrote Safari Price; field is computed | Added Safari Price Override (plain Number) to Payments; followup loads Override first, falls back to formula |
+| Save failed: field is computed | Attempted to write computed Safari Price field via API | Removed from saveRecord(); use Safari Price Override instead |
+| Payment amount blocked at zero | Validation rejected 0 | Now only blocks if field is completely empty |
+| Empty Last Dive Date broke registration | Optional date field sent as "" to Airtable | Delete empty date fields from payload before POST |
+| Manifest OTP scenario not sending | Make forgot webhook data structure, auto-deactivated after error | Redetermine data structure + reactivate scenario |
+| Malformed date (2-digit year e.g. 17/03/26) broke registration | Auto-format corrected display but payload still sent invalid date | Regex check DD/MM/YYYY (4-digit year) before POST — delete if invalid |
+| Last Dive Date showed no error for bad format | Missing field-error span and field ID in HTML | Added id="f-lastDive", field-error span, updated change listener |
+| First pricing option pre-selected on load | classList.add('selected') on i===0 in init() | Removed — no option selected by default |
+| WA Messages not logging | Save must be called before Send WhatsApp | currentPaymentRecordId only exists after Save — always Save first |
