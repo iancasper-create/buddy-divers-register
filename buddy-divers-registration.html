@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-REG 2026-03-25 | No default pricing selection, last dive date format validation -->
+<!-- BD-REG 2026-03-25d | parseDate now rejects impossible dates (e.g. month 22) for all date fields -->
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8" />
@@ -1915,7 +1915,11 @@ function parseDate(val) {
   if (!val) return null;
   const m = val.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
   if (!m) return null;
-  return new Date(parseInt(m[3]), parseInt(m[2]) - 1, parseInt(m[1]));
+  const day = parseInt(m[1]), month = parseInt(m[2]), year = parseInt(m[3]);
+  const d = new Date(year, month - 1, day);
+  // Reject impossible dates — JS rolls month 22 forward, so check month didn't shift
+  if (d.getFullYear() !== year || d.getMonth() !== month - 1 || d.getDate() !== day) return null;
+  return d;
 }
 
 // Convert YYYY-MM-DD (from Airtable) to DD/MM/YYYY for display
@@ -2338,10 +2342,11 @@ document.getElementById('regForm').addEventListener('submit', async function(e) 
   }
   data.submittedAt = new Date().toISOString();
 
-  // Remove empty optional date fields — Airtable rejects empty strings for date fields
-  ['lastDive', 'passportIssue', 'passportExpiry', 'dob'].forEach(function(f) {
-    if (!data[f] || data[f].toString().trim() === '') delete data[f];
-  });
+  // Last Dive Date is optional — strip if empty or not a real calendar date
+  (function() {
+    var ld = data['lastDive'] ? data['lastDive'].toString().trim() : '';
+    if (!ld || !parseDate(ld)) delete data['lastDive'];
+  })();
 
   // ⚠️ REPLACE THIS URL with your Make.com webhook URL
   const WEBHOOK_URL = 'https://hook.eu1.make.com/h3wexi08df15jvkk1uyfw0ix669qv1ms';
