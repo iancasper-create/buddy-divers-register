@@ -541,7 +541,7 @@ async function loadTripDropdown() {
   const sel = document.getElementById('tripId');
   try {
     const data = await atFetch(TABLE_TRIPS,
-      'fields[]=Trip+Id&fields[]=Name&fields[]=Start+Date');
+      'fields[]=Trip+Id&fields[]=Name');
     if (!data || !data.records || data.records.length === 0) {
       sel.innerHTML = '<option value="">— Select your trip —</option>';
       return;
