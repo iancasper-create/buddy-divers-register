@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-MANIFEST 2026-03-26 | Trip ID text input replaced with dropdown loaded from Airtable -->
+<!-- BD-MANIFEST 2026-03-26 | Phone-first login, trip dropdown after OTP -->
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -429,14 +429,7 @@
   <div class="panel" id="loginSection">
     <div class="panel-title">Tour Leader Login</div>
     <div class="form-row">
-      <div class="form-group">
-        <label>Select Trip</label>
-        <select id="tripId" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;background:#fff;color:var(--text);">
-          <option value="">Loading trips...</option>
-        </select>
-        <span class="field-error" id="tripIdError">Please select a trip</span>
-      </div>
-      <div class="form-group">
+      <div class="form-group" style="flex:1;">
         <label>Phone Number</label>
         <input type="tel" id="leaderPhone" placeholder="05X-XXXXXXX" />
         <span class="field-error" id="phoneError">Please enter your phone number</span>
@@ -444,6 +437,21 @@
     </div>
     <button class="btn-primary" id="btnRequestOtp" onclick="requestOtp()">Send Verification Code</button>
     <div class="status-msg" id="loginStatus"></div>
+  </div>
+
+  <!-- TRIP SELECTION — shown after OTP verified (only if leader has multiple trips) -->
+  <div class="panel" id="tripSelectSection" style="display:none;">
+    <div class="panel-title">Select Trip</div>
+    <div class="form-row">
+      <div class="form-group" style="flex:1;">
+        <select id="tripId" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;background:#fff;color:var(--text);">
+          <option value="">— Select your trip —</option>
+        </select>
+        <span class="field-error" id="tripIdError">Please select a trip</span>
+      </div>
+    </div>
+    <button class="btn-primary" id="btnLoadTrip" onclick="loadSelectedTrip()">View Manifest</button>
+    <div class="status-msg" id="tripSelectStatus"></div>
   </div>
 
   <!-- STEP 2: OTP -->
@@ -532,39 +540,7 @@ const READONLY_TOKEN   = 'patlTOY5CIZQiCwX6.128e3422e74128f058aa8b3f51fe39ec5483
 // ============================================================
 function getToken() { return READONLY_TOKEN; }
 
-window.addEventListener('load', () => { setupOtp(); loadTripDropdown(); });
-
-// ============================================================
-// LOAD TRIP DROPDOWN — fetches active trips from Airtable
-// ============================================================
-async function loadTripDropdown() {
-  const sel = document.getElementById('tripId');
-  try {
-    const data = await atFetch(TABLE_TRIPS,
-      'fields[]=Trip+Id&fields[]=Name');
-    if (!data || !data.records || data.records.length === 0) {
-      sel.innerHTML = '<option value="">— Select your trip —</option>';
-      return;
-    }
-    // Sort by Trip Id (YYMMDD) ascending
-    const sorted = data.records.slice().sort(function(a, b) {
-      return (a.fields['Trip Id'] || '').localeCompare(b.fields['Trip Id'] || '');
-    });
-    sel.innerHTML = '<option value="">— Select your trip —</option>';
-    sorted.forEach(function(rec) {
-      const tripId = rec.fields['Trip Id'] || '';
-      const name   = rec.fields['Name']    || tripId;
-      if (!tripId) return;
-      const opt = document.createElement('option');
-      opt.value       = tripId;
-      opt.textContent = name + ' (' + tripId + ')';
-      sel.appendChild(opt);
-    });
-  } catch(e) {
-    sel.innerHTML = '<option value="">— Select your trip —</option>';
-    console.error('Trip dropdown load error:', e);
-  }
-}
+window.addEventListener('load', () => { setupOtp(); });
 
 // ============================================================
 // AIRTABLE HELPER
@@ -639,79 +615,84 @@ function clearOtp() {
 // ============================================================
 // STATE
 // ============================================================
-let _tripRecordId   = null;
-let _tripData       = null;
-let _leaderPhone    = null;
-let _leaderEmail    = null;
-let _leaderName     = null;
-let _tripId         = null;
+// STATE
+// ============================================================
+let _tripRecordId = null;
+let _tripData     = null;
+let _leaderPhone  = null;
+let _leaderEmail  = null;
+let _leaderName   = null;
+let _tripId       = null;
+let _leaderTrips  = []; // all trips found for this leader
+
+const normalize = p => p.replace(/\D/g,'').slice(-9);
+const ADMINS = {
+  '542323567': { name: 'Ian Casper',   email: 'ian@buddy-divers.com' },
+  '555563119': { name: 'Amir Fireman', email: 'amir@buddy-divers.com' }
+};
 
 // ============================================================
-// STEP 1 — REQUEST OTP
-// Make webhook handles OTP generation, Airtable storage, and email send
-// Manifest is read-only — no Airtable writes here
+// STEP 1 — REQUEST OTP (phone only, no trip needed yet)
 // ============================================================
 async function requestOtp(resend = false) {
   hideStatus('loginStatus');
-  const tripId = document.getElementById('tripId').value.trim();
-  const phone  = document.getElementById('leaderPhone').value.trim();
+  const phone = document.getElementById('leaderPhone').value.trim();
 
-  if (!tripId) { document.getElementById('tripIdError').style.display = 'block'; return; }
-  document.getElementById('tripIdError').style.display = 'none';
-  if (!phone)  { document.getElementById('phoneError').style.display = 'block'; return; }
+  if (!phone) { document.getElementById('phoneError').style.display = 'block'; return; }
   document.getElementById('phoneError').style.display = 'none';
 
   setLoading('btnRequestOtp', true, 'Send Verification Code');
 
-  // 1. Fetch trip from Airtable to validate phone
-  const data = await atFetch(TABLE_TRIPS, `filterByFormula=({Trip+Id}="${tripId}")&maxRecords=1`);
-  if (!data || !data.records || data.records.length === 0) {
+  const phoneNorm = normalize(phone);
+  const isAdmin   = !!ADMINS[phoneNorm];
+
+  let trips = [];
+  let resolvedEmail = '';
+  let resolvedName  = '';
+
+  try {
+    if (isAdmin) {
+      resolvedEmail = ADMINS[phoneNorm].email;
+      resolvedName  = ADMINS[phoneNorm].name;
+      const data = await atFetch(TABLE_TRIPS,
+        'fields[]=Trip+Id&fields[]=Name&fields[]=Leader+Email&fields[]=Leader+Name&fields[]=Leader+Phone');
+      if (data && data.records) trips = data.records;
+    } else {
+      const e164 = '+972' + phoneNorm;
+      const data = await atFetch(TABLE_TRIPS,
+        `filterByFormula=({Leader+Phone}="${e164}")&fields[]=Trip+Id&fields[]=Name&fields[]=Leader+Email&fields[]=Leader+Name`);
+      if (data && data.records) trips = data.records;
+      if (trips.length === 0) {
+        setLoading('btnRequestOtp', false, 'Send Verification Code');
+        showStatus('loginStatus', 'error', 'Phone number not found. Please contact Buddy-Divers.');
+        return;
+      }
+      const firstRec = trips[0].fields;
+      resolvedEmail  = (firstRec['Leader Email'] || '').trim();
+      resolvedName   = (firstRec['Leader Name']  || '').trim();
+    }
+  } catch(e) {
     setLoading('btnRequestOtp', false, 'Send Verification Code');
-    showStatus('loginStatus', 'error', `Trip ID "${tripId}" not found. Please check and try again.`);
+    showStatus('loginStatus', 'error', 'Error connecting to Airtable. Please try again.');
     return;
   }
 
-  const rec         = data.records[0];
-  const leaderPhone = (rec.fields['Leader Phone'] || '').trim();
-  const leaderEmail = (rec.fields['Leader Email'] || '').trim();
-  const leaderName  = (rec.fields['Leader Name']  || '').trim();
-  const tripName    = rec.fields['Name'] || tripId;
-
-  // Normalize phone: strip non-digits, take last 9 digits (handles +972, 972, 0 prefixes)
-  const normalize = p => p.replace(/\D/g,'').slice(-9);
-
-  // Admin phones — can access any trip regardless of Leader Phone
-  const ADMINS = {
-    '542323567': { name: 'Ian Casper',   email: 'ian@buddy-divers.com' },
-    '555563119': { name: 'Amir Fireman', email: 'amir@buddy-divers.com' }
-  };
-  const adminKey = normalize(phone);
-  const isAdmin  = !!ADMINS[adminKey];
-
-  // For admins, use their own name/email; otherwise use trip leader's
-  const resolvedName  = isAdmin ? ADMINS[adminKey].name  : leaderName;
-  const resolvedEmail = isAdmin ? ADMINS[adminKey].email : leaderEmail;
-
-  if (!isAdmin && (!leaderPhone || normalize(leaderPhone) !== normalize(phone))) {
-    setLoading('btnRequestOtp', false, 'Send Verification Code');
-    showStatus('loginStatus', 'error', 'Phone number not authorized for this trip.');
-    return;
-  }
   if (!resolvedEmail) {
     setLoading('btnRequestOtp', false, 'Send Verification Code');
-    showStatus('loginStatus', 'error', 'No email on file for this leader. Please contact Buddy-Divers.');
+    showStatus('loginStatus', 'error', 'No email on file. Please contact Buddy-Divers.');
     return;
   }
 
-  // Generate OTP in JS — sent to Make which stores in Airtable and emails it
-  const otp = Math.floor(1000 + Math.random() * 9000).toString();
+  const otp    = Math.floor(1000 + Math.random() * 9000).toString();
+  const tripId = trips.length > 0 ? (trips[0].fields['Trip Id'] || 'PHONE_AUTH') : 'PHONE_AUTH';
+  const tripName = trips.length > 0 ? (trips[0].fields['Name'] || '') : '';
 
-  // 2. Post to Make webhook
   try {
     const resp = await fetch(MANIFEST_OTP_WEBHOOK, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'send_otp', tripId, leaderName: resolvedName, leaderEmail: resolvedEmail, leaderPhone: phone, tripName, otp })
+      body: JSON.stringify({ action: 'send_otp', tripId, leaderName: resolvedName,
+        leaderEmail: resolvedEmail, leaderPhone: phone, tripName, otp })
     });
     if (!resp.ok) throw new Error('Webhook error');
   } catch(e) {
@@ -720,20 +701,13 @@ async function requestOtp(resend = false) {
     return;
   }
 
-  // Save OTP in sessionStorage for verification
-  sessionStorage.setItem('bd-manifest-otp-' + tripId, otp);
-
-  // Save state
-  _tripRecordId = rec.id;
-  _tripData     = rec.fields;
-  _leaderPhone  = phone;
-  _leaderEmail  = resolvedEmail;
-  _leaderName   = resolvedName;
-  _tripId       = tripId;
+  sessionStorage.setItem('bd-manifest-otp-phone', otp);
+  _leaderTrips = trips;
+  _leaderPhone = phone;
+  _leaderEmail = resolvedEmail;
+  _leaderName  = resolvedName;
 
   setLoading('btnRequestOtp', false, 'Send Verification Code');
-
-  // Show OTP screen
   document.getElementById('loginSection').style.display = 'none';
   document.getElementById('otpSection').style.display   = 'block';
   clearOtp();
@@ -744,8 +718,6 @@ async function requestOtp(resend = false) {
 
 // ============================================================
 // STEP 2 — VERIFY OTP
-// Reads OTP from Airtable using readonly token, no writes needed
-// OTP expires naturally after OTP_EXPIRY_MINUTES
 // ============================================================
 async function verifyOtp() {
   hideStatus('otpStatus');
@@ -754,21 +726,62 @@ async function verifyOtp() {
 
   setLoading('btnVerifyOtp', true, 'Verify');
 
-  // Verify against OTP stored in sessionStorage (generated in JS, sent to Make)
-  const storedOtp = sessionStorage.getItem('bd-manifest-otp-' + _tripId) || '';
+  const storedOtp = sessionStorage.getItem('bd-manifest-otp-phone') || '';
   if (!storedOtp || entered !== storedOtp) {
     setLoading('btnVerifyOtp', false, 'Verify');
     showStatus('otpStatus', 'error', 'Invalid code. Please try again.');
     return;
   }
 
-  // Clear OTP from sessionStorage
-  sessionStorage.removeItem('bd-manifest-otp-' + _tripId);
-
+  sessionStorage.removeItem('bd-manifest-otp-phone');
   setLoading('btnVerifyOtp', false, 'Verify');
   document.getElementById('otpSection').style.display = 'none';
 
-  // Show trip banner using state saved during login
+  if (_leaderTrips.length === 1) {
+    await loadTripAndShowManifest(_leaderTrips[0].fields['Trip Id']);
+    return;
+  }
+
+  // Multiple trips — show picker
+  _leaderTrips.sort((a, b) =>
+    (a.fields['Trip Id'] || '').localeCompare(b.fields['Trip Id'] || ''));
+  const sel = document.getElementById('tripId');
+  sel.innerHTML = '<option value="">— Select your trip —</option>';
+  _leaderTrips.forEach(function(rec) {
+    const tid  = rec.fields['Trip Id'] || '';
+    const name = rec.fields['Name']    || tid;
+    if (!tid) return;
+    const opt = document.createElement('option');
+    opt.value = tid;
+    opt.textContent = name + ' (' + tid + ')';
+    sel.appendChild(opt);
+  });
+  document.getElementById('tripSelectSection').style.display = 'block';
+}
+
+// ============================================================
+// STEP 3 — LOAD SELECTED TRIP
+// ============================================================
+async function loadSelectedTrip() {
+  const tripId = document.getElementById('tripId').value.trim();
+  if (!tripId) { document.getElementById('tripIdError').style.display = 'block'; return; }
+  document.getElementById('tripIdError').style.display = 'none';
+  document.getElementById('tripSelectSection').style.display = 'none';
+  await loadTripAndShowManifest(tripId);
+}
+
+async function loadTripAndShowManifest(tripId) {
+  const data = await atFetch(TABLE_TRIPS, `filterByFormula=({Trip+Id}="${tripId}")&maxRecords=1`);
+  if (!data || !data.records || data.records.length === 0) {
+    showStatus('tripSelectStatus', 'error', 'Trip not found. Please contact Buddy-Divers.');
+    document.getElementById('tripSelectSection').style.display = 'block';
+    return;
+  }
+  const rec     = data.records[0];
+  _tripRecordId = rec.id;
+  _tripData     = rec.fields;
+  _tripId       = tripId;
+
   document.getElementById('leaderGreeting').textContent = `Hello ${_leaderName}`;
   document.getElementById('bannerTripName').textContent  = _tripData['Name'] || _tripId;
   const fmtBannerDate = d => {
