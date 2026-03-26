@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-FOLLOWUP 2026-03-22 | Safari Price Override field added; editable + saved to Payments; trip 260915 added -->
+<!-- BD-FOLLOWUP 2026-03-26 | Trip search replaced with dropdown loaded from Airtable -->
 <html lang="en" dir="ltr">
 <head>
 <meta charset="UTF-8"/>
@@ -427,8 +427,10 @@
     <div class="card-title"><span class="step-badge">1</span> Find Trip</div>
     <div class="search-row">
       <div class="field">
-        <label>Trip ID</label>
-        <input type="text" id="tripIdInput" placeholder="e.g. 271014" maxlength="10"/>
+        <label>Trip</label>
+        <select id="tripIdInput" style="width:100%;padding:10px 14px;border:1.5px solid #c5dfe6;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:15px;color:#1a3a4a;outline:none;background:#fff;">
+          <option value="">Loading trips...</option>
+        </select>
       </div>
       <button class="btn btn-primary" id="searchBtn" onclick="searchTrip()">Search</button>
     </div>
@@ -719,6 +721,9 @@ let currentPaymentRecordId = null; // existing payment record id if found
 function checkToken() {
   if (!AIRTABLE_API_KEY || !AIRTABLE_API_KEY.startsWith('pat')) {
     document.getElementById('tokenOverlay').style.display = 'flex';
+  } else {
+    // Token already in sessionStorage — load trip dropdown immediately
+    loadTripDropdown();
   }
 }
 
@@ -732,8 +737,40 @@ function submitToken() {
   sessionStorage.setItem('bd_airtable_token', val);
   document.getElementById('tokenOverlay').style.display = 'none';
   document.getElementById('tokenError').style.display = 'none';
+  loadTripDropdown();
 }
 
+async function loadTripDropdown() {
+  const sel = document.getElementById('tripIdInput');
+  sel.innerHTML = '<option value="">Loading trips...</option>';
+  try {
+    const url = `https://api.airtable.com/v0/${BASE_ID}/tbl8KGVwkIHi26plq?maxRecords=100`;
+    const res = await fetch(url, { headers: { Authorization: `Bearer ${AIRTABLE_API_KEY}` } });
+    const data = await res.json();
+    if (!data.records || data.records.length === 0) {
+      sel.innerHTML = '<option value="">No trips found</option>';
+      return;
+    }
+    // Sort by Trip Id descending (most future first)
+    data.records.sort((a, b) =>
+      (b.fields['Trip Id'] || '').localeCompare(a.fields['Trip Id'] || ''));
+    sel.innerHTML = '<option value="">— Select a trip —</option>';
+    data.records.forEach(function(rec) {
+      const tid  = rec.fields['Trip Id']   || '';
+      const name = rec.fields['Trip Name'] || '';
+      if (!tid) return;
+      const opt = document.createElement('option');
+      opt.value = tid;
+      opt.textContent = (name && name !== tid) ? name + ' (' + tid + ')' : tid;
+      sel.appendChild(opt);
+    });
+  } catch(e) {
+    sel.innerHTML = '<option value="">Error loading trips</option>';
+    console.error('loadTripDropdown error:', e);
+  }
+}
+
+// Enter key on token input
 document.getElementById('tokenInput').addEventListener('keydown', e => { if (e.key === 'Enter') submitToken(); });
 
 // Run on load
@@ -742,7 +779,7 @@ checkToken();
 // ── SEARCH TRIP ──────────────────────────────────────────────────
 async function searchTrip() {
   const tripId = document.getElementById('tripIdInput').value.trim();
-  if (!tripId) { showMsg('searchMsg', 'info', 'Please enter a Trip ID.'); return; }
+  if (!tripId) { showMsg('searchMsg', 'info', 'Please select a trip.'); return; }
 
   const btn = document.getElementById('searchBtn');
   btn.disabled = true;
@@ -1605,6 +1642,7 @@ async function openWhatsApp() {
 }
 
 // Allow pressing Enter in trip ID field
+// Trip select — trigger search on Enter key (optional convenience)
 document.getElementById('tripIdInput').addEventListener('keydown', e => { if (e.key === 'Enter') searchTrip(); });
 
 // Fetch BOI rate on page load
