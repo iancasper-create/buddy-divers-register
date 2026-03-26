@@ -654,8 +654,7 @@ async function requestOtp(resend = false) {
     if (isAdmin) {
       resolvedEmail = ADMINS[phoneNorm].email;
       resolvedName  = ADMINS[phoneNorm].name;
-      const data = await atFetch(TABLE_TRIPS,
-        'fields[]=Trip+Id&fields[]=Name&fields[]=Leader+Email&fields[]=Leader+Name&fields[]=Leader+Phone');
+      const data = await atFetch(TABLE_TRIPS, 'maxRecords=100');
       if (data && data.records) trips = data.records;
     } else {
       const e164 = '+972' + phoneNorm;
@@ -684,12 +683,13 @@ async function requestOtp(resend = false) {
   }
 
   const otp    = Math.floor(1000 + Math.random() * 9000).toString();
-  // For the Make webhook we need a real tripId to update the OTP on that Airtable record
-  // Sort trips by Trip Id descending (YYMMDD) to get the most future trip first
+  // For Make webhook: use the first trip record's Airtable record ID and Trip Id field
+  // Sort by Trip Id descending to get most future trip first
   const sortedTrips = trips.slice().sort((a, b) =>
     (b.fields['Trip Id'] || '').localeCompare(a.fields['Trip Id'] || ''));
-  let webhookTripId   = sortedTrips.length > 0 ? (sortedTrips[0].fields['Trip Id'] || '') : '';
-  let webhookTripName = sortedTrips.length > 0 ? (sortedTrips[0].fields['Name']    || '') : '';
+  const webhookTrip   = sortedTrips.length > 0 ? sortedTrips[0] : null;
+  let webhookTripId   = webhookTrip ? (webhookTrip.fields['Trip Id'] || webhookTrip.id) : '';
+  let webhookTripName = webhookTrip ? (webhookTrip.fields['Name']    || '')              : '';
   if (!webhookTripId) {
     setLoading('btnRequestOtp', false, 'Send Verification Code');
     showStatus('loginStatus', 'error', 'No trips found in system. Please contact Buddy-Divers.');
