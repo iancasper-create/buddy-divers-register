@@ -659,8 +659,9 @@ async function requestOtp(resend = false) {
     } else {
       const e164 = '+972' + phoneNorm;
       // Search both E.164 and local format (some leaders stored without country code)
+      const formula = encodeURIComponent(`OR({Leader Phone}="${e164}",{Leader Phone}="0${phoneNorm}")`);
       const data = await atFetch(TABLE_TRIPS,
-        `filterByFormula=OR({Leader+Phone}="${e164}",{Leader+Phone}="0${phoneNorm}")&fields[]=Trip+Id&fields[]=Name&fields[]=Leader+Email&fields[]=Leader+Name`);
+        `filterByFormula=${formula}&fields[]=Trip+Id&fields[]=Name&fields[]=Leader+Email&fields[]=Leader+Name`);
       if (data && data.records) trips = data.records;
       if (trips.length === 0) {
         setLoading('btnRequestOtp', false, 'Send Verification Code');
