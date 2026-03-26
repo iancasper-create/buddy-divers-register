@@ -549,6 +549,7 @@ async function atFetch(table, params) {
   const token = getToken();
   if (!token) { console.error('No token'); return null; }
   const url = `https://api.airtable.com/v0/${AIRTABLE_BASE}/${table}?${params}`;
+  console.log('atFetch URL:', url);
   const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
   if (!res.ok) { console.error('Airtable error', res.status); return null; }
   return res.json();
@@ -658,8 +659,7 @@ async function requestOtp(resend = false) {
       if (data && data.records) trips = data.records;
     } else {
       // Fetch all trips and filter in JS — Airtable formula filtering on phone fields is unreliable
-      const data = await atFetch(TABLE_TRIPS,
-        'fields[]=Trip%20Id&fields[]=Name&fields[]=Leader%20Email&fields[]=Leader%20Name&fields[]=Leader%20Phone');
+      const data = await atFetch(TABLE_TRIPS, 'maxRecords=100');
       if (data && data.records) {
         trips = data.records.filter(function(rec) {
           const stored = (rec.fields['Leader Phone'] || '').replace(/\D/g,'').slice(-9);
