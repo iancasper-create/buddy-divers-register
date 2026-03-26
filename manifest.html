@@ -657,12 +657,15 @@ async function requestOtp(resend = false) {
       const data = await atFetch(TABLE_TRIPS, 'maxRecords=100');
       if (data && data.records) trips = data.records;
     } else {
-      const e164 = '+972' + phoneNorm;
-      // Search both E.164 and local format (some leaders stored without country code)
-      const e164encoded = '%2B972' + phoneNorm; // %2B = + sign, safe in URL
+      // Fetch all trips and filter in JS — Airtable formula filtering on phone fields is unreliable
       const data = await atFetch(TABLE_TRIPS,
-        `filterByFormula=OR({Leader+Phone}="${e164encoded}",{Leader+Phone}="0${phoneNorm}")&fields[]=Trip+Id&fields[]=Name&fields[]=Leader+Email&fields[]=Leader+Name`);
-      if (data && data.records) trips = data.records;
+        'fields[]=Trip+Id&fields[]=Name&fields[]=Leader+Email&fields[]=Leader+Name&fields[]=Leader+Phone');
+      if (data && data.records) {
+        trips = data.records.filter(function(rec) {
+          const stored = (rec.fields['Leader Phone'] || '').replace(/\D/g,'').slice(-9);
+          return stored && stored === phoneNorm;
+        });
+      }
       if (trips.length === 0) {
         setLoading('btnRequestOtp', false, 'Send Verification Code');
         showStatus('loginStatus', 'error', 'Phone number not found. Please contact Buddy-Divers.');
