@@ -694,7 +694,7 @@ async function requestOtp(resend = false) {
     (b.fields['Trip Id'] || '').localeCompare(a.fields['Trip Id'] || ''));
   const webhookTrip   = sortedTrips.length > 0 ? sortedTrips[0] : null;
   let webhookTripId   = webhookTrip ? (webhookTrip.fields['Trip Id'] || webhookTrip.id) : '';
-  let webhookTripName = webhookTrip ? (webhookTrip.fields['Name']    || '')              : '';
+  let webhookTripName = webhookTrip ? (webhookTrip.fields['Trip Name']    || '')              : '';
   if (!webhookTripId) {
     setLoading('btnRequestOtp', false, 'Send Verification Code');
     showStatus('loginStatus', 'error', 'No trips found in system. Please contact Buddy-Divers.');
@@ -763,7 +763,7 @@ async function verifyOtp() {
   sel.innerHTML = '<option value="">— Select your trip —</option>';
   _leaderTrips.forEach(function(rec) {
     const tid  = rec.fields['Trip Id'] || '';
-    const name = rec.fields['Name']    || tid;
+    const name = rec.fields['Trip Name']    || tid;
     if (!tid) return;
     const opt = document.createElement('option');
     opt.value = tid;
@@ -797,7 +797,7 @@ async function loadTripAndShowManifest(tripId) {
   _tripId       = tripId;
 
   document.getElementById('leaderGreeting').textContent = `Hello ${_leaderName}`;
-  document.getElementById('bannerTripName').textContent  = _tripData['Name'] || _tripId;
+  document.getElementById('bannerTripName').textContent  = _tripData['Trip Name'] || _tripId;
   const fmtBannerDate = d => {
     if (!d) return '';
     const dt = new Date(d);
