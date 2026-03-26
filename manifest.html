@@ -659,7 +659,7 @@ async function requestOtp(resend = false) {
     } else {
       // Fetch all trips and filter in JS — Airtable formula filtering on phone fields is unreliable
       const data = await atFetch(TABLE_TRIPS,
-        'fields[]=Trip+Id&fields[]=Name&fields[]=Leader+Email&fields[]=Leader+Name&fields[]=Leader+Phone');
+        'fields[]=Trip%20Id&fields[]=Name&fields[]=Leader%20Email&fields[]=Leader%20Name&fields[]=Leader%20Phone');
       if (data && data.records) {
         trips = data.records.filter(function(rec) {
           const stored = (rec.fields['Leader Phone'] || '').replace(/\D/g,'').slice(-9);
