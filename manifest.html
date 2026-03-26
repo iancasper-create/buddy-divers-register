@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-MANIFEST 2026-03-20 | Nitrox checkmark/red X, favicon added -->
+<!-- BD-MANIFEST 2026-03-26 | Trip ID text input replaced with dropdown loaded from Airtable -->
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -430,9 +430,11 @@
     <div class="panel-title">Tour Leader Login</div>
     <div class="form-row">
       <div class="form-group">
-        <label>Trip ID</label>
-        <input type="text" id="tripId" placeholder="e.g. 261211" maxlength="10" />
-        <span class="field-error" id="tripIdError">Please enter a Trip ID</span>
+        <label>Select Trip</label>
+        <select id="tripId" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;background:#fff;color:var(--text);">
+          <option value="">Loading trips...</option>
+        </select>
+        <span class="field-error" id="tripIdError">Please select a trip</span>
       </div>
       <div class="form-group">
         <label>Phone Number</label>
@@ -530,7 +532,39 @@ const READONLY_TOKEN   = 'patlTOY5CIZQiCwX6.128e3422e74128f058aa8b3f51fe39ec5483
 // ============================================================
 function getToken() { return READONLY_TOKEN; }
 
-window.addEventListener('load', () => { setupOtp(); });
+window.addEventListener('load', () => { setupOtp(); loadTripDropdown(); });
+
+// ============================================================
+// LOAD TRIP DROPDOWN — fetches active trips from Airtable
+// ============================================================
+async function loadTripDropdown() {
+  const sel = document.getElementById('tripId');
+  try {
+    const data = await atFetch(TABLE_TRIPS,
+      'fields[]=Trip+Id&fields[]=Name&fields[]=Start+Date');
+    if (!data || !data.records || data.records.length === 0) {
+      sel.innerHTML = '<option value="">— Select your trip —</option>';
+      return;
+    }
+    // Sort by Trip Id (YYMMDD) ascending
+    const sorted = data.records.slice().sort(function(a, b) {
+      return (a.fields['Trip Id'] || '').localeCompare(b.fields['Trip Id'] || '');
+    });
+    sel.innerHTML = '<option value="">— Select your trip —</option>';
+    sorted.forEach(function(rec) {
+      const tripId = rec.fields['Trip Id'] || '';
+      const name   = rec.fields['Name']    || tripId;
+      if (!tripId) return;
+      const opt = document.createElement('option');
+      opt.value       = tripId;
+      opt.textContent = name + ' (' + tripId + ')';
+      sel.appendChild(opt);
+    });
+  } catch(e) {
+    sel.innerHTML = '<option value="">— Select your trip —</option>';
+    console.error('Trip dropdown load error:', e);
+  }
+}
 
 // ============================================================
 // AIRTABLE HELPER
