@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-FOLLOWUP 2026-03-26 | Trip search replaced with dropdown loaded from Airtable -->
+<!-- BD-FOLLOWUP 2026-03-27a | Added Raja Ampat 270118 to tripNames and tripCountries -->
 <html lang="en" dir="ltr">
 <head>
 <meta charset="UTF-8"/>
@@ -1280,6 +1280,7 @@ function buildPaymentHTML(booking, amount, nisAmount, rate, notes, paidSoFar, sa
     '261009': 'מדגסקר', '261022': 'גלפגוס', '271014': 'גלפגוס',
     '261211': 'מיאנמר', '270106': 'מיאנמר', '270203': 'מיאנמר',
     '261219': 'פיליפינים',
+    '270118': 'אינדונזיה',
   };
   const tripCountry = tripCountries[booking.tripId] || '';
 
@@ -1454,6 +1455,7 @@ async function generatePaymentImage() {
     '261009':'מדגסקר — אוקטובר 2026',
     '261211':'מיאנמר — דצמבר 2026', '270106':'מיאנמר — ינואר 2027', '270203':'מיאנמר — פברואר 2027',
     '261219':'פיליפינים — דצמבר 2026',
+    '270118':'ראג׳ה אמפאט — ינואר 2027',
   };
   const tripDisplayName = tripNames[booking.tripId] || `טיול ${booking.tripId}`;
   const tripCurrency = booking.currency || 'USD';

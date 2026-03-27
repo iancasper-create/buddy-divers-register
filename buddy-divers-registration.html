@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-REG 2026-03-25d | parseDate now rejects impossible dates (e.g. month 22) for all date fields -->
+<!-- BD-REG 2026-03-27a | Added Raja Ampat 270118; generalized credit_ addon bidirectional logic -->
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8" />
@@ -1613,6 +1613,30 @@ const TRIPS = {
       }
     ]
   },
+  "270118": {
+    name: "🤿 ראג'ה אמפאט — Raja Ampat",
+    dates: "16/01/2027 – 28/01/2027",
+    note: "🚢 הפלגה בפועל: 18–27 בינואר | ספינה: DUNE Aurora | מלווה: אמיר פיירמן",
+    currency: "USD",
+    pricing: [
+      {
+        value: "full_package_6980",
+        he: "חבילה מלאה, כולל טיסות, העברות ולינת מעבר — 9 לילות ספינה",
+        en: "Full package incl. flights, transfers & transit hotel — 9 nights liveaboard",
+        price: "$6,980",
+        priceNum: 6980
+      }
+    ],
+    addons: [
+      {
+        value: "credit_1750",
+        he: "זיכוי כספי עבור רכישת טיסות עצמאית",
+        en: "Cash Credit for Self-Arranged Flights",
+        price: "$1,750",
+        priceNum: -1750
+      }
+    ]
+  },
   "default": {
     name: "🤿 ספארי Buddy-Divers",
     dates: "תאריכים יעודכנו / Dates TBD",
@@ -1743,8 +1767,8 @@ function init() {
       addonsContainer.appendChild(label);
     });
 
-    // Bidirectional logic: credit_1400 ↔ flight options
-    const creditCheckbox = addonsContainer.querySelector('input[value="credit_1400"]');
+    // Bidirectional logic: credit_* ↔ flight options (works for any credit_ addon)
+    const creditCheckbox = addonsContainer.querySelector('input[name="pricing_addon"][value^="credit_"]');
     const buddyFlightLabel = document.getElementById('opt-flight-buddy');
     const selfFlightRadio = document.querySelector('input[name="flights"][value="SelfArranged"]');
     const selfFlightLabel = document.getElementById('opt-flight-self');
