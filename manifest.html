@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-MANIFEST 2026-03-26 | Phone-first login, trip dropdown after OTP -->
+<!-- BD-MANIFEST 2026-03-27a | Multi-trip checkbox selector; stay logged in; debug log removed -->
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -387,7 +387,30 @@
       .page-wrapper { padding: 0; }
       .trip-banner { background: #007289 !important; -webkit-print-color-adjust: exact; }
       .manifest-table { font-size: 11px; }
+      #manifestContainer > div:first-child { display: none !important; }
     }
+
+    /* TRIP CHECKBOX LIST */
+    .trip-checkbox-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+      background: white;
+    }
+    .trip-checkbox-item:hover { background: rgba(0,114,137,0.04); border-color: var(--teal); }
+    .trip-checkbox-item input[type="checkbox"] {
+      width: 18px; height: 18px; cursor: pointer; accent-color: var(--teal);
+      flex-shrink: 0;
+    }
+    .trip-checkbox-label { font-size: 15px; font-weight: 600; color: var(--text); }
+
+    /* PER-TRIP MANIFEST BLOCK */
+    .trip-manifest-block { margin-bottom: 36px; }
 
     @media(max-width: 600px) {
       .panel { padding: 20px 16px; }
@@ -439,18 +462,12 @@
     <div class="status-msg" id="loginStatus"></div>
   </div>
 
-  <!-- TRIP SELECTION — shown after OTP verified (only if leader has multiple trips) -->
+  <!-- TRIP SELECTION — shown after OTP verified (multi-select checkboxes) -->
   <div class="panel" id="tripSelectSection" style="display:none;">
-    <div class="panel-title">Select Trip</div>
-    <div class="form-row">
-      <div class="form-group" style="flex:1;">
-        <select id="tripId" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;background:#fff;color:var(--text);">
-          <option value="">— Select your trip —</option>
-        </select>
-        <span class="field-error" id="tripIdError">Please select a trip</span>
-      </div>
-    </div>
-    <button class="btn-primary" id="btnLoadTrip" onclick="loadSelectedTrip()">View Manifest</button>
+    <div class="panel-title">Select Trip(s)</div>
+    <div id="tripCheckboxList" style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;"></div>
+    <span class="field-error" id="tripIdError" style="display:none;margin-bottom:8px;">Please select at least one trip</span>
+    <button class="btn-primary" id="btnLoadTrip" onclick="loadSelectedTrips()">View Manifest</button>
     <div class="status-msg" id="tripSelectStatus"></div>
   </div>
 
@@ -478,47 +495,12 @@
     <div class="status-msg" id="otpStatus"></div>
   </div>
 
-  <!-- TRIP BANNER (shown after auth) -->
-  <div class="trip-banner" id="tripBanner">
-    <div class="leader-greeting" id="leaderGreeting"></div>
-    <div class="trip-banner-name" id="bannerTripName"></div>
-    <div class="trip-banner-meta">
-      <span>Dates: <span id="bannerDates"></span></span>
-      <span>Destination: <span id="bannerDestination"></span></span>
-      <span>Vessel: <span id="bannerVessel"></span></span>
-      <span>Capacity: <span id="bannerCapacity"></span></span>
+  <!-- MANIFEST CONTAINER — one block per selected trip -->
+  <div id="manifestContainer" style="display:none;">
+    <div style="display:flex;justify-content:flex-end;margin-bottom:12px;">
+      <button class="btn-secondary" onclick="changeSelection()">&#8592; Change Trip Selection</button>
     </div>
-  </div>
-
-  <!-- MANIFEST TABLE -->
-  <div id="manifestSection" style="display:none;">
-    <div class="manifest-actions">
-      <div class="divers-count">
-        Divers: <span id="diverCountBadge">0</span>
-      </div>
-      <button class="btn-secondary" onclick="window.print()">Print</button>
-    </div>
-    <div class="manifest-wrap">
-      <table class="manifest-table">
-        <thead>
-          <tr>
-            <th style="text-align:center;">#</th>
-            <th>Full Name</th>
-            <th>Date of Birth</th>
-            <th>Phone</th>
-            <th>Cert Level</th>
-            <th>No. of Dives</th>
-            <th>Last Dive</th>
-            <th>Nitrox</th>
-            <th>Cabin Type</th>
-            <th>Cabin No.</th>
-            <th>Dietary</th>
-            <th>Notes</th>
-          </tr>
-        </thead>
-        <tbody id="manifestBody"></tbody>
-      </table>
-    </div>
+    <div id="manifestBlocks"></div>
   </div>
 
 </div><!-- /page-wrapper -->
@@ -549,7 +531,6 @@ async function atFetch(table, params) {
   const token = getToken();
   if (!token) { console.error('No token'); return null; }
   const url = `https://api.airtable.com/v0/${AIRTABLE_BASE}/${table}?${params}`;
-  console.log('atFetch URL:', url);
   const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
   if (!res.ok) { console.error('Airtable error', res.status); return null; }
   return res.json();
@@ -625,6 +606,7 @@ let _leaderEmail  = null;
 let _leaderName   = null;
 let _tripId       = null;
 let _leaderTrips  = []; // all trips found for this leader
+let _verified     = false; // stays true after OTP — no re-auth needed for selection change
 
 const normalize = p => p.replace(/\D/g,'').slice(-9);
 const ADMINS = {
@@ -750,96 +732,168 @@ async function verifyOtp() {
   sessionStorage.removeItem('bd-manifest-otp-phone');
   setLoading('btnVerifyOtp', false, 'Verify');
   document.getElementById('otpSection').style.display = 'none';
+  _verified = true;
 
-  if (_leaderTrips.length === 1) {
-    await loadTripAndShowManifest(_leaderTrips[0].fields['Trip Id']);
-    return;
-  }
+  // Populate checkboxes and show trip picker
+  showTripPicker();
+}
 
-  // Multiple trips — show picker
+// ============================================================
+// SHOW TRIP PICKER (after auth — also called by changeSelection)
+// ============================================================
+function showTripPicker() {
+  // Sort trips most-future first
   _leaderTrips.sort((a, b) =>
-    (a.fields['Trip Id'] || '').localeCompare(b.fields['Trip Id'] || ''));
-  const sel = document.getElementById('tripId');
-  sel.innerHTML = '<option value="">— Select your trip —</option>';
+    (b.fields['Trip Id'] || '').localeCompare(a.fields['Trip Id'] || ''));
+
+  const list = document.getElementById('tripCheckboxList');
+  list.innerHTML = '';
   _leaderTrips.forEach(function(rec) {
     const tid  = rec.fields['Trip Id'] || '';
-    const name = rec.fields['Trip Name']    || tid;
+    const name = rec.fields['Trip Name'] || tid;
     if (!tid) return;
-    const opt = document.createElement('option');
-    opt.value = tid;
-    opt.textContent = (name && name !== tid) ? name + ' (' + tid + ')' : tid;
-    sel.appendChild(opt);
+    const label = document.createElement('label');
+    label.className = 'trip-checkbox-item';
+    label.innerHTML =
+      '<input type="checkbox" name="trip_select" value="' + tid + '" />' +
+      '<span class="trip-checkbox-label">' +
+        (name && name !== tid ? name + ' <span style="color:var(--muted);font-weight:400;font-size:13px;">(' + tid + ')</span>' : tid) +
+      '</span>';
+    list.appendChild(label);
   });
+
+  // Auto-check if only one trip
+  if (_leaderTrips.length === 1) {
+    const cb = list.querySelector('input[type="checkbox"]');
+    if (cb) cb.checked = true;
+  }
+
+  document.getElementById('tripSelectStatus') && hideStatus('tripSelectStatus');
+  document.getElementById('tripIdError').style.display = 'none';
+  document.getElementById('manifestContainer').style.display = 'none';
   document.getElementById('tripSelectSection').style.display = 'block';
 }
 
 // ============================================================
-// STEP 3 — LOAD SELECTED TRIP
+// CHANGE SELECTION — back to picker without re-login
 // ============================================================
-async function loadSelectedTrip() {
-  const tripId = document.getElementById('tripId').value.trim();
-  if (!tripId) { document.getElementById('tripIdError').style.display = 'block'; return; }
-  document.getElementById('tripIdError').style.display = 'none';
-  document.getElementById('tripSelectSection').style.display = 'none';
-  await loadTripAndShowManifest(tripId);
+function changeSelection() {
+  document.getElementById('manifestContainer').style.display = 'none';
+  showTripPicker();
 }
 
-async function loadTripAndShowManifest(tripId) {
-  const data = await atFetch(TABLE_TRIPS, `filterByFormula=({Trip+Id}="${tripId}")&maxRecords=1`);
-  if (!data || !data.records || data.records.length === 0) {
-    showStatus('tripSelectStatus', 'error', 'Trip not found. Please contact Buddy-Divers.');
-    document.getElementById('tripSelectSection').style.display = 'block';
+// ============================================================
+// STEP 3 — LOAD SELECTED TRIPS (multi)
+// ============================================================
+async function loadSelectedTrips() {
+  const checked = Array.from(
+    document.querySelectorAll('input[name="trip_select"]:checked')
+  ).map(cb => cb.value);
+
+  if (checked.length === 0) {
+    document.getElementById('tripIdError').style.display = 'block';
     return;
   }
-  const rec     = data.records[0];
-  _tripRecordId = rec.id;
-  _tripData     = rec.fields;
-  _tripId       = tripId;
+  document.getElementById('tripIdError').style.display = 'none';
+  document.getElementById('tripSelectSection').style.display = 'none';
 
-  document.getElementById('leaderGreeting').textContent = `Hello ${_leaderName}`;
-  document.getElementById('bannerTripName').textContent  = _tripData['Trip Name'] || _tripId;
-  const fmtBannerDate = d => {
+  const container = document.getElementById('manifestBlocks');
+  container.innerHTML = '';
+  document.getElementById('manifestContainer').style.display = 'block';
+
+  for (const tripId of checked) {
+    await loadTripBlock(tripId, container);
+  }
+}
+
+async function loadTripBlock(tripId, container) {
+  // Fetch trip record
+  const data = await atFetch(TABLE_TRIPS, `filterByFormula=({Trip+Id}="${tripId}")&maxRecords=1`);
+  if (!data || !data.records || data.records.length === 0) {
+    const errDiv = document.createElement('div');
+    errDiv.className = 'status-msg error';
+    errDiv.style.display = 'block';
+    errDiv.textContent = 'Trip ' + tripId + ' not found. Please contact Buddy-Divers.';
+    container.appendChild(errDiv);
+    return;
+  }
+
+  const rec    = data.records[0];
+  const fields = rec.fields;
+
+  const fmtDate = d => {
     if (!d) return '';
     const dt = new Date(d);
     if (isNaN(dt)) return d;
-    return `${String(dt.getDate()).padStart(2,'0')}/${String(dt.getMonth()+1).padStart(2,'0')}/${dt.getFullYear()}`;
+    return String(dt.getDate()).padStart(2,'0') + '/' +
+           String(dt.getMonth()+1).padStart(2,'0') + '/' +
+           dt.getFullYear();
   };
-  const startRaw = _tripData['Start Date'] || _tripData['Departure Date'] || _tripData['Date'] || '';
-  const endRaw   = _tripData['Return Date'] || _tripData['End Date'] || '';
-  document.getElementById('bannerDates').textContent =
-    `${fmtBannerDate(startRaw)} – ${fmtBannerDate(endRaw)}`;
-  document.getElementById('bannerDestination').textContent = _tripData['Destination'] || '';
-  document.getElementById('bannerVessel').textContent    = _tripData['Vessel'] || '';
-  document.getElementById('bannerCapacity').textContent  = _tripData['Capacity'] ? `${_tripData['Capacity']} divers max` : '';
-  document.getElementById('tripBanner').classList.add('show');
 
-  await loadManifest(_tripId);
+  const startRaw = fields['Start Date'] || fields['Departure Date'] || fields['Date'] || '';
+  const endRaw   = fields['Return Date'] || fields['End Date'] || '';
+
+  // Build block wrapper
+  const block = document.createElement('div');
+  block.className = 'trip-manifest-block';
+
+  // Banner
+  block.innerHTML =
+    '<div class="trip-banner show">' +
+      '<div class="leader-greeting">Hello ' + _leaderName + '</div>' +
+      '<div class="trip-banner-name">' + (fields['Trip Name'] || tripId) + '</div>' +
+      '<div class="trip-banner-meta">' +
+        '<span>Dates: <span>' + fmtDate(startRaw) + ' – ' + fmtDate(endRaw) + '</span></span>' +
+        '<span>Destination: <span>' + (fields['Destination'] || '') + '</span></span>' +
+        '<span>Vessel: <span>' + (fields['Vessel'] || '') + '</span></span>' +
+        (fields['Capacity'] ? '<span>Capacity: <span>' + fields['Capacity'] + ' divers max</span></span>' : '') +
+      '</div>' +
+    '</div>' +
+    '<div class="manifest-actions">' +
+      '<div class="divers-count">Divers: <span class="diver-count-badge">…</span></div>' +
+      '<button class="btn-secondary" onclick="window.print()">Print</button>' +
+    '</div>' +
+    '<div class="manifest-wrap">' +
+      '<table class="manifest-table">' +
+        '<thead><tr>' +
+          '<th style="text-align:center;">#</th>' +
+          '<th>Full Name</th><th>Date of Birth</th><th>Phone</th>' +
+          '<th>Cert Level</th><th>No. of Dives</th><th>Last Dive</th>' +
+          '<th>Nitrox</th><th>Cabin Type</th><th>Cabin No.</th>' +
+          '<th>Dietary</th><th>Notes</th>' +
+        '</tr></thead>' +
+        '<tbody class="manifest-body">' +
+          '<tr><td colspan="12" style="text-align:center;padding:24px;color:var(--muted);">Loading…</td></tr>' +
+        '</tbody>' +
+      '</table>' +
+    '</div>';
+
+  container.appendChild(block);
+
+  // Load divers into this block
+  await loadManifestIntoBlock(tripId, block);
 }
 
 // ============================================================
-// LOAD MANIFEST
+// LOAD MANIFEST INTO A BLOCK
 // ============================================================
-async function loadManifest(tripId) {
-  document.getElementById('manifestSection').style.display = 'block';
-  document.getElementById('manifestBody').innerHTML =
-    '<tr><td colspan="12" style="text-align:center;padding:24px;color:var(--muted);">Loading...</td></tr>';
+async function loadManifestIntoBlock(tripId, block) {
+  const tbody = block.querySelector('.manifest-body');
+  const badge = block.querySelector('.diver-count-badge');
 
-  // Fetch all bookings for this trip
   const bookingsData = await atFetch(TABLE_BOOKINGS,
     `filterByFormula=({Trip}="${tripId}")&fields[]=Diver+ID&fields[]=Cabin+Type&fields[]=Cabin+Number&fields[]=Notes`
   );
 
   if (!bookingsData || !bookingsData.records || bookingsData.records.length === 0) {
-    document.getElementById('manifestBody').innerHTML =
-      '<tr><td colspan="12" style="text-align:center;padding:24px;color:var(--muted);">No divers found for this trip.</td></tr>';
-    document.getElementById('diverCountBadge').textContent = '0';
+    tbody.innerHTML = '<tr><td colspan="12" style="text-align:center;padding:24px;color:var(--muted);">No divers found for this trip.</td></tr>';
+    if (badge) badge.textContent = '0';
     return;
   }
 
   const bookings = bookingsData.records;
-  document.getElementById('diverCountBadge').textContent = bookings.length;
+  if (badge) badge.textContent = bookings.length;
 
-  // For each booking, fetch diver details
   const rows = [];
   for (const booking of bookings) {
     const diverIds = booking.fields['Diver ID'];
@@ -858,68 +912,63 @@ async function loadManifest(tripId) {
     const diver = diverData.records[0].fields;
 
     rows.push({
-      firstName:     diver['First Name']            || '',
-      lastName:      diver['Last Name']             || '',
-      phone:         diver['Phone']                 || '',
-      dob:           diver['Date of Birth']         || '',
-      certLevel:     diver['Dive Certification Level'] || '',
-      numDives:      diver['Number of Dives']       || '',
-      lastDive:      diver['Last Dive Date']        || '',
-      nitrox:        diver['Nitrox Certified']      || '',
-      dietary:       diver['Dietary Requirements']  || '',
-      cabinType:     booking.fields['Cabin Type']   || '',
-      cabinNumber:   booking.fields['Cabin Number'] || '',
-      notes:         booking.fields['Notes']        || ''
+      firstName:   diver['First Name']               || '',
+      lastName:    diver['Last Name']                || '',
+      phone:       diver['Phone']                    || '',
+      dob:         diver['Date of Birth']            || '',
+      certLevel:   diver['Dive Certification Level'] || '',
+      numDives:    diver['Number of Dives']          || '',
+      lastDive:    diver['Last Dive Date']           || '',
+      nitrox:      diver['Nitrox Certified']         || '',
+      dietary:     diver['Dietary Requirements']     || '',
+      cabinType:   booking.fields['Cabin Type']      || '',
+      cabinNumber: booking.fields['Cabin Number']    || '',
+      notes:       booking.fields['Notes']           || ''
     });
   }
 
   if (rows.length === 0) {
-    document.getElementById('manifestBody').innerHTML =
-      '<tr><td colspan="12" style="text-align:center;padding:24px;color:var(--muted);">No diver data found.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="12" style="text-align:center;padding:24px;color:var(--muted);">No diver data found.</td></tr>';
     return;
   }
 
-  // Sort by last name
-  rows.sort((a,b) => a.lastName.localeCompare(b.lastName, 'he'));
+  rows.sort((a, b) => a.lastName.localeCompare(b.lastName, 'he'));
 
-  const tbody = document.getElementById('manifestBody');
+  const formatDate = d => {
+    if (!d) return '';
+    const dt = new Date(d);
+    if (isNaN(dt)) return d;
+    return String(dt.getDate()).padStart(2,'0') + '/' +
+           String(dt.getMonth()+1).padStart(2,'0') + '/' +
+           dt.getFullYear();
+  };
+
   tbody.innerHTML = '';
-
   rows.forEach((r, idx) => {
-    const formatDate = d => {
-      if (!d) return '';
-      const dt = new Date(d);
-      if (isNaN(dt)) return d;
-      return `${String(dt.getDate()).padStart(2,'0')}/${String(dt.getMonth()+1).padStart(2,'0')}/${dt.getFullYear()}`;
-    };
-
     const nitroxHtml = (r.nitrox && r.nitrox.toLowerCase() === 'yes')
-      ? '<span class="nitrox-yes">✓</span>' : '<span style="color:#c0392b;font-size:14px;font-weight:700;">✗</span>';
+      ? '<span class="nitrox-yes">✓</span>'
+      : '<span style="color:#c0392b;font-size:14px;font-weight:700;">✗</span>';
 
-    const certHtml = r.certLevel
-      ? `<span class="cert-badge">${r.certLevel}</span>` : '<span class="muted">—</span>';
-
-    const cabinHtml = r.cabinType
-      ? `<span class="cabin-badge">${r.cabinType}</span>` : '';
-
+    const certHtml    = r.certLevel ? '<span class="cert-badge">' + r.certLevel + '</span>' : '<span class="muted">—</span>';
+    const cabinHtml   = r.cabinType ? '<span class="cabin-badge">' + r.cabinType + '</span>' : '';
     const dietaryHtml = r.dietary
-      ? `<span class="dietary-flag">${r.dietary}</span>` : '<span style="color:var(--muted);font-size:12px;">—</span>';
+      ? '<span class="dietary-flag">' + r.dietary + '</span>'
+      : '<span style="color:var(--muted);font-size:12px;">—</span>';
 
     const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td style="text-align:center;"><div class="diver-num">${idx+1}</div></td>
-      <td style="font-weight:700;">${r.lastName} ${r.firstName}</td>
-      <td class="muted">${formatDate(r.dob)}</td>
-      <td class="muted">${r.phone}</td>
-      <td>${certHtml}</td>
-      <td style="text-align:center;font-weight:700;">${r.numDives || '—'}</td>
-      <td class="muted">${formatDate(r.lastDive)}</td>
-      <td style="text-align:center;">${nitroxHtml}</td>
-      <td>${cabinHtml}</td>
-      <td style="text-align:center;font-weight:700;">${r.cabinNumber || '—'}</td>
-      <td>${dietaryHtml}</td>
-      <td class="muted" style="font-size:12px;max-width:140px;">${r.notes}</td>
-    `;
+    tr.innerHTML =
+      '<td style="text-align:center;"><div class="diver-num">' + (idx+1) + '</div></td>' +
+      '<td style="font-weight:700;">' + r.lastName + ' ' + r.firstName + '</td>' +
+      '<td class="muted">' + formatDate(r.dob) + '</td>' +
+      '<td class="muted">' + r.phone + '</td>' +
+      '<td>' + certHtml + '</td>' +
+      '<td style="text-align:center;font-weight:700;">' + (r.numDives || '—') + '</td>' +
+      '<td class="muted">' + formatDate(r.lastDive) + '</td>' +
+      '<td style="text-align:center;">' + nitroxHtml + '</td>' +
+      '<td>' + cabinHtml + '</td>' +
+      '<td style="text-align:center;font-weight:700;">' + (r.cabinNumber || '—') + '</td>' +
+      '<td>' + dietaryHtml + '</td>' +
+      '<td class="muted" style="font-size:12px;max-width:140px;">' + r.notes + '</td>';
     tbody.appendChild(tr);
   });
 }
@@ -928,8 +977,11 @@ async function loadManifest(tripId) {
 // BACK TO LOGIN
 // ============================================================
 function backToLogin() {
-  document.getElementById('otpSection').style.display   = 'none';
-  document.getElementById('loginSection').style.display = 'block';
+  _verified = false;
+  document.getElementById('otpSection').style.display        = 'none';
+  document.getElementById('tripSelectSection').style.display = 'none';
+  document.getElementById('manifestContainer').style.display = 'none';
+  document.getElementById('loginSection').style.display      = 'block';
   clearOtp();
   hideStatus('otpStatus');
 }
