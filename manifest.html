@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-MANIFEST 2026-03-27b | btn-secondary white bold text for visibility -->
+<!-- BD-MANIFEST 2026-03-27c | View Manifest(s) button moved to top of trip list -->
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -465,9 +465,9 @@
   <!-- TRIP SELECTION — shown after OTP verified (multi-select checkboxes) -->
   <div class="panel" id="tripSelectSection" style="display:none;">
     <div class="panel-title">Select Trip(s)</div>
-    <div id="tripCheckboxList" style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;"></div>
+    <button class="btn-primary" id="btnLoadTrip" onclick="loadSelectedTrips()" style="margin-bottom:16px;">View Manifest(s)</button>
     <span class="field-error" id="tripIdError" style="display:none;margin-bottom:8px;">Please select at least one trip</span>
-    <button class="btn-primary" id="btnLoadTrip" onclick="loadSelectedTrips()">View Manifest</button>
+    <div id="tripCheckboxList" style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;"></div>
     <div class="status-msg" id="tripSelectStatus"></div>
   </div>
 
