@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-REG 2026-03-27a | Added Raja Ampat 270118; generalized credit_ addon bidirectional logic -->
+<!-- BD-REG 2026-03-27b | 270118 pricing title dynamic, credit as supplement in pricing card, Indonesia label updated -->
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8" />
@@ -593,7 +593,7 @@
 
     <!-- SECTION 5: Safari Pricing (DYNAMIC) -->
     <div class="card">
-      <div class="section-title"><span class="icon">💳</span> עלות הספארי ללא טיסות <span style="font-weight:400;color:var(--muted);font-size:12px;margin-right:6px;">Safari Pricing (excl. flights)</span><span class="req">*</span></div>
+      <div class="section-title" id="pricingSectionTitle"><span class="icon">💳</span> עלות הספארי ללא טיסות <span style="font-weight:400;color:var(--muted);font-size:12px;margin-right:6px;">Safari Pricing (excl. flights)</span><span class="req">*</span></div>
 
       <div class="options-group" id="pricingOptions">
         <!-- Dynamically populated from trip config -->
@@ -1618,6 +1618,10 @@ const TRIPS = {
     dates: "16/01/2027 – 28/01/2027",
     note: "🚢 הפלגה בפועל: 18–27 בינואר | ספינה: DUNE Aurora | מלווה: אמיר פיירמן",
     currency: "USD",
+    pricingTitle: {
+      he: "עלות הספארי כולל טיסות",
+      en: "Safari Pricing (incl. flights)"
+    },
     pricing: [
       {
         value: "full_package_6980",
@@ -1625,15 +1629,14 @@ const TRIPS = {
         en: "Full package incl. flights, transfers & transit hotel — 9 nights liveaboard",
         price: "$6,980",
         priceNum: 6980
-      }
-    ],
-    addons: [
+      },
       {
         value: "credit_1750",
         he: "זיכוי כספי עבור רכישת טיסות עצמאית",
         en: "Cash Credit for Self-Arranged Flights",
         price: "$1,750",
-        priceNum: -1750
+        priceNum: -1750,
+        supplement: true
       }
     ]
   },
@@ -1671,6 +1674,15 @@ function init() {
     noteEl.style.display = 'block';
   } else {
     noteEl.style.display = 'none';
+  }
+
+  // Update pricing section title if trip has custom pricingTitle
+  const pricingSectionTitle = document.getElementById('pricingSectionTitle');
+  if (pricingSectionTitle && tripConfig.pricingTitle) {
+    pricingSectionTitle.innerHTML =
+      '<span class="icon">💳</span> ' + tripConfig.pricingTitle.he +
+      ' <span style="font-weight:400;color:var(--muted);font-size:12px;margin-right:6px;">' + tripConfig.pricingTitle.en + '</span>' +
+      '<span class="req">*</span>';
   }
 
   // Build pricing options
@@ -1714,7 +1726,44 @@ function init() {
     }
     container.appendChild(label);
   });
-  
+
+  // Bidirectional logic: supplement credit_* checkbox ↔ flight options
+  const suppCreditCheckbox = container.querySelector('input[name="pricing_supplement"][value^="credit_"]');
+  if (suppCreditCheckbox) {
+    const buddyFlightLabel = document.getElementById('opt-flight-buddy');
+    const selfFlightRadio = document.querySelector('input[name="flights"][value="SelfArranged"]');
+    const selfFlightLabel = document.getElementById('opt-flight-self');
+    const buddyFlightRadio = document.querySelector('input[name="flights"][value="BuddyArranged"]');
+    if (buddyFlightLabel && selfFlightRadio && selfFlightLabel) {
+      suppCreditCheckbox.addEventListener('change', function() {
+        if (suppCreditCheckbox.checked) {
+          buddyFlightLabel.style.display = 'none';
+          selfFlightRadio.checked = true;
+          document.querySelectorAll('#flightOptions .option-item').forEach(function(i) { i.classList.remove('selected'); });
+          selfFlightLabel.classList.add('selected');
+        } else {
+          buddyFlightLabel.style.display = '';
+        }
+      });
+      if (selfFlightRadio) {
+        selfFlightRadio.addEventListener('change', function() {
+          if (selfFlightRadio.checked) {
+            suppCreditCheckbox.checked = true;
+            suppCreditCheckbox.closest('.option-item').classList.add('selected');
+          }
+        });
+      }
+      if (buddyFlightRadio) {
+        buddyFlightRadio.addEventListener('change', function() {
+          if (buddyFlightRadio.checked) {
+            suppCreditCheckbox.checked = false;
+            suppCreditCheckbox.closest('.option-item').classList.remove('selected');
+          }
+        });
+      }
+    }
+  }
+
   // Render cabin (room) options if present
   const roomOptionsSection = document.getElementById('roomOptionsSection');
   const roomContainer = document.getElementById('roomOptions');
@@ -1767,7 +1816,7 @@ function init() {
       addonsContainer.appendChild(label);
     });
 
-    // Bidirectional logic: credit_* ↔ flight options (works for any credit_ addon)
+    // Bidirectional logic: credit_* ↔ flight options (works for credit_ in addons or supplement)
     const creditCheckbox = addonsContainer.querySelector('input[name="pricing_addon"][value^="credit_"]');
     const buddyFlightLabel = document.getElementById('opt-flight-buddy');
     const selfFlightRadio = document.querySelector('input[name="flights"][value="SelfArranged"]');
@@ -2319,7 +2368,7 @@ document.getElementById('regForm').addEventListener('submit', async function(e) 
       const suppOpt = tripPricingConf.pricing.find(o => o.supplement === true);
       if (suppOpt && suppOpt.priceNum) {
         supplementPriceNum = suppOpt.priceNum * 1;
-        pricingLabel = selectedPricingValue + ' + single_supplement_' + supplementPriceNum;
+        pricingLabel = selectedPricingValue + ' + ' + suppOpt.value;
       }
     }
   }
