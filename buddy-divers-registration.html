@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-REG 2026-03-27e | Correct error messages for invalid dates on all date fields -->
+<!-- BD-REG 2026-03-27f | Fix lastDive blur listener error message for invalid date -->
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8" />
@@ -2216,10 +2216,13 @@ function attachBlurValidation() {
       }
       const validFormat = /^\d{2}\/\d{2}\/\d{4}$/.test(val);
       const d = validFormat ? parseDate(val) : null;
-      const ok = validFormat && d && d <= new Date();
+      const validYear = d && d.getFullYear() >= 1920;
+      const ok = validFormat && d && validYear && d <= new Date();
       if (errEl) errEl.textContent = !validFormat
         ? 'פורמט לא תקין — נא להזין DD/MM/YYYY / Invalid format — please enter DD/MM/YYYY'
-        : 'תאריך לא יכול להיות בעתיד / Date cannot be in the future';
+        : (!d || !validYear)
+          ? 'תאריך לא תקין / Invalid date (DD/MM/YYYY)'
+          : 'תאריך לא יכול להיות בעתיד / Date cannot be in the future (DD/MM/YYYY)';
       if (fieldEl) fieldEl.classList.toggle('invalid', !ok);
     });
   }
