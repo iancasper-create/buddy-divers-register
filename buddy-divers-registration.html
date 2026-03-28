@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-REG 2026-03-27b | 270118 pricing title dynamic, credit as supplement in pricing card, Indonesia label updated -->
+<!-- BD-REG 2026-03-27c | ISO date conversion before Make POST; lastDive year >= 1920 validation -->
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8" />
@@ -2102,7 +2102,8 @@ function validateField(fieldId, name, type) {
         msg = 'פורמט לא תקין — נא להזין DD/MM/YYYY / Invalid format — please enter DD/MM/YYYY';
       } else {
         const d = parseDate(val);
-        ok = d && d <= new Date();
+        const validYear = d && d.getFullYear() >= 1920;
+        ok = validYear && d <= new Date();
         msg = 'תאריך לא יכול להיות בעתיד / Date cannot be in the future (DD/MM/YYYY)';
       }
     }
@@ -2420,6 +2421,18 @@ document.getElementById('regForm').addEventListener('submit', async function(e) 
     var ld = data['lastDive'] ? data['lastDive'].toString().trim() : '';
     if (!ld || !parseDate(ld)) delete data['lastDive'];
   })();
+
+  // Convert DD/MM/YYYY date fields to ISO YYYY-MM-DD before sending to Make
+  ['dob','passportIssue','passportExpiry','lastDive'].forEach(function(field) {
+    if (data[field]) {
+      var d = parseDate(data[field]);
+      if (d) {
+        data[field] = d.getFullYear() + '-' +
+          String(d.getMonth()+1).padStart(2,'0') + '-' +
+          String(d.getDate()).padStart(2,'0');
+      }
+    }
+  });
 
   // ⚠️ REPLACE THIS URL with your Make.com webhook URL
   const WEBHOOK_URL = 'https://hook.eu1.make.com/h3wexi08df15jvkk1uyfw0ix669qv1ms';
