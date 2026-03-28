@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-REG 2026-03-27c | ISO date conversion before Make POST; lastDive year >= 1920 validation -->
+<!-- BD-REG 2026-03-27e | Correct error messages for invalid dates on all date fields -->
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8" />
@@ -2059,23 +2059,36 @@ function validateField(fieldId, name, type) {
     if (!val) { ok = false; }
     else {
       const d = parseDate(val), now = new Date();
-      const min = new Date(); min.setFullYear(now.getFullYear() - 90);
-      ok = d && d >= min && d <= now;
-      msg = 'תאריך לידה לא תקין / Invalid date of birth (DD/MM/YYYY)';
+      if (!d) {
+        ok = false;
+        msg = 'תאריך לא תקין / Invalid date (DD/MM/YYYY)';
+      } else {
+        const min = new Date(); min.setFullYear(now.getFullYear() - 90);
+        ok = d >= min && d <= now;
+        msg = 'תאריך לידה לא תקין / Invalid date of birth (DD/MM/YYYY)';
+      }
     }
   } else if (type === 'passportIssue') {
     if (!val) { ok = false; }
     else {
       const d = parseDate(val), now = new Date();
-      const min = new Date(); min.setFullYear(now.getFullYear() - 10);
-      ok = d && d >= min && d <= now;
-      msg = 'תאריך הנפקה לא יכול להיות מעל 10 שנים / Issue date cannot be more than 10 years ago (DD/MM/YYYY)';
+      if (!d) {
+        ok = false;
+        msg = 'תאריך לא תקין / Invalid date (DD/MM/YYYY)';
+      } else {
+        const min = new Date(); min.setFullYear(now.getFullYear() - 10);
+        ok = d >= min && d <= now;
+        msg = 'תאריך הנפקה לא יכול להיות מעל 10 שנים / Issue date cannot be more than 10 years ago (DD/MM/YYYY)';
+      }
     }
   } else if (type === 'passportExpiry') {
     if (!val) { ok = false; }
     else {
       const d = parseDate(val);
-      if (!d || d < new Date()) {
+      if (!d) {
+        ok = false;
+        msg = 'תאריך לא תקין / Invalid date (DD/MM/YYYY)';
+      } else if (d < new Date()) {
         ok = false;
         msg = 'הדרכון פג תוקף / Passport has expired (DD/MM/YYYY)';
       } else {
@@ -2103,8 +2116,13 @@ function validateField(fieldId, name, type) {
       } else {
         const d = parseDate(val);
         const validYear = d && d.getFullYear() >= 1920;
-        ok = validYear && d <= new Date();
-        msg = 'תאריך לא יכול להיות בעתיד / Date cannot be in the future (DD/MM/YYYY)';
+        if (!d || !validYear) {
+          ok = false;
+          msg = 'תאריך לא תקין / Invalid date (DD/MM/YYYY)';
+        } else if (d > new Date()) {
+          ok = false;
+          msg = 'תאריך לא יכול להיות בעתיד / Date cannot be in the future (DD/MM/YYYY)';
+        }
       }
     }
   } else if (type === 'select') {
