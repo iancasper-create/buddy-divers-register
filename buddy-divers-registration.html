@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-REG 2026-03-27f | Fix lastDive blur listener error message for invalid date -->
+<!-- BD-REG 2026-03-27g | Extra phone hidden field check at submit; prevents country-code-only phone -->
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8" />
@@ -2351,6 +2351,18 @@ document.getElementById('regForm').addEventListener('submit', async function(e) 
   }
 
   if (!validateForm()) {
+    return;
+  }
+
+  // Extra safety check: ensure hidden phone fields have real numbers (not just country code)
+  const phoneHiddenVal = document.getElementById('phoneHidden').value || '';
+  const phoneDigits = phoneHiddenVal.replace(/\D/g, '');
+  if (phoneDigits.length < 7) {
+    const phoneField = document.getElementById('f-phone');
+    if (phoneField) phoneField.classList.add('invalid');
+    const phoneErr = phoneField && phoneField.querySelector('.field-error');
+    if (phoneErr) phoneErr.textContent = 'נדרש מספר טלפון תקין / Valid phone number required';
+    phoneField && phoneField.scrollIntoView({behavior:'smooth', block:'center'});
     return;
   }
 
