@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-REG 2026-03-27h | Phone minimum raised to 9 digits -->
+<!-- BD-REG 2026-03-29a | Phone minimum raised to 9 digits -->
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8" />
@@ -1637,6 +1637,14 @@ const TRIPS = {
         price: "$1,750",
         priceNum: -1750,
         supplement: true
+      },
+      {
+        value: "superior_upgrade_330",
+        he: "שדרוג לחדר סופריור מפלס ראשי",
+        en: "Upgrade to Main Deck Superior Cabin",
+        price: "$330",
+        priceNum: 330,
+        supplement: true
       }
     ]
   },
@@ -2378,6 +2386,8 @@ document.getElementById('regForm').addEventListener('submit', async function(e) 
   const sanitize = v => typeof v === 'string' ? v.replace(/"/g, '״').replace(/\\/g, '') : v;
   const freeTextFields = ['allergies','medicalNotes','dietary','notes','emergencyName','emergencyRelationship','insuranceCompany','insuranceContact','policyNumber','referral'];
   fd.forEach((v,k) => { data[k] = freeTextFields.includes(k) ? sanitize(v) : v; });
+  // Collect all checked supplement checkboxes as array (supports multiple supplements per trip)
+  data['pricing_supplement'] = fd.getAll('pricing_supplement');
 
   // If no-TZ checkbox is checked, override idNumber with the substitute passport value
   const noTzCheckedSubmit = document.getElementById('noTzIdCheckbox') && document.getElementById('noTzIdCheckbox').checked;
@@ -2387,10 +2397,11 @@ document.getElementById('regForm').addEventListener('submit', async function(e) 
     data['passportNumber'] = subVal;
   }
   
-  // Calculate totalPrice from selected pricing + supplement if checked
+  // Calculate totalPrice from selected pricing + supplements if checked
   const submitParams = new URLSearchParams(window.location.search);
   const selectedPricingValue = data['pricing'] || '';
-  const supplementChecked = !!data['pricing_supplement'];
+  const checkedSupplements = Array.isArray(data['pricing_supplement']) ? data['pricing_supplement'] : (data['pricing_supplement'] ? [data['pricing_supplement']] : []);
+  const supplementChecked = checkedSupplements.length > 0;
   const tripPricingConf = TRIPS[submitParams.get('trip') || 'default'];
   let mainPriceNum = 0;
   let supplementPriceNum = 0;
@@ -2398,12 +2409,12 @@ document.getElementById('regForm').addEventListener('submit', async function(e) 
   if (tripPricingConf && tripPricingConf.pricing) {
     const mainOpt = tripPricingConf.pricing.find(o => o.value === selectedPricingValue);
     if (mainOpt && mainOpt.priceNum) mainPriceNum = mainOpt.priceNum * 1;
-    if (supplementChecked) {
-      const suppOpt = tripPricingConf.pricing.find(o => o.supplement === true);
-      if (suppOpt && suppOpt.priceNum) {
-        supplementPriceNum = suppOpt.priceNum * 1;
-        pricingLabel = selectedPricingValue + ' + ' + suppOpt.value;
-      }
+    if (checkedSupplements.length > 0) {
+      const suppOpts = tripPricingConf.pricing.filter(o => o.supplement === true && checkedSupplements.includes(o.value));
+      suppOpts.forEach(function(suppOpt) {
+        if (suppOpt.priceNum) supplementPriceNum += suppOpt.priceNum * 1;
+        pricingLabel += ' + ' + suppOpt.value;
+      });
     }
   }
 
