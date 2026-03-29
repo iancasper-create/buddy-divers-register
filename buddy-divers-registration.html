@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-REG 2026-03-27g | Extra phone hidden field check at submit; prevents country-code-only phone -->
+<!-- BD-REG 2026-03-27h | Phone minimum raised to 9 digits -->
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8" />
@@ -2129,7 +2129,7 @@ function validateField(fieldId, name, type) {
     ok = val.length > 0;
   } else if (name === 'phone' || name === 'emergencyPhone') {
     const digits = val.replace(/\D/g, '');
-    ok = digits.length >= 7;
+    ok = digits.length >= 9;
     msg = 'נדרש מספר טלפון תקין / Valid phone number required';
   } else {
     ok = val.length > 0;
@@ -2357,7 +2357,7 @@ document.getElementById('regForm').addEventListener('submit', async function(e) 
   // Extra safety check: ensure hidden phone fields have real numbers (not just country code)
   const phoneHiddenVal = document.getElementById('phoneHidden').value || '';
   const phoneDigits = phoneHiddenVal.replace(/\D/g, '');
-  if (phoneDigits.length < 7) {
+  if (phoneDigits.length < 9) {
     const phoneField = document.getElementById('f-phone');
     if (phoneField) phoneField.classList.add('invalid');
     const phoneErr = phoneField && phoneField.querySelector('.field-error');
