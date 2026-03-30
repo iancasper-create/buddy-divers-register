@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-REG 2026-03-29e | Phone minimum raised to 9 digits -->
+<!-- BD-REG 2026-03-29f | Phone minimum raised to 9 digits -->
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8" />
@@ -3279,6 +3279,27 @@ function toggleSecondPassport(checked) {
     if (dob && p2dob && !p2dob.value) p2dob.value = dob.value;
     // Attach date autoformat for passport2 inputs if not already attached
     attachDateAutoFormatIds(['p2DobInput','p2PassportIssueInput','p2PassportExpiryInput']);
+
+    // Attach blur validation for passport2 fields (only once)
+    var p2BlurFields = [
+      ['f-p2FirstName',      'passport2FirstName',      'text'],
+      ['f-p2LastName',       'passport2LastName',       'text'],
+      ['f-p2Dob',            'passport2Dob',            'dob'],
+      ['f-p2Nationality',    'passport2Nationality',    'select'],
+      ['f-p2PassportNumber', 'passport2PassportNumber', 'text'],
+      ['f-p2PassportIssue',  'passport2PassportIssue',  'passportIssue'],
+      ['f-p2PassportExpiry', 'passport2PassportExpiry', 'passportExpiry'],
+    ];
+    p2BlurFields.forEach(function(f) {
+      var fieldEl = document.getElementById(f[0]);
+      if (!fieldEl || fieldEl._p2BlurAttached) return;
+      fieldEl._p2BlurAttached = true;
+      var input = fieldEl.querySelector('[name="' + f[1] + '"]');
+      if (!input) return;
+      input.addEventListener('blur', function() { validateField(f[0], f[1], f[2]); });
+      input.addEventListener('input', function() { if (fieldEl.classList.contains('invalid')) validateField(f[0], f[1], f[2]); });
+      input.addEventListener('change', function() { validateField(f[0], f[1], f[2]); });
+    });
   } else {
     // Clear passport2 photo error when hiding
     document.getElementById('passport2PhotoError').style.display = 'none';
