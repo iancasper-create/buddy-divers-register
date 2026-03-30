@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-REG 2026-03-29b | Phone minimum raised to 9 digits -->
+<!-- BD-REG 2026-03-29c | Phone minimum raised to 9 digits -->
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8" />
@@ -589,6 +589,94 @@
         <input type="hidden" name="passportPhoto" id="passportPhotoUrl" />
         <span class="field-error" id="passportPhotoError" style="display:none;">יש להעלות תמונת דרכון / Passport photo is required</span>
       </div>
+
+      <!-- Dual citizenship checkbox -->
+      <div class="form-row" style="margin-top:16px;">
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:14px;font-weight:600;color:var(--navy);">
+          <input type="checkbox" id="dualPassportCheckbox" onchange="toggleSecondPassport(this.checked)"
+            style="width:18px;height:18px;cursor:pointer;accent-color:var(--teal);" />
+          <span>ברשותי דרכון נוסף (אזרחות כפולה) <span class="en">/ I hold a second passport (dual citizenship)</span></span>
+        </label>
+      </div>
+
+      <!-- Second passport section — hidden until checkbox ticked -->
+      <div id="secondPassportSection" style="display:none;margin-top:16px;border-top:2px dashed var(--teal);padding-top:16px;">
+        <div style="font-size:13px;font-weight:700;color:var(--teal);margin-bottom:12px;text-align:right;">
+          🛂 דרכון שני <span style="font-weight:400;color:var(--muted);">Second Passport</span>
+        </div>
+
+        <!-- P2 Row 1: First | Middle | Last -->
+        <div class="form-row three">
+          <div class="field" id="f-p2FirstName">
+            <label>שם פרטי (באנגלית) <span class="en">/ First Name</span><span class="req">*</span></label>
+            <input type="text" name="passport2FirstName" id="p2FirstNameInput" placeholder="John" />
+            <span class="field-error">שדה חובה / Required</span>
+          </div>
+          <div class="field">
+            <label>שם אמצעי (באנגלית) <span class="en">/ Middle Name</span></label>
+            <input type="text" name="passport2MiddleName" id="p2MiddleNameInput" placeholder="Middle name" />
+          </div>
+          <div class="field" id="f-p2LastName">
+            <label>שם משפחה (באנגלית) <span class="en">/ Last Name</span><span class="req">*</span></label>
+            <input type="text" name="passport2LastName" id="p2LastNameInput" placeholder="Smith" />
+            <span class="field-error">שדה חובה / Required</span>
+          </div>
+        </div>
+
+        <!-- P2 Row 2: DOB | Nationality | Passport Number -->
+        <div class="form-row three">
+          <div class="field" id="f-p2Dob">
+            <label>תאריך לידה <span class="en">Date of Birth</span><span class="req">*</span></label>
+            <input type="text" name="passport2Dob" id="p2DobInput" placeholder="DD/MM/YYYY" pattern="\d{2}/\d{2}/\d{4}" maxlength="10" />
+            <span class="field-error">שדה חובה / Required</span>
+          </div>
+          <div class="field" id="f-p2Nationality">
+            <label>אזרחות (באנגלית) <span class="en">/ Nationality</span><span class="req">*</span></label>
+            <input type="text" name="passport2Nationality" id="p2NationalityInput" placeholder="Nationality" />
+            <span class="field-error">שדה חובה / Required</span>
+          </div>
+          <div class="field" id="f-p2PassportNumber">
+            <label>מספר דרכון <span class="en">Passport Number</span><span class="req">*</span></label>
+            <input type="text" name="passport2PassportNumber" id="p2PassportNumberInput" placeholder="XX0000000" />
+            <span class="field-error">שדה חובה / Required</span>
+          </div>
+        </div>
+
+        <!-- P2 Row 3: Issue Date | Expiry Date -->
+        <div class="form-row three">
+          <div class="field" id="f-p2PassportIssue">
+            <label>תאריך הנפקת דרכון <span class="en">Passport Issue Date</span><span class="req">*</span></label>
+            <input type="text" name="passport2PassportIssue" id="p2PassportIssueInput" placeholder="DD/MM/YYYY" pattern="\d{2}/\d{2}/\d{4}" maxlength="10" />
+            <span class="field-error" id="p2PassportIssueError">שדה חובה / Required</span>
+          </div>
+          <div class="field" id="f-p2PassportExpiry">
+            <label>תוקף דרכון <span class="en">Passport Expiry</span><span class="req">*</span></label>
+            <input type="text" name="passport2PassportExpiry" id="p2PassportExpiryInput" placeholder="DD/MM/YYYY" pattern="\d{2}/\d{2}/\d{4}" maxlength="10" />
+            <span class="field-error" id="p2PassportExpiryError">שדה חובה / Required</span>
+          </div>
+          <div class="field"></div>
+        </div>
+
+        <!-- P2 Photo upload -->
+        <div class="field" style="margin-top:8px;">
+          <label>תמונת דרכון שני <span class="en">Second Passport Photo</span><span class="req">*</span></label>
+          <div class="upload-box" id="passport2UploadArea">
+            <input type="file" id="passport2FileInput" accept="image/jpeg, image/png" style="display:none"
+              onchange="handleUpload(this,'passport2UploadArea','passport2PhotoUrl','passport2UploadStatus','passports','passport2')" />
+            <input type="file" id="passport2CameraInput" accept="image/jpeg, image/png" capture="environment" style="display:none"
+              onchange="handleUpload(this,'passport2UploadArea','passport2PhotoUrl','passport2UploadStatus','passports','passport2')" />
+            <div class="upload-box-status" id="passport2UploadStatus"></div>
+            <div class="upload-box-buttons">
+              <button type="button" class="upload-btn upload-btn-gallery" onclick="document.getElementById('passport2FileInput').click()">🖼 העלה.י תמונה מהגלריה / Upload from gallery</button>
+              <button type="button" class="upload-btn upload-btn-camera" onclick="document.getElementById('passport2CameraInput').click()">📷 העלה.י תמונה באמצעות המצלמה / Upload using camera</button>
+            </div>
+            <div class="upload-hint">JPG, PNG · עד 5MB / up to 5MB</div>
+          </div>
+          <input type="hidden" name="passport2Photo" id="passport2PhotoUrl" />
+          <span class="field-error" id="passport2PhotoError" style="display:none;">יש להעלות תמונת דרכון שני / Second passport photo is required</span>
+        </div>
+      </div>
+
     </div>
 
     <!-- SECTION 5: Safari Pricing (DYNAMIC) -->
@@ -2289,6 +2377,29 @@ function validateForm() {
   document.getElementById('passportPhotoError').style.display = passportPhotoOk ? 'none' : 'block';
   if (!passportPhotoOk) { valid = false; missingFields.push('תמונת דרכון / Passport Photo'); }
 
+  // Second passport — only validate if checkbox is ticked
+  const dualPassportChecked = document.getElementById('dualPassportCheckbox') && document.getElementById('dualPassportCheckbox').checked;
+  if (dualPassportChecked) {
+    var p2Fields = [
+      ['f-p2FirstName',      'passport2FirstName',      'text',  'שם פרטי דרכון שני / Second Passport First Name'],
+      ['f-p2LastName',       'passport2LastName',       'text',  'שם משפחה דרכון שני / Second Passport Last Name'],
+      ['f-p2Dob',            'passport2Dob',            'dob',   'תאריך לידה דרכון שני / Second Passport DOB'],
+      ['f-p2Nationality',    'passport2Nationality',    'text',  'אזרחות דרכון שני / Second Passport Nationality'],
+      ['f-p2PassportNumber', 'passport2PassportNumber', 'text',  'מספר דרכון שני / Second Passport Number'],
+      ['f-p2PassportIssue',  'passport2PassportIssue',  'passportIssue', 'תאריך הנפקה דרכון שני / Second Passport Issue Date'],
+      ['f-p2PassportExpiry', 'passport2PassportExpiry', 'passportExpiry','תוקף דרכון שני / Second Passport Expiry'],
+    ];
+    p2Fields.forEach(function(f) {
+      if (!validateField(f[0], f[1], f[2])) {
+        valid = false;
+        missingFields.push(f[3]);
+      }
+    });
+    const p2PhotoOk = !!document.getElementById('passport2PhotoUrl').value;
+    document.getElementById('passport2PhotoError').style.display = p2PhotoOk ? 'none' : 'block';
+    if (!p2PhotoOk) { valid = false; missingFields.push('תמונת דרכון שני / Second Passport Photo'); }
+  }
+
   // Dive computer selection
   const diveComputer = document.querySelector('[name="diveComputer"]:checked');
   const diveComputerOk = !!diveComputer;
@@ -2467,7 +2578,12 @@ document.getElementById('regForm').addEventListener('submit', async function(e) 
   })();
 
   // Convert DD/MM/YYYY date fields to ISO YYYY-MM-DD before sending to Make
-  ['dob','passportIssue','passportExpiry','lastDive'].forEach(function(field) {
+  // Also include second passport date fields if dual citizenship checkbox ticked
+  var dateFieldsToConvert = ['dob','passportIssue','passportExpiry','lastDive'];
+  if (document.getElementById('dualPassportCheckbox') && document.getElementById('dualPassportCheckbox').checked) {
+    dateFieldsToConvert = dateFieldsToConvert.concat(['passport2Dob','passport2PassportIssue','passport2PassportExpiry']);
+  }
+  dateFieldsToConvert.forEach(function(field) {
     if (data[field]) {
       var d = parseDate(data[field]);
       if (d) {
@@ -3005,11 +3121,38 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 });
 
+// ============================================================
+// DUAL PASSPORT — toggle second passport section
+// ============================================================
+function toggleSecondPassport(checked) {
+  var section = document.getElementById('secondPassportSection');
+  section.style.display = checked ? 'block' : 'none';
+
+  if (checked) {
+    // Pre-fill name and DOB from first passport (editable)
+    var fn = document.getElementById('firstNameInput');
+    var ln = document.getElementById('lastNameInput');
+    var dob = document.getElementById('dobInput');
+    var p2fn = document.getElementById('p2FirstNameInput');
+    var p2ln = document.getElementById('p2LastNameInput');
+    var p2dob = document.getElementById('p2DobInput');
+    if (fn && p2fn && !p2fn.value) p2fn.value = fn.value;
+    if (ln && p2ln && !p2ln.value) p2ln.value = ln.value;
+    if (dob && p2dob && !p2dob.value) p2dob.value = dob.value;
+    // Attach date autoformat for passport2 inputs if not already attached
+    attachDateAutoFormatIds(['p2DobInput','p2PassportIssueInput','p2PassportExpiryInput']);
+  } else {
+    // Clear passport2 photo error when hiding
+    document.getElementById('passport2PhotoError').style.display = 'none';
+  }
+}
+
 // Auto-format date fields as user types (inserts / after DD and MM)
-function attachDateAutoFormat() {
-  ['dobInput','passportIssueInput','passportExpiryInput','lastDiveInput'].forEach(id => {
+function attachDateAutoFormatIds(ids) {
+  ids.forEach(id => {
     const el = document.getElementById(id);
-    if (!el) return;
+    if (!el || el._dateFormatAttached) return;
+    el._dateFormatAttached = true;
     el.addEventListener('input', function(e) {
       let v = this.value.replace(/[^\d]/g, '');
       if (v.length > 8) v = v.slice(0, 8);
@@ -3018,6 +3161,10 @@ function attachDateAutoFormat() {
       this.value = v;
     });
   });
+}
+
+function attachDateAutoFormat() {
+  attachDateAutoFormatIds(['dobInput','passportIssueInput','passportExpiryInput','lastDiveInput']);
 }
 
 document.addEventListener('DOMContentLoaded', () => { init(); attachBlurValidation(); attachDateAutoFormat(); });
