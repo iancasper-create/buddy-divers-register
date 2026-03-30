@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-REG 2026-03-29c | Phone minimum raised to 9 digits -->
+<!-- BD-REG 2026-03-29e | Phone minimum raised to 9 digits -->
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8" />
@@ -508,7 +508,7 @@
 
     <!-- SECTION 2: Passport -->
     <div class="card">
-      <div class="section-title"><span class="icon">🛂</span> דרכון <span style="font-weight:400;color:var(--muted);font-size:12px;margin-right:6px;">Passport Details</span></div>
+      <div class="section-title"><span class="icon">🛂</span> דרכון ראשי <span style="font-weight:400;color:var(--muted);font-size:12px;margin-right:6px;">Primary Passport Details</span></div>
 
       <!-- Row 1: First Name | Middle Name | Last Name -->
       <div class="form-row three">
@@ -536,9 +536,78 @@
           <span class="field-error">שדה חובה / Required</span>
         </div>
         <div class="field" id="f-nationality">
-          <label>אזרחות (באנגלית) <span class="en">/ Nationality</span><span class="req">*</span></label>
-          <input type="text" name="nationality" placeholder="לאום / Nationality" id="nationalityInput" />
-          <span class="field-error">אנגלית בלבד / English characters only</span>
+          <label>אזרחות <span class="en">/ Nationality</span><span class="req">*</span></label>
+          <select name="nationality" id="nationalityInput">
+            <option value="">בחר.י / Select nationality</option>
+            <optgroup label="── Israel &amp; UK ──">
+              <option value="Israeli">Israeli</option>
+              <option value="British">British</option>
+            </optgroup>
+            <optgroup label="── European Union ──">
+              <option value="Austrian">Austrian</option>
+              <option value="Belgian">Belgian</option>
+              <option value="Bulgarian">Bulgarian</option>
+              <option value="Croatian">Croatian</option>
+              <option value="Cypriot">Cypriot</option>
+              <option value="Czech">Czech</option>
+              <option value="Danish">Danish</option>
+              <option value="Estonian">Estonian</option>
+              <option value="Finnish">Finnish</option>
+              <option value="French">French</option>
+              <option value="German">German</option>
+              <option value="Greek">Greek</option>
+              <option value="Hungarian">Hungarian</option>
+              <option value="Irish">Irish</option>
+              <option value="Italian">Italian</option>
+              <option value="Latvian">Latvian</option>
+              <option value="Lithuanian">Lithuanian</option>
+              <option value="Luxembourgish">Luxembourgish</option>
+              <option value="Maltese">Maltese</option>
+              <option value="Dutch">Dutch</option>
+              <option value="Polish">Polish</option>
+              <option value="Portuguese">Portuguese</option>
+              <option value="Romanian">Romanian</option>
+              <option value="Slovak">Slovak</option>
+              <option value="Slovenian">Slovenian</option>
+              <option value="Spanish">Spanish</option>
+              <option value="Swedish">Swedish</option>
+            </optgroup>
+            <optgroup label="── Africa ──">
+              <option value="South African">South African</option>
+            </optgroup>
+            <optgroup label="── North &amp; Central America ──">
+              <option value="Belizean">Belizean</option>
+              <option value="Canadian">Canadian</option>
+              <option value="Costa Rican">Costa Rican</option>
+              <option value="Cuban">Cuban</option>
+              <option value="Dominican">Dominican</option>
+              <option value="Salvadoran">Salvadoran</option>
+              <option value="Guatemalan">Guatemalan</option>
+              <option value="Haitian">Haitian</option>
+              <option value="Honduran">Honduran</option>
+              <option value="Jamaican">Jamaican</option>
+              <option value="Mexican">Mexican</option>
+              <option value="Nicaraguan">Nicaraguan</option>
+              <option value="Panamanian">Panamanian</option>
+              <option value="American">American</option>
+            </optgroup>
+            <optgroup label="── South America ──">
+              <option value="Argentine">Argentine</option>
+              <option value="Bolivian">Bolivian</option>
+              <option value="Brazilian">Brazilian</option>
+              <option value="Chilean">Chilean</option>
+              <option value="Colombian">Colombian</option>
+              <option value="Ecuadorian">Ecuadorian</option>
+              <option value="Guyanese">Guyanese</option>
+              <option value="Paraguayan">Paraguayan</option>
+              <option value="Peruvian">Peruvian</option>
+              <option value="Surinamese">Surinamese</option>
+              <option value="Trinidadian">Trinidadian</option>
+              <option value="Uruguayan">Uruguayan</option>
+              <option value="Venezuelan">Venezuelan</option>
+            </optgroup>
+          </select>
+          <span class="field-error">שדה חובה / Required</span>
         </div>
         <div class="field" id="f-passportNumber">
           <label>מספר דרכון <span class="en">Passport Number</span><span class="req">*</span></label>
@@ -592,7 +661,7 @@
 
       <!-- Dual citizenship checkbox -->
       <div class="form-row" style="margin-top:16px;">
-        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:14px;font-weight:600;color:var(--navy);">
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:14px;font-weight:700;color:#c0392b;">
           <input type="checkbox" id="dualPassportCheckbox" onchange="toggleSecondPassport(this.checked)"
             style="width:18px;height:18px;cursor:pointer;accent-color:var(--teal);" />
           <span>ברשותי דרכון נוסף (אזרחות כפולה) <span class="en">/ I hold a second passport (dual citizenship)</span></span>
@@ -631,8 +700,77 @@
             <span class="field-error">שדה חובה / Required</span>
           </div>
           <div class="field" id="f-p2Nationality">
-            <label>אזרחות (באנגלית) <span class="en">/ Nationality</span><span class="req">*</span></label>
-            <input type="text" name="passport2Nationality" id="p2NationalityInput" placeholder="Nationality" />
+            <label>אזרחות <span class="en">/ Nationality</span><span class="req">*</span></label>
+            <select name="passport2Nationality" id="p2NationalityInput">
+            <option value="">בחר.י / Select nationality</option>
+            <optgroup label="── Israel &amp; UK ──">
+              <option value="Israeli">Israeli</option>
+              <option value="British">British</option>
+            </optgroup>
+            <optgroup label="── European Union ──">
+              <option value="Austrian">Austrian</option>
+              <option value="Belgian">Belgian</option>
+              <option value="Bulgarian">Bulgarian</option>
+              <option value="Croatian">Croatian</option>
+              <option value="Cypriot">Cypriot</option>
+              <option value="Czech">Czech</option>
+              <option value="Danish">Danish</option>
+              <option value="Estonian">Estonian</option>
+              <option value="Finnish">Finnish</option>
+              <option value="French">French</option>
+              <option value="German">German</option>
+              <option value="Greek">Greek</option>
+              <option value="Hungarian">Hungarian</option>
+              <option value="Irish">Irish</option>
+              <option value="Italian">Italian</option>
+              <option value="Latvian">Latvian</option>
+              <option value="Lithuanian">Lithuanian</option>
+              <option value="Luxembourgish">Luxembourgish</option>
+              <option value="Maltese">Maltese</option>
+              <option value="Dutch">Dutch</option>
+              <option value="Polish">Polish</option>
+              <option value="Portuguese">Portuguese</option>
+              <option value="Romanian">Romanian</option>
+              <option value="Slovak">Slovak</option>
+              <option value="Slovenian">Slovenian</option>
+              <option value="Spanish">Spanish</option>
+              <option value="Swedish">Swedish</option>
+            </optgroup>
+            <optgroup label="── Africa ──">
+              <option value="South African">South African</option>
+            </optgroup>
+            <optgroup label="── North &amp; Central America ──">
+              <option value="Belizean">Belizean</option>
+              <option value="Canadian">Canadian</option>
+              <option value="Costa Rican">Costa Rican</option>
+              <option value="Cuban">Cuban</option>
+              <option value="Dominican">Dominican</option>
+              <option value="Salvadoran">Salvadoran</option>
+              <option value="Guatemalan">Guatemalan</option>
+              <option value="Haitian">Haitian</option>
+              <option value="Honduran">Honduran</option>
+              <option value="Jamaican">Jamaican</option>
+              <option value="Mexican">Mexican</option>
+              <option value="Nicaraguan">Nicaraguan</option>
+              <option value="Panamanian">Panamanian</option>
+              <option value="American">American</option>
+            </optgroup>
+            <optgroup label="── South America ──">
+              <option value="Argentine">Argentine</option>
+              <option value="Bolivian">Bolivian</option>
+              <option value="Brazilian">Brazilian</option>
+              <option value="Chilean">Chilean</option>
+              <option value="Colombian">Colombian</option>
+              <option value="Ecuadorian">Ecuadorian</option>
+              <option value="Guyanese">Guyanese</option>
+              <option value="Paraguayan">Paraguayan</option>
+              <option value="Peruvian">Peruvian</option>
+              <option value="Surinamese">Surinamese</option>
+              <option value="Trinidadian">Trinidadian</option>
+              <option value="Uruguayan">Uruguayan</option>
+              <option value="Venezuelan">Venezuelan</option>
+            </optgroup>
+            </select>
             <span class="field-error">שדה חובה / Required</span>
           </div>
           <div class="field" id="f-p2PassportNumber">
@@ -2246,7 +2384,7 @@ function attachBlurValidation() {
     ['f-email',           'email',          'email'],
     ['f-phone',           'phone',          'text'],
     ['f-dob',             'dob',            'dob'],
-    ['f-nationality',     'nationality',    'englishOnly'],
+    ['f-nationality',     'nationality',    'select'],
     ['f-passportNumber',  'passportNumber', 'text'],
     ['f-passportIssue',   'passportIssue',  'passportIssue'],
     ['f-passportExpiry',  'passportExpiry', 'passportExpiry'],
@@ -2338,7 +2476,7 @@ function validateForm() {
     ['f-email',           'email',          'email',           'אימייל / Email'],
     ['f-phone',           'phone',          'text',            'טלפון / Phone'],
     ['f-dob',             'dob',            'dob',             'תאריך לידה / Date of Birth'],
-    ['f-nationality',     'nationality',    'englishOnly',     'לאום / Nationality'],
+    ['f-nationality',     'nationality',    'select',          'לאום / Nationality'],
     ['f-passportNumber',  'passportNumber', 'text',            'מספר דרכון / Passport Number'],
     ['f-passportIssue',   'passportIssue',  'passportIssue',   'תאריך הנפקת דרכון / Passport Issue Date'],
     ['f-passportExpiry',  'passportExpiry', 'passportExpiry',  'תאריך פקיעת דרכון / Passport Expiry Date'],
