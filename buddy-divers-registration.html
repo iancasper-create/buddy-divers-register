@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-REG 2026-04-04a | Phone minimum raised to 9 digits -->
+<!-- BD-REG 2026-04-04b | Phone minimum raised to 9 digits -->
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8" />
@@ -3192,6 +3192,44 @@ function prefillForm(d) {
     returningCb.checked = true;
     const optItem = returningCb.closest('.option-item');
     if (optItem) optItem.classList.add('selected');
+  }
+
+  // Passport 2 — populate if data exists from Airtable lookup
+  var p2num = d.passport2PassportNumber || d.passport2Number || '';
+  if (p2num) {
+    // Set values BEFORE opening section so toggleSecondPassport auto-fill doesn't override
+    var p2fn = document.getElementById('p2FirstNameInput');
+    var p2mn = document.getElementById('p2MiddleNameInput');
+    var p2ln = document.getElementById('p2LastNameInput');
+    var p2dob = document.getElementById('p2DobInput');
+    var p2nat = document.getElementById('p2NationalityInput');
+    var p2pnum = document.getElementById('p2PassportNumberInput');
+    var p2issue = document.getElementById('p2PassportIssueInput');
+    var p2expiry = document.getElementById('p2PassportExpiryInput');
+    if (p2fn) p2fn.value = d.passport2FirstName || '';
+    if (p2mn) p2mn.value = d.passport2MiddleName || '';
+    if (p2ln) p2ln.value = d.passport2LastName || '';
+    if (p2dob) p2dob.value = isoToDmy(d.passport2Dob || d.passport2DateOfBirth || '');
+    if (p2nat) {
+      var p2natVal = d.passport2Nationality || '';
+      var p2natOpt = Array.from(p2nat.options).find(function(o) { return o.value === p2natVal || o.text === p2natVal; });
+      if (p2natOpt) p2nat.value = p2natOpt.value;
+    }
+    if (p2pnum) p2pnum.value = d.passport2PassportNumber || d.passport2Number || '';
+    if (p2issue) p2issue.value = isoToDmy(d.passport2PassportIssue || d.passport2IssueDate || '');
+    if (p2expiry) p2expiry.value = isoToDmy(d.passport2PassportExpiry || d.passport2ExpiryDate || '');
+    // Tick checkbox and reveal section
+    var dualCb = document.getElementById('dualPassportCheckbox');
+    if (dualCb && !dualCb.checked) {
+      dualCb.checked = true;
+      toggleSecondPassport(true);
+    }
+    // Passport 2 photo
+    if (d.passport2Photo) {
+      document.getElementById('passport2PhotoUrl').value = d.passport2Photo;
+      var p2s = document.getElementById('passport2UploadStatus');
+      if (p2s) { p2s.innerHTML = '<span class="existing-file">\u2705 \u05ea\u05de\u05d5\u05e0\u05d4 \u05e7\u05d9\u05d9\u05de\u05ea \u05d1\u05de\u05e2\u05e8\u05db\u05ea / Photo on file <strong style="color:#c0392b;"> \u2014 \u05e2\u05d3\u05db\u05e0.\u05d9 \u05d0\u05ea \u05d4\u05ea\u05de\u05d5\u05e0\u05d4 \u05d1\u05de\u05d9\u05d3\u05ea \u05d4\u05e6\u05d5\u05e8\u05da / Update photo if needed</strong></span>'; }
+    }
   }
 }
 
