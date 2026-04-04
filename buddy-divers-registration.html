@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-REG 2026-04-04b | Phone minimum raised to 9 digits -->
+<!-- BD-REG 2026-04-04c | Phone minimum raised to 9 digits -->
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8" />
@@ -3228,7 +3228,18 @@ function prefillForm(d) {
     if (d.passport2Photo) {
       document.getElementById('passport2PhotoUrl').value = d.passport2Photo;
       var p2s = document.getElementById('passport2UploadStatus');
-      if (p2s) { p2s.innerHTML = '<span class="existing-file">\u2705 \u05ea\u05de\u05d5\u05e0\u05d4 \u05e7\u05d9\u05d9\u05de\u05ea \u05d1\u05de\u05e2\u05e8\u05db\u05ea / Photo on file <strong style="color:#c0392b;"> \u2014 \u05e2\u05d3\u05db\u05e0.\u05d9 \u05d0\u05ea \u05d4\u05ea\u05de\u05d5\u05e0\u05d4 \u05d1\u05de\u05d9\u05d3\u05ea \u05d4\u05e6\u05d5\u05e8\u05da / Update photo if needed</strong></span>'; }
+      if (p2s) { p2s.innerHTML = '<span class="existing-file">✅ תמונה קיימת במערכת / Photo on file <strong style="color:#c0392b;"> — עדכנ.י את התמונה במידת הצורך / Update photo if needed</strong></span>'; }
+      var p2a = document.getElementById('passport2UploadArea');
+      if (p2a) {
+        var p2btns = p2a.querySelector('.upload-box-buttons');
+        if (p2btns && !p2a.querySelector('.upload-box-inner')) {
+          var p2inner = document.createElement('div');
+          p2inner.className = 'upload-box-inner';
+          p2inner.innerHTML = '<div class="upload-photo-preview"><a href="' + d.passport2Photo + '" target="_blank"><img src="' + d.passport2Photo + '" /></a></div><div class="upload-box-controls"></div>';
+          p2inner.querySelector('.upload-box-controls').appendChild(p2btns.cloneNode(true));
+          p2btns.replaceWith(p2inner);
+        }
+      }
     }
   }
 }
