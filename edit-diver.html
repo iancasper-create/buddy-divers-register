@@ -296,11 +296,10 @@
       <div id="pricingTripButtons" style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;"></div>
       <!-- Pricing field — shown after trip selected -->
       <div id="pricingFieldWrap" style="display:none;">
-        <div style="background:#f4fafd;border:1.5px solid #c5dfe6;border-radius:10px;padding:16px 20px;margin-bottom:14px;">
-          <div style="font-size:12px;font-weight:700;color:#1a3a5c;text-align:right;margin-bottom:8px;text-transform:uppercase;letter-spacing:.03em;">מחיר נבחר / Selected Pricing</div>
-          <input type="text" id="f-bookingPricing" dir="ltr" placeholder="e.g. twin_2890 + single_supplement"
-            style="width:100%;border:1.5px solid #c5dfe6;border-radius:8px;padding:10px 12px;font-size:14px;color:#1a3a4a;font-family:'DM Sans',sans-serif;background:#fff;" />
-          <div style="font-size:11px;color:#d4692a;font-weight:600;margin-top:6px;text-align:right;">ערך זה מתעדכן בטבלת ההזמנות / This saves to the Bookings table</div>
+        <div id="pricingCardsWrap"></div>
+        <input type="hidden" id="f-bookingPricing" />
+        <div style="margin-top:4px;margin-bottom:14px;">
+          <div style="font-size:11px;color:#d4692a;font-weight:600;text-align:right;">ערך זה מתעדכן בטבלת ההזמנות / This saves to the Bookings table</div>
         </div>
         <button onclick="saveBookingPricing()" style="background:#2a7a5c;color:#fff;border:none;border-radius:8px;padding:10px 24px;font-size:14px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;">שמור מחיר / Save Pricing</button>
         <span id="pricingSaveMsg" style="font-size:13px;font-weight:600;margin-right:14px;vertical-align:middle;"></span>
@@ -1037,6 +1036,633 @@ function showMsg(msg, isError) {
   el.style.color=isError?'#d93f3f':'#5a7a8a';
 }
 
+
+// ── TRIPS PRICING DATA ────────────────────────────────────────────
+const TRIPS = {
+  "260328": {
+    name: "🤿 ספארי מדגסקר — Madagascar Safari",
+    dates: "28/03/2026 – 05/04/2026",
+    currency: "EUR",
+    pricing: [
+      {
+        value: "twin_2890",
+        he: "יחיד בחדר זוגי",
+        en: "Single occupancy in twin room",
+        price: "€2,890",
+        priceNum: 2890
+      },
+      {
+        value: "twin_2690",
+        he: "יחיד בחדר זוגי (שאינו צולל)",
+        en: "Non-diver sharing twin room",
+        price: "€2,690",
+        priceNum: 2690
+      },
+      {
+        value: "single_supplement",
+        he: "תוספת שימוש יחיד בחדר",
+        en: "Single room supplement (add-on)",
+        price: "€690 תוספת",
+        priceNum: 690,
+        supplement: true
+      }
+    ]
+  },
+  "260615": {
+    name: "🤿 למבה / הלמהרה / ראג'ה אמפאט, אינדונזיה",
+    dates: "15/06/2026 – 26/06/2026",
+    currency: "USD",
+    pricing: [
+      {
+        value: "cabin_3500",
+        he: "מחיר ליחיד בחדר זוגי",
+        en: "Per person (shared cabin)",
+        price: "$3,500",
+        priceNum: 3500
+      },
+      {
+        value: "superior_upgrade_360",
+        he: "תוספת חדר סופריור, סיפון ראשי (בכפוף לזמינות בעת ההרשמה)",
+        en: "Superior Cabin Main Deck (subject to availability at time of booking)",
+        price: "$360",
+        priceNum: 360,
+        supplement: true
+      }
+    ]
+  },
+  "260620": {
+    name: "🤿 ספארי מדגסקר — Madagascar Safari",
+    dates: "20/06/2026 – 30/06/2026",
+    note: "⚠️ בכפוף למינימום נרשמים",
+    currency: "EUR",
+    pricing: [
+      {
+        value: "twin_2890",
+        he: "יחיד בחדר זוגי",
+        en: "Single occupancy in twin room",
+        price: "€2,890",
+        priceNum: 2890
+      },
+      {
+        value: "twin_2690",
+        he: "יחיד בחדר זוגי (שאינו צולל)",
+        en: "Non-diver sharing twin room",
+        price: "€2,690",
+        priceNum: 2690
+      },
+      {
+        value: "single_supplement",
+        he: "תוספת שימוש יחיד בחדר",
+        en: "Single room supplement (add-on)",
+        price: "€690 תוספת",
+        priceNum: 690,
+        supplement: true
+      }
+    ]
+  },
+  "260730": {
+    name: "🤿 ספארי מדגסקר — Madagascar Safari",
+    dates: "30/07/2026 – 08/08/2026",
+    currency: "EUR",
+    pricing: [
+      {
+        value: "twin_2890",
+        he: "יחיד בחדר זוגי",
+        en: "Single occupancy in twin room",
+        price: "€2,890",
+        priceNum: 2890
+      },
+      {
+        value: "twin_2690",
+        he: "יחיד בחדר זוגי (שאינו צולל)",
+        en: "Non-diver sharing twin room",
+        price: "€2,690",
+        priceNum: 2690
+      },
+      {
+        value: "single_supplement",
+        he: "תוספת שימוש יחיד בחדר",
+        en: "Single room supplement (add-on)",
+        price: "€690 תוספת",
+        priceNum: 690,
+        supplement: true
+      }
+    ]
+  },
+  "260815": {
+    name: "🤿 ספארי מדגסקר — Madagascar Safari",
+    dates: "15/08/2026 – 24/08/2026",
+    currency: "EUR",
+    pricing: [
+      {
+        value: "twin_2890",
+        he: "יחיד בחדר זוגי",
+        en: "Single occupancy in twin room",
+        price: "€2,890",
+        priceNum: 2890
+      },
+      {
+        value: "twin_2690",
+        he: "יחיד בחדר זוגי (שאינו צולל)",
+        en: "Non-diver sharing twin room",
+        price: "€2,690",
+        priceNum: 2690
+      },
+      {
+        value: "single_supplement",
+        he: "תוספת שימוש יחיד בחדר",
+        en: "Single room supplement (add-on)",
+        price: "€690 תוספת",
+        priceNum: 690,
+        supplement: true
+      }
+    ]
+  },
+  "260915": {
+    name: "🤿 ספארי מדגסקר — Madagascar Safari",
+    dates: "15/09/2026 – 24/09/2026",
+    currency: "EUR",
+    pricing: [
+      {
+        value: "twin_2890",
+        he: "יחיד בחדר זוגי",
+        en: "Single occupancy in twin room",
+        price: "€2,890",
+        priceNum: 2890
+      },
+      {
+        value: "twin_2690",
+        he: "יחיד בחדר זוגי (שאינו צולל)",
+        en: "Non-diver sharing twin room",
+        price: "€2,690",
+        priceNum: 2690
+      },
+      {
+        value: "single_supplement",
+        he: "תוספת שימוש יחיד בחדר",
+        en: "Single room supplement (add-on)",
+        price: "€690 תוספת",
+        priceNum: 690,
+        supplement: true
+      }
+    ]
+  },
+  "260925": {
+    name: "🤿 ספארי מדגסקר — Madagascar Safari",
+    dates: "25/09/2026 – 04/10/2026",
+    currency: "EUR",
+    pricing: [
+      {
+        value: "twin_2890",
+        he: "יחיד בחדר זוגי",
+        en: "Single occupancy in twin room",
+        price: "€2,890",
+        priceNum: 2890
+      },
+      {
+        value: "twin_2690",
+        he: "יחיד בחדר זוגי (שאינו צולל)",
+        en: "Non-diver sharing twin room",
+        price: "€2,690",
+        priceNum: 2690
+      },
+      {
+        value: "single_supplement",
+        he: "תוספת שימוש יחיד בחדר",
+        en: "Single room supplement (add-on)",
+        price: "€690 תוספת",
+        priceNum: 690,
+        supplement: true
+      }
+    ]
+  },
+  "261009": {
+    name: "🤿 ספארי מדגסקר — Madagascar Safari",
+    dates: "09/10/2026 – 18/10/2026",
+    currency: "EUR",
+    pricing: [
+      {
+        value: "twin_2890",
+        he: "יחיד בחדר זוגי",
+        en: "Single occupancy in twin room",
+        price: "€2,890",
+        priceNum: 2890
+      },
+      {
+        value: "twin_2690",
+        he: "יחיד בחדר זוגי (שאינו צולל)",
+        en: "Non-diver sharing twin room",
+        price: "€2,690",
+        priceNum: 2690
+      },
+      {
+        value: "single_supplement",
+        he: "תוספת שימוש יחיד בחדר",
+        en: "Single room supplement (add-on)",
+        price: "€690 תוספת",
+        priceNum: 690,
+        supplement: true
+      }
+    ]
+  },
+  "270203": {
+    name: "🤿 ספארי מיאנמר — Myanmar Safari",
+    dates: "03/02/2027 – 10/02/2027",
+    currency: "USD",
+    pricing: [
+      {
+        value: "upper_standard_2350",
+        he: "יחיד בחדר זוגי — סטנדרטי מפלס עליון (שרותים ומקלחת משותפים)",
+        en: "Single in twin room — upper deck standard (shared bathroom)",
+        price: "$2,350",
+        priceNum: 2350
+      },
+      {
+        value: "main_deluxe_2470",
+        he: "יחיד בחדר זוגי — דלקס מפלס ראשי",
+        en: "Single in twin room — main deck deluxe",
+        price: "$2,470",
+        priceNum: 2470
+      },
+      {
+        value: "main_master_2550",
+        he: "יחיד בחדר זוגי — מאסטר מפלס ראשי (מיטה זוגית בלבד)",
+        en: "Single in twin room — main deck master (double bed only)",
+        price: "$2,550",
+        priceNum: 2550
+      }
+    ]
+  },
+
+  "261211": {
+    name: "🤿 ספארי מיאנמר — Myanmar Safari",
+    dates: "11/12/2026 – 18/12/2026",
+    currency: "USD",
+    pricing: [
+      {
+        value: "upper_standard_2350",
+        he: "יחיד בחדר זוגי — סטנדרטי מפלס עליון (שרותים ומקלחת משותפים)",
+        en: "Single in twin room — upper deck standard (shared bathroom)",
+        price: "$2,350",
+        priceNum: 2350
+      },
+      {
+        value: "main_deluxe_2470",
+        he: "יחיד בחדר זוגי — דלקס מפלס ראשי",
+        en: "Single in twin room — main deck deluxe",
+        price: "$2,470",
+        priceNum: 2470
+      },
+      {
+        value: "main_master_2550",
+        he: "יחיד בחדר זוגי — מאסטר מפלס ראשי (מיטה זוגית בלבד)",
+        en: "Single in twin room — main deck master (double bed only)",
+        price: "$2,550",
+        priceNum: 2550
+      }
+    ]
+  },
+
+  "260828": {
+    name: "🤿 ספארי פיג'י וטונגה — Fiji & Tonga Safari",
+    dates: "28/08/2026 – 12/09/2026",
+    note: "⛔ רשימת המתנה בלבד / Waiting list only",
+    currency: "USD",
+    pricing: [
+      {
+        value: "single_9790",
+        he: "מחיר לאדם",
+        en: "Price per person",
+        price: "$9,790",
+        priceNum: 9790
+      }
+    ]
+  },
+  "261022": {
+    name: "🤿 ספארי גלאפגוס — Galapagos Safari",
+    dates: "22/10/2026 – 29/10/2026",
+    note: "2 מקומות אחרונים / Last 2 spaces",
+    currency: "USD", 
+    pricing: [
+      {
+        value: "single_7300",
+        he: "מחיר לאדם",
+        en: "Price per person",
+        price: "$7,300",
+        priceNum: 7300
+      }
+    ]
+  },
+  "271014": {
+    name: "🤿 ספארי גלאפגוס — Galapagos Safari",
+    dates: "14/10/2027 – 21/10/2027",
+    note: "סוכות / Sukkot",
+    currency: "USD",
+    pricing: [
+      {
+        value: "single_7350",
+        he: "מחיר לאדם",
+        en: "Price per person",
+        price: "$7,350",
+        priceNum: 7350
+      }
+    ]
+  },
+  "261122": {
+    name: "🤿 ספארי תאילנד — Thailand Safari",
+    dates: "22/11/2026 – 29/11/2026",
+    currency: "USD",
+    pricing: [
+      {
+        value: "upper_standard_2360",
+        he: "יחיד בחדר זוגי — סטנדרטי מפלס עליון (שרותים ומקלחת משותפים)",
+        en: "Single in twin room — upper deck standard (shared bathroom)",
+        price: "$2,360",
+        priceNum: 2360
+      },
+      {
+        value: "main_deluxe_2427",
+        he: "יחיד בחדר זוגי — דלקס מפלס ראשי",
+        en: "Single in twin room — main deck deluxe",
+        price: "$2,427",
+        priceNum: 2427
+      },
+      {
+        value: "main_master_2528",
+        he: "יחיד בחדר זוגי — מאסטר מפלס ראשי (מיטה זוגית בלבד)",
+        en: "Single in twin room — main deck master (double bed only)",
+        price: "$2,528",
+        priceNum: 2528
+      }
+    ]
+  },
+  "261219": {
+    name: "🤿 פיליפינים קומבו — Philippines Combo",
+    dates: "19/12/2026 – 30/12/2026",
+    note: "🚢 ספארי ימי בלבד 19-26/12/2026 · 🏝️ החבילה המלאה ים יבשה: 19-30/12/2026",
+    currency: "USD",
+    pricing: [
+      {
+        value: "full_package_5990",
+        he: "החבילה המלאה, ים + יבשה, 11 לילות (כולל טיסות)",
+        en: "Full package, sea + land, 11 nights (flights included)",
+        price: "$5,990",
+        priceNum: 5990
+      },
+      {
+        value: "boat_only_4390",
+        he: "ספארי ימי בלבד, 7 לילות (כולל טיסות)",
+        en: "Boat only, 7 nights (flights included)",
+        price: "$4,390",
+        priceNum: 4390
+      }
+    ],
+    roomOptions: [
+      {
+        value: "lower_twin_0",
+        he: "מפלס תחתון, חדר טווין (מיטת קומתיים)",
+        en: "Lower deck, twin room (Bunk Bed)",
+        price: "$0",
+        priceNum: 0
+      },
+      {
+        value: "lower_triple_90",
+        he: "מפלס תחתון, חדר לשלושה בתפוסה זוגית בלבד",
+        en: "Lower deck, triple room for Double Occupancy Only",
+        price: "$90",
+        priceNum: 90
+      },
+      {
+        value: "main_front_140",
+        he: "מפלס ראשי, חדר פרמיום קידמי",
+        en: "Main deck, front premium cabin",
+        price: "$140",
+        priceNum: 140
+      },
+      {
+        value: "main_premium_205",
+        he: "מפלס ראשי, חדר פרמיום",
+        en: "Main deck, premium cabin",
+        price: "$205",
+        priceNum: 205
+      },
+      {
+        value: "upper_premium_275",
+        he: "מפלס עליון, חדר פרמיום",
+        en: "Upper deck, premium cabin",
+        price: "$275",
+        priceNum: 275
+      }
+    ],
+    addons: [
+      {
+        value: "garden_suite_185",
+        he: "שדרוג לחדר Garden Suite בריזורט",
+        en: "Resort Garden Suite upgrade",
+        price: "$185",
+        priceNum: 185,
+        fullPackageOnly: true
+      },
+      {
+        value: "credit_1400",
+        he: "זיכוי כספי עבור רכישת טיסות עצמאית",
+        en: "Cash Credit for Self Flight Purchase",
+        price: "$1,400",
+        priceNum: -1400
+      },
+      {
+        value: "nitrox_boat_180",
+        he: "נייטרוקס על הסירה",
+        en: "Nitrox Boat",
+        price: "$180",
+        priceNum: 180
+      },
+      {
+        value: "nitrox_boat_resort_240",
+        he: "נייטרוקס על הסירה ובריזורט",
+        en: "Nitrox Boat & Resort",
+        price: "$240",
+        priceNum: 240
+      }
+    ]
+  },
+  "270104": {
+    name: "🐋 מקסיקו קומבו — Mexico Combo 🦈",
+    dates: "04/01/2027 – 16/01/2027",
+    note: "🦭 La Paz (land - optional): 04/01–07/01 | Quino Del Mar: 07/01–16/01 🚢",
+    currency: "USD",
+    pricing: [
+      {
+        value: "quino_4295",
+        he: "קינו דל מאר ‎07/01/27‎–‎16/01/27",
+        en: "Quino Del Mar — 07/01/27–16/01/27",
+        price: "$4,295",
+        priceNum: 4295
+      },
+      {
+        value: "land_only_1190",
+        he: "לה פאז — יבשה בלבד (אופציונלי) ‎04/01/27‎–‎07/01/27",
+        en: "La Paz — land only (optional) 04/01/27–07/01/27",
+        price: "$1,190",
+        priceNum: 1190,
+        supplement: true
+      }
+    ]
+  },
+  "270106": {
+    name: "🤿 ספארי מיאנמר — Myanmar Safari",
+    dates: "06/01/2027 – 13/01/2027",
+    currency: "USD",
+    pricing: [
+      {
+        value: "upper_standard_2350",
+        he: "יחיד בחדר זוגי — סטנדרטי מפלס עליון (שרותים ומקלחת משותפים)",
+        en: "Single in twin room — upper deck standard (shared bathroom)",
+        price: "$2,350",
+        priceNum: 2350
+      },
+      {
+        value: "main_deluxe_2470",
+        he: "יחיד בחדר זוגי — דלקס מפלס ראשי",
+        en: "Single in twin room — main deck deluxe",
+        price: "$2,470",
+        priceNum: 2470
+      },
+      {
+        value: "main_master_2550",
+        he: "יחיד בחדר זוגי — מאסטר מפלס ראשי (מיטה זוגית בלבד)",
+        en: "Single in twin room — main deck master (double bed only)",
+        price: "$2,550",
+        priceNum: 2550
+      }
+    ]
+  },
+  "270118": {
+    name: "🤿 ראג'ה אמפאט — Raja Ampat",
+    dates: "16/01/2027 – 28/01/2027",
+    note: "🚢 הפלגה בפועל: 18–27 בינואר | ספינה: DUNE Aurora | מלווה: אמיר פיירמן",
+    currency: "USD",
+    pricingTitle: {
+      he: "עלות הספארי כולל טיסות",
+      en: "Safari Pricing (incl. flights)"
+    },
+    pricing: [
+      {
+        value: "full_package_6980",
+        he: "חבילה מלאה, כולל טיסות, העברות ולינת מעבר — 9 לילות ספינה",
+        en: "Full package incl. flights, transfers & transit hotel — 9 nights liveaboard",
+        price: "$6,980",
+        priceNum: 6980
+      },
+      {
+        value: "superior_upgrade_330",
+        he: "שדרוג לחדר סופריור מפלס ראשי",
+        en: "Upgrade to Main Deck Superior Cabin",
+        price: "$330",
+        priceNum: 330,
+        supplement: true
+      },
+      {
+        value: "credit_1750",
+        he: "זיכוי כספי עבור רכישת טיסות עצמאית",
+        en: "Cash Credit for Self-Arranged Flights",
+        price: "$1,750",
+        priceNum: -1750,
+        supplement: true
+      }
+    ]
+  },
+  "default": {
+    name: "🤿 ספארי Buddy-Divers",
+    dates: "תאריכים יעודכנו / Dates TBD",
+    pricing: [
+      {
+        value: "standard",
+        he: "מחיר סטנדרטי",
+        en: "Standard pricing",
+        price: "יעודכן / TBD"
+      }
+    ]
+  }
+};
+
+// ── RENDER PRICING CARDS ──────────────────────────────────────────
+function renderPricingCards(tripId, storedPricing) {
+  const trip = TRIPS[tripId] || TRIPS['default'];
+  if (!trip) return;
+
+  // Parse stored pricing into selected values
+  const selectedVals = (storedPricing || '').split('+').map(s => s.trim()).filter(Boolean);
+
+  // Build pricing cards container
+  let html = '<div style="margin-bottom:16px;">';
+
+  // Main pricing options (radio)
+  if (trip.pricing && trip.pricing.length) {
+    trip.pricing.forEach(opt => {
+      if (opt.supplement) return; // supplements handled below
+      const isSelected = selectedVals.includes(opt.value);
+      html += `<label class="option-item ${isSelected ? 'selected' : ''}" style="margin-bottom:10px;cursor:pointer;">
+        <input type="radio" name="editPricing" value="${opt.value}" ${isSelected ? 'checked' : ''} onchange="updatePricingLabel()" />
+        <div class="opt-label">
+          <span class="opt-he">${opt.he}</span>
+          <span class="opt-en">${opt.en}</span>
+          <span style="display:block;font-size:14px;font-weight:700;color:#3a8a9c;margin-top:4px;">${opt.price}</span>
+        </div>
+      </label>`;
+    });
+  }
+
+  // Supplements (checkboxes)
+  const supplements = trip.pricing ? trip.pricing.filter(o => o.supplement) : [];
+  if (supplements.length) {
+    supplements.forEach(opt => {
+      const isSelected = selectedVals.includes(opt.value);
+      html += `<label class="option-item ${isSelected ? 'selected' : ''}" style="cursor:pointer;">
+        <input type="checkbox" name="editPricingSupplement" value="${opt.value}" ${isSelected ? 'checked' : ''} onchange="updatePricingLabel()" />
+        <div class="opt-label">
+          <span class="opt-he">${opt.he}</span>
+          <span class="opt-en">${opt.en}</span>
+          <span style="display:block;font-size:14px;font-weight:700;color:#d4692a;margin-top:4px;">${opt.price}</span>
+        </div>
+      </label>`;
+    });
+  }
+
+  // Room options (radio)
+  if (trip.roomOptions && trip.roomOptions.length) {
+    html += '<div style="font-size:12px;font-weight:700;color:#1a3a5c;text-align:right;margin:16px 0 8px;text-transform:uppercase;">Room Options</div>';
+    trip.roomOptions.forEach(opt => {
+      const isSelected = selectedVals.includes(opt.value);
+      html += `<label class="option-item ${isSelected ? 'selected' : ''}" style="margin-bottom:8px;cursor:pointer;">
+        <input type="radio" name="editRoomOption" value="${opt.value}" ${isSelected ? 'checked' : ''} onchange="updatePricingLabel()" />
+        <div class="opt-label">
+          <span class="opt-he">${opt.he}</span>
+          <span class="opt-en">${opt.en}</span>
+          <span style="display:block;font-size:14px;font-weight:700;color:#3a8a9c;margin-top:4px;">${opt.price}</span>
+        </div>
+      </label>`;
+    });
+  }
+
+  html += '</div>';
+
+  document.getElementById('pricingCardsWrap').innerHTML = html;
+  document.getElementById('pricingFieldWrap').style.display = 'block';
+  document.getElementById('pricingSaveMsg').textContent = '';
+  updatePricingLabel();
+}
+
+function updatePricingLabel() {
+  const parts = [];
+  const main = document.querySelector('input[name="editPricing"]:checked');
+  if (main) parts.push(main.value);
+  document.querySelectorAll('input[name="editPricingSupplement"]:checked').forEach(cb => parts.push(cb.value));
+  const room = document.querySelector('input[name="editRoomOption"]:checked');
+  if (room) parts.push(room.value);
+  document.getElementById('f-bookingPricing').value = parts.join(' + ');
+}
+
 // ── SAFARI PRICING (Bookings lookup) ──────────────────────────────
 let currentBookings = []; // [{id, tripId, tripName, pricing}]
 let currentBookingRecordId = null;
@@ -1075,8 +1701,22 @@ async function loadDiverBookings(diverRecordId, diverIdNumber) {
       flights: getF(r.fields, 'Flights', 'Flight', 'Flight Preference', 'Flight Option'),
       diveCertPhoto: getF(r.fields, 'Dive Cert Photo URL', 'Dive Certification Photo URL', 'Cert Photo URL', 'Dive Cert Photo', 'Certification Photo URL'),
       nitroxCertPhoto: getF(r.fields, 'Nitrox Cert Photo URL', 'Nitrox Photo URL', 'Nitrox Certification Photo URL', 'Nitrox Cert Photo'),
-      passportPhoto2: getF(r.fields, 'Passport 2 Photo', 'Passport Photo 2 URL', 'Passport 2 Photo URL', 'Second Passport Photo URL')
+      passportPhoto2: getF(r.fields, 'Passport 2 Photo', 'Passport Photo 2 URL', 'Passport 2 Photo URL', 'Second Passport Photo URL'),
+      _allFields: r.fields  // Keep all fields for debugging
     })).sort((a,b) => String(b.tripId).localeCompare(String(a.tripId)));
+
+    // Log booking field names to debug panel
+    if (records.length > 0) {
+      const bFields = records[0].fields;
+      console.log('=== BOOKING FIELDS ===');
+      Object.keys(bFields).sort().forEach(k => console.log(`"${k}": ${JSON.stringify(bFields[k]).substring(0,80)}`));
+      const debugPanel = document.getElementById('debugPanel');
+      if (debugPanel) {
+        const bookingSection = '<div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.2);"><strong style="color:#fde68a">BOOKING FIELDS:</strong>' +
+          Object.keys(bFields).sort().map(k => `<div><strong style="color:#86efac">${k}</strong>: ${String(bFields[k]).substring(0,80)}</div>`).join('') + '</div>';
+        debugPanel.innerHTML += bookingSection;
+      }
+    }
 
     const btnsEl = document.getElementById('pricingTripButtons');
     btnsEl.innerHTML = '';
@@ -1090,13 +1730,12 @@ async function loadDiverBookings(diverRecordId, diverIdNumber) {
         document.querySelectorAll('[id^="pricingBtn_"]').forEach(el => el.classList.remove('selected'));
         btn.classList.add('selected');
         currentBookingRecordId = b.id;
-        document.getElementById('f-bookingPricing').value = b.pricing || '';
-        document.getElementById('pricingFieldWrap').style.display = 'block';
         document.getElementById('pricingSaveMsg').textContent = '';
         if (b.flights) setRadio('flights', b.flights);
         if (b.passportPhoto2) setCurFile('passport2-current', 'f-p2Photo', b.passportPhoto2);
         if (b.diveCertPhoto) setCurFile('cert-current', 'f-certPhoto', b.diveCertPhoto);
         if (b.nitroxCertPhoto) setCurFile('nitrox-current', 'f-nitroxPhoto', b.nitroxCertPhoto);
+        renderPricingCards(b.tripId, b.pricing);
       };
       btnsEl.appendChild(btn);
     });
