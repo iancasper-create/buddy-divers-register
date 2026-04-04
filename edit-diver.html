@@ -55,7 +55,8 @@
     /* CARDS */
     .card { background:#fff;border-radius:14px;padding:24px 28px;box-shadow:0 2px 12px rgba(0,0,0,0.07);margin-bottom:18px;display:none; }
     .card.visible { display:block; }
-    .card-title { display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-bottom:20px;padding-bottom:10px;border-bottom:2px solid #eef4f7;font-size:15px;font-weight:700;color:#1a3a5c; }
+    .card-title .en { font-weight:400;color:#888;font-size:13px;margin-right:6px; }
+    .card-title { display:flex;align-items:center;justify-content:flex-start;gap:8px;margin-bottom:20px;padding-bottom:10px;border-bottom:2px solid #eef4f7;font-size:15px;font-weight:700;color:#1a3a5c; }
     .card-title .icon { font-size:18px; }
     .card-title .en { font-weight:400;color:#888;font-size:13px; }
 
@@ -169,15 +170,15 @@
 
   <!-- 1: PERSONAL DETAILS -->
   <div class="card" id="sec-personal">
-    <div class="card-title"><span class="icon">👤</span> <span class="he">פרטים אישיים</span> <span class="en">/ Personal Details</span></div>
+    <div class="card-title">👤 <strong>פרטים אישיים</strong> <span class="en">Personal Details</span></div>
+    <!-- ID Number (top, full row) -->
+    <div class="fr c1">
+      <div class="field"><label><span class="he">מספר תעודת זהות</span> / ID Number</label><input type="text" id="f-idNumber" dir="ltr" placeholder="XXXXXXXXX" /></div>
+    </div>
     <!-- Email (right) | Phone (left) — DOM: Email first = right in RTL -->
     <div class="fr c2">
       <div class="field"><label><span class="he">אימייל</span> / Email</label><input type="email" id="f-email" dir="ltr" placeholder="email@example.com" /></div>
       <div class="field"><label><span class="he">טלפון נייד</span> / Mobile</label><input type="tel" id="f-phone" dir="ltr" placeholder="+972..." /></div>
-    </div>
-    <!-- ID Number (full) -->
-    <div class="fr c1">
-      <div class="field"><label><span class="he">מספר תעודת זהות</span> / ID Number</label><input type="text" id="f-idNumber" dir="ltr" placeholder="XXXXXXXXX" /></div>
     </div>
     <!-- Boat Name (right) | City (left) — DOM: Boat Name first = right -->
     <div class="fr c2">
@@ -191,8 +192,9 @@
   </div>
 
   <!-- 2: PRIMARY PASSPORT -->
+
   <div class="card" id="sec-passport">
-    <div class="card-title"><span class="icon">🛂</span> <span class="he">דרכון ראשי</span> <span class="en">/ Primary Passport Details</span></div>
+    <div class="card-title">🛂 <strong>דרכון ראשי</strong> <span class="en">Primary Passport Details</span></div>
     <!-- Row 1: First Name (right) | Middle Name (mid) | Last Name (left) — DOM: First, Middle, Last -->
     <div class="fr c3">
       <div class="field"><label><span class="he">שם פרטי (באנגלית)</span> / First Name</label><input type="text" id="f-firstName" dir="ltr" placeholder="John" /></div>
@@ -242,8 +244,9 @@
   </div>
 
   <!-- 3: SECOND PASSPORT -->
+
   <div class="card" id="sec-passport2">
-    <div class="card-title" style="color:#c0392b;"><span class="icon">🛂</span> <span class="he">דרכון שני</span> <span class="en">/ Second Passport (Dual Citizenship)</span></div>
+    <div class="card-title" style="color:#c0392b;">🛂 <strong>דרכון שני</strong> <span class="en" style="color:#c0392b;">Second Passport (Dual Citizenship)</span></div>
     <!-- Row 1: First Name (right) | Middle Name (mid) | Last Name (left) -->
     <div class="fr c3">
       <div class="field"><label><span class="he">שם פרטי (באנגלית)</span> / First Name</label><input type="text" id="f-p2FirstName" dir="ltr" placeholder="John" /></div>
@@ -275,8 +278,65 @@
   </div>
 
   <!-- 4: DIVING DETAILS -->
+
+  <div class="card" id="sec-pricing">
+    <div class="card-title">🎫 <strong>עלות הספארי ללא טיסות</strong> <span class="en">Safari Pricing (excl. flights)</span></div>
+    <div id="pricingLoadWrap">
+      <p style="font-size:13px;color:#5a7a8a;text-align:right;margin-bottom:12px;">טוען הזמנות... / Loading bookings for this diver...</p>
+    </div>
+    <div id="pricingBookingWrap" style="display:none;">
+      <div class="fr c1" style="margin-bottom:12px;">
+        <div class="field">
+          <label><span class="he">בחר הזמנה</span> / Select Booking</label>
+          <select id="pricingBookingSelect" onchange="loadBookingPricing()">
+            <option value="">— בחר טיול / Select trip —</option>
+          </select>
+        </div>
+      </div>
+      <div id="pricingFieldWrap" style="display:none;">
+        <div class="fr c1">
+          <div class="field">
+            <label><span class="he">מחיר נבחר</span> / Selected Pricing</label>
+            <input type="text" id="f-bookingPricing" dir="ltr" placeholder="e.g. twin_2890 + single_supplement" />
+            <div class="hint">ערך זה מתעדכן בטבלת ההזמנות / This saves to the Bookings table</div>
+          </div>
+        </div>
+        <button onclick="saveBookingPricing()" style="background:#2a7a5c;color:#fff;border:none;border-radius:8px;padding:9px 22px;font-size:14px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;margin-top:4px;">שמור מחיר / Save Pricing</button>
+        <span id="pricingSaveMsg" style="font-size:13px;font-weight:600;margin-right:12px;"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" id="sec-flights">
+    <div class="card-title">✈️ <strong>טיסות</strong> <span class="en">Flights</span></div>
+    <label class="option-item" id="fl-buddy">
+      <input type="radio" name="flights" value="BuddyArranged" onchange="updateRadioStyle('flights')" />
+      <div class="opt-label">
+        <span class="opt-he">הזמנת טיסות דרך באדי-דייברס</span>
+        <span class="opt-en">Flights arranged by Buddy-Divers</span>
+        <span class="opt-sub">עלות הטיסות תקבע בהתאם לזמינות ביום ההזמנה בפועל / Price based on availability at time of booking</span>
+      </div>
+    </label>
+    <label class="option-item" id="fl-self">
+      <input type="radio" name="flights" value="SelfArranged" onchange="updateRadioStyle('flights')" />
+      <div class="opt-label">
+        <span class="opt-he">ארכוש טיסות באופן עצמאי</span>
+        <span class="opt-en">I will arrange my own flights</span>
+      </div>
+    </label>
+    <label class="option-item" id="fl-undecided">
+      <input type="radio" name="flights" value="Undecided" onchange="updateRadioStyle('flights')" />
+      <div class="opt-label">
+        <span class="opt-he">עדיין לא החלטתי, אעדכן בהמשך</span>
+        <span class="opt-en">Undecided, I will let you know</span>
+      </div>
+    </label>
+  </div>
+
+  <!-- 9: PAYMENT METHOD -->
+
   <div class="card" id="sec-diving">
-    <div class="card-title"><span class="icon">🤿</span> <span class="he">פרטי צלילה</span> <span class="en">/ Diving Details</span></div>
+    <div class="card-title">🤿 <strong>פרטי צלילה</strong> <span class="en">Diving Details</span></div>
     <!-- Row 1: Cert Level (right) | Cert Agency (left) — DOM: Level, Agency -->
     <div class="fr c2">
       <div class="field"><label><span class="he">רמת הסמכה</span> / Certification Level</label>
@@ -349,8 +409,9 @@
   </div>
 
   <!-- 5: EQUIPMENT RENTAL -->
+
   <div class="card" id="sec-equipment">
-    <div class="card-title"><span class="icon">🪣</span> <span class="he">השכרת ציוד</span> <span class="en">/ Equipment Rental</span></div>
+    <div class="card-title">🪣 <strong>השכרת ציוד</strong> <span class="en">Equipment Rental</span></div>
     <!-- Dive Computer: radio buttons (3 options side by side) -->
     <div style="margin-bottom:20px;">
       <div style="font-size:12px;font-weight:700;color:#1a3a5c;text-align:right;margin-bottom:10px;"><span class="he">מחשב צלילה (חובה)</span> / Dive Computer</div>
@@ -401,8 +462,9 @@
   </div>
 
   <!-- 6: HEALTH & EMERGENCY -->
+
   <div class="card" id="sec-health">
-    <div class="card-title"><span class="icon">🏥</span> <span class="he">בריאות וחירום</span> <span class="en">/ Health &amp; Emergency</span></div>
+    <div class="card-title">🏥 <strong>בריאות וחירום</strong> <span class="en">Health &amp; Emergency</span></div>
     <div class="fr c1">
       <div class="field"><label><span class="he">בקשות תזונה</span> / Dietary Requirements</label><textarea id="f-dietary" placeholder="פרט.י בקשות תזונה אם ישנן / List any dietary requirements"></textarea></div>
     </div>
@@ -434,8 +496,9 @@
   </div>
 
   <!-- 7: DIVE INSURANCE -->
+
   <div class="card" id="sec-insurance">
-    <div class="card-title"><span class="icon">🛡️</span> <span class="he">ביטוח צלילה</span> <span class="en">/ Dive Insurance</span></div>
+    <div class="card-title">🛡️ <strong>ביטוח צלילה</strong> <span class="en">Dive Insurance</span></div>
     <!-- Insurance Company (right) | Policy Number (left) — DOM: Company, Policy -->
     <div class="fr c2">
       <div class="field"><label><span class="he">שם חברת הביטוח</span> / Insurance Company</label><input type="text" id="f-insuranceCompany" placeholder="Insurance company name / שם חברת הביטוח" /></div>
@@ -448,7 +511,7 @@
       <span class="ulabel"><span class="he">מסמך ביטוח צלילה</span> / Dive Insurance Document</span>
       <div class="cur-file" id="insurance-current"></div>
       <div class="upload-area" id="insuranceArea">
-        <input type="file" accept="image/*,.heic,.heif" onchange="handleUpload(this,'insuranceArea','f-insurancePhoto','insuranceStatus','diving','insurance','Dive Insurance Photo (from Diver)')" />
+        <input type="file" accept="image/*,.heic,.heif" onchange="handleUpload(this,'insuranceArea','f-insurancePhoto','insuranceStatus','diving','insurance','Dive Insurance URL')" />
         <div class="up-lbl">📎 לחץ להחלפת מסמך / Click to replace</div>
         <div class="up-hint">JPG, PNG, HEIC, WebP · עד 5MB / up to 5MB</div>
       </div>
@@ -458,35 +521,9 @@
   </div>
 
   <!-- 8: FLIGHTS -->
-  <div class="card" id="sec-flights">
-    <div class="card-title"><span class="icon">✈️</span> <span class="he">טיסות</span> <span class="en">/ Flights</span></div>
-    <label class="option-item" id="fl-buddy">
-      <input type="radio" name="flights" value="BuddyArranged" onchange="updateRadioStyle('flights')" />
-      <div class="opt-label">
-        <span class="opt-he">הזמנת טיסות דרך באדי-דייברס</span>
-        <span class="opt-en">Flights arranged by Buddy-Divers</span>
-        <span class="opt-sub">עלות הטיסות תקבע בהתאם לזמינות ביום ההזמנה בפועל / Price based on availability at time of booking</span>
-      </div>
-    </label>
-    <label class="option-item" id="fl-self">
-      <input type="radio" name="flights" value="SelfArranged" onchange="updateRadioStyle('flights')" />
-      <div class="opt-label">
-        <span class="opt-he">ארכוש טיסות באופן עצמאי</span>
-        <span class="opt-en">I will arrange my own flights</span>
-      </div>
-    </label>
-    <label class="option-item" id="fl-undecided">
-      <input type="radio" name="flights" value="Undecided" onchange="updateRadioStyle('flights')" />
-      <div class="opt-label">
-        <span class="opt-he">עדיין לא החלטתי, אעדכן בהמשך</span>
-        <span class="opt-en">Undecided, I will let you know</span>
-      </div>
-    </label>
-  </div>
 
-  <!-- 9: PAYMENT METHOD -->
   <div class="card" id="sec-payment">
-    <div class="card-title"><span class="icon">💰</span> <span class="he">אמצעי תשלום</span> <span class="en">/ Payment Method</span></div>
+    <div class="card-title">💰 <strong>אמצעי תשלום</strong> <span class="en">Payment Method</span></div>
     <label class="option-item" id="pm-bank">
       <input type="radio" name="paymentMethod" value="Bank Transfer" onchange="updateRadioStyle('paymentMethod')" />
       <div class="opt-label">
@@ -512,8 +549,9 @@
   </div>
 
   <!-- 10: ADDITIONAL DETAILS -->
+
   <div class="card" id="sec-additional">
-    <div class="card-title"><span class="icon">⭐</span> <span class="he">פרטים נוספים</span> <span class="en">/ Additional Details</span></div>
+    <div class="card-title">⭐ <strong>פרטים נוספים</strong> <span class="en">Additional Details</span></div>
     <label class="option-item" id="rc-check" style="margin-bottom:16px;">
       <input type="checkbox" id="f-returningCustomer" value="yes" onchange="this.closest('.option-item').classList.toggle('selected',this.checked)" />
       <div class="opt-label">
@@ -548,6 +586,7 @@
   </div>
 
 </div>
+
 
 <!-- SAVE BAR -->
 <div id="saveBar">
@@ -687,7 +726,7 @@ function loadDiverRecord(rec) {
   setV('f-passportNumber', f['Passport Number']);
   setSel('f-gender', f['Gender']);
   setV('f-passportIssue', iso2dmy(f['Passport Issue Date']));
-  setV('f-passportExpiry', iso2dmy(f['Passport Expiry']));
+  setV('f-passportExpiry', iso2dmy(f['Passport Expiry Date']));
   setCurFile('passport-current', 'f-passportPhoto', f['Passport Photo URL']);
 
   // Passport 2
@@ -698,9 +737,9 @@ function loadDiverRecord(rec) {
   setCurFile('passport2-current', 'f-p2Photo', f['Passport Photo 2 URL']);
 
   // Diving
-  setSel('f-certLevel', f['Certification Level']); setSel('f-certAgency', f['Certification Agency']);
+  setSel('f-certLevel', f['Dive Certification Level']); setSel('f-certAgency', f['Certification Agency']);
   setV('f-certNumber', f['Certification Number']); setV('f-numDives', f['Number of Dives']);
-  setSel('f-nitrox', f['Nitrox']); setV('f-lastDive', iso2dmy(f['Last Dive Date']));
+  setSel('f-nitrox', f['Nitrox Certified']); setV('f-lastDive', iso2dmy(f['Last Dive Date']));
   setV('f-nitroxCertNumber', f['Nitrox Cert Number']); toggleNitrox();
   setCurFile('cert-current', 'f-certPhoto', f['Dive Cert Photo URL']);
   setCurFile('nitrox-current', 'f-nitroxPhoto', f['Nitrox Cert Photo URL']);
@@ -713,14 +752,14 @@ function loadDiverRecord(rec) {
 
   // Health
   setV('f-dietary', f['Dietary Requirements']);
-  setV('f-allergies', f['Allergies']); setV('f-medicalNotes', f['Medical Notes']);
-  setV('f-emergencyName', f['Emergency Name']); setSel('f-emergencyRelationship', f['Emergency Relationship']);
-  setV('f-emergencyEmail', f['Emergency Email']); setV('f-emergencyPhone', f['Emergency Phone']);
+  setV('f-allergies', f['Known Allergies']); setV('f-medicalNotes', f['Medical Notes']);
+  setV('f-emergencyName', f['Emergency Contact Name']); setSel('f-emergencyRelationship', f['Emergency Contact Relationship']);
+  setV('f-emergencyEmail', f['Emergency Contact Email']); setV('f-emergencyPhone', f['Emergency Contact Phone']);
 
   // Insurance
   setV('f-insuranceCompany', f['Insurance Company']); setV('f-policyNumber', f['Policy Number']);
   setV('f-insuranceContact', f['Insurance Contact']);
-  setCurFile('insurance-current', 'f-insurancePhoto', f['Dive Insurance Photo (from Diver)']);
+  setCurFile('insurance-current', 'f-insurancePhoto', f['Dive Insurance URL']);
 
   // Flights & Payment (radio buttons)
   setRadio('flights', f['Flights']);
@@ -736,12 +775,15 @@ function loadDiverRecord(rec) {
   setV('f-notes', f['Notes']); setSel('f-referral', f['How Did You Hear']); setSel('f-mediaConsent', f['Media Consent']);
 
   // Show sections
-  ['sec-personal','sec-passport','sec-passport2','sec-diving','sec-equipment','sec-health','sec-insurance','sec-flights','sec-payment','sec-additional']
+  ['sec-personal','sec-passport','sec-passport2','sec-pricing','sec-flights','sec-diving','sec-equipment','sec-health','sec-insurance','sec-payment','sec-additional']
     .forEach(id => document.getElementById(id).classList.add('visible'));
   document.getElementById('saveName').textContent = fullName;
   document.getElementById('saveBar').classList.add('visible');
   document.getElementById('saveMsg').textContent = '';
   document.getElementById('diverBanner').scrollIntoView({ behavior:'smooth', block:'start' });
+  // Load bookings for Safari Pricing section
+  document.getElementById('pricingLoadWrap').style.display = 'block';
+  loadDiverBookings(rec.id);
 }
 
 // ── SAVE ───────────────────────────────────────────────────────────
@@ -764,17 +806,17 @@ async function saveDiver() {
     add('First Name','f-firstName'); add('Middle Name','f-middleName'); add('Last Name','f-lastName');
     add('Date of Birth','f-dob', dmy2iso); add('Nationality','f-nationality');
     add('Passport Number','f-passportNumber'); add('Gender','f-gender');
-    add('Passport Issue Date','f-passportIssue', dmy2iso); add('Passport Expiry','f-passportExpiry', dmy2iso);
+    add('Passport Issue Date','f-passportIssue', dmy2iso); add('Passport Expiry Date','f-passportExpiry', dmy2iso);
     // Passport 2
     add('Passport 2 First Name','f-p2FirstName'); add('Passport 2 Middle Name','f-p2MiddleName');
     add('Passport 2 Last Name','f-p2LastName'); add('Passport 2 Date of Birth','f-p2Dob', dmy2iso);
     add('Passport 2 Nationality','f-p2Nationality'); add('Passport 2 Number','f-p2PassportNumber');
     add('Passport 2 Issue Date','f-p2Issue', dmy2iso); add('Passport 2 Expiry Date','f-p2Expiry', dmy2iso);
     // Diving
-    add('Certification Level','f-certLevel'); add('Certification Agency','f-certAgency');
+    add('Dive Certification Level','f-certLevel'); add('Certification Agency','f-certAgency');
     add('Certification Number','f-certNumber');
     const nd = document.getElementById('f-numDives').value; if (nd!=='') fields['Number of Dives'] = parseInt(nd,10);
-    add('Nitrox','f-nitrox'); add('Last Dive Date','f-lastDive', dmy2iso);
+    add('Nitrox Certified','f-nitrox'); add('Last Dive Date','f-lastDive', dmy2iso);
     add('Nitrox Cert Number','f-nitroxCertNumber');
     // Equipment
     const dc = document.querySelector('input[name="diveComputer"]:checked');
@@ -784,9 +826,9 @@ async function saveDiver() {
     const ht=document.getElementById('f-height').value; if(ht) fields['Height']=parseInt(ht,10);
     const wt=document.getElementById('f-weight').value; if(wt) fields['Weight']=parseInt(wt,10);
     // Health
-    add('Dietary Requirements','f-dietary'); add('Allergies','f-allergies'); add('Medical Notes','f-medicalNotes');
-    add('Emergency Name','f-emergencyName'); add('Emergency Relationship','f-emergencyRelationship');
-    add('Emergency Email','f-emergencyEmail'); add('Emergency Phone','f-emergencyPhone');
+    add('Dietary Requirements','f-dietary'); add('Known Allergies','f-allergies'); add('Medical Notes','f-medicalNotes');
+    add('Emergency Contact Name','f-emergencyName'); add('Emergency Contact Relationship','f-emergencyRelationship');
+    add('Emergency Contact Email','f-emergencyEmail'); add('Emergency Contact Phone','f-emergencyPhone');
     // Insurance
     add('Insurance Company','f-insuranceCompany'); add('Policy Number','f-policyNumber');
     add('Insurance Contact','f-insuranceContact');
@@ -801,7 +843,7 @@ async function saveDiver() {
     add('Notes','f-notes'); add('How Did You Hear','f-referral'); add('Media Consent','f-mediaConsent');
     // Photos — only new uploads
     [['f-passportPhoto','Passport Photo URL'],['f-certPhoto','Dive Cert Photo URL'],
-     ['f-nitroxPhoto','Nitrox Cert Photo URL'],['f-insurancePhoto','Dive Insurance Photo (from Diver)'],
+     ['f-nitroxPhoto','Nitrox Cert Photo URL'],['f-insurancePhoto','Dive Insurance URL'],
      ['f-p2Photo','Passport Photo 2 URL']].forEach(([id,at]) => {
       const v=(document.getElementById(id)||{}).value; if(v) fields[at]=v;
     });
@@ -816,7 +858,7 @@ function clearDiver() {
   currentDiverId=null; currentDiverFields={};
   document.getElementById('diverBanner').style.display='none';
   document.getElementById('saveBar').classList.remove('visible');
-  ['sec-personal','sec-passport','sec-passport2','sec-diving','sec-equipment','sec-health','sec-insurance','sec-flights','sec-payment','sec-additional']
+  ['sec-personal','sec-passport','sec-passport2','sec-pricing','sec-flights','sec-diving','sec-equipment','sec-health','sec-insurance','sec-payment','sec-additional']
     .forEach(id => document.getElementById(id).classList.remove('visible'));
   document.getElementById('idSearch').value='';
   document.getElementById('diverList').style.display='none'; document.getElementById('diverList').innerHTML='';
@@ -941,6 +983,75 @@ function showMsg(msg, isError) {
   const el=document.getElementById('searchMsg');
   el.style.display=msg?'block':'none'; el.textContent=msg;
   el.style.color=isError?'#d93f3f':'#5a7a8a';
+}
+
+// ── SAFARI PRICING (Bookings lookup) ──────────────────────────────
+let currentBookings = []; // [{id, tripId, tripName, pricing}]
+let currentBookingRecordId = null;
+
+async function loadDiverBookings(diverRecordId) {
+  document.getElementById('pricingLoadWrap').innerHTML = '<p style="font-size:13px;color:#5a7a8a;text-align:right;">טוען הזמנות... / Loading bookings...</p>';
+  document.getElementById('pricingBookingWrap').style.display = 'none';
+  document.getElementById('pricingFieldWrap').style.display = 'none';
+  try {
+    // Filter bookings where Diver ID linked record contains this diver
+    const formula = encodeURIComponent(`FIND("${diverRecordId}", ARRAYJOIN({Diver ID}))`);
+    const data = await atFetch(`https://api.airtable.com/v0/${BASE_ID}/${BOOKINGS_TABLE}?filterByFormula=${formula}&maxRecords=20`);
+    if (!data.records || !data.records.length) {
+      document.getElementById('pricingLoadWrap').innerHTML = '<p style="font-size:13px;color:#5a7a8a;text-align:right;">לא נמצאו הזמנות / No bookings found.</p>';
+      return;
+    }
+    currentBookings = data.records.map(r => ({
+      id: r.id,
+      tripId: r.fields['Trip ID'] || r.fields['Trip Id'] || '',
+      pricing: r.fields['Pricing'] || ''
+    })).sort((a,b) => b.tripId.localeCompare(a.tripId));
+
+    const sel = document.getElementById('pricingBookingSelect');
+    sel.innerHTML = '<option value="">— בחר טיול / Select trip —</option>';
+    currentBookings.forEach(b => {
+      const opt = document.createElement('option');
+      opt.value = b.id;
+      opt.textContent = b.tripId || b.id;
+      sel.appendChild(opt);
+    });
+    document.getElementById('pricingLoadWrap').style.display = 'none';
+    document.getElementById('pricingBookingWrap').style.display = 'block';
+    // Auto-select if only one booking
+    if (currentBookings.length === 1) {
+      sel.value = currentBookings[0].id;
+      loadBookingPricing();
+    }
+  } catch(e) {
+    document.getElementById('pricingLoadWrap').innerHTML = `<p style="font-size:13px;color:#d93f3f;text-align:right;">שגיאה / Error loading bookings: ${e.message}</p>`;
+  }
+}
+
+function loadBookingPricing() {
+  const sel = document.getElementById('pricingBookingSelect');
+  const bookingId = sel.value;
+  if (!bookingId) { document.getElementById('pricingFieldWrap').style.display = 'none'; return; }
+  currentBookingRecordId = bookingId;
+  const booking = currentBookings.find(b => b.id === bookingId);
+  document.getElementById('f-bookingPricing').value = booking ? booking.pricing : '';
+  document.getElementById('pricingFieldWrap').style.display = 'block';
+  document.getElementById('pricingSaveMsg').textContent = '';
+}
+
+async function saveBookingPricing() {
+  if (!currentBookingRecordId) return;
+  const pricing = document.getElementById('f-bookingPricing').value.trim();
+  const msgEl = document.getElementById('pricingSaveMsg');
+  msgEl.style.color = '#5a7a8a'; msgEl.textContent = 'שומר... / Saving...';
+  try {
+    await atPatch(BOOKINGS_TABLE, currentBookingRecordId, { 'Pricing': pricing });
+    msgEl.style.color = '#2a7a5c'; msgEl.textContent = '✓ נשמר / Saved';
+    // Update local cache
+    const booking = currentBookings.find(b => b.id === currentBookingRecordId);
+    if (booking) booking.pricing = pricing;
+  } catch(e) {
+    msgEl.style.color = '#d93f3f'; msgEl.textContent = '❌ שגיאה / Error: ' + e.message;
+  }
 }
 
 checkToken();
