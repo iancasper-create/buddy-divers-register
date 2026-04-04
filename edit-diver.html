@@ -1,4 +1,4 @@
-<!-- BD-EDIT 2026-04-04f -->
+<!-- BD-EDIT 2026-04-04g -->
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
@@ -298,11 +298,7 @@
       <div id="pricingFieldWrap" style="display:none;">
         <div id="pricingCardsWrap"></div>
         <input type="hidden" id="f-bookingPricing" />
-        <div style="margin-top:4px;margin-bottom:14px;">
-          <div style="font-size:11px;color:#d4692a;font-weight:600;text-align:right;">ערך זה מתעדכן בטבלת ההזמנות / This saves to the Bookings table</div>
-        </div>
-        <button onclick="saveBookingPricing()" style="background:#2a7a5c;color:#fff;border:none;border-radius:8px;padding:10px 24px;font-size:14px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;">שמור מחיר / Save Pricing</button>
-        <span id="pricingSaveMsg" style="font-size:13px;font-weight:600;margin-right:14px;vertical-align:middle;"></span>
+
       </div>
     </div>
   </div>
@@ -887,10 +883,16 @@ async function saveDiver() {
       const v=(document.getElementById(id)||{}).value; if(v) fields[at]=v;
     });
     await atPatch(DIVERS_TABLE, currentDiverId, fields);
-    // Also update Notes in Bookings table (both tables have their own Notes field)
+    // Update Bookings table: Notes, Pricing, Flights
     if (currentBookingRecordId) {
+      const bookingUpdate = {};
       const noteVal = (document.getElementById('f-notes') || {}).value || '';
-      await atPatch(BOOKINGS_TABLE, currentBookingRecordId, { 'Notes': noteVal });
+      bookingUpdate['Notes'] = noteVal;
+      const pricingVal = (document.getElementById('f-bookingPricing') || {}).value || '';
+      if (pricingVal) bookingUpdate['Pricing'] = pricingVal;
+      const flEl = document.querySelector('input[name="flights"]:checked');
+      if (flEl) bookingUpdate['Self Arranged Flights'] = flEl.value;
+      await atPatch(BOOKINGS_TABLE, currentBookingRecordId, bookingUpdate);
     }
     msgEl.className = 'ok'; msgEl.textContent = '✓ נשמר בהצלחה / Saved successfully';
   } catch(e) {
@@ -1767,25 +1769,6 @@ function loadBookingPricing() {
     if (booking.passportPhoto2) setCurFile('passport2-current', 'f-p2Photo', booking.passportPhoto2);
     if (booking.diveCertPhoto) setCurFile('cert-current', 'f-certPhoto', booking.diveCertPhoto);
     if (booking.nitroxCertPhoto) setCurFile('nitrox-current', 'f-nitroxPhoto', booking.nitroxCertPhoto);
-  }
-}
-
-async function saveBookingPricing() {
-  if (!currentBookingRecordId) return;
-  const pricing = document.getElementById('f-bookingPricing').value.trim();
-  const msgEl = document.getElementById('pricingSaveMsg');
-  msgEl.style.color = '#5a7a8a'; msgEl.textContent = 'שומר... / Saving...';
-  try {
-    const fl = document.querySelector('input[name="flights"]:checked');
-    const bookingFields = { 'Pricing': pricing };
-    if (fl) bookingFields['Self Arranged Flights'] = fl.value;
-    await atPatch(BOOKINGS_TABLE, currentBookingRecordId, bookingFields);
-    msgEl.style.color = '#2a7a5c'; msgEl.textContent = '✓ נשמר / Saved';
-    // Update local cache
-    const booking = currentBookings.find(b => b.id === currentBookingRecordId);
-    if (booking) booking.pricing = pricing;
-  } catch(e) {
-    msgEl.style.color = '#d93f3f'; msgEl.textContent = '❌ שגיאה / Error: ' + e.message;
   }
 }
 
