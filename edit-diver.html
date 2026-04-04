@@ -872,9 +872,7 @@ async function saveDiver() {
     // Insurance
     add('Dive Insurance Company','f-insuranceCompany'); add('Dive Insurance Policy Number','f-policyNumber');
     add('Dive Insurance Emergency Contact','f-insuranceContact');
-    // Flights & Payment
-    const fl = document.querySelector('input[name="flights"]:checked');
-    if (fl) fields['Flights'] = fl.value;
+    // Payment
     const pm = document.querySelector('input[name="paymentMethod"]:checked');
     if (pm) fields['Payment Method'] = pm.value;
     // Additional
@@ -1742,9 +1740,12 @@ async function loadDiverBookings(diverRecordId, diverIdNumber) {
     });
     document.getElementById('pricingLoadWrap').style.display = 'none';
     document.getElementById('pricingBookingWrap').style.display = 'block';
-    // Auto-select if only one booking
+    // Auto-select if only one booking; hide selector (not needed)
     if (currentBookings.length === 1) {
+      btnsEl.style.display = 'none';
       btnsEl.firstChild && btnsEl.firstChild.click();
+    } else {
+      btnsEl.style.display = '';
     }
   } catch(e) {
     document.getElementById('pricingLoadWrap').innerHTML = `<p style="font-size:13px;color:#d93f3f;text-align:right;">שגיאה / Error: ${e.message}</p>`;
