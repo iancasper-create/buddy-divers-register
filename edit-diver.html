@@ -671,10 +671,22 @@ async function searchById() {
   if (!id) return;
   showMsg('מחפש... / Searching...');
   try {
-    const formula = encodeURIComponent(`{ID Number}="${id}"`);
-    const data = await atFetch(`https://api.airtable.com/v0/${BASE_ID}/${DIVERS_TABLE}?filterByFormula=${formula}`);
-    if (!data.records || !data.records.length) { showMsg('לא נמצא צולל / No diver found.', true); return; }
-    showMsg(''); loadDiverRecord(data.records[0]);
+    let found = null;
+    // Try multiple possible field names for Israeli ID
+    for (const fieldName of ['ID Number', 'Israeli ID', 'Diver ID', 'Israeli ID Number']) {
+      try {
+        const formula = encodeURIComponent(`{${fieldName}}="${id}"`);
+        const res = await fetch(
+          `https://api.airtable.com/v0/${BASE_ID}/${DIVERS_TABLE}?filterByFormula=${formula}`,
+          { headers: { Authorization: `Bearer ${AIRTABLE_API_KEY}` } }
+        );
+        if (!res.ok) continue; // field name wrong — try next
+        const data = await res.json();
+        if (data.records && data.records.length > 0) { found = data.records[0]; break; }
+      } catch(e) { continue; }
+    }
+    if (!found) { showMsg('לא נמצא צולל / No diver found.', true); return; }
+    showMsg(''); loadDiverRecord(found);
   } catch(e) { showMsg('שגיאה / Error: ' + e.message, true); }
 }
 
@@ -713,56 +725,72 @@ function loadDiverRecord(rec) {
   const fullName = [f['First Name'],f['Last Name']].filter(Boolean).join(' ') || 'Unknown';
   document.getElementById('bannerName').textContent = fullName;
   document.getElementById('bannerMeta').textContent = `ID: ${f['ID Number']||'—'} | Email: ${f['Email']||'—'} | Record: ${rec.id}`;
+  // Show Airtable field names in console for debugging
+  console.log('=== AIRTABLE FIELDS FOR THIS DIVER ===');
+  Object.keys(f).sort().forEach(k => console.log(`"${k}": ${JSON.stringify(f[k]).substring(0,60)}`));
   document.getElementById('diverBanner').style.display = 'block';
 
-  // Personal
-  setV('f-email', f['Email']); setV('f-phone', f['Phone']);
-  setV('f-idNumber', f['ID Number']); setV('f-boatName', f['Boat Name']); setV('f-city', f['City']);
+  // Personal — try multiple field name variants
+  const idVal = getF(f, 'ID Number', 'Israeli ID', 'Diver ID', 'Israeli ID Number');
+  const boatVal = getF(f, 'Boat Name', 'Preferred First Name on Boat', 'First Name on Boat', 'Boat First Name');
+  setV('f-idNumber', idVal);
+  setV('f-boatName', boatVal);
+  setV('f-email', f['Email']); setV('f-phone', f['Phone']); setV('f-city', f['City']);
 
   // Passport 1
   setV('f-firstName', f['First Name']); setV('f-middleName', f['Middle Name']); setV('f-lastName', f['Last Name']);
   setV('f-dob', iso2dmy(f['Date of Birth']));
-  setSel('f-nationality', f['Nationality']);
+  setSel('f-nationality', getF(f, 'Nationality', 'Passport Nationality', 'Country', 'Citizenship'));
   setV('f-passportNumber', f['Passport Number']);
   setSel('f-gender', f['Gender']);
   setV('f-passportIssue', iso2dmy(f['Passport Issue Date']));
   setV('f-passportExpiry', iso2dmy(f['Passport Expiry Date']));
-  setCurFile('passport-current', 'f-passportPhoto', f['Passport Photo URL']);
+  setCurFile('passport-current', 'f-passportPhoto', getF(f, 'Passport Photo URL', 'Passport Photo', 'Passport Photo (URL)', 'Passport Image URL'));
 
   // Passport 2
   setV('f-p2FirstName', f['Passport 2 First Name']); setV('f-p2MiddleName', f['Passport 2 Middle Name']);
   setV('f-p2LastName', f['Passport 2 Last Name']); setV('f-p2Dob', iso2dmy(f['Passport 2 Date of Birth']));
   setV('f-p2Nationality', f['Passport 2 Nationality']); setV('f-p2PassportNumber', f['Passport 2 Number']);
   setV('f-p2Issue', iso2dmy(f['Passport 2 Issue Date'])); setV('f-p2Expiry', iso2dmy(f['Passport 2 Expiry Date']));
-  setCurFile('passport2-current', 'f-p2Photo', f['Passport Photo 2 URL']);
+  setCurFile('passport2-current', 'f-p2Photo',
+    getF(f, 'Passport Photo 2 URL', 'Passport 2 Photo URL', 'Second Passport Photo URL', 'Passport Photo 2 (URL)', 'Passport2 Photo URL'));
 
   // Diving
-  setSel('f-certLevel', f['Dive Certification Level']); setSel('f-certAgency', f['Certification Agency']);
+  setSel('f-certLevel', f['Dive Certification Level']);
+  setSel('f-certAgency', getF(f, 'Certification Agency', 'Cert Agency', 'Certifying Agency', 'Agency', 'Dive Agency', 'Certifying Organization'));
   setV('f-certNumber', f['Certification Number']); setV('f-numDives', f['Number of Dives']);
   setSel('f-nitrox', f['Nitrox Certified']); setV('f-lastDive', iso2dmy(f['Last Dive Date']));
   setV('f-nitroxCertNumber', f['Nitrox Cert Number']); toggleNitrox();
-  setCurFile('cert-current', 'f-certPhoto', f['Dive Cert Photo URL']);
-  setCurFile('nitrox-current', 'f-nitroxPhoto', f['Nitrox Cert Photo URL']);
+  setCurFile('cert-current', 'f-certPhoto',
+    getF(f, 'Dive Cert Photo URL', 'Dive Certification Photo', 'Cert Photo URL', 'Dive Cert Photo', 'Dive Certificate Photo URL', 'Certification Photo URL'));
+  setCurFile('nitrox-current', 'f-nitroxPhoto',
+    getF(f, 'Nitrox Cert Photo URL', 'Nitrox Photo URL', 'Nitrox Certification Photo', 'Nitrox Photo', 'Nitrox Cert Photo', 'Nitrox Certificate Photo URL'));
 
   // Equipment
   setRadio('diveComputer', f['Dive Computer']);
-  setSel('f-bcdSize', f['BCD Size']); setSel('f-regulator', f['Regulator']); setSel('f-wetsuitSize', f['Wetsuit Size']);
-  setSel('f-finsSize', f['Fins Size']); setSel('f-mask', f['Mask']); setSel('f-tank15L', f['Tank 15L']);
+  setSel('f-bcdSize', f['BCD Size']);
+  setSel('f-regulator', getF(f, 'Regulator', 'Regulator Rental', 'Needs Regulator', 'Rent Regulator'));
+  setSel('f-wetsuitSize', f['Wetsuit Size']);
+  setSel('f-finsSize', getF(f, 'Fins Size', 'Fins', 'Fins Size (EU)', 'Fin Size', 'Fins EU'));
+  setSel('f-mask', getF(f, 'Mask', 'Mask Rental', 'Needs Mask', 'Rent Mask'));
+  setSel('f-tank15L', getF(f, 'Tank 15L', '15L Tank', 'Tank', 'Tank Size', '15 Liter Tank'));
   setV('f-height', f['Height']); setV('f-weight', f['Weight']);
 
   // Health
   setV('f-dietary', f['Dietary Requirements']);
   setV('f-allergies', f['Known Allergies']); setV('f-medicalNotes', f['Medical Notes']);
-  setV('f-emergencyName', f['Emergency Contact Name']); setSel('f-emergencyRelationship', f['Emergency Contact Relationship']);
+  setV('f-emergencyName', f['Emergency Contact Name']);
+  setSel('f-emergencyRelationship', f['Emergency Contact Relationship']);
   setV('f-emergencyEmail', f['Emergency Contact Email']); setV('f-emergencyPhone', f['Emergency Contact Phone']);
 
   // Insurance
-  setV('f-insuranceCompany', f['Insurance Company']); setV('f-policyNumber', f['Policy Number']);
-  setV('f-insuranceContact', f['Insurance Contact']);
+  setV('f-insuranceCompany', getF(f, 'Insurance Company', 'Insurance Company Name', 'Insurance Provider', 'Dive Insurance Company'));
+  setV('f-policyNumber', getF(f, 'Policy Number', 'Insurance Policy Number', 'Insurance Policy', 'Policy'));
+  setV('f-insuranceContact', getF(f, 'Insurance Contact', 'Insurance Emergency Contact', 'Insurance Contact Details', 'Insurance Company Contact Details', 'Insurance Phone'));
   setCurFile('insurance-current', 'f-insurancePhoto', f['Dive Insurance URL']);
 
-  // Flights & Payment (radio buttons)
-  setRadio('flights', f['Flights']);
+  // Flights & Payment
+  setRadio('flights', getF(f, 'Flights', 'Flight', 'Flight Preference', 'Flights Preference'));
   setRadio('paymentMethod', f['Payment Method']);
 
   // Additional
@@ -772,7 +800,9 @@ function loadDiverRecord(rec) {
     rcCb.checked = (rc === 'yes' || rc === 'Yes' || rc === true);
     document.getElementById('rc-check').classList.toggle('selected', rcCb.checked);
   }
-  setV('f-notes', f['Notes']); setSel('f-referral', f['How Did You Hear']); setSel('f-mediaConsent', f['Media Consent']);
+  setV('f-notes', f['Notes']);
+  setSel('f-referral', getF(f, 'How Did You Hear', 'How Did You Hear About Us', 'How Did You Hear About Us?', 'Referral', 'Referral Source'));
+  setSel('f-mediaConsent', f['Media Consent']);
 
   // Show sections
   ['sec-personal','sec-passport','sec-passport2','sec-pricing','sec-flights','sec-diving','sec-equipment','sec-health','sec-insurance','sec-payment','sec-additional']
@@ -783,7 +813,7 @@ function loadDiverRecord(rec) {
   document.getElementById('diverBanner').scrollIntoView({ behavior:'smooth', block:'start' });
   // Load bookings for Safari Pricing section
   document.getElementById('pricingLoadWrap').style.display = 'block';
-  loadDiverBookings(rec.id);
+  loadDiverBookings(rec.id, idVal);
 }
 
 // ── SAVE ───────────────────────────────────────────────────────────
@@ -941,6 +971,15 @@ async function handleUpload(input, areaId, urlFieldId, statusId, folder, docType
 }
 
 // ── HELPERS ────────────────────────────────────────────────────────
+// Try multiple Airtable field name variants, return first non-empty value
+function getF(f) {
+  const names = Array.prototype.slice.call(arguments, 1);
+  for (var i = 0; i < names.length; i++) {
+    var v = f[names[i]];
+    if (v !== undefined && v !== null && v !== '') return v;
+  }
+  return '';
+}
 function setV(id, val) {
   const el=document.getElementById(id);
   if(el) el.value=(val!==null&&val!==undefined)?String(val):'';
@@ -989,21 +1028,36 @@ function showMsg(msg, isError) {
 let currentBookings = []; // [{id, tripId, tripName, pricing}]
 let currentBookingRecordId = null;
 
-async function loadDiverBookings(diverRecordId) {
+async function loadDiverBookings(diverRecordId, diverIdNumber) {
   document.getElementById('pricingLoadWrap').innerHTML = '<p style="font-size:13px;color:#5a7a8a;text-align:right;">טוען הזמנות... / Loading bookings...</p>';
   document.getElementById('pricingBookingWrap').style.display = 'none';
   document.getElementById('pricingFieldWrap').style.display = 'none';
   try {
-    // Filter bookings where Diver ID linked record contains this diver
-    const formula = encodeURIComponent(`FIND("${diverRecordId}", ARRAYJOIN({Diver ID}))`);
-    const data = await atFetch(`https://api.airtable.com/v0/${BASE_ID}/${BOOKINGS_TABLE}?filterByFormula=${formula}&maxRecords=20`);
-    if (!data.records || !data.records.length) {
+    let records = [];
+    // Try multiple filter approaches to find this diver's bookings
+    const approaches = [
+      encodeURIComponent(`{Diver ID}="${diverRecordId}"`),
+      encodeURIComponent(`FIND("${diverRecordId}",ARRAYJOIN({Diver ID}))`),
+      diverIdNumber ? encodeURIComponent(`{Israeli ID (from Divers)}="${diverIdNumber}"`) : null,
+    ].filter(Boolean);
+
+    for (const formula of approaches) {
+      try {
+        const url = `https://api.airtable.com/v0/${BASE_ID}/${BOOKINGS_TABLE}?filterByFormula=${formula}&maxRecords=20`;
+        const res = await fetch(url, { headers: { Authorization: `Bearer ${AIRTABLE_API_KEY}` } });
+        if (!res.ok) continue;
+        const data = await res.json();
+        if (data.records && data.records.length > 0) { records = data.records; break; }
+      } catch(e) { continue; }
+    }
+
+    if (!records.length) {
       document.getElementById('pricingLoadWrap').innerHTML = '<p style="font-size:13px;color:#5a7a8a;text-align:right;">לא נמצאו הזמנות / No bookings found.</p>';
       return;
     }
-    currentBookings = data.records.map(r => ({
+    currentBookings = records.map(r => ({
       id: r.id,
-      tripId: r.fields['Trip ID'] || r.fields['Trip Id'] || '',
+      tripId: r.fields['Trip ID'] || r.fields['Trip Id'] || r.fields['Trip'] || '',
       pricing: r.fields['Pricing'] || ''
     })).sort((a,b) => b.tripId.localeCompare(a.tripId));
 
@@ -1017,13 +1071,9 @@ async function loadDiverBookings(diverRecordId) {
     });
     document.getElementById('pricingLoadWrap').style.display = 'none';
     document.getElementById('pricingBookingWrap').style.display = 'block';
-    // Auto-select if only one booking
-    if (currentBookings.length === 1) {
-      sel.value = currentBookings[0].id;
-      loadBookingPricing();
-    }
+    if (currentBookings.length === 1) { sel.value = currentBookings[0].id; loadBookingPricing(); }
   } catch(e) {
-    document.getElementById('pricingLoadWrap').innerHTML = `<p style="font-size:13px;color:#d93f3f;text-align:right;">שגיאה / Error loading bookings: ${e.message}</p>`;
+    document.getElementById('pricingLoadWrap').innerHTML = `<p style="font-size:13px;color:#d93f3f;text-align:right;">שגיאה / Error: ${e.message}</p>`;
   }
 }
 
