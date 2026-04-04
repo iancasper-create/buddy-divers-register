@@ -292,24 +292,18 @@
       <p style="font-size:13px;color:#5a7a8a;text-align:right;margin-bottom:12px;">טוען הזמנות... / Loading bookings for this diver...</p>
     </div>
     <div id="pricingBookingWrap" style="display:none;">
-      <div class="fr c1" style="margin-bottom:12px;">
-        <div class="field">
-          <label><span class="he">בחר הזמנה</span> / Select Booking</label>
-          <select id="pricingBookingSelect" onchange="loadBookingPricing()">
-            <option value="">— בחר טיול / Select trip —</option>
-          </select>
-        </div>
-      </div>
+      <!-- Trip selector buttons — one per booking -->
+      <div id="pricingTripButtons" style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;"></div>
+      <!-- Pricing field — shown after trip selected -->
       <div id="pricingFieldWrap" style="display:none;">
-        <div class="fr c1">
-          <div class="field">
-            <label><span class="he">מחיר נבחר</span> / Selected Pricing</label>
-            <input type="text" id="f-bookingPricing" dir="ltr" placeholder="e.g. twin_2890 + single_supplement" />
-            <div class="hint">ערך זה מתעדכן בטבלת ההזמנות / This saves to the Bookings table</div>
-          </div>
+        <div style="background:#f4fafd;border:1.5px solid #c5dfe6;border-radius:10px;padding:16px 20px;margin-bottom:14px;">
+          <div style="font-size:12px;font-weight:700;color:#1a3a5c;text-align:right;margin-bottom:8px;text-transform:uppercase;letter-spacing:.03em;">מחיר נבחר / Selected Pricing</div>
+          <input type="text" id="f-bookingPricing" dir="ltr" placeholder="e.g. twin_2890 + single_supplement"
+            style="width:100%;border:1.5px solid #c5dfe6;border-radius:8px;padding:10px 12px;font-size:14px;color:#1a3a4a;font-family:'DM Sans',sans-serif;background:#fff;" />
+          <div style="font-size:11px;color:#d4692a;font-weight:600;margin-top:6px;text-align:right;">ערך זה מתעדכן בטבלת ההזמנות / This saves to the Bookings table</div>
         </div>
-        <button onclick="saveBookingPricing()" style="background:#2a7a5c;color:#fff;border:none;border-radius:8px;padding:9px 22px;font-size:14px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;margin-top:4px;">שמור מחיר / Save Pricing</button>
-        <span id="pricingSaveMsg" style="font-size:13px;font-weight:600;margin-right:12px;"></span>
+        <button onclick="saveBookingPricing()" style="background:#2a7a5c;color:#fff;border:none;border-radius:8px;padding:10px 24px;font-size:14px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;">שמור מחיר / Save Pricing</button>
+        <span id="pricingSaveMsg" style="font-size:13px;font-weight:600;margin-right:14px;vertical-align:middle;"></span>
       </div>
     </div>
   </div>
@@ -1078,22 +1072,40 @@ async function loadDiverBookings(diverRecordId, diverIdNumber) {
       id: r.id,
       tripId: r.fields['Trip Id'] || r.fields['Trip ID'] || r.fields['Trip Name'] || r.fields['Trip'] || r.id,
       pricing: r.fields['Pricing'] || '',
-      passportPhoto2: getF(r.fields, 'Passport Photo 2 URL', 'Passport 2 Photo URL', 'Second Passport Photo URL'),
-      diveCertPhoto: getF(r.fields, 'Dive Cert Photo URL', 'Dive Certification Photo URL', 'Cert Photo URL'),
-      nitroxCertPhoto: getF(r.fields, 'Nitrox Cert Photo URL', 'Nitrox Photo URL', 'Nitrox Certification Photo URL')
+      flights: getF(r.fields, 'Flights', 'Flight', 'Flight Preference', 'Flight Option'),
+      diveCertPhoto: getF(r.fields, 'Dive Cert Photo URL', 'Dive Certification Photo URL', 'Cert Photo URL', 'Dive Cert Photo', 'Certification Photo URL'),
+      nitroxCertPhoto: getF(r.fields, 'Nitrox Cert Photo URL', 'Nitrox Photo URL', 'Nitrox Certification Photo URL', 'Nitrox Cert Photo'),
+      passportPhoto2: getF(r.fields, 'Passport 2 Photo', 'Passport Photo 2 URL', 'Passport 2 Photo URL', 'Second Passport Photo URL')
     })).sort((a,b) => String(b.tripId).localeCompare(String(a.tripId)));
 
-    const sel = document.getElementById('pricingBookingSelect');
-    sel.innerHTML = '<option value="">— בחר טיול / Select trip —</option>';
-    currentBookings.forEach(b => {
-      const opt = document.createElement('option');
-      opt.value = b.id;
-      opt.textContent = b.tripId || b.id;
-      sel.appendChild(opt);
+    const btnsEl = document.getElementById('pricingTripButtons');
+    btnsEl.innerHTML = '';
+    currentBookings.forEach((b, i) => {
+      const btn = document.createElement('div');
+      btn.className = 'option-item';
+      btn.id = 'pricingBtn_' + i;
+      btn.style.cursor = 'pointer';
+      btn.innerHTML = `<div class="opt-label"><span class="opt-he">טיול ${b.tripId}</span><span class="opt-en">${b.pricing || 'No pricing set'}</span></div>`;
+      btn.onclick = () => {
+        document.querySelectorAll('[id^="pricingBtn_"]').forEach(el => el.classList.remove('selected'));
+        btn.classList.add('selected');
+        currentBookingRecordId = b.id;
+        document.getElementById('f-bookingPricing').value = b.pricing || '';
+        document.getElementById('pricingFieldWrap').style.display = 'block';
+        document.getElementById('pricingSaveMsg').textContent = '';
+        if (b.flights) setRadio('flights', b.flights);
+        if (b.passportPhoto2) setCurFile('passport2-current', 'f-p2Photo', b.passportPhoto2);
+        if (b.diveCertPhoto) setCurFile('cert-current', 'f-certPhoto', b.diveCertPhoto);
+        if (b.nitroxCertPhoto) setCurFile('nitrox-current', 'f-nitroxPhoto', b.nitroxCertPhoto);
+      };
+      btnsEl.appendChild(btn);
     });
     document.getElementById('pricingLoadWrap').style.display = 'none';
     document.getElementById('pricingBookingWrap').style.display = 'block';
-    if (currentBookings.length === 1) { sel.value = currentBookings[0].id; loadBookingPricing(); }
+    // Auto-select if only one booking
+    if (currentBookings.length === 1) {
+      btnsEl.firstChild && btnsEl.firstChild.click();
+    }
   } catch(e) {
     document.getElementById('pricingLoadWrap').innerHTML = `<p style="font-size:13px;color:#d93f3f;text-align:right;">שגיאה / Error: ${e.message}</p>`;
   }
@@ -1108,8 +1120,10 @@ function loadBookingPricing() {
   document.getElementById('f-bookingPricing').value = booking ? booking.pricing : '';
   document.getElementById('pricingFieldWrap').style.display = 'block';
   document.getElementById('pricingSaveMsg').textContent = '';
-  // Show photo URLs from booking if not already showing from Divers
   if (booking) {
+    // Set Flights from booking
+    if (booking.flights) setRadio('flights', booking.flights);
+    // Set photo View links from booking
     if (booking.passportPhoto2) setCurFile('passport2-current', 'f-p2Photo', booking.passportPhoto2);
     if (booking.diveCertPhoto) setCurFile('cert-current', 'f-certPhoto', booking.diveCertPhoto);
     if (booking.nitroxCertPhoto) setCurFile('nitrox-current', 'f-nitroxPhoto', booking.nitroxCertPhoto);
