@@ -1,4 +1,4 @@
-<!-- BD-EDIT 2026-04-04c -->
+<!-- BD-EDIT 2026-04-04d -->
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
@@ -886,6 +886,11 @@ async function saveDiver() {
       const v=(document.getElementById(id)||{}).value; if(v) fields[at]=v;
     });
     await atPatch(DIVERS_TABLE, currentDiverId, fields);
+    // Also update Notes in Bookings table (both tables have their own Notes field)
+    if (currentBookingRecordId) {
+      const noteVal = (document.getElementById('f-notes') || {}).value || '';
+      await atPatch(BOOKINGS_TABLE, currentBookingRecordId, { 'Notes': noteVal });
+    }
     msgEl.className = 'ok'; msgEl.textContent = '✓ נשמר בהצלחה / Saved successfully';
   } catch(e) {
     msgEl.className = 'err'; msgEl.textContent = '❌ שגיאה / Error: ' + e.message;
