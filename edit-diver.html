@@ -1698,7 +1698,7 @@ async function loadDiverBookings(diverRecordId, diverIdNumber) {
       id: r.id,
       tripId: r.fields['Trip Id'] || r.fields['Trip ID'] || r.fields['Trip Name'] || r.fields['Trip'] || r.id,
       pricing: r.fields['Pricing'] || '',
-      flights: getF(r.fields, 'Flights', 'Flight', 'Flight Preference', 'Flight Option'),
+      flights: getF(r.fields, 'Self Arranged Flights', 'Flights', 'Flight', 'Flight Preference'),
       diveCertPhoto: getF(r.fields, 'Dive Cert Photo URL', 'Dive Certification Photo URL', 'Cert Photo URL', 'Dive Cert Photo', 'Certification Photo URL'),
       nitroxCertPhoto: getF(r.fields, 'Nitrox Cert Photo URL', 'Nitrox Photo URL', 'Nitrox Certification Photo URL', 'Nitrox Cert Photo'),
       passportPhoto2: getF(r.fields, 'Passport 2 Photo', 'Passport Photo 2 URL', 'Passport 2 Photo URL', 'Second Passport Photo URL'),
