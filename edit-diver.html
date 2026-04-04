@@ -166,7 +166,14 @@
     <div id="searchMsg"></div>
   </div>
 
-  <div id="diverBanner"><div class="bname" id="bannerName"></div><div class="bmeta" id="bannerMeta"></div></div>
+  <div id="diverBanner">
+    <div class="bname" id="bannerName"></div>
+    <div class="bmeta" id="bannerMeta"></div>
+    <div style="margin-top:10px;">
+      <button onclick="toggleDebug()" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:#fff;border-radius:6px;padding:4px 12px;font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;">🔍 Show Airtable Field Names (Debug)</button>
+      <div id="debugPanel" style="display:none;margin-top:8px;background:rgba(0,0,0,0.3);border-radius:8px;padding:10px 14px;font-size:11px;color:#e0f0ff;direction:ltr;max-height:200px;overflow-y:auto;line-height:1.8;" id="debugPanel"></div>
+    </div>
+  </div>
 
   <!-- 1: PERSONAL DETAILS -->
   <div class="card" id="sec-personal">
@@ -725,14 +732,21 @@ function loadDiverRecord(rec) {
   const fullName = [f['First Name'],f['Last Name']].filter(Boolean).join(' ') || 'Unknown';
   document.getElementById('bannerName').textContent = fullName;
   document.getElementById('bannerMeta').textContent = `ID: ${f['ID Number']||'—'} | Email: ${f['Email']||'—'} | Record: ${rec.id}`;
-  // Show Airtable field names in console for debugging
-  console.log('=== AIRTABLE FIELDS FOR THIS DIVER ===');
+  // Populate debug panel with all Airtable field names and values
+  const debugPanel = document.getElementById('debugPanel');
+  if (debugPanel) {
+    debugPanel.innerHTML = Object.keys(f).sort().map(k => {
+      const v = String(f[k]).substring(0, 80);
+      return `<div><strong style="color:#7dd3fc">${k}</strong>: ${v}</div>`;
+    }).join('');
+  }
+  console.log('=== AIRTABLE FIELDS ===');
   Object.keys(f).sort().forEach(k => console.log(`"${k}": ${JSON.stringify(f[k]).substring(0,60)}`));
   document.getElementById('diverBanner').style.display = 'block';
 
   // Personal — try multiple field name variants
   const idVal = getF(f, 'ID Number', 'Israeli ID', 'Diver ID', 'Israeli ID Number');
-  const boatVal = getF(f, 'Boat Name', 'Preferred First Name on Boat', 'First Name on Boat', 'Boat First Name');
+  const boatVal = getF(f, 'Boat Name', 'Preferred First Name on Boat', 'First Name on Boat', 'Boat First Name', 'Preferred Name', 'Nickname', 'Nick Name', 'Boat');
   setV('f-idNumber', idVal);
   setV('f-boatName', boatVal);
   setV('f-email', f['Email']); setV('f-phone', f['Phone']); setV('f-city', f['City']);
@@ -740,12 +754,12 @@ function loadDiverRecord(rec) {
   // Passport 1
   setV('f-firstName', f['First Name']); setV('f-middleName', f['Middle Name']); setV('f-lastName', f['Last Name']);
   setV('f-dob', iso2dmy(f['Date of Birth']));
-  setSel('f-nationality', getF(f, 'Nationality', 'Passport Nationality', 'Country', 'Citizenship'));
+  setSel('f-nationality', getF(f, 'Nationality', 'Passport Nationality', 'Country', 'Citizenship', 'Nationality (Passport)', 'Passport Country'));
   setV('f-passportNumber', f['Passport Number']);
   setSel('f-gender', f['Gender']);
   setV('f-passportIssue', iso2dmy(f['Passport Issue Date']));
   setV('f-passportExpiry', iso2dmy(f['Passport Expiry Date']));
-  setCurFile('passport-current', 'f-passportPhoto', getF(f, 'Passport Photo URL', 'Passport Photo', 'Passport Photo (URL)', 'Passport Image URL'));
+  setCurFile('passport-current', 'f-passportPhoto', getF(f, 'Passport Photo URL', 'Passport Photo', 'Passport Photo (URL)', 'Passport Image URL', 'Passport 1 Photo URL'));
 
   // Passport 2
   setV('f-p2FirstName', f['Passport 2 First Name']); setV('f-p2MiddleName', f['Passport 2 Middle Name']);
@@ -753,7 +767,7 @@ function loadDiverRecord(rec) {
   setV('f-p2Nationality', f['Passport 2 Nationality']); setV('f-p2PassportNumber', f['Passport 2 Number']);
   setV('f-p2Issue', iso2dmy(f['Passport 2 Issue Date'])); setV('f-p2Expiry', iso2dmy(f['Passport 2 Expiry Date']));
   setCurFile('passport2-current', 'f-p2Photo',
-    getF(f, 'Passport Photo 2 URL', 'Passport 2 Photo URL', 'Second Passport Photo URL', 'Passport Photo 2 (URL)', 'Passport2 Photo URL'));
+    getF(f, 'Passport Photo 2 URL', 'Passport 2 Photo URL', 'Second Passport Photo URL', 'Passport Photo 2 (URL)', 'Passport2 Photo URL', 'Passport 2 Photo', 'Second Passport Photo', 'Passport Photo 2'));
 
   // Diving
   setSel('f-certLevel', f['Dive Certification Level']);
@@ -771,7 +785,7 @@ function loadDiverRecord(rec) {
   setSel('f-bcdSize', f['BCD Size']);
   setSel('f-regulator', getF(f, 'Regulator', 'Regulator Rental', 'Needs Regulator', 'Rent Regulator'));
   setSel('f-wetsuitSize', f['Wetsuit Size']);
-  setSel('f-finsSize', getF(f, 'Fins Size', 'Fins', 'Fins Size (EU)', 'Fin Size', 'Fins EU'));
+  setSel('f-finsSize', getF(f, 'Fins Size', 'Fins', 'Fins Size (EU)', 'Fin Size', 'Fins EU', 'Fins (EU)', 'EU Fins Size', 'Fin Size (EU)'));
   setSel('f-mask', getF(f, 'Mask', 'Mask Rental', 'Needs Mask', 'Rent Mask'));
   setSel('f-tank15L', getF(f, 'Tank 15L', '15L Tank', 'Tank', 'Tank Size', '15 Liter Tank'));
   setV('f-height', f['Height']); setV('f-weight', f['Weight']);
@@ -785,8 +799,8 @@ function loadDiverRecord(rec) {
 
   // Insurance
   setV('f-insuranceCompany', getF(f, 'Insurance Company', 'Insurance Company Name', 'Insurance Provider', 'Dive Insurance Company'));
-  setV('f-policyNumber', getF(f, 'Policy Number', 'Insurance Policy Number', 'Insurance Policy', 'Policy'));
-  setV('f-insuranceContact', getF(f, 'Insurance Contact', 'Insurance Emergency Contact', 'Insurance Contact Details', 'Insurance Company Contact Details', 'Insurance Phone'));
+  setV('f-policyNumber', getF(f, 'Policy Number', 'Insurance Policy Number', 'Insurance Policy', 'Policy', 'Policy No', 'Insurance Policy No'));
+  setV('f-insuranceContact', getF(f, 'Insurance Contact', 'Insurance Emergency Contact', 'Insurance Contact Details', 'Insurance Company Contact Details', 'Insurance Phone', 'Insurance Contact Info', 'Insurance Details', 'Emergency Insurance Contact'));
   setCurFile('insurance-current', 'f-insurancePhoto', f['Dive Insurance URL']);
 
   // Flights & Payment
@@ -970,7 +984,10 @@ async function handleUpload(input, areaId, urlFieldId, statusId, folder, docType
   }
 }
 
-// ── HELPERS ────────────────────────────────────────────────────────
+function toggleDebug() {
+  const p = document.getElementById('debugPanel');
+  if (p) p.style.display = p.style.display === 'none' ? 'block' : 'none';
+}
 // Try multiple Airtable field name variants, return first non-empty value
 function getF(f) {
   const names = Array.prototype.slice.call(arguments, 1);
@@ -1043,7 +1060,7 @@ async function loadDiverBookings(diverRecordId, diverIdNumber) {
 
     for (const formula of approaches) {
       try {
-        const url = `https://api.airtable.com/v0/${BASE_ID}/${BOOKINGS_TABLE}?filterByFormula=${formula}&maxRecords=20`;
+        const url = `https://api.airtable.com/v0/${BASE_ID}/${BOOKINGS_TABLE}?filterByFormula=${formula}&maxRecords=20&cellFormat=string&timeZone=UTC&userLocale=en-us`;
         const res = await fetch(url, { headers: { Authorization: `Bearer ${AIRTABLE_API_KEY}` } });
         if (!res.ok) continue;
         const data = await res.json();
@@ -1057,9 +1074,12 @@ async function loadDiverBookings(diverRecordId, diverIdNumber) {
     }
     currentBookings = records.map(r => ({
       id: r.id,
-      tripId: r.fields['Trip ID'] || r.fields['Trip Id'] || r.fields['Trip'] || '',
-      pricing: r.fields['Pricing'] || ''
-    })).sort((a,b) => b.tripId.localeCompare(a.tripId));
+      tripId: r.fields['Trip Id'] || r.fields['Trip ID'] || r.fields['Trip Name'] || r.fields['Trip'] || r.id,
+      pricing: r.fields['Pricing'] || '',
+      passportPhoto2: getF(r.fields, 'Passport Photo 2 URL', 'Passport 2 Photo URL', 'Second Passport Photo URL'),
+      diveCertPhoto: getF(r.fields, 'Dive Cert Photo URL', 'Dive Certification Photo URL', 'Cert Photo URL'),
+      nitroxCertPhoto: getF(r.fields, 'Nitrox Cert Photo URL', 'Nitrox Photo URL', 'Nitrox Certification Photo URL')
+    })).sort((a,b) => String(b.tripId).localeCompare(String(a.tripId)));
 
     const sel = document.getElementById('pricingBookingSelect');
     sel.innerHTML = '<option value="">— בחר טיול / Select trip —</option>';
@@ -1086,6 +1106,12 @@ function loadBookingPricing() {
   document.getElementById('f-bookingPricing').value = booking ? booking.pricing : '';
   document.getElementById('pricingFieldWrap').style.display = 'block';
   document.getElementById('pricingSaveMsg').textContent = '';
+  // Show photo URLs from booking if not already showing from Divers
+  if (booking) {
+    if (booking.passportPhoto2) setCurFile('passport2-current', 'f-p2Photo', booking.passportPhoto2);
+    if (booking.diveCertPhoto) setCurFile('cert-current', 'f-certPhoto', booking.diveCertPhoto);
+    if (booking.nitroxCertPhoto) setCurFile('nitrox-current', 'f-nitroxPhoto', booking.nitroxCertPhoto);
+  }
 }
 
 async function saveBookingPricing() {
