@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Your Buddy-Divers Registration Details</title>
+</head>
+<body style="margin:0;padding:0;background:#f4f7fa;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#1a1a2e;">
+
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f7fa;padding:32px 16px;">
+  <tr><td align="center">
+  <table width="620" cellpadding="0" cellspacing="0" style="max-width:620px;width:100%;background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.08);">
+
+    <!-- HEADER -->
+    <tr>
+      <td style="background:#1a3a5c;padding:32px 40px;text-align:center;">
+        <img src="https://res.cloudinary.com/dccbsfte0/image/upload/v1773063708/logo_hnmilh.png" alt="Buddy-Divers" width="140" style="display:block;margin:0 auto 16px;" />
+        <div style="color:#ffffff;font-size:22px;font-weight:700;letter-spacing:0.5px;">Registration Confirmation</div>
+        <div style="color:#a8c4d8;font-size:14px;margin-top:6px;">A full copy of your registration details</div>
+      </td>
+    </tr>
+
+    <!-- INTRO -->
+    <tr>
+      <td style="padding:28px 40px 8px;">
+        <p style="margin:0;font-size:15px;color:#333;line-height:1.6;">
+          Hi <strong>{{1.firstName}}</strong>, thank you for registering with Buddy-Divers!<br/>
+          Below is a complete copy of the details you submitted. Please review them and contact us if anything needs to be corrected.
+        </p>
+      </td>
+    </tr>
+
+    <!-- ───────────────────────────────── -->
+    <!-- SECTION: TRIP DETAILS             -->
+    <!-- ───────────────────────────────── -->
+    <tr><td style="padding:24px 40px 0;">
+      <div style="font-size:12px;font-weight:700;letter-spacing:1.2px;color:#1a3a5c;text-transform:uppercase;border-bottom:2px solid #e8f0f7;padding-bottom:6px;margin-bottom:16px;">Trip Details</div>
+      <table width="100%" cellpadding="0" cellspacing="0">
+        <tr><td style="padding:5px 0;font-size:13px;color:#666;width:45%;">Trip</td><td style="padding:5px 0;font-size:13px;color:#1a1a2e;font-weight:600;">{{1.tripDestination}}</td></tr>
+        <tr><td style="padding:5px 0;font-size:13px;color:#666;">Trip ID</td><td style="padding:5px 0;font-size:13px;color:#1a1a2e;">{{1.tripId}}</td></tr>
+        <tr><td style="padding:5px 0;font-size:13px;color:#666;">Submitted</td><td style="padding:5px 0;font-size:13px;color:#1a1a2e;">{{formatDate(1.submittedAt; "DD/MM/YYYY HH:mm")}}</td></tr>
+      </table>
+    </td></tr>
+
+    <!-- ───────────────────────────────── -->
+    <!-- SECTION: PERSONAL DETAILS         -->
+    <!-- ───────────────────────────────── -->
+    <tr><td style="padding:24px 40px 0;">
+      <div style="font-size:12px;font-weight:700;letter-spacing:1.2px;color:#1a3a5c;text-transform:uppercase;border-bottom:2px solid #e8f0f7;padding-bottom:6px;margin-bottom:16px;">Personal Details</div>
+      <table width="100%" cellpadding="0" cellspacing="0">
+        <tr><td style="padding:5px 0;font-size:13px;color:#666;width:45%;">Israeli ID</td><td style="padding:5px 0;font-size:13px;color:#1a1a2e;">{{1.idNumber}}</td></tr>
+        <tr><td style="padding:5px 0;font-size:13px;color:#666;">First Name</td><td style="padding:5px 0;font-size:13px;color:#1a1a2e;">{{1.firstName}}</td></tr>
+        <tr><td style="padding:5px 0;font-size:13px;color:#666;">Middle Name</td><td style="padding:5px 0;font-size:13px;color:#1a1a2e;">{{if(1.middleName; 1.middleName; "—")}}</td></tr>
+        <tr><td style="padding:5px 0;font-size:13px;color:#666;">Last Name</td><td style="padding:5px 0;font-size:13px;color:#1a1a2e;">{{1.lastName}}</td></tr>
+        <tr><td style="padding:5px 0;font-size:13px;color:#666;">Preferred Boat Name</td><td style="padding:5px 0;font-size:13px;color:#1a1a2e;">{{if(1.boatName; 1.boatName; "—")}}</td></tr>
+        <tr><td style="padding:5px 0;font-size:13px;color:#666;">Email</td><td style="padding:5px 0;font-size:13px;color:#1a1a2e;">{{1.email}}</td></tr>
+        <tr><td style="padding:5px 0;font-size:13px;color:#666;">Phone</td><td style="padding:5px 0;font-size:13px;color:#1a1a2e;">{{1.phone}}</td></tr>
+        <tr><td style="padding:5px 0;font-size:13px;color:#666;">City</td><td style="padding:5px 0;font-size:13px;color:#1a1a2e;">{{if(1.city; 1.city; "—")}}</td></tr>
+      </table>
+    </td></tr>
+
+    <!-- ───────────────────────────────── -->
+    <!-- SECTION: PRIMARY PASSPORT         -->
+    <!-- ───────────────────────────────── -->
+    <tr><td style="padding:24px 40px 0;">
+      <div style="font-size:12px;font-weight:700;letter-spacing:1.2px;color:#1a3a5c;text-transform:uppercase;border-bottom:2px solid #e8f0f7;padding-bottom:6px;margin-bottom:16px;">Primary Passport</div>
+      <table width="100%" cellpadding="0" cellspacing="0">
+        <tr><td style="padding:5px 0;font-size:13px;color:#666;width:45%;">Date of Birth</td><td style="padding:5px 0;font-size:13px;color:#1a1a2e;">{{1.dob}}</td></tr>
+        <tr><td style="padding:5px 0;font-size:13px;color:#666;">Nationality</td><td style="padding:5px 0;font-size:13px;color:#1a1a2e;">{{1.nationality}}</td></tr>
+        <tr><td style="padding:5px 0;font-size:13px;color:#666;">Passport Number</td><td style="padding:5px 0;font-size:13px;color:#1a1a2e;">{{1.passportNumber}}</td></tr>
+        <tr><td style="padding:5px 0;font-size:13px;color:#666;">Issue Date</td><td style="padding:5px 0;font-size:13px;color:#1a1a2e;">{{1.passportIssue}}</td></tr>
+        <tr><td style="padding:5px 0;font-size:13px;color:#666;">Expiry Date</td><td style="padding:5px 0;font-size:13px;color:#1a1a2e;">{{1.passportExpiry}}</td></tr>
+        <tr><td style="padding:5px 0;font-size:13px;color:#666;">Gender</td><td style="padding:5px 0;font-size:13px;color:#1a1a2e;">{{1.gender}}</td></tr>
+        <tr>
+          <td style="padding:5px 0;font-size:13px;color:#666;">Passport Photo</td>
+          <td style="padding:5px 0;font-size:13px;">
+            {{if(1.passportPhotoUrl; "<span style='color:#2a7a5c;font-weight:600;'>✓ Received</span>"; "<span style='color:#c0392b;'>Not uploaded</span>")}}
+          </td>
+        </tr>
+      </table>
+    </td></tr>
+
+    <!-- ───────────────────────────────── -->
+    <!-- SECTION: SECOND PASSPORT (if any) -->
+    <!-- ───────────────────────────────── -->
+    {{if(1.passport2PassportNumber;
+    "<tr><td style='padding:24px 40px 0;'>
+      <div style='font-size:12px;font-weight:700;letter-spacing:1.2px;color:#1a3a5c;text-transform:uppercase;border-bottom:2px solid #e8f0f7;padding-bottom:6px;margin-bottom:16px;'>Second Passport (Dual Citizenship)</div>
+      <table width='100%' cellpadding='0' cellspacing='0'>
+        <tr><td style='padding:5px 0;font-size:13px;color:#666;width:45%;'>First Name</td><td style='padding:5px 0;font-size:13px;color:#1a1a2e;'>" & 1.passport2FirstName & "</td></tr>
+        <tr><td style='padding:5px 0;font-size:13px;color:#666;'>Middle Name</td><td style='padding:5px 0;font-size:13px;color:#1a1a2e;'>" & if(1.passport2MiddleName; 1.passport2MiddleName; "—") & "</td></tr>
+        <tr><td style='padding:5px 0;font-size:13px;color:#666;'>Last Name</td><td style='padding:5px 0;font-size:13px;color:#1a1a2e;'>" & 1.passport2LastName & "</td></tr>
+        <tr><td style='padding:5px 0;font-size:13px;color:#666;'>Date of Birth</td><td style='padding:5px 0;font-size:13px;color:#1a1a2e;'>" & 1.passport2Dob & "</td></tr>
+        <tr><td style='padding:5px 0;font-size:13px;color:#666;'>Nationality</td><td style='padding:5px 0;font-size:13px;color:#1a1a2e;'>" & 1.passport2Nationality & "</td></tr>
+        <tr><td style='padding:5px 0;font-size:13px;color:#666;'>Passport Number</td><td style='padding:5px 0;font-size:13px;color:#1a1a2e;'>" & 1.passport2PassportNumber & "</td></tr>
+        <tr><td style='padding:5px 0;font-size:13px;color:#666;'>Issue Date</td><td style='padding:5px 0;font-size:13px;color:#1a1a2e;'>" & 1.passport2PassportIssue & "</td></tr>
+        <tr><td style='padding:5px 0;font-size:13px;color:#666;'>Expiry Date</td><td style='padding:5px 0;font-size:13px;color:#1a1a2e;'>" & 1.passport2PassportExpiry & "</td></tr>
+        <tr><td style='padding:5px 0;font-size:13px;color:#666;'>Passport 2 Photo</td><td style='padding:5px 0;font-size:13px;'>" & if(1.passport2Photo; "<span style='color:#2a7a5c;font-weight:600;'>✓ Received</span>"; "<span style='color:#c0392b;'>Not uploaded</span>") & "</td></tr>
+      </table>
+    </td></tr>";
+    "")}}
+
+    <!-- ───────────────────────────────── -->
+    <!-- SECTION: SAFARI PRICING & FLIGHTS -->
+    <!-- ───────────────────────────────── -->
+    <tr><td style="padding:24px 40px 0;">
+      <div style="font-size:12px;font-weight:700;letter-spacing:1.2px;color:#1a3a5c;text-transform:uppercase;border-bottom:2px solid #e8f0f7;padding-bottom:6px;margin-bottom:16px;">Safari Pricing & Flights</div>
+      <table width="100%" cellpadding="0" cellspacing="0">
+        <tr><td style="padding:5px 0;font-size:13px;color:#666;width:45%;">Pricing Selection</td><td style="padding:5px 0;font-size:13px;color:#1a1a2e;">{{1.pricing}}</td></tr>
+        <tr><td style="padding:5px 0;font-size:13px;color:#666;">Total Price</td><td style="padding:5px 0;font-size:14px;color:#1a3a5c;font-weight:700;">{{1.currency}} {{1.totalPrice}}</td></tr>
+        <tr><td style="padding:5px 0;font-size:13px;color:#666;">Flights</td><td style="padding:5px 0;font-size:13px;color:#1a1a2e;">
+          {{if(1.flights = "BuddyArranged"; "Arranged by Buddy-Divers"; if(1.flights = "SelfArranged"; "Self-arranged"; "Undecided"))}}
+        </td></tr>
+      </table>
+    </td></tr>
+
+    <!-- ───────────────────────────────── -->
+    <!-- SECTION: DIVING DETAILS           -->
+    <!-- ───────────────────────────────── -->
+    <tr><td style="padding:24px 40px 0;">
+      <div style="font-size:12px;font-weight:700;letter-spacing:1.2px;color:#1a3a5c;text-transform:uppercase;border-bottom:2px solid #e8f0f7;padding-bottom:6px;margin-bottom:16px;">Diving Details</div>
+      <table width="100%" cellpadding="0" cellspacing="0">
+        <tr><td style="padding:5px 0;font-size:13px;color:#666;width:45%;">Certification Level</td><td style="padding:5px 0;font-size:13px;color:#1a1a2e;">{{1.certLevel}}</td></tr>
+        <tr><td style="padding:5px 0;font-size:13px;color:#666;">Certifying Agency</td><td style="padding:5px 0;font-size:13px;color:#1a1a2e;">{{if(1.certAgency; 1.certAgency; "—")}}</td></tr>
+        <tr><td style="padding:5px 0;font-size:13px;color:#666;">Certification Number</td><td style="padding:5px 0;font-size:13px;color:#1a1a2e;">{{if(1.certNumber; 1.certNumber; "—")}}</td></tr>
+        <tr><td style="padding:5px 0;font-size:13px;color:#666;">Number of Dives</td><td style="padding:5px 0;font-size:13px;color:#1a1a2e;">{{if(1.numDives; 1.numDives; "—")}}</td></tr>
+        <tr><td style="padding:5px 0;font-size:13px;color:#666;">Nitrox Certified</td><td style="padding:5px 0;font-size:13px;color:#1a1a2e;">{{if(1.nitrox = "Yes"; "Yes"; "No")}}</td></tr>
+        <tr><td style="padding:5px 0;font-size:13px;color:#666;">Nitrox Cert Number</td><td style="padding:5px 0;font-size:13px;color:#1a1a2e;">{{if(1.nitroxCertNumber; 1.nitroxCertNumber; "—")}}</td></tr>
+        <tr><td style="padding:5px 0;font-size:13px;color:#666;">Last Dive Date</td><td style="padding:5px 0;font-size:13px;color:#1a1a2e;">{{if(1.lastDive; 1.lastDive; "—")}}</td></tr>
+        <tr>
+          <td style="padding:5px 0;font-size:13px;color:#666;">Dive Cert Photo</td>
+          <td style="padding:5px 0;font-size:13px;">{{if(1.diveCertPhotoUrl; "<span style='color:#2a7a5c;font-weight:600;'>✓ Received</span>"; "<span style='color:#c0392b;'>Not uploaded</span>")}}</td>
+        </tr>
+        <tr>
+          <td style="padding:5px 0;font-size:13px;color:#666;">Nitrox Cert Photo</td>
+          <td style="padding:5px 0;font-size:13px;">{{if(1.nitroxCertPhotoUrl; "<span style='color:#2a7a5c;font-weight:600;'>✓ Received</span>"; "<span style='color:#c0392b;'>Not uploaded</span>")}}</td>
+        </tr>
+      </table>
+    </td></tr>
+
+    <!-- ───────────────────────────────── -->
+    <!-- SECTION: EQUIPMENT                -->
+    <!-- ───────────────────────────────── -->
+    <tr><td style="padding:24px 40px 0;">
+      <div style="font-size:12px;font-weight:700;letter-spacing:1.2px;color:#1a3a5c;text-transform:uppercase;border-bottom:2px solid #e8f0f7;padding-bottom:6px;margin-bottom:16px;">Equipment</div>
+      <table width="100%" cellpadding="0" cellspacing="0">
+        <tr><td style="padding:5px 0;font-size:13px;color:#666;width:45%;">Dive Computer</td><td style="padding:5px 0;font-size:13px;color:#1a1a2e;">{{1.diveComputer}}</td></tr>
+        <tr><td style="padding:5px 0;font-size:13px;color:#666;">BCD Size</td><td style="padding:5px 0;font-size:13px;color:#1a1a2e;">{{if(1.bcdSize; 1.bcdSize; "—")}}</td></tr>
+        <tr><td style="padding:5px 0;font-size:13px;color:#666;">Regulator Rental</td><td style="padding:5px 0;font-size:13px;color:#1a1a2e;">{{if(1.regulatorRental; 1.regulatorRental; "—")}}</td></tr>
+        <tr><td style="padding:5px 0;font-size:13px;color:#666;">Wetsuit Size</td><td style="padding:5px 0;font-size:13px;color:#1a1a2e;">{{if(1.wetsuitSize; 1.wetsuitSize; "—")}}</td></tr>
+        <tr><td style="padding:5px 0;font-size:13px;color:#666;">Fins / Shoe Size</td><td style="padding:5px 0;font-size:13px;color:#1a1a2e;">{{if(1.finsSize; 1.finsSize; "—")}}</td></tr>
+        <tr><td style="padding:5px 0;font-size:13px;color:#666;">Mask Rental</td><td style="padding:5px 0;font-size:13px;color:#1a1a2e;">{{if(1.maskRental; 1.maskRental; "—")}}</td></tr>
+        <tr><td style="padding:5px 0;font-size:13px;color:#666;">15L Tank</td><td style="padding:5px 0;font-size:13px;color:#1a1a2e;">{{if(1.tank15L; 1.tank15L; "—")}}</td></tr>
+        <tr><td style="padding:5px 0;font-size:13px;color:#666;">Height</td><td style="padding:5px 0;font-size:13px;color:#1a1a2e;">{{if(1.height; 1.height & " cm"; "—")}}</td></tr>
+        <tr><td style="padding:5px 0;font-size:13px;color:#666;">Weight</td><td style="padding:5px 0;font-size:13px;color:#1a1a2e;">{{if(1.weight; 1.weight & " kg"; "—")}}</td></tr>
+      </table>
+    </td></tr>
+
+    <!-- ───────────────────────────────── -->
+    <!-- SECTION: HEALTH & MEDICAL         -->
+    <!-- ───────────────────────────────── -->
+    <tr><td style="padding:24px 40px 0;">
+      <div style="font-size:12px;font-weight:700;letter-spacing:1.2px;color:#1a3a5c;text-transform:uppercase;border-bottom:2px solid #e8f0f7;padding-bottom:6px;margin-bottom:16px;">Health & Medical</div>
+      <table width="100%" cellpadding="0" cellspacing="0">
+        <tr><td style="padding:5px 0;font-size:13px;color:#666;width:45%;">Dietary Requirements</td><td style="padding:5px 0;font-size:13px;color:#1a1a2e;">{{if(1.dietary; 1.dietary; "—")}}</td></tr>
+        <tr><td style="padding:5px 0;font-size:13px;color:#666;">Known Allergies</td><td style="padding:5px 0;font-size:13px;color:#1a1a2e;">{{if(1.allergies; 1.allergies; "—")}}</td></tr>
+        <tr><td style="padding:5px 0;font-size:13px;color:#666;">Medical Notes</td><td style="padding:5px 0;font-size:13px;color:#1a1a2e;">{{if(1.medicalNotes; 1.medicalNotes; "—")}}</td></tr>
+      </table>
+    </td></tr>
+
+    <!-- ───────────────────────────────── -->
+    <!-- SECTION: EMERGENCY CONTACT        -->
+    <!-- ───────────────────────────────── -->
+    <tr><td style="padding:24px 40px 0;">
+      <div style="font-size:12px;font-weight:700;letter-spacing:1.2px;color:#1a3a5c;text-transform:uppercase;border-bottom:2px solid #e8f0f7;padding-bottom:6px;margin-bottom:16px;">Emergency Contact</div>
+      <table width="100%" cellpadding="0" cellspacing="0">
+        <tr><td style="padding:5px 0;font-size:13px;color:#666;width:45%;">Name</td><td style="padding:5px 0;font-size:13px;color:#1a1a2e;">{{1.emergencyName}}</td></tr>
+        <tr><td style="padding:5px 0;font-size:13px;color:#666;">Relationship</td><td style="padding:5px 0;font-size:13px;color:#1a1a2e;">{{if(1.emergencyRelationship; 1.emergencyRelationship; "—")}}</td></tr>
+        <tr><td style="padding:5px 0;font-size:13px;color:#666;">Email</td><td style="padding:5px 0;font-size:13px;color:#1a1a2e;">{{1.emergencyEmail}}</td></tr>
+        <tr><td style="padding:5px 0;font-size:13px;color:#666;">Phone</td><td style="padding:5px 0;font-size:13px;color:#1a1a2e;">{{1.emergencyPhone}}</td></tr>
+      </table>
+    </td></tr>
+
+    <!-- ───────────────────────────────── -->
+    <!-- SECTION: DIVE INSURANCE           -->
+    <!-- ───────────────────────────────── -->
+    <tr><td style="padding:24px 40px 0;">
+      <div style="font-size:12px;font-weight:700;letter-spacing:1.2px;color:#1a3a5c;text-transform:uppercase;border-bottom:2px solid #e8f0f7;padding-bottom:6px;margin-bottom:16px;">Dive Insurance</div>
+      <table width="100%" cellpadding="0" cellspacing="0">
+        <tr><td style="padding:5px 0;font-size:13px;color:#666;width:45%;">Insurance Company</td><td style="padding:5px 0;font-size:13px;color:#1a1a2e;">{{if(1.insuranceCompany; 1.insuranceCompany; "—")}}</td></tr>
+        <tr><td style="padding:5px 0;font-size:13px;color:#666;">Policy Number</td><td style="padding:5px 0;font-size:13px;color:#1a1a2e;">{{if(1.policyNumber; 1.policyNumber; "—")}}</td></tr>
+        <tr><td style="padding:5px 0;font-size:13px;color:#666;">Emergency Contact</td><td style="padding:5px 0;font-size:13px;color:#1a1a2e;">{{if(1.insuranceContact; 1.insuranceContact; "—")}}</td></tr>
+        <tr>
+          <td style="padding:5px 0;font-size:13px;color:#666;">Insurance Document</td>
+          <td style="padding:5px 0;font-size:13px;">{{if(1.insurancePhotoUrl; "<span style='color:#2a7a5c;font-weight:600;'>✓ Received</span>"; "<span style='color:#c0392b;'>Not uploaded</span>")}}</td>
+        </tr>
+      </table>
+    </td></tr>
+
+    <!-- ───────────────────────────────── -->
+    <!-- SECTION: PAYMENT                  -->
+    <!-- ───────────────────────────────── -->
+    <tr><td style="padding:24px 40px 0;">
+      <div style="font-size:12px;font-weight:700;letter-spacing:1.2px;color:#1a3a5c;text-transform:uppercase;border-bottom:2px solid #e8f0f7;padding-bottom:6px;margin-bottom:16px;">Payment</div>
+      <table width="100%" cellpadding="0" cellspacing="0">
+        <tr><td style="padding:5px 0;font-size:13px;color:#666;width:45%;">Payment Method</td><td style="padding:5px 0;font-size:13px;color:#1a1a2e;">{{1.paymentMethod}}</td></tr>
+      </table>
+    </td></tr>
+
+    <!-- ───────────────────────────────── -->
+    <!-- SECTION: ADDITIONAL               -->
+    <!-- ───────────────────────────────── -->
+    <tr><td style="padding:24px 40px 0;">
+      <div style="font-size:12px;font-weight:700;letter-spacing:1.2px;color:#1a3a5c;text-transform:uppercase;border-bottom:2px solid #e8f0f7;padding-bottom:6px;margin-bottom:16px;">Additional Information</div>
+      <table width="100%" cellpadding="0" cellspacing="0">
+        <tr><td style="padding:5px 0;font-size:13px;color:#666;width:45%;">Returning Customer</td><td style="padding:5px 0;font-size:13px;color:#1a1a2e;">{{if(1.returningCustomer = "yes"; "Yes"; "No")}}</td></tr>
+        <tr><td style="padding:5px 0;font-size:13px;color:#666;">How Did You Hear About Us</td><td style="padding:5px 0;font-size:13px;color:#1a1a2e;">{{if(1.referral; 1.referral; "—")}}</td></tr>
+        <tr><td style="padding:5px 0;font-size:13px;color:#666;">Media Consent</td><td style="padding:5px 0;font-size:13px;color:#1a1a2e;">{{if(1.mediaConsent; 1.mediaConsent; "—")}}</td></tr>
+        <tr><td style="padding:5px 0;font-size:13px;color:#666;">Notes / Special Requests</td><td style="padding:5px 0;font-size:13px;color:#1a1a2e;">{{if(1.notes; 1.notes; "—")}}</td></tr>
+      </table>
+    </td></tr>
+
+    <!-- FOOTER NOTE -->
+    <tr>
+      <td style="padding:32px 40px;">
+        <div style="background:#f4f7fa;border-radius:8px;padding:16px 20px;font-size:12px;color:#666;line-height:1.6;">
+          If any of the above details are incorrect, please reply to this email or contact us at <a href="mailto:info@buddy-divers.com" style="color:#1a3a5c;">info@buddy-divers.com</a> as soon as possible so we can update your record before the trip.
+        </div>
+      </td>
+    </tr>
+
+    <!-- FOOTER -->
+    <tr>
+      <td style="background:#1a3a5c;padding:20px 40px;text-align:center;">
+        <div style="color:#a8c4d8;font-size:12px;">Buddy-Divers | info@buddy-divers.com | buddy-divers.com</div>
+      </td>
+    </tr>
+
+  </table>
+  </td></tr>
+</table>
+
+</body>
+</html>
+
+<!-- ================================================================
+MAKE.COM SCENARIO 3 — SETUP INSTRUCTIONS
+================================================================
+
+1. After the existing Airtable module, add a ROUTER module.
+
+2. ROUTE 1 — "Send Registration Copy":
+   - Filter condition: {{1.requestCopy}} = yes
+   - Add an "Email" (or "Gmail") module
+   - To: {{1.email}}
+   - Subject: Your Buddy-Divers Registration Details — {{1.tripDestination}}
+   - Content type: HTML
+   - Body: paste the full HTML above (everything before these instructions)
+
+3. ROUTE 2 — "Standard flow":
+   - No filter (fallback)
+   - Continue with the existing notification email flow
+
+4. FIELD NAME NOTES — match exactly to your Make webhook field names:
+   - 1.firstName, 1.lastName, 1.middleName, 1.boatName
+   - 1.email, 1.phone, 1.city
+   - 1.idNumber
+   - 1.dob, 1.nationality, 1.passportNumber, 1.passportIssue, 1.passportExpiry, 1.gender
+   - 1.passportPhotoUrl
+   - 1.passport2FirstName, 1.passport2MiddleName, 1.passport2LastName
+   - 1.passport2Dob, 1.passport2Nationality, 1.passport2PassportNumber
+   - 1.passport2PassportIssue, 1.passport2PassportExpiry, 1.passport2Photo
+   - 1.pricing, 1.totalPrice, 1.currency, 1.tripId, 1.tripDestination, 1.flights
+   - 1.certLevel, 1.certAgency, 1.certNumber, 1.numDives, 1.nitrox
+   - 1.nitroxCertNumber, 1.lastDive
+   - 1.diveCertPhotoUrl, 1.nitroxCertPhotoUrl
+   - 1.diveComputer, 1.bcdSize, 1.regulatorRental, 1.wetsuitSize
+   - 1.finsSize, 1.maskRental, 1.tank15L, 1.height, 1.weight
+   - 1.dietary, 1.allergies, 1.medicalNotes
+   - 1.emergencyName, 1.emergencyRelationship, 1.emergencyEmail, 1.emergencyPhone
+   - 1.insuranceCompany, 1.policyNumber, 1.insuranceContact, 1.insurancePhotoUrl
+   - 1.paymentMethod
+   - 1.returningCustomer, 1.referral, 1.mediaConsent, 1.notes
+   - 1.submittedAt, 1.requestCopy
+================================================================ -->
