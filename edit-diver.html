@@ -1649,7 +1649,6 @@ function renderPricingCards(tripId, storedPricing) {
 
   document.getElementById('pricingCardsWrap').innerHTML = html;
   document.getElementById('pricingFieldWrap').style.display = 'block';
-  document.getElementById('pricingSaveMsg').textContent = '';
   updatePricingLabel();
 }
 
@@ -1730,8 +1729,7 @@ async function loadDiverBookings(diverRecordId, diverIdNumber) {
         document.querySelectorAll('[id^="pricingBtn_"]').forEach(el => el.classList.remove('selected'));
         btn.classList.add('selected');
         currentBookingRecordId = b.id;
-        document.getElementById('pricingSaveMsg').textContent = '';
-        if (b.flights) setRadio('flights', b.flights);
+              if (b.flights) setRadio('flights', b.flights);
         if (b.passportPhoto2) setCurFile('passport2-current', 'f-p2Photo', b.passportPhoto2);
         if (b.diveCertPhoto) setCurFile('cert-current', 'f-certPhoto', b.diveCertPhoto);
         if (b.nitroxCertPhoto) setCurFile('nitrox-current', 'f-nitroxPhoto', b.nitroxCertPhoto);
@@ -1761,7 +1759,6 @@ function loadBookingPricing() {
   const booking = currentBookings.find(b => b.id === bookingId);
   document.getElementById('f-bookingPricing').value = booking ? booking.pricing : '';
   document.getElementById('pricingFieldWrap').style.display = 'block';
-  document.getElementById('pricingSaveMsg').textContent = '';
   if (booking) {
     // Set Flights from booking
     if (booking.flights) setRadio('flights', booking.flights);
