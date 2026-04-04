@@ -680,7 +680,7 @@ async function searchById() {
   try {
     let found = null;
     // Try multiple possible field names for Israeli ID
-    for (const fieldName of ['ID Number', 'Israeli ID', 'Diver ID', 'Israeli ID Number']) {
+    for (const fieldName of ['Israeli ID', 'ID Number', 'Diver ID', 'Israeli ID Number']) {
       try {
         const formula = encodeURIComponent(`{${fieldName}}="${id}"`);
         const res = await fetch(
@@ -745,8 +745,8 @@ function loadDiverRecord(rec) {
   document.getElementById('diverBanner').style.display = 'block';
 
   // Personal — try multiple field name variants
-  const idVal = getF(f, 'ID Number', 'Israeli ID', 'Diver ID', 'Israeli ID Number');
-  const boatVal = getF(f, 'Boat Name', 'Preferred First Name on Boat', 'First Name on Boat', 'Boat First Name', 'Preferred Name', 'Nickname', 'Nick Name', 'Boat');
+  const idVal = getF(f, 'Israeli ID', 'ID Number', 'Diver ID');
+  const boatVal = getF(f, 'Preferred Boat Name', 'Boat Name', 'Preferred First Name on Boat');
   setV('f-idNumber', idVal);
   setV('f-boatName', boatVal);
   setV('f-email', f['Email']); setV('f-phone', f['Phone']); setV('f-city', f['City']);
@@ -754,9 +754,11 @@ function loadDiverRecord(rec) {
   // Passport 1
   setV('f-firstName', f['First Name']); setV('f-middleName', f['Middle Name']); setV('f-lastName', f['Last Name']);
   setV('f-dob', iso2dmy(f['Date of Birth']));
-  setSel('f-nationality', getF(f, 'Nationality', 'Passport Nationality', 'Country', 'Citizenship', 'Nationality (Passport)', 'Passport Country'));
+  setSel('f-nationality', getF(f, 'Passport Country', 'Nationality', 'Passport Nationality', 'Country', 'Citizenship'));
   setV('f-passportNumber', f['Passport Number']);
-  setSel('f-gender', f['Gender']);
+  var genderRaw = f['Gender'] || '';
+  var genderMapped = genderRaw === 'M' ? 'male' : genderRaw === 'F' ? 'female' : genderRaw;
+  setSel('f-gender', genderMapped);
   setV('f-passportIssue', iso2dmy(f['Passport Issue Date']));
   setV('f-passportExpiry', iso2dmy(f['Passport Expiry Date']));
   setCurFile('passport-current', 'f-passportPhoto', getF(f, 'Passport Photo URL', 'Passport Photo', 'Passport Photo (URL)', 'Passport Image URL', 'Passport 1 Photo URL'));
@@ -767,11 +769,11 @@ function loadDiverRecord(rec) {
   setV('f-p2Nationality', f['Passport 2 Nationality']); setV('f-p2PassportNumber', f['Passport 2 Number']);
   setV('f-p2Issue', iso2dmy(f['Passport 2 Issue Date'])); setV('f-p2Expiry', iso2dmy(f['Passport 2 Expiry Date']));
   setCurFile('passport2-current', 'f-p2Photo',
-    getF(f, 'Passport Photo 2 URL', 'Passport 2 Photo URL', 'Second Passport Photo URL', 'Passport Photo 2 (URL)', 'Passport2 Photo URL', 'Passport 2 Photo', 'Second Passport Photo', 'Passport Photo 2'));
+    getF(f, 'Passport 2 Photo', 'Passport Photo 2 URL', 'Passport 2 Photo URL', 'Second Passport Photo URL', 'Passport Photo 2'));
 
   // Diving
   setSel('f-certLevel', f['Dive Certification Level']);
-  setSel('f-certAgency', getF(f, 'Certification Agency', 'Cert Agency', 'Certifying Agency', 'Agency', 'Dive Agency', 'Certifying Organization'));
+  setSel('f-certAgency', getF(f, 'Certifying Agency', 'Certification Agency', 'Cert Agency', 'Agency'));
   setV('f-certNumber', f['Certification Number']); setV('f-numDives', f['Number of Dives']);
   setSel('f-nitrox', f['Nitrox Certified']); setV('f-lastDive', iso2dmy(f['Last Dive Date']));
   setV('f-nitroxCertNumber', f['Nitrox Cert Number']); toggleNitrox();
@@ -783,11 +785,11 @@ function loadDiverRecord(rec) {
   // Equipment
   setRadio('diveComputer', f['Dive Computer']);
   setSel('f-bcdSize', f['BCD Size']);
-  setSel('f-regulator', getF(f, 'Regulator', 'Regulator Rental', 'Needs Regulator', 'Rent Regulator'));
+  setSel('f-regulator', getF(f, 'Regulator Rental', 'Regulator', 'Needs Regulator'));
   setSel('f-wetsuitSize', f['Wetsuit Size']);
-  setSel('f-finsSize', getF(f, 'Fins Size', 'Fins', 'Fins Size (EU)', 'Fin Size', 'Fins EU', 'Fins (EU)', 'EU Fins Size', 'Fin Size (EU)'));
-  setSel('f-mask', getF(f, 'Mask', 'Mask Rental', 'Needs Mask', 'Rent Mask'));
-  setSel('f-tank15L', getF(f, 'Tank 15L', '15L Tank', 'Tank', 'Tank Size', '15 Liter Tank'));
+  setSel('f-finsSize', getF(f, 'Fins Rental - Shoe size', 'Fins Size', 'Fins', 'Fins Size (EU)', 'Fin Size'));
+  setSel('f-mask', getF(f, 'Mask Rental', 'Mask', 'Needs Mask'));
+  setSel('f-tank15L', getF(f, '15L Tank', '5L Tank', 'Tank 15L', 'Tank'));
   setV('f-height', f['Height']); setV('f-weight', f['Weight']);
 
   // Health
@@ -798,9 +800,9 @@ function loadDiverRecord(rec) {
   setV('f-emergencyEmail', f['Emergency Contact Email']); setV('f-emergencyPhone', f['Emergency Contact Phone']);
 
   // Insurance
-  setV('f-insuranceCompany', getF(f, 'Insurance Company', 'Insurance Company Name', 'Insurance Provider', 'Dive Insurance Company'));
-  setV('f-policyNumber', getF(f, 'Policy Number', 'Insurance Policy Number', 'Insurance Policy', 'Policy', 'Policy No', 'Insurance Policy No'));
-  setV('f-insuranceContact', getF(f, 'Insurance Contact', 'Insurance Emergency Contact', 'Insurance Contact Details', 'Insurance Company Contact Details', 'Insurance Phone', 'Insurance Contact Info', 'Insurance Details', 'Emergency Insurance Contact'));
+  setV('f-insuranceCompany', getF(f, 'Dive Insurance Company', 'Insurance Company', 'Insurance Provider'));
+  setV('f-policyNumber', getF(f, 'Dive Insurance Policy Number', 'Policy Number', 'Insurance Policy Number', 'Policy'));
+  setV('f-insuranceContact', getF(f, 'Dive Insurance Emergency Contact', 'Insurance Contact', 'Insurance Emergency Contact', 'Insurance Company Contact Details'));
   setCurFile('insurance-current', 'f-insurancePhoto', f['Dive Insurance URL']);
 
   // Flights & Payment
@@ -811,11 +813,11 @@ function loadDiverRecord(rec) {
   const rc = f['Returning Customer'];
   const rcCb = document.getElementById('f-returningCustomer');
   if (rcCb) {
-    rcCb.checked = (rc === 'yes' || rc === 'Yes' || rc === true);
+    rcCb.checked = (rc === 'yes' || rc === 'Yes' || rc === 'YES' || rc === true);
     document.getElementById('rc-check').classList.toggle('selected', rcCb.checked);
   }
   setV('f-notes', f['Notes']);
-  setSel('f-referral', getF(f, 'How Did You Hear', 'How Did You Hear About Us', 'How Did You Hear About Us?', 'Referral', 'Referral Source'));
+  setSel('f-referral', getF(f, 'Referral Source', 'How Did You Hear', 'How Did You Hear About Us', 'Referral'));
   setSel('f-mediaConsent', f['Media Consent']);
 
   // Show sections
@@ -845,10 +847,10 @@ async function saveDiver() {
     }
     // Personal
     add('Email','f-email'); add('Phone','f-phone');
-    add('ID Number','f-idNumber'); add('Boat Name','f-boatName'); add('City','f-city');
+    add('Israeli ID','f-idNumber'); add('Preferred Boat Name','f-boatName'); add('City','f-city');
     // Passport 1
     add('First Name','f-firstName'); add('Middle Name','f-middleName'); add('Last Name','f-lastName');
-    add('Date of Birth','f-dob', dmy2iso); add('Nationality','f-nationality');
+    add('Date of Birth','f-dob', dmy2iso); add('Passport Country','f-nationality');
     add('Passport Number','f-passportNumber'); add('Gender','f-gender');
     add('Passport Issue Date','f-passportIssue', dmy2iso); add('Passport Expiry Date','f-passportExpiry', dmy2iso);
     // Passport 2
@@ -857,7 +859,7 @@ async function saveDiver() {
     add('Passport 2 Nationality','f-p2Nationality'); add('Passport 2 Number','f-p2PassportNumber');
     add('Passport 2 Issue Date','f-p2Issue', dmy2iso); add('Passport 2 Expiry Date','f-p2Expiry', dmy2iso);
     // Diving
-    add('Dive Certification Level','f-certLevel'); add('Certification Agency','f-certAgency');
+    add('Dive Certification Level','f-certLevel'); add('Certifying Agency','f-certAgency');
     add('Certification Number','f-certNumber');
     const nd = document.getElementById('f-numDives').value; if (nd!=='') fields['Number of Dives'] = parseInt(nd,10);
     add('Nitrox Certified','f-nitrox'); add('Last Dive Date','f-lastDive', dmy2iso);
@@ -865,8 +867,8 @@ async function saveDiver() {
     // Equipment
     const dc = document.querySelector('input[name="diveComputer"]:checked');
     if (dc) fields['Dive Computer'] = dc.value;
-    add('BCD Size','f-bcdSize'); add('Regulator','f-regulator'); add('Wetsuit Size','f-wetsuitSize');
-    add('Fins Size','f-finsSize'); add('Mask','f-mask'); add('Tank 15L','f-tank15L');
+    add('BCD Size','f-bcdSize'); add('Regulator Rental','f-regulator'); add('Wetsuit Size','f-wetsuitSize');
+    add('Fins Rental - Shoe size','f-finsSize'); add('Mask Rental','f-mask'); add('15L Tank','f-tank15L');
     const ht=document.getElementById('f-height').value; if(ht) fields['Height']=parseInt(ht,10);
     const wt=document.getElementById('f-weight').value; if(wt) fields['Weight']=parseInt(wt,10);
     // Health
@@ -874,8 +876,8 @@ async function saveDiver() {
     add('Emergency Contact Name','f-emergencyName'); add('Emergency Contact Relationship','f-emergencyRelationship');
     add('Emergency Contact Email','f-emergencyEmail'); add('Emergency Contact Phone','f-emergencyPhone');
     // Insurance
-    add('Insurance Company','f-insuranceCompany'); add('Policy Number','f-policyNumber');
-    add('Insurance Contact','f-insuranceContact');
+    add('Dive Insurance Company','f-insuranceCompany'); add('Dive Insurance Policy Number','f-policyNumber');
+    add('Dive Insurance Emergency Contact','f-insuranceContact');
     // Flights & Payment
     const fl = document.querySelector('input[name="flights"]:checked');
     if (fl) fields['Flights'] = fl.value;
@@ -884,11 +886,11 @@ async function saveDiver() {
     // Additional
     const rcCb = document.getElementById('f-returningCustomer');
     if (rcCb) fields['Returning Customer'] = rcCb.checked ? 'yes' : 'no';
-    add('Notes','f-notes'); add('How Did You Hear','f-referral'); add('Media Consent','f-mediaConsent');
+    add('Notes','f-notes'); add('Referral Source','f-referral'); add('Media Consent','f-mediaConsent');
     // Photos — only new uploads
     [['f-passportPhoto','Passport Photo URL'],['f-certPhoto','Dive Cert Photo URL'],
      ['f-nitroxPhoto','Nitrox Cert Photo URL'],['f-insurancePhoto','Dive Insurance URL'],
-     ['f-p2Photo','Passport Photo 2 URL']].forEach(([id,at]) => {
+     ['f-p2Photo','Passport 2 Photo']].forEach(([id,at]) => {
       const v=(document.getElementById(id)||{}).value; if(v) fields[at]=v;
     });
     await atPatch(DIVERS_TABLE, currentDiverId, fields);
