@@ -1,4 +1,4 @@
-<!-- BD-EDIT 2026-04-04b -->
+<!-- BD-EDIT 2026-04-04c -->
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
@@ -877,7 +877,7 @@ async function saveDiver() {
     if (pm) fields['Payment Method'] = pm.value;
     // Additional
     const rcCb = document.getElementById('f-returningCustomer');
-    if (rcCb) fields['Returning Customer'] = rcCb.checked ? 'yes' : 'no';
+    if (rcCb) fields['Returning Customer'] = rcCb.checked ? 'Yes' : 'No';
     add('Notes','f-notes'); add('Referral Source','f-referral'); add('Media Consent','f-mediaConsent');
     // Photos — only new uploads
     [['f-passportPhoto','Passport Photo URL'],['f-certPhoto','Dive Cert Photo URL'],
@@ -1777,7 +1777,10 @@ async function saveBookingPricing() {
   const msgEl = document.getElementById('pricingSaveMsg');
   msgEl.style.color = '#5a7a8a'; msgEl.textContent = 'שומר... / Saving...';
   try {
-    await atPatch(BOOKINGS_TABLE, currentBookingRecordId, { 'Pricing': pricing });
+    const fl = document.querySelector('input[name="flights"]:checked');
+    const bookingFields = { 'Pricing': pricing };
+    if (fl) bookingFields['Self Arranged Flights'] = fl.value;
+    await atPatch(BOOKINGS_TABLE, currentBookingRecordId, bookingFields);
     msgEl.style.color = '#2a7a5c'; msgEl.textContent = '✓ נשמר / Saved';
     // Update local cache
     const booking = currentBookings.find(b => b.id === currentBookingRecordId);
