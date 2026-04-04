@@ -1,4 +1,4 @@
-<!-- BD-EDIT 2026-04-04a -->
+<!-- BD-EDIT 2026-04-04b -->
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
@@ -844,7 +844,8 @@ async function saveDiver() {
     // Passport 1
     add('First Name','f-firstName'); add('Middle Name','f-middleName'); add('Last Name','f-lastName');
     add('Date of Birth','f-dob', dmy2iso); add('Passport Country','f-nationality');
-    add('Passport Number','f-passportNumber'); add('Gender','f-gender');
+    add('Passport Number','f-passportNumber');
+    const genderEl = document.getElementById('f-gender'); if (genderEl && genderEl.value) fields['Gender'] = genderEl.value === 'male' ? 'M' : genderEl.value === 'female' ? 'F' : genderEl.value;
     add('Passport Issue Date','f-passportIssue', dmy2iso); add('Passport Expiry Date','f-passportExpiry', dmy2iso);
     // Passport 2
     add('Passport 2 First Name','f-p2FirstName'); add('Passport 2 Middle Name','f-p2MiddleName');
@@ -871,7 +872,9 @@ async function saveDiver() {
     // Insurance
     add('Dive Insurance Company','f-insuranceCompany'); add('Dive Insurance Policy Number','f-policyNumber');
     add('Dive Insurance Emergency Contact','f-insuranceContact');
-    // Payment
+    // Flights & Payment
+    const fl = document.querySelector('input[name="flights"]:checked');
+    if (fl) fields['Flights'] = fl.value;
     const pm = document.querySelector('input[name="paymentMethod"]:checked');
     if (pm) fields['Payment Method'] = pm.value;
     // Additional
@@ -1739,12 +1742,9 @@ async function loadDiverBookings(diverRecordId, diverIdNumber) {
     });
     document.getElementById('pricingLoadWrap').style.display = 'none';
     document.getElementById('pricingBookingWrap').style.display = 'block';
-    // Auto-select if only one booking; hide selector button (not needed for single booking)
+    // Auto-select if only one booking
     if (currentBookings.length === 1) {
-      btnsEl.style.display = 'none';
       btnsEl.firstChild && btnsEl.firstChild.click();
-    } else {
-      btnsEl.style.display = '';
     }
   } catch(e) {
     document.getElementById('pricingLoadWrap').innerHTML = `<p style="font-size:13px;color:#d93f3f;text-align:right;">שגיאה / Error: ${e.message}</p>`;
@@ -1776,10 +1776,7 @@ async function saveBookingPricing() {
   const msgEl = document.getElementById('pricingSaveMsg');
   msgEl.style.color = '#5a7a8a'; msgEl.textContent = 'שומר... / Saving...';
   try {
-    const fl = document.querySelector('input[name="flights"]:checked');
-    const bookingFields = { 'Pricing': pricing };
-    if (fl) bookingFields['Self Arranged Flights'] = fl.value;
-    await atPatch(BOOKINGS_TABLE, currentBookingRecordId, bookingFields);
+    await atPatch(BOOKINGS_TABLE, currentBookingRecordId, { 'Pricing': pricing });
     msgEl.style.color = '#2a7a5c'; msgEl.textContent = '✓ נשמר / Saved';
     // Update local cache
     const booking = currentBookings.find(b => b.id === currentBookingRecordId);
