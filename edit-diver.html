@@ -1,0 +1,1064 @@
+<!-- BD-EDIT 2026-04-03c -->
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/jpeg" href="https://res.cloudinary.com/dccbsfte0/image/upload/v1774016253/logo2_swvqfe.jpg" />
+  <title>Edit Diver — Buddy-Divers Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'DM Sans', sans-serif; background: #eef4f7; min-height: 100vh; direction: rtl; }
+
+    /* ── TOKEN OVERLAY ── */
+    #tokenOverlay {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55);
+      z-index: 1000; align-items: center; justify-content: center;
+    }
+    .token-box {
+      background: #fff; border-radius: 14px; padding: 36px 32px; width: 360px;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.18);
+    }
+    .token-box h2 { color: #1a3a5c; font-size: 18px; margin-bottom: 8px; text-align: center; }
+    .token-box p { font-size: 13px; color: #5a7a8a; text-align: center; margin-bottom: 18px; }
+    .token-box input {
+      width: 100%; border: 1.5px solid #c5dfe6; border-radius: 8px;
+      padding: 10px 14px; font-size: 15px; color: #1a3a4a; outline: none; margin-bottom: 12px;
+      font-family: 'DM Sans', sans-serif; direction: ltr;
+    }
+    .token-box button {
+      width: 100%; background: #1a3a5c; color: #fff; border: none;
+      border-radius: 8px; padding: 11px; font-size: 15px; font-weight: 700;
+      cursor: pointer; font-family: 'DM Sans', sans-serif;
+    }
+    .token-box button:hover { background: #254d78; }
+    #tokenError { color: #d93f3f; font-size: 13px; text-align: center; margin-top: 8px; display: none; }
+
+    /* ── HEADER ── */
+    .header {
+      background: linear-gradient(135deg, #1a3a5c 0%, #254d78 100%);
+      padding: 18px 24px; display: flex; align-items: center; gap: 14px;
+    }
+    .header img { height: 42px; border-radius: 8px; }
+    .header h1 { color: #fff; font-size: 20px; font-weight: 700; }
+    .header .sub { color: #a8cfe0; font-size: 13px; margin-top: 2px; direction: ltr; }
+
+    /* ── MAIN ── */
+    .container { max-width: 900px; margin: 28px auto; padding: 0 16px 60px; }
+
+    /* ── SEARCH CARD ── */
+    .search-card {
+      background: #fff; border-radius: 14px; padding: 24px 28px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.07); margin-bottom: 24px;
+    }
+    .search-card h2 { color: #1a3a5c; font-size: 16px; font-weight: 700; margin-bottom: 18px; }
+    .search-tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+    .tab-btn {
+      flex: 1; padding: 9px; border: 2px solid #c5dfe6; border-radius: 8px;
+      background: #f4fafd; color: #1a3a5c; font-size: 14px; font-weight: 600;
+      cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all .2s;
+    }
+    .tab-btn.active { background: #1a3a5c; color: #fff; border-color: #1a3a5c; }
+    .tab-pane { display: none; }
+    .tab-pane.active { display: block; }
+    .search-row { display: flex; gap: 10px; }
+    .search-row input, .search-row select {
+      flex: 1; border: 1.5px solid #c5dfe6; border-radius: 8px;
+      padding: 10px 14px; font-size: 14px; color: #1a3a4a; outline: none;
+      font-family: 'DM Sans', sans-serif; direction: ltr;
+    }
+    .search-row select { direction: rtl; }
+    .btn-search {
+      background: #1a3a5c; color: #fff; border: none; border-radius: 8px;
+      padding: 10px 20px; font-size: 14px; font-weight: 700; cursor: pointer;
+      font-family: 'DM Sans', sans-serif; white-space: nowrap;
+    }
+    .btn-search:hover { background: #254d78; }
+    #diverList { margin-top: 14px; display: none; }
+    .diver-item {
+      border: 1.5px solid #c5dfe6; border-radius: 8px; padding: 10px 16px;
+      margin-bottom: 6px; cursor: pointer; font-size: 14px; color: #1a3a5c;
+      transition: background .15s; display: flex; justify-content: space-between; align-items: center;
+    }
+    .diver-item:hover { background: #eef4f7; }
+    .diver-item .diver-id { color: #5a8a6a; font-size: 12px; direction: ltr; }
+    #searchMsg { font-size: 13px; color: #5a7a8a; margin-top: 10px; text-align: center; display: none; }
+
+    /* ── SECTION CARDS ── */
+    .section-card {
+      background: #fff; border-radius: 14px; padding: 24px 28px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.07); margin-bottom: 18px; display: none;
+    }
+    .section-card.visible { display: block; }
+    .section-title {
+      font-size: 15px; font-weight: 700; color: #1a3a5c;
+      border-bottom: 2px solid #eef4f7; padding-bottom: 10px; margin-bottom: 18px;
+      display: flex; align-items: center; gap: 8px;
+    }
+
+    /* ── DIVER BANNER ── */
+    #diverBanner {
+      background: linear-gradient(135deg, #1a3a5c, #254d78);
+      border-radius: 14px; padding: 18px 24px; margin-bottom: 18px;
+      display: none; color: #fff;
+    }
+    #diverBanner .name { font-size: 20px; font-weight: 700; }
+    #diverBanner .meta { font-size: 13px; color: #a8cfe0; margin-top: 4px; direction: ltr; }
+
+    /* ── FORM FIELDS ── */
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .form-grid.three { grid-template-columns: 1fr 1fr 1fr; }
+    .form-grid.full { grid-template-columns: 1fr; }
+    @media (max-width: 600px) {
+      .form-grid, .form-grid.three { grid-template-columns: 1fr; }
+    }
+    .field-group { display: flex; flex-direction: column; gap: 5px; }
+    .field-group label {
+      font-size: 12px; font-weight: 600; color: #5a7a8a; text-transform: uppercase; letter-spacing: .03em;
+    }
+    .field-group label .en { font-weight: 400; color: #8aabb5; margin-right: 4px; text-transform: none; }
+    .field-group input, .field-group select, .field-group textarea {
+      border: 1.5px solid #c5dfe6; border-radius: 8px; padding: 9px 12px;
+      font-size: 14px; color: #1a3a4a; outline: none; font-family: 'DM Sans', sans-serif;
+      background: #fff; transition: border-color .2s;
+    }
+    .field-group input:focus, .field-group select:focus, .field-group textarea:focus {
+      border-color: #3a8a9c;
+    }
+    .field-group textarea { resize: vertical; min-height: 72px; }
+    .field-group input[readonly] { background: #f4fafd; color: #7a9aaa; cursor: not-allowed; }
+    .field-note { font-size: 11px; color: #8aabb5; margin-top: 2px; }
+
+    /* ── UPLOAD AREAS ── */
+    .upload-wrap { display: flex; flex-direction: column; gap: 6px; }
+    .current-file {
+      font-size: 12px; color: #3a8a9c; word-break: break-all;
+      background: #f4fafd; border-radius: 6px; padding: 6px 10px;
+    }
+    .current-file a { color: #3a8a9c; text-decoration: underline; }
+    .upload-area {
+      border: 2px dashed #c5dfe6; border-radius: 8px; padding: 14px 12px;
+      text-align: center; cursor: pointer; transition: border-color .2s; position: relative;
+    }
+    .upload-area:hover { border-color: #3a8a9c; }
+    .upload-area input[type="file"] {
+      position: absolute; inset: 0; opacity: 0; cursor: pointer;
+      border: none; padding: 0;
+    }
+    .upload-area .up-label { font-size: 13px; color: #5a7a8a; }
+    .upload-area .up-hint { font-size: 11px; color: #aac; margin-top: 3px; }
+    .upload-area.uploading { border-color: #d4692a; }
+    .upload-area.upload-done { border-color: #3a8a6c; background: #f4fdf8; }
+    .upload-area.upload-error { border-color: #d93f3f; background: #fdf4f4; }
+    .upload-status { font-size: 12px; margin-top: 5px; min-height: 16px; }
+    .upload-success { color: #2a6a4c; }
+    .upload-error-msg { color: #d93f3f; }
+    .upload-progress { color: #d4692a; }
+
+    /* ── SAVE BAR ── */
+    #saveBar {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: #fff; border-top: 2px solid #eef4f7;
+      padding: 14px 24px; display: none; align-items: center;
+      justify-content: space-between; z-index: 100;
+      box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
+    }
+    #saveBar.visible { display: flex; }
+    #saveBar .diver-label { font-size: 14px; color: #1a3a5c; font-weight: 600; }
+    .save-btns { display: flex; gap: 10px; }
+    .btn-save {
+      background: #2a7a5c; color: #fff; border: none; border-radius: 8px;
+      padding: 10px 28px; font-size: 15px; font-weight: 700;
+      cursor: pointer; font-family: 'DM Sans', sans-serif;
+    }
+    .btn-save:hover { background: #226648; }
+    .btn-save:disabled { background: #aaa; cursor: default; }
+    .btn-clear {
+      background: transparent; color: #5a7a8a; border: 1.5px solid #c5dfe6;
+      border-radius: 8px; padding: 10px 20px; font-size: 14px; font-weight: 600;
+      cursor: pointer; font-family: 'DM Sans', sans-serif;
+    }
+    #saveMsg { font-size: 13px; font-weight: 600; margin-left: 14px; }
+    #saveMsg.ok { color: #2a7a5c; }
+    #saveMsg.err { color: #d93f3f; }
+
+    /* ── NATIONALITY DROPDOWN ── */
+    select option[disabled] { color: #aaa; }
+  </style>
+</head>
+<body>
+
+<!-- TOKEN OVERLAY -->
+<div id="tokenOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:1000;display:flex;align-items:center;justify-content:center;">
+  <div class="token-box">
+    <h2>🔐 Admin Login</h2>
+    <p>Enter your Airtable token to continue.<br/>It will be remembered for this session.</p>
+    <input type="password" id="tokenInput" placeholder="pat..." dir="ltr" />
+    <button onclick="submitToken()">כניסה / Enter</button>
+    <div id="tokenError">Invalid token. Please try again.</div>
+  </div>
+</div>
+
+<!-- HEADER -->
+<div class="header">
+  <img src="https://res.cloudinary.com/dccbsfte0/image/upload/v1773063708/logo_hnmilh.png" alt="Buddy-Divers" />
+  <div>
+    <div class="h1">✏️ Edit Diver Record</div>
+    <div class="sub">Admin — Update diver details &amp; file uploads</div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- SEARCH CARD -->
+  <div class="search-card">
+    <h2>🔍 חפש צולל / Find Diver</h2>
+    <div class="search-tabs">
+      <button class="tab-btn active" onclick="switchTab('id')">לפי מספר ת"ז / By ID</button>
+      <button class="tab-btn" onclick="switchTab('trip')">לפי טיול / By Trip</button>
+    </div>
+
+    <div id="tab-id" class="tab-pane active">
+      <div class="search-row">
+        <input type="text" id="idSearch" placeholder="מספר ת״ז / Israeli ID" dir="ltr"
+          onkeydown="if(event.key==='Enter') searchById()" />
+        <button class="btn-search" onclick="searchById()">חפש / Search</button>
+      </div>
+    </div>
+
+    <div id="tab-trip" class="tab-pane">
+      <div class="search-row">
+        <select id="tripSelect"><option value="">טוען טיולים... / Loading...</option></select>
+        <button class="btn-search" onclick="searchByTrip()">טען צוללים / Load Divers</button>
+      </div>
+      <div id="diverList"></div>
+    </div>
+
+    <div id="searchMsg"></div>
+  </div>
+
+  <!-- DIVER BANNER -->
+  <div id="diverBanner">
+    <div class="name" id="bannerName"></div>
+    <div class="meta" id="bannerMeta"></div>
+  </div>
+
+  <!-- PERSONAL DETAILS -->
+  <div class="section-card" id="sec-personal">
+    <div class="section-title">👤 פרטים אישיים / Personal Details</div>
+    <div class="form-grid" style="margin-bottom:16px;">
+      <div class="field-group">
+        <label>שם פרטי <span class="en">First Name</span></label>
+        <input type="text" id="f-firstName" />
+      </div>
+      <div class="field-group">
+        <label>שם משפחה <span class="en">Last Name</span></label>
+        <input type="text" id="f-lastName" />
+      </div>
+      <div class="field-group">
+        <label>שם אמצעי <span class="en">Middle Name</span></label>
+        <input type="text" id="f-middleName" />
+      </div>
+      <div class="field-group">
+        <label>שם על הספינה <span class="en">Boat Name</span></label>
+        <input type="text" id="f-boatName" />
+      </div>
+    </div>
+    <div class="form-grid">
+      <div class="field-group">
+        <label>אימייל <span class="en">Email</span></label>
+        <input type="email" id="f-email" dir="ltr" />
+      </div>
+      <div class="field-group">
+        <label>טלפון <span class="en">Phone</span></label>
+        <input type="tel" id="f-phone" dir="ltr" />
+      </div>
+      <div class="field-group">
+        <label>תאריך לידה <span class="en">Date of Birth</span></label>
+        <input type="text" id="f-dob" placeholder="DD/MM/YYYY" dir="ltr" />
+      </div>
+      <div class="field-group">
+        <label>מגדר <span class="en">Gender</span></label>
+        <select id="f-gender">
+          <option value="">-- בחר --</option>
+          <option value="male">זכר / Male</option>
+          <option value="female">נקבה / Female</option>
+          <option value="other">אחר / Other</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- ID & PASSPORT 1 -->
+  <div class="section-card" id="sec-passport">
+    <div class="section-title">🛂 דרכון ראשי / Primary Passport</div>
+    <div class="form-grid" style="margin-bottom:16px;">
+      <div class="field-group">
+        <label>מספר ת"ז <span class="en">ID Number</span></label>
+        <input type="text" id="f-idNumber" dir="ltr" />
+        <div class="field-note">9 ספרות / 9 digits (Israeli ID)</div>
+      </div>
+      <div class="field-group">
+        <label>לאום <span class="en">Nationality</span></label>
+        <select id="f-nationality">
+          <option value="">-- בחר --</option>
+          <optgroup label="🇮🇱 Israel &amp; UK">
+            <option>Israeli</option><option>British</option>
+          </optgroup>
+          <optgroup label="🇪🇺 European Union">
+            <option>Austrian</option><option>Belgian</option><option>Bulgarian</option>
+            <option>Croatian</option><option>Cypriot</option><option>Czech</option>
+            <option>Danish</option><option>Dutch</option><option>Estonian</option>
+            <option>Finnish</option><option>French</option><option>German</option>
+            <option>Greek</option><option>Hungarian</option><option>Irish</option>
+            <option>Italian</option><option>Latvian</option><option>Lithuanian</option>
+            <option>Luxembourgish</option><option>Maltese</option><option>Polish</option>
+            <option>Portuguese</option><option>Romanian</option><option>Slovak</option>
+            <option>Slovenian</option><option>Spanish</option><option>Swedish</option>
+          </optgroup>
+          <optgroup label="🌍 Africa">
+            <option>South African</option>
+          </optgroup>
+          <optgroup label="🌎 North &amp; Central America">
+            <option>American</option><option>Canadian</option><option>Mexican</option>
+          </optgroup>
+          <optgroup label="🌎 South America">
+            <option>Argentine</option><option>Brazilian</option><option>Chilean</option>
+            <option>Colombian</option>
+          </optgroup>
+          <optgroup label="🌏 Asia &amp; Pacific">
+            <option>Australian</option><option>Chinese</option><option>Indian</option>
+            <option>Japanese</option><option>New Zealander</option><option>Russian</option>
+            <option>Swiss</option><option>Turkish</option>
+          </optgroup>
+          <optgroup label="🌐 Other">
+            <option>Other</option>
+          </optgroup>
+        </select>
+      </div>
+      <div class="field-group">
+        <label>מספר דרכון <span class="en">Passport Number</span></label>
+        <input type="text" id="f-passportNumber" dir="ltr" />
+      </div>
+      <div class="field-group">
+        <label>תאריך הנפקה <span class="en">Issue Date</span></label>
+        <input type="text" id="f-passportIssue" placeholder="DD/MM/YYYY" dir="ltr" />
+      </div>
+      <div class="field-group">
+        <label>תוקף דרכון <span class="en">Expiry Date</span></label>
+        <input type="text" id="f-passportExpiry" placeholder="DD/MM/YYYY" dir="ltr" />
+      </div>
+    </div>
+    <div class="upload-wrap">
+      <label style="font-size:12px;font-weight:600;color:#5a7a8a;text-transform:uppercase;letter-spacing:.03em;">
+        צילום דרכון <span style="font-weight:400;color:#8aabb5;text-transform:none;">Passport Photo</span>
+      </label>
+      <div id="passport-current" class="current-file" style="display:none;"></div>
+      <div class="upload-area" id="passportArea">
+        <input type="file" accept="image/*,.heic,.heif" onchange="handleUpload(this,'passportArea','f-passportPhoto','passportStatus','passports','passport')" />
+        <div class="up-label">📎 לחץ להחלפת תמונה / Click to replace photo</div>
+        <div class="up-hint">JPG, PNG, HEIC, WebP · עד 5MB / up to 5MB</div>
+      </div>
+      <div class="upload-status" id="passportStatus"></div>
+      <input type="hidden" id="f-passportPhoto" />
+    </div>
+  </div>
+
+  <!-- PASSPORT 2 -->
+  <div class="section-card" id="sec-passport2">
+    <div class="section-title" style="color:#c0392b;">🛂 דרכון שני / Second Passport (Dual Citizenship)</div>
+    <div class="form-grid" style="margin-bottom:16px;">
+      <div class="field-group">
+        <label>שם פרטי <span class="en">First Name</span></label>
+        <input type="text" id="f-p2FirstName" />
+      </div>
+      <div class="field-group">
+        <label>שם אמצעי <span class="en">Middle Name</span></label>
+        <input type="text" id="f-p2MiddleName" />
+      </div>
+      <div class="field-group">
+        <label>שם משפחה <span class="en">Last Name</span></label>
+        <input type="text" id="f-p2LastName" />
+      </div>
+      <div class="field-group">
+        <label>תאריך לידה <span class="en">Date of Birth</span></label>
+        <input type="text" id="f-p2Dob" placeholder="DD/MM/YYYY" dir="ltr" />
+      </div>
+      <div class="field-group">
+        <label>לאום <span class="en">Nationality</span></label>
+        <input type="text" id="f-p2Nationality" />
+      </div>
+      <div class="field-group">
+        <label>מספר דרכון <span class="en">Passport Number</span></label>
+        <input type="text" id="f-p2PassportNumber" dir="ltr" />
+      </div>
+      <div class="field-group">
+        <label>תאריך הנפקה <span class="en">Issue Date</span></label>
+        <input type="text" id="f-p2Issue" placeholder="DD/MM/YYYY" dir="ltr" />
+      </div>
+      <div class="field-group">
+        <label>תוקף <span class="en">Expiry Date</span></label>
+        <input type="text" id="f-p2Expiry" placeholder="DD/MM/YYYY" dir="ltr" />
+      </div>
+    </div>
+    <div class="upload-wrap">
+      <label style="font-size:12px;font-weight:600;color:#5a7a8a;text-transform:uppercase;letter-spacing:.03em;">
+        צילום דרכון שני <span style="font-weight:400;color:#8aabb5;text-transform:none;">Passport 2 Photo</span>
+      </label>
+      <div id="passport2-current" class="current-file" style="display:none;"></div>
+      <div class="upload-area" id="passport2Area">
+        <input type="file" accept="image/*,.heic,.heif" onchange="handleUpload(this,'passport2Area','f-p2Photo','passport2Status','passports','passport2')" />
+        <div class="up-label">📎 לחץ להחלפת תמונה / Click to replace photo</div>
+        <div class="up-hint">JPG, PNG, HEIC, WebP · עד 5MB / up to 5MB</div>
+      </div>
+      <div class="upload-status" id="passport2Status"></div>
+      <input type="hidden" id="f-p2Photo" />
+    </div>
+  </div>
+
+  <!-- DIVING -->
+  <div class="section-card" id="sec-diving">
+    <div class="section-title">🤿 צלילה / Diving</div>
+    <div class="form-grid" style="margin-bottom:16px;">
+      <div class="field-group">
+        <label>רמת הסמכה <span class="en">Certification Level</span></label>
+        <input type="text" id="f-certLevel" />
+      </div>
+      <div class="field-group">
+        <label>מחשב צלילה <span class="en">Dive Computer</span></label>
+        <input type="text" id="f-diveComputer" />
+      </div>
+      <div class="field-group">
+        <label>צלילה אחרונה <span class="en">Last Dive Date</span></label>
+        <input type="text" id="f-lastDive" placeholder="DD/MM/YYYY" dir="ltr" />
+      </div>
+    </div>
+    <!-- Dive Cert Upload -->
+    <div class="upload-wrap" style="margin-bottom:16px;">
+      <label style="font-size:12px;font-weight:600;color:#5a7a8a;text-transform:uppercase;letter-spacing:.03em;">
+        תעודת צלילה <span style="font-weight:400;color:#8aabb5;text-transform:none;">Dive Certificate</span>
+      </label>
+      <div id="cert-current" class="current-file" style="display:none;"></div>
+      <div class="upload-area" id="certArea">
+        <input type="file" accept="image/*,.heic,.heif" onchange="handleUpload(this,'certArea','f-certPhoto','certStatus','diving','divecert')" />
+        <div class="up-label">📎 לחץ להחלפת תעודה / Click to replace certificate</div>
+        <div class="up-hint">JPG, PNG, HEIC, WebP · עד 5MB / up to 5MB</div>
+      </div>
+      <div class="upload-status" id="certStatus"></div>
+      <input type="hidden" id="f-certPhoto" />
+    </div>
+    <!-- Nitrox Cert Upload -->
+    <div class="upload-wrap">
+      <label style="font-size:12px;font-weight:600;color:#5a7a8a;text-transform:uppercase;letter-spacing:.03em;">
+        תעודת ניטרוקס <span style="font-weight:400;color:#8aabb5;text-transform:none;">Nitrox Certificate</span>
+      </label>
+      <div id="nitrox-current" class="current-file" style="display:none;"></div>
+      <div class="upload-area" id="nitroxArea">
+        <input type="file" accept="image/*,.heic,.heif" onchange="handleUpload(this,'nitroxArea','f-nitroxPhoto','nitroxStatus','diving','nitrox')" />
+        <div class="up-label">📎 לחץ להחלפת תעודה / Click to replace</div>
+        <div class="up-hint">JPG, PNG, HEIC, WebP · עד 5MB / up to 5MB</div>
+      </div>
+      <div class="upload-status" id="nitroxStatus"></div>
+      <input type="hidden" id="f-nitroxPhoto" />
+    </div>
+  </div>
+
+  <!-- EMERGENCY CONTACT -->
+  <div class="section-card" id="sec-emergency">
+    <div class="section-title">🆘 איש קשר לחירום / Emergency Contact</div>
+    <div class="form-grid">
+      <div class="field-group">
+        <label>שם <span class="en">Name</span></label>
+        <input type="text" id="f-emergencyName" />
+      </div>
+      <div class="field-group">
+        <label>אימייל <span class="en">Email</span></label>
+        <input type="email" id="f-emergencyEmail" dir="ltr" />
+      </div>
+      <div class="field-group">
+        <label>טלפון <span class="en">Phone</span></label>
+        <input type="tel" id="f-emergencyPhone" dir="ltr" />
+      </div>
+    </div>
+  </div>
+
+  <!-- INSURANCE -->
+  <div class="section-card" id="sec-insurance">
+    <div class="section-title">🛡️ ביטוח / Insurance</div>
+    <div class="form-grid" style="margin-bottom:16px;">
+      <div class="field-group">
+        <label>חברת ביטוח <span class="en">Company</span></label>
+        <input type="text" id="f-insuranceCompany" />
+      </div>
+      <div class="field-group">
+        <label>מספר פוליסה <span class="en">Policy Number</span></label>
+        <input type="text" id="f-policyNumber" dir="ltr" />
+      </div>
+      <div class="field-group">
+        <label>טלפון חירום ביטוח <span class="en">Insurance Emergency Contact</span></label>
+        <input type="text" id="f-insuranceContact" dir="ltr" />
+      </div>
+    </div>
+    <div class="upload-wrap">
+      <label style="font-size:12px;font-weight:600;color:#5a7a8a;text-transform:uppercase;letter-spacing:.03em;">
+        מסמך ביטוח <span style="font-weight:400;color:#8aabb5;text-transform:none;">Insurance Document</span>
+      </label>
+      <div id="insurance-current" class="current-file" style="display:none;"></div>
+      <div class="upload-area" id="insuranceArea">
+        <input type="file" accept="image/*,.heic,.heif" onchange="handleUpload(this,'insuranceArea','f-insurancePhoto','insuranceStatus','diving','insurance')" />
+        <div class="up-label">📎 לחץ להחלפת מסמך / Click to replace document</div>
+        <div class="up-hint">JPG, PNG, HEIC, WebP · עד 5MB / up to 5MB</div>
+      </div>
+      <div class="upload-status" id="insuranceStatus"></div>
+      <input type="hidden" id="f-insurancePhoto" />
+    </div>
+  </div>
+
+  <!-- MEDICAL & NOTES -->
+  <div class="section-card" id="sec-medical">
+    <div class="section-title">🏥 רפואי והערות / Medical &amp; Notes</div>
+    <div class="form-grid full" style="margin-bottom:16px;">
+      <div class="field-group">
+        <label>הצהרת בריאות <span class="en">Medical Notes</span></label>
+        <textarea id="f-medicalNotes"></textarea>
+      </div>
+      <div class="field-group">
+        <label>דיאטה <span class="en">Dietary Requirements</span></label>
+        <input type="text" id="f-dietary" />
+      </div>
+      <div class="field-group">
+        <label>אלרגיות <span class="en">Allergies</span></label>
+        <input type="text" id="f-allergies" />
+      </div>
+      <div class="field-group">
+        <label>הערות <span class="en">Notes</span></label>
+        <textarea id="f-notes"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- TRIP PREFERENCES -->
+  <div class="section-card" id="sec-prefs">
+    <div class="section-title">✈️ העדפות / Preferences</div>
+    <div class="form-grid">
+      <div class="field-group">
+        <label>טיסות <span class="en">Flights</span></label>
+        <select id="f-flights">
+          <option value="">-- בחר --</option>
+          <option value="BuddyArranged">הזמנה דרך Buddy-Divers</option>
+          <option value="SelfArranged">ארכוש באופן עצמאי</option>
+          <option value="Undecided">עדיין לא החלטתי</option>
+        </select>
+      </div>
+      <div class="field-group">
+        <label>אמצעי תשלום <span class="en">Payment Method</span></label>
+        <select id="f-paymentMethod">
+          <option value="">-- בחר --</option>
+          <option value="Bank Transfer">Bank Transfer</option>
+          <option value="Credit Card up to 3 payments">Credit Card up to 3 payments</option>
+          <option value="Standing Order">Standing Order</option>
+        </select>
+      </div>
+      <div class="field-group">
+        <label>שמעת עלינו דרך <span class="en">How Did You Hear</span></label>
+        <input type="text" id="f-referral" />
+      </div>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<!-- SAVE BAR -->
+<div id="saveBar">
+  <div>
+    <div class="diver-label" id="saveBarName"></div>
+    <div id="saveMsg"></div>
+  </div>
+  <div class="save-btns">
+    <button class="btn-clear" onclick="clearDiver()">נקה / Clear</button>
+    <button class="btn-save" id="saveBtn" onclick="saveDiver()">💾 שמור שינויים / Save Changes</button>
+  </div>
+</div>
+
+<script>
+// ── CONFIG ────────────────────────────────────────────────────────
+const CLOUDINARY_CLOUD_NAME = 'dccbsfte0';
+const CLOUDINARY_UPLOAD_PRESET = 'buddy_divers_uploads';
+const BASE_ID = 'app2RAeuaXaWrHOan';
+const DIVERS_TABLE = 'tblE9d3rE4uDv2uxO';
+const BOOKINGS_TABLE = 'tblMCB8nCSoRuiTKI';
+const TRIPS_TABLE = 'tbl8KGVwkIHi26plq';
+
+let AIRTABLE_API_KEY = sessionStorage.getItem('bd_airtable_token') || '';
+let currentDiverId = null;    // Airtable record ID
+let currentDiverFields = {};  // raw fields from Airtable
+
+// ── TOKEN ─────────────────────────────────────────────────────────
+function checkToken() {
+  if (!AIRTABLE_API_KEY || !AIRTABLE_API_KEY.startsWith('pat')) {
+    document.getElementById('tokenOverlay').style.display = 'flex';
+  } else {
+    loadTripDropdown();
+  }
+}
+function submitToken() {
+  const val = document.getElementById('tokenInput').value.trim();
+  if (!val.startsWith('pat')) {
+    document.getElementById('tokenError').style.display = 'block';
+    return;
+  }
+  AIRTABLE_API_KEY = val;
+  sessionStorage.setItem('bd_airtable_token', val);
+  document.getElementById('tokenOverlay').style.display = 'none';
+  document.getElementById('tokenError').style.display = 'none';
+  loadTripDropdown();
+}
+document.getElementById('tokenInput').addEventListener('keydown', e => { if (e.key === 'Enter') submitToken(); });
+
+// ── TABS ──────────────────────────────────────────────────────────
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach((b, i) => b.classList.toggle('active', (i === 0) === (tab === 'id')));
+  document.getElementById('tab-id').classList.toggle('active', tab === 'id');
+  document.getElementById('tab-trip').classList.toggle('active', tab === 'trip');
+  showMsg('');
+}
+
+// ── AIRTABLE HELPERS ──────────────────────────────────────────────
+async function atFetch(url) {
+  const res = await fetch(url, { headers: { Authorization: `Bearer ${AIRTABLE_API_KEY}` } });
+  if (!res.ok) throw new Error('Airtable error ' + res.status);
+  return res.json();
+}
+async function atPatch(tableId, recordId, fields) {
+  const res = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${tableId}/${recordId}`, {
+    method: 'PATCH',
+    headers: { Authorization: `Bearer ${AIRTABLE_API_KEY}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ fields })
+  });
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.error && err.error.message ? err.error.message : 'Save failed ' + res.status);
+  }
+  return res.json();
+}
+
+// ── TRIP DROPDOWN ─────────────────────────────────────────────────
+async function loadTripDropdown() {
+  const sel = document.getElementById('tripSelect');
+  try {
+    const data = await atFetch(`https://api.airtable.com/v0/${BASE_ID}/${TRIPS_TABLE}?maxRecords=100`);
+    if (!data.records || !data.records.length) { sel.innerHTML = '<option>No trips found</option>'; return; }
+    data.records.sort((a, b) => (b.fields['Trip Id'] || '').localeCompare(a.fields['Trip Id'] || ''));
+    sel.innerHTML = '<option value="">— בחר טיול / Select trip —</option>';
+    data.records.forEach(r => {
+      const tid = r.fields['Trip Id'] || '';
+      const name = r.fields['Trip Name'] || '';
+      if (!tid) return;
+      const opt = document.createElement('option');
+      opt.value = tid;
+      opt.textContent = name ? `${name} (${tid})` : tid;
+      sel.appendChild(opt);
+    });
+  } catch(e) {
+    sel.innerHTML = '<option>Error loading trips</option>';
+  }
+}
+
+// ── SEARCH BY ID ──────────────────────────────────────────────────
+async function searchById() {
+  const id = document.getElementById('idSearch').value.trim();
+  if (!id) return;
+  showMsg('מחפש... / Searching...', false);
+  try {
+    const formula = encodeURIComponent(`{ID Number}="${id}"`);
+    const data = await atFetch(`https://api.airtable.com/v0/${BASE_ID}/${DIVERS_TABLE}?filterByFormula=${formula}`);
+    if (!data.records || !data.records.length) {
+      showMsg('לא נמצא צולל עם מספר זה / No diver found with this ID.', true);
+      return;
+    }
+    showMsg('');
+    loadDiverRecord(data.records[0]);
+  } catch(e) {
+    showMsg('שגיאת חיפוש / Search error: ' + e.message, true);
+  }
+}
+
+// ── SEARCH BY TRIP ────────────────────────────────────────────────
+async function searchByTrip() {
+  const tripId = document.getElementById('tripSelect').value;
+  if (!tripId) { showMsg('בחר טיול / Select a trip first.', true); return; }
+  showMsg('טוען צוללים... / Loading divers...', false);
+  const listEl = document.getElementById('diverList');
+  listEl.style.display = 'none';
+  listEl.innerHTML = '';
+  try {
+    const formula = encodeURIComponent(`{Trip ID}="${tripId}"`);
+    const data = await atFetch(`https://api.airtable.com/v0/${BASE_ID}/${BOOKINGS_TABLE}?filterByFormula=${formula}&maxRecords=100`);
+    if (!data.records || !data.records.length) {
+      showMsg('לא נמצאו הרשמות לטיול זה / No bookings found for this trip.', true);
+      return;
+    }
+    showMsg('');
+    // Collect unique diver record IDs
+    const diverIds = [];
+    data.records.forEach(b => {
+      const linked = b.fields['Diver ID'];
+      if (linked && linked[0] && !diverIds.includes(linked[0])) diverIds.push(linked[0]);
+    });
+    if (!diverIds.length) { showMsg('לא נמצאו צוללים / No divers linked.', true); return; }
+
+    // Fetch each diver record
+    const divers = await Promise.all(diverIds.map(rid =>
+      atFetch(`https://api.airtable.com/v0/${BASE_ID}/${DIVERS_TABLE}/${rid}`).catch(() => null)
+    ));
+    listEl.style.display = 'block';
+    divers.filter(Boolean).forEach(rec => {
+      const f = rec.fields || {};
+      const name = [f['First Name'], f['Last Name']].filter(Boolean).join(' ') || 'Unknown';
+      const idNum = f['ID Number'] || '—';
+      const div = document.createElement('div');
+      div.className = 'diver-item';
+      div.innerHTML = `<span>${name}</span><span class="diver-id">${idNum}</span>`;
+      div.onclick = () => { showMsg(''); loadDiverRecord(rec); };
+      listEl.appendChild(div);
+    });
+  } catch(e) {
+    showMsg('שגיאה / Error: ' + e.message, true);
+  }
+}
+
+// ── LOAD DIVER INTO FORM ──────────────────────────────────────────
+function loadDiverRecord(rec) {
+  currentDiverId = rec.id;
+  currentDiverFields = rec.fields || {};
+  const f = currentDiverFields;
+
+  // Banner
+  const fullName = [f['First Name'], f['Last Name']].filter(Boolean).join(' ') || 'Unknown Diver';
+  document.getElementById('bannerName').textContent = fullName;
+  document.getElementById('bannerMeta').textContent = `ID: ${f['ID Number'] || '—'} | Email: ${f['Email'] || '—'} | Record: ${rec.id}`;
+  document.getElementById('diverBanner').style.display = 'block';
+
+  // Personal
+  setVal('f-firstName', f['First Name']);
+  setVal('f-lastName', f['Last Name']);
+  setVal('f-middleName', f['Middle Name']);
+  setVal('f-boatName', f['Boat Name']);
+  setVal('f-email', f['Email']);
+  setVal('f-phone', f['Phone']);
+  setVal('f-dob', isoToDisplay(f['Date of Birth']));
+  setSelectVal('f-gender', f['Gender']);
+
+  // Passport 1
+  setVal('f-idNumber', f['ID Number']);
+  setSelectVal('f-nationality', f['Nationality']);
+  setVal('f-passportNumber', f['Passport Number']);
+  setVal('f-passportIssue', isoToDisplay(f['Passport Issue Date']));
+  setVal('f-passportExpiry', isoToDisplay(f['Passport Expiry']));
+  setCurrentFile('passport-current', 'f-passportPhoto', f['Passport Photo URL']);
+
+  // Passport 2
+  const hasP2 = !!(f['Passport 2 Number'] || f['Passport 2 First Name']);
+  setVal('f-p2FirstName', f['Passport 2 First Name']);
+  setVal('f-p2MiddleName', f['Passport 2 Middle Name']);
+  setVal('f-p2LastName', f['Passport 2 Last Name']);
+  setVal('f-p2Dob', isoToDisplay(f['Passport 2 Date of Birth']));
+  setVal('f-p2Nationality', f['Passport 2 Nationality']);
+  setVal('f-p2PassportNumber', f['Passport 2 Number']);
+  setVal('f-p2Issue', isoToDisplay(f['Passport 2 Issue Date']));
+  setVal('f-p2Expiry', isoToDisplay(f['Passport 2 Expiry Date']));
+  setCurrentFile('passport2-current', 'f-p2Photo', f['Passport Photo 2 URL']);
+
+  // Diving
+  setVal('f-certLevel', f['Certification Level']);
+  setVal('f-diveComputer', f['Dive Computer']);
+  setVal('f-lastDive', isoToDisplay(f['Last Dive Date']));
+  setCurrentFile('cert-current', 'f-certPhoto', f['Dive Cert Photo URL']);
+  setCurrentFile('nitrox-current', 'f-nitroxPhoto', f['Nitrox Cert Photo URL']);
+
+  // Emergency
+  setVal('f-emergencyName', f['Emergency Name']);
+  setVal('f-emergencyEmail', f['Emergency Email']);
+  setVal('f-emergencyPhone', f['Emergency Phone']);
+
+  // Insurance
+  setVal('f-insuranceCompany', f['Insurance Company']);
+  setVal('f-policyNumber', f['Policy Number']);
+  setVal('f-insuranceContact', f['Insurance Contact']);
+  setCurrentFile('insurance-current', 'f-insurancePhoto', f['Dive Insurance Photo (from Diver)']);
+
+  // Medical & Notes
+  setVal('f-medicalNotes', f['Medical Notes']);
+  setVal('f-dietary', f['Dietary Requirements']);
+  setVal('f-allergies', f['Allergies']);
+  setVal('f-notes', f['Notes']);
+
+  // Prefs
+  setSelectVal('f-flights', f['Flights']);
+  setSelectVal('f-paymentMethod', f['Payment Method']);
+  setVal('f-referral', f['How Did You Hear']);
+
+  // Show sections
+  ['sec-personal','sec-passport','sec-diving','sec-emergency','sec-insurance','sec-medical','sec-prefs'].forEach(id => {
+    document.getElementById(id).classList.add('visible');
+  });
+  // Show passport 2 always (may be empty — admin can fill it in)
+  document.getElementById('sec-passport2').classList.add('visible');
+
+  // Save bar
+  document.getElementById('saveBarName').textContent = fullName;
+  document.getElementById('saveBar').classList.add('visible');
+  document.getElementById('saveMsg').textContent = '';
+
+  // Scroll to form
+  document.getElementById('diverBanner').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ── SAVE DIVER ────────────────────────────────────────────────────
+async function saveDiver() {
+  if (!currentDiverId) return;
+  const btn = document.getElementById('saveBtn');
+  const msgEl = document.getElementById('saveMsg');
+  btn.disabled = true;
+  btn.textContent = 'שומר... / Saving...';
+  msgEl.className = '';
+  msgEl.textContent = '';
+
+  try {
+    const fields = {};
+    function addField(airtableName, elId, transform) {
+      const val = (document.getElementById(elId) || {}).value;
+      if (val !== undefined && val !== null) {
+        fields[airtableName] = transform ? transform(val) : (val || null);
+      }
+    }
+
+    addField('First Name', 'f-firstName');
+    addField('Last Name', 'f-lastName');
+    addField('Middle Name', 'f-middleName');
+    addField('Boat Name', 'f-boatName');
+    addField('Email', 'f-email');
+    addField('Phone', 'f-phone');
+    addField('Date of Birth', 'f-dob', displayToIso);
+    addField('Gender', 'f-gender');
+    addField('ID Number', 'f-idNumber');
+    addField('Nationality', 'f-nationality');
+    addField('Passport Number', 'f-passportNumber');
+    addField('Passport Issue Date', 'f-passportIssue', displayToIso);
+    addField('Passport Expiry', 'f-passportExpiry', displayToIso);
+
+    // Photos: only include if a new upload was done
+    const passportPhoto = document.getElementById('f-passportPhoto').value;
+    if (passportPhoto) fields['Passport Photo URL'] = passportPhoto;
+    const certPhoto = document.getElementById('f-certPhoto').value;
+    if (certPhoto) fields['Dive Cert Photo URL'] = certPhoto;
+    const nitroxPhoto = document.getElementById('f-nitroxPhoto').value;
+    if (nitroxPhoto) fields['Nitrox Cert Photo URL'] = nitroxPhoto;
+    const insurancePhoto = document.getElementById('f-insurancePhoto').value;
+    if (insurancePhoto) fields['Dive Insurance Photo (from Diver)'] = insurancePhoto;
+
+    // Passport 2
+    addField('Passport 2 First Name', 'f-p2FirstName');
+    addField('Passport 2 Middle Name', 'f-p2MiddleName');
+    addField('Passport 2 Last Name', 'f-p2LastName');
+    addField('Passport 2 Date of Birth', 'f-p2Dob', displayToIso);
+    addField('Passport 2 Nationality', 'f-p2Nationality');
+    addField('Passport 2 Number', 'f-p2PassportNumber');
+    addField('Passport 2 Issue Date', 'f-p2Issue', displayToIso);
+    addField('Passport 2 Expiry Date', 'f-p2Expiry', displayToIso);
+    const p2Photo = document.getElementById('f-p2Photo').value;
+    if (p2Photo) fields['Passport Photo 2 URL'] = p2Photo;
+
+    addField('Certification Level', 'f-certLevel');
+    addField('Dive Computer', 'f-diveComputer');
+    addField('Last Dive Date', 'f-lastDive', displayToIso);
+    addField('Emergency Name', 'f-emergencyName');
+    addField('Emergency Email', 'f-emergencyEmail');
+    addField('Emergency Phone', 'f-emergencyPhone');
+    addField('Insurance Company', 'f-insuranceCompany');
+    addField('Policy Number', 'f-policyNumber');
+    addField('Insurance Contact', 'f-insuranceContact');
+    addField('Medical Notes', 'f-medicalNotes');
+    addField('Dietary Requirements', 'f-dietary');
+    addField('Allergies', 'f-allergies');
+    addField('Notes', 'f-notes');
+    addField('Flights', 'f-flights');
+    addField('Payment Method', 'f-paymentMethod');
+    addField('How Did You Hear', 'f-referral');
+
+    // Strip null values to avoid overwriting with empty
+    Object.keys(fields).forEach(k => { if (fields[k] === null || fields[k] === '') delete fields[k]; });
+
+    await atPatch(DIVERS_TABLE, currentDiverId, fields);
+
+    msgEl.className = 'ok';
+    msgEl.textContent = '✓ נשמר בהצלחה / Saved successfully';
+  } catch(e) {
+    msgEl.className = 'err';
+    msgEl.textContent = '❌ שגיאה / Error: ' + e.message;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '💾 שמור שינויים / Save Changes';
+  }
+}
+
+// ── CLEAR ─────────────────────────────────────────────────────────
+function clearDiver() {
+  currentDiverId = null;
+  currentDiverFields = {};
+  document.getElementById('diverBanner').style.display = 'none';
+  document.getElementById('saveBar').classList.remove('visible');
+  ['sec-personal','sec-passport','sec-passport2','sec-diving','sec-emergency','sec-insurance','sec-medical','sec-prefs'].forEach(id => {
+    document.getElementById(id).classList.remove('visible');
+  });
+  document.getElementById('idSearch').value = '';
+  document.getElementById('diverList').style.display = 'none';
+  document.getElementById('diverList').innerHTML = '';
+  showMsg('');
+}
+
+// ── CLOUDINARY UPLOAD ─────────────────────────────────────────────
+async function handleUpload(input, areaId, urlFieldId, statusId, folder, docType) {
+  const file = input.files && input.files[0];
+  if (!file) return;
+  const area = document.getElementById(areaId);
+  const statusEl = document.getElementById(statusId);
+  const urlField = document.getElementById(urlFieldId);
+
+  const allowedTypes = ['image/jpeg','image/png','image/webp','image/heic','image/heif'];
+  if (!allowedTypes.includes(file.type)) {
+    area.classList.remove('uploading','upload-done');
+    area.classList.add('upload-error');
+    statusEl.innerHTML = '<span class="upload-error-msg">❌ יש להעלות תמונה בלבד (JPG, PNG, HEIC, WebP) / Images only</span>';
+    urlField.value = ''; input.value = ''; return;
+  }
+  if (file.size > 5 * 1024 * 1024) {
+    area.classList.remove('uploading','upload-done');
+    area.classList.add('upload-error');
+    statusEl.innerHTML = '<span class="upload-error-msg">❌ הקובץ גדול מ-5MB / File exceeds 5MB</span>';
+    urlField.value = ''; return;
+  }
+
+  area.classList.remove('upload-done','upload-error');
+  area.classList.add('uploading');
+  statusEl.innerHTML = '<span class="upload-progress">⏳ מעלה... / Uploading...</span>';
+  urlField.value = '';
+
+  try {
+    const idNum = (document.getElementById('f-idNumber') || {}).value || 'unknown';
+    const first = ((document.getElementById('f-firstName') || {}).value || '').trim().replace(/\s+/g,'-') || 'unknown';
+    const last = ((document.getElementById('f-lastName') || {}).value || '').trim().replace(/\s+/g,'-') || 'unknown';
+    const diverFolder = 'divers/' + idNum + '_' + last + '_' + first;
+
+    // If a file already exists, extract its public_id so we overwrite in-place
+    // Cloudinary URL format: .../image/upload/v{version}/{public_id}.{ext}
+    const existingUrl = currentDiverFields[{
+      'f-passportPhoto': 'Passport Photo URL',
+      'f-certPhoto': 'Dive Cert Photo URL',
+      'f-nitroxPhoto': 'Nitrox Cert Photo URL',
+      'f-insurancePhoto': 'Dive Insurance Photo (from Diver)',
+      'f-p2Photo': 'Passport Photo 2 URL'
+    }[urlFieldId]] || '';
+    let existingPublicId = null;
+    if (existingUrl) {
+      // Strip protocol + host + /image/upload/ + optional version segment
+      const match = existingUrl.match(/\/image\/upload\/(?:v\d+\/)?(.+)$/);
+      if (match) {
+        // Remove file extension to get the public_id
+        existingPublicId = match[1].replace(/\.[^/.]+$/, '');
+      }
+    }
+
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+    if (existingPublicId) {
+      // Overwrite the existing asset in-place — same URL, CDN cache busted
+      formData.append('public_id', existingPublicId);
+      formData.append('overwrite', 'true');
+      formData.append('invalidate', 'true');
+    } else {
+      // New file — use folder-based path
+      formData.append('folder', diverFolder + '/' + (folder || 'general'));
+    }
+    formData.append('angle', 'auto_right');
+
+    const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, { method:'POST', body:formData });
+    if (!res.ok) throw new Error('Upload failed: ' + res.status);
+    const result = await res.json();
+    if (!result.secure_url) throw new Error('No URL returned');
+
+    urlField.value = result.secure_url;
+    area.classList.remove('uploading','upload-error');
+    area.classList.add('upload-done');
+    const short = file.name.length > 35 ? file.name.substring(0,32) + '...' : file.name;
+    statusEl.innerHTML = `<span class="upload-success">✓ הועלה / Uploaded: ${short}</span>`;
+    // Update the "current file" preview
+    const currentEl = document.getElementById(areaId.replace('Area','') + '-current') ||
+                      document.getElementById(statusId.replace('Status','') + '-current');
+    if (currentEl) {
+      currentEl.style.display = 'block';
+      currentEl.innerHTML = `קובץ נוכחי: <a href="${result.secure_url}" target="_blank">צפה / View</a>`;
+    }
+  } catch(e) {
+    area.classList.remove('uploading','upload-done');
+    area.classList.add('upload-error');
+    statusEl.innerHTML = `<span class="upload-error-msg">❌ שגיאה / Upload failed. Try again.</span>`;
+    urlField.value = '';
+    console.error('Upload error:', e);
+  }
+}
+
+// ── HELPERS ───────────────────────────────────────────────────────
+function setVal(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.value = val || '';
+}
+function setSelectVal(id, val) {
+  const el = document.getElementById(id);
+  if (!el || !val) return;
+  for (let i = 0; i < el.options.length; i++) {
+    if (el.options[i].value === val || el.options[i].text === val) {
+      el.selectedIndex = i; return;
+    }
+  }
+}
+function setCurrentFile(currentId, hiddenId, url) {
+  const el = document.getElementById(currentId);
+  const hidden = document.getElementById(hiddenId);
+  if (!el) return;
+  if (url) {
+    el.style.display = 'block';
+    el.innerHTML = `קובץ נוכחי: <a href="${url}" target="_blank">צפה / View uploaded file</a>`;
+    if (hidden) hidden.value = ''; // clear so we don't overwrite unless a new file chosen
+  } else {
+    el.style.display = 'none';
+    if (hidden) hidden.value = '';
+  }
+}
+function isoToDisplay(iso) {
+  if (!iso) return '';
+  const m = iso.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  return m ? `${m[3]}/${m[2]}/${m[1]}` : iso;
+}
+function displayToIso(display) {
+  if (!display) return null;
+  const m = display.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  if (!m) return null;
+  const d = new Date(`${m[3]}-${m[2]}-${m[1]}`);
+  if (isNaN(d.getTime())) return null;
+  return `${m[3]}-${m[2]}-${m[1]}`;
+}
+function showMsg(msg, isError) {
+  const el = document.getElementById('searchMsg');
+  el.style.display = msg ? 'block' : 'none';
+  el.textContent = msg;
+  el.style.color = isError ? '#d93f3f' : '#5a7a8a';
+}
+
+// ── INIT ──────────────────────────────────────────────────────────
+checkToken();
+</script>
+</body>
+</html>

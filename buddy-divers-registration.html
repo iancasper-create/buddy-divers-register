@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-REG 2026-04-03b | Phone minimum raised to 9 digits -->
+<!-- BD-REG 2026-04-03c | Phone minimum raised to 9 digits -->
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8" />
@@ -2216,15 +2216,30 @@ async function handleUpload(input, areaId, urlFieldId, statusId, folder, docType
   urlField.value = '';
 
   try {
+    // If a file already exists for this field, overwrite in-place (same public_id, CDN cache busted)
+    const existingUrl = urlField.value;
+    let existingPublicId = null;
+    if (existingUrl) {
+      const match = existingUrl.match(/\/image\/upload\/(?:v\d+\/)?(.+)$/);
+      if (match) existingPublicId = match[1].replace(/\.[^/.]+$/, '');
+    }
+
     const formData = new FormData();
     formData.append('file', file);
     formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-    // Build folder as divers/ID_LastName_FirstName/subfolder
-    const diverId = (document.getElementById('idNumberInput') ? document.getElementById('idNumberInput').value : '') || 'unknown';
-    const diverFirst = (document.getElementById('firstNameInput') ? document.getElementById('firstNameInput').value : '').trim().replace(/\s+/g, '-') || 'unknown';
-    const diverLast = (document.getElementById('lastNameInput') ? document.getElementById('lastNameInput').value : '').trim().replace(/\s+/g, '-') || 'unknown';
-    const diverFolder = 'divers/' + diverId + '_' + diverLast + '_' + diverFirst;
-    formData.append('folder', diverFolder + '/' + (folder || 'general'));
+    if (existingPublicId) {
+      // Returning diver — overwrite the existing Cloudinary asset in-place
+      formData.append('public_id', existingPublicId);
+      formData.append('overwrite', 'true');
+      formData.append('invalidate', 'true');
+    } else {
+      // New diver — upload to folder path as usual
+      const diverId = (document.getElementById('idNumberInput') ? document.getElementById('idNumberInput').value : '') || 'unknown';
+      const diverFirst = (document.getElementById('firstNameInput') ? document.getElementById('firstNameInput').value : '').trim().replace(/\s+/g, '-') || 'unknown';
+      const diverLast = (document.getElementById('lastNameInput') ? document.getElementById('lastNameInput').value : '').trim().replace(/\s+/g, '-') || 'unknown';
+      const diverFolder = 'divers/' + diverId + '_' + diverLast + '_' + diverFirst;
+      formData.append('folder', diverFolder + '/' + (folder || 'general'));
+    }
 
     const response = await fetch(
       `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
