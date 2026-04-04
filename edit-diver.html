@@ -1,4 +1,4 @@
-<!-- BD-EDIT 2026-04-03c -->
+<!-- BD-EDIT 2026-04-03d -->
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
@@ -693,8 +693,9 @@ async function searchByTrip() {
   listEl.style.display = 'none';
   listEl.innerHTML = '';
   try {
-    const formula = encodeURIComponent(`{Trip ID}="${tripId}"`);
+    const formula = encodeURIComponent(`{Trip}="${tripId}"`);
     const data = await atFetch(`https://api.airtable.com/v0/${BASE_ID}/${BOOKINGS_TABLE}?filterByFormula=${formula}&maxRecords=100`);
+
     if (!data.records || !data.records.length) {
       showMsg('לא נמצאו הרשמות לטיול זה / No bookings found for this trip.', true);
       return;
