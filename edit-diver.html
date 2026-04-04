@@ -1725,7 +1725,7 @@ async function loadDiverBookings(diverRecordId, diverIdNumber) {
       btn.className = 'option-item';
       btn.id = 'pricingBtn_' + i;
       btn.style.cursor = 'pointer';
-      btn.innerHTML = `<div class="opt-label"><span class="opt-he">טיול ${b.tripId}</span><span class="opt-en">${b.pricing || 'No pricing set'}</span></div>`;
+      btn.innerHTML = `<div class="opt-label"><span class="opt-he">טיול ${b.tripId}</span></div>`;
       btn.onclick = () => {
         document.querySelectorAll('[id^="pricingBtn_"]').forEach(el => el.classList.remove('selected'));
         btn.classList.add('selected');
