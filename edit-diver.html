@@ -1,4 +1,4 @@
-<!-- BD-EDIT 2026-04-04d -->
+<!-- BD-EDIT 2026-04-04e -->
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
@@ -952,19 +952,12 @@ async function handleUpload(input, areaId, urlFieldId, statusId, folder, docType
   area.classList.remove('upload-done','upload-error'); area.classList.add('uploading');
   statusEl.innerHTML='<span class="upload-progress">⏳ מעלה... / Uploading...</span>';
   try {
-    const existingUrl=currentDiverFields[airtableField]||'';
-    let existingPublicId=null;
-    if (existingUrl) {
-      const m=existingUrl.match(/\/image\/upload\/(?:v\d+\/)?(.+)$/);
-      if(m) existingPublicId=m[1].replace(/\.[^/.]+$/,'');
-    }
     const idNum=(document.getElementById('f-idNumber')||{}).value||'unknown';
     const first=((document.getElementById('f-firstName')||{}).value||'').trim().replace(/\s+/g,'-')||'unknown';
     const last=((document.getElementById('f-lastName')||{}).value||'').trim().replace(/\s+/g,'-')||'unknown';
     const fd=new FormData();
     fd.append('file',file); fd.append('upload_preset',CLOUDINARY_UPLOAD_PRESET);
-    if(existingPublicId){ fd.append('public_id',existingPublicId); fd.append('overwrite','true'); fd.append('invalidate','true'); }
-    else { fd.append('folder','divers/'+idNum+'_'+last+'_'+first+'/'+(folder||'general')); }
+    fd.append('folder','divers/'+idNum+'_'+last+'_'+first+'/'+(folder||'general'));
     fd.append('angle','auto_right');
     const res=await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,{method:'POST',body:fd});
     if(!res.ok) throw new Error('Upload failed: '+res.status);
