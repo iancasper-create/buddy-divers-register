@@ -1,4 +1,4 @@
-<!-- BD-EDIT 2026-04-04e -->
+<!-- BD-EDIT 2026-04-04f -->
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
@@ -256,9 +256,9 @@
     <div class="card-title" style="color:#c0392b;">🛂 <strong>דרכון שני</strong> <span class="en" style="color:#c0392b;">Second Passport (Dual Citizenship)</span></div>
     <!-- Row 1: First Name (right) | Middle Name (mid) | Last Name (left) -->
     <div class="fr c3">
-      <div class="field"><label><span class="he">שם פרטי (באנגלית)</span> / First Name</label><input type="text" id="f-p2FirstName" dir="ltr" placeholder="John" /></div>
-      <div class="field"><label><span class="he">שם אמצעי (באנגלית)</span> / Middle Name</label><input type="text" id="f-p2MiddleName" dir="ltr" placeholder="Middle name" /></div>
-      <div class="field"><label><span class="he">שם משפחה (באנגלית)</span> / Last Name</label><input type="text" id="f-p2LastName" dir="ltr" placeholder="Smith" /></div>
+      <div class="field"><label><span class="he">שם פרטי (באנגלית)</span> / First Name</label><input type="text" id="f-p2FirstName" dir="ltr" placeholder="John" oninput="this.value=this.value.replace(/[^a-zA-Z\s\-]/g,'')" /></div>
+      <div class="field"><label><span class="he">שם אמצעי (באנגלית)</span> / Middle Name</label><input type="text" id="f-p2MiddleName" dir="ltr" placeholder="Middle name" oninput="this.value=this.value.replace(/[^a-zA-Z\s\-]/g,'')" /></div>
+      <div class="field"><label><span class="he">שם משפחה (באנגלית)</span> / Last Name</label><input type="text" id="f-p2LastName" dir="ltr" placeholder="Smith" oninput="this.value=this.value.replace(/[^a-zA-Z\s\-]/g,'')" /></div>
     </div>
     <!-- Row 2: DOB (right) | Nationality (mid) | Passport Number (left) -->
     <div class="fr c3">
@@ -757,7 +757,8 @@ function loadDiverRecord(rec) {
   setCurFile('passport-current', 'f-passportPhoto', getF(f, 'Passport Photo URL', 'Passport Photo', 'Passport Photo (URL)', 'Passport Image URL', 'Passport 1 Photo URL'));
 
   // Passport 2
-  setV('f-p2FirstName', f['Passport 2 First Name']); setV('f-p2MiddleName', f['Passport 2 Middle Name']);
+  setV('f-p2FirstName', f['Passport 2 First Name']);
+  setV('f-p2MiddleName', f['Passport 2 Middle Name'] || f['Middle Name'] || '');
   setV('f-p2LastName', f['Passport 2 Last Name']); setV('f-p2Dob', iso2dmy(f['Passport 2 Date of Birth']));
   setV('f-p2Nationality', f['Passport 2 Nationality']); setV('f-p2PassportNumber', f['Passport 2 Number']);
   setV('f-p2Issue', iso2dmy(f['Passport 2 Issue Date'])); setV('f-p2Expiry', iso2dmy(f['Passport 2 Expiry Date']));
