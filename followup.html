@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-FOLLOWUP 2026-04-03a | Added Raja Ampat 270118 to tripNames and tripCountries -->
+<!-- BD-FOLLOWUP 2026-04-06a | Added Raja Ampat 270118 to tripNames and tripCountries -->
 <html lang="en" dir="ltr">
 <head>
 <meta charset="UTF-8"/>
@@ -1286,7 +1286,7 @@ function buildPaymentHTML(booking, amount, nisAmount, rate, notes, paidSoFar, sa
   const tripCountry = tripCountries[booking.tripId] || '';
 
   // Itemized costs block
-  const hasExtras = (flightAmt > 0) || (hotelAmt > 0) || (extrasAmt > 0) || (discountAmt !== 0);
+  const hasExtras = (flightAmt !== 0) || (hotelAmt !== 0) || (extrasAmt !== 0) || (discountAmt !== 0);
   let costsHTML = '';
   if (safari > 0) {
     if (!hasExtras) {
@@ -1303,9 +1303,9 @@ function buildPaymentHTML(booking, amount, nisAmount, rate, notes, paidSoFar, sa
         <table style="border-collapse:collapse;font-size:17px;color:#1a3a4a;direction:rtl;margin-left:auto;">
           ${row('ספארי', safari)}
           ${discountRow}
-          ${flightAmt > 0 ? row('טיסות', flightAmt) : ''}
-          ${hotelAmt > 0 ? row('מלון', hotelAmt) : ''}
-          ${extrasAmt > 0 ? row('תוספות', extrasAmt) : ''}
+          ${flightAmt !== 0 ? row('טיסות', flightAmt) : ''}
+          ${hotelAmt !== 0 ? row('מלון', hotelAmt) : ''}
+          ${extrasAmt !== 0 ? row('תוספות', extrasAmt) : ''}
           <tr><td colspan="2" style="padding:0;"><div style="border-top:1px solid #c5dfe6;margin:4px 0;"></div></td></tr>
           <tr><td style="color:#007289;font-weight:700;padding:3px 0;text-align:right;font-size:17px;">סה"כ:</td><td style="font-weight:700;color:#007289;padding:3px 0 3px 20px;direction:ltr;text-align:right;min-width:70px;font-size:17px;">${currencySymbol}${total.toLocaleString('en-US')}</td></tr>
         </table>
