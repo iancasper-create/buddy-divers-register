@@ -70,6 +70,9 @@ canvas.sig{display:block;width:100%;height:110px;cursor:crosshair;touch-action:n
 .agree-row label{font-size:14px;line-height:1.55;cursor:pointer;}
 .btn-next{background:var(--navy);color:#fff;border:none;border-radius:7px;padding:13px 34px;font-family:'Source Sans 3',sans-serif;font-size:15px;font-weight:600;cursor:pointer;margin-top:20px;}
 .btn-next:hover{background:#0f2440;}
+.btn-submit{background:#27ae60;color:#fff;border:none;border-radius:7px;padding:13px 34px;font-family:'Source Sans 3',sans-serif;font-size:15px;font-weight:600;cursor:pointer;margin-top:20px;margin-left:12px;}
+.btn-submit:hover{background:#1e8449;}
+@media(max-width:600px){.btn-submit{margin-left:0;width:100%;}}
 .btn-print{background:var(--orange);color:#fff;border:none;border-radius:7px;padding:13px 34px;font-family:'Source Sans 3',sans-serif;font-size:15px;font-weight:600;cursor:pointer;margin-top:20px;}
 .btn-print:hover{background:#b85520;}
 @media print{
@@ -411,13 +414,15 @@ canvas.sig{display:block;width:100%;height:110px;cursor:crosshair;touch-action:n
         <div class="field"><label>Parent or Guardian</label><input type="text" placeholder="If applicable"></div>
         <div class="field"><label>Date</label><input type="date" id="waiver-sig-date"></div>
       </div>
-      <p style='font-size:12px;color:var(--muted);border-top:1px solid var(--border);padding-top:12px;margin-top:16px;'>NAI'A Cruises Fiji Ltd. &nbsp;|&nbsp; PO Box 332, Pacific Harbour, Fiji &nbsp;|&nbsp; Tel: 679.345.0382 &nbsp;|&nbsp; Fax: 679.345.0566 &nbsp;|&nbsp; explore@naia.com.fj</p>
+      <p style='font-size:12px;color:var(--muted);border-top:1px solid var(--border);padding-top:12px;margin-top:16px;'>NAI'A Cruises Fiji Ltd. &nbsp;|&nbsp; PO Box 332, Pacific Harbour, Fiji &nbsp;|&nbsp; Tel: 679.345.0382 &nbsp;|&nbsp; Fax: 679.345.0566 &nbsp;|&nbsp; <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="0a6f727a6665786f4a646b636b24696567246c60">[email&#160;protected]</a></p>
       <button class="btn-print">Print / Save PDF</button>
+      <button class="btn-submit" id="btn-submit">Submit All Forms</button>
+      <div id="submit-msg" style="display:none;background:#e8f7ef;border:1.5px solid #27ae60;border-radius:8px;padding:14px 18px;margin-top:16px;font-size:14px;color:#1a5c35;"><strong>&#10003; Forms submitted successfully.</strong> A copy has been sent to your email address.</div>
     </div>
   </div>
 </div>
 </div>
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 var tabs = document.querySelectorAll(".tab");
 tabs.forEach(function(btn) {
   btn.addEventListener("click", function() {
@@ -620,6 +625,59 @@ document.getElementById("med-name").addEventListener("input", function() {
   var s = document.getElementById("storm-name"); if(s) s.value = v;
   var w = document.getElementById("waiver-name"); if(w) w.value = v;
 });
+
+// SUBMIT
+document.getElementById("btn-submit").addEventListener("click", function() {
+  var panel = document.getElementById("panel-2");
+  var errors = validatePanel(panel, 2);
+  if(errors.length > 0) { showErrors(errors, panel); return; }
+  clearErrors(panel);
+
+  function val(id){ var el=document.getElementById(id); return el ? el.value : ""; }
+  function chk(id){ var el=document.getElementById(id); return el && el.checked ? "Yes" : "No"; }
+  function radio(name){ var el=document.querySelector("input[name="+name+"]:checked"); return el ? el.value : "Not answered"; }
+  function sig(id){ var el=document.getElementById(id); return el ? el.toDataURL("image/png") : ""; }
+
+  var data = {
+    participant_name: val("med-name"), email: val("med-email"),
+    birthdate: val("med-dob"), date_completed: val("med-date"),
+    q1:radio("q1"),q2:radio("q2"),q3:radio("q3"),q4:radio("q4"),q5:radio("q5"),
+    q6:radio("q6"),q7:radio("q7"),q8:radio("q8"),q9:radio("q9"),
+    A1:radio("A1"),A2:radio("A2"),A3:radio("A3"),A4:radio("A4"),A5:radio("A5"),
+    C1:radio("C1"),C2:radio("C2"),C3:radio("C3"),C4:radio("C4"),
+    D1:radio("D1"),D2:radio("D2"),D3:radio("D3"),D4:radio("D4"),D5:radio("D5"),
+    E1:radio("E1"),E2:radio("E2"),E3:radio("E3"),E4:radio("E4"),
+    F1:radio("F1"),F2:radio("F2"),F3:radio("F3"),F4:radio("F4"),F5:radio("F5"),
+    G1:radio("G1"),G2:radio("G2"),G3:radio("G3"),G4:radio("G4"),G5:radio("G5"),G6:radio("G6"),
+    B1:radio("B1"),B2:radio("B2"),B3:radio("B3"),B4:radio("B4"),
+    sig_medical:sig("sig-med"), sig_storm:sig("sig-storm"), sig_waiver:sig("sig-waiver"),
+    storm_ack:chk("storm-ack"), storm_date:val("storm-date"),
+    waiver_departure:val("waiver-depart"), waiver_initial:val("waiver-initial"),
+    w1:chk("w1"),w2:chk("w2"),w3:chk("w3"), waiver_sig_date:val("waiver-sig-date")
+  };
+
+  var btn = document.getElementById("btn-submit");
+  btn.textContent = "Sending...";
+  btn.disabled = true;
+
+  fetch("https://hook.eu1.make.com/tukoqg4pbob61k3n9c0whx74rnnof8t2", {
+    method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(data)
+  })
+  .then(function(r){
+    if(r.ok){
+      document.getElementById("submit-msg").style.display="block";
+      btn.textContent="Submitted";
+    } else {
+      btn.textContent="Submit All Forms"; btn.disabled=false;
+      alert("Submission failed. Please try again or use Print/Save PDF.");
+    }
+  })
+  .catch(function(){
+    btn.textContent="Submit All Forms"; btn.disabled=false;
+    alert("Submission failed. Please check your connection and try again.");
+  });
+});
+
 var today = new Date().toISOString().split("T")[0];
 ["med-date","med-sig-date","storm-date","waiver-sig-date"].forEach(function(id){ var el=document.getElementById(id); if(el)el.value=today; });
 </script>
