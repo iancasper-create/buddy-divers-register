@@ -3,954 +3,625 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NAI'A Cruises – Guest Forms</title>
+<title>NAI'A Cruises - Guest Forms</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Source+Sans+3:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --navy: #1a3a5c;
-    --teal: #1a7a8a;
-    --orange: #d4692a;
-    --light-bg: #f4f7fa;
-    --border: #c8d6e5;
-    --text: #1e2d3d;
-    --muted: #6b7f94;
-    --white: #ffffff;
-    --red: #c0392b;
-    --green: #27ae60;
-  }
-
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    font-family: 'Source Sans 3', sans-serif;
-    background: var(--light-bg);
-    color: var(--text);
-    font-size: 15px;
-    line-height: 1.6;
-  }
-
-  /* ── HEADER ── */
-  header {
-    background: var(--navy);
-    padding: 24px 40px;
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.25);
-  }
-  header .anchor-icon {
-    font-size: 32px;
-    color: var(--orange);
-  }
-  header h1 {
-    font-family: 'Playfair Display', serif;
-    color: var(--white);
-    font-size: 22px;
-    font-weight: 500;
-  }
-  header p {
-    color: rgba(255,255,255,0.6);
-    font-size: 13px;
-    margin-top: 2px;
-  }
-
-  /* ── TABS ── */
-  .tabs {
-    background: var(--navy);
-    display: flex;
-    gap: 4px;
-    padding: 0 40px;
-    border-top: 1px solid rgba(255,255,255,0.1);
-  }
-  .tab-btn {
-    background: none;
-    border: none;
-    color: rgba(255,255,255,0.55);
-    font-family: 'Source Sans 3', sans-serif;
-    font-size: 13.5px;
-    font-weight: 500;
-    padding: 12px 20px;
-    cursor: pointer;
-    border-bottom: 3px solid transparent;
-    transition: all 0.2s;
-    letter-spacing: 0.3px;
-  }
-  .tab-btn:hover { color: rgba(255,255,255,0.85); }
-  .tab-btn.active {
-    color: var(--white);
-    border-bottom-color: var(--orange);
-  }
-
-  /* ── MAIN WRAPPER ── */
-  .main {
-    max-width: 860px;
-    margin: 36px auto;
-    padding: 0 20px 60px;
-  }
-
-  /* ── FORM PANELS ── */
-  .panel { display: none; }
-  .panel.active { display: block; }
-
-  /* ── CARD ── */
-  .card {
-    background: var(--white);
-    border-radius: 10px;
-    box-shadow: 0 2px 16px rgba(26,58,92,0.08);
-    overflow: hidden;
-    margin-bottom: 20px;
-  }
-  .card-header {
-    background: var(--navy);
-    color: var(--white);
-    padding: 18px 28px;
-  }
-  .card-header h2 {
-    font-family: 'Playfair Display', serif;
-    font-size: 19px;
-    font-weight: 500;
-  }
-  .card-header p {
-    font-size: 13px;
-    color: rgba(255,255,255,0.65);
-    margin-top: 4px;
-  }
-  .card-body { padding: 28px; }
-
-  /* ── NOTICE BOXES ── */
-  .notice {
-    background: #eaf3ff;
-    border-left: 4px solid var(--teal);
-    border-radius: 6px;
-    padding: 14px 18px;
-    font-size: 13.5px;
-    margin-bottom: 24px;
-    color: #1a4060;
-  }
-  .notice.warn {
-    background: #fff4ec;
-    border-color: var(--orange);
-    color: #6b2c00;
-  }
-
-  /* ── FIELD ROWS ── */
-  .field-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 18px;
-    margin-bottom: 18px;
-  }
-  .field-row.single { grid-template-columns: 1fr; }
-  .field-row.triple { grid-template-columns: 1fr 1fr 1fr; }
-
-  .field { display: flex; flex-direction: column; gap: 5px; }
-  .field label {
-    font-size: 12.5px;
-    font-weight: 600;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-  .field input, .field select, .field textarea {
-    border: 1.5px solid var(--border);
-    border-radius: 6px;
-    padding: 10px 13px;
-    font-family: 'Source Sans 3', sans-serif;
-    font-size: 14.5px;
-    color: var(--text);
-    transition: border-color 0.2s;
-    background: #fafcfe;
-  }
-  .field input:focus, .field select:focus, .field textarea:focus {
-    outline: none;
-    border-color: var(--teal);
-    background: var(--white);
-  }
-  .field textarea { resize: vertical; min-height: 80px; }
-
-  /* ── DIVIDER ── */
-  .section-divider {
-    border: none;
-    border-top: 1.5px solid var(--border);
-    margin: 24px 0;
-  }
-  .section-title {
-    font-family: 'Playfair Display', serif;
-    font-size: 16px;
-    color: var(--navy);
-    margin-bottom: 16px;
-    padding-bottom: 8px;
-    border-bottom: 2px solid var(--border);
-  }
-
-  /* ── QUESTION ROWS (medical) ── */
-  .q-row {
-    display: flex;
-    align-items: flex-start;
-    gap: 16px;
-    padding: 14px 0;
-    border-bottom: 1px solid #edf2f7;
-  }
-  .q-row:last-child { border-bottom: none; }
-  .q-num {
-    font-weight: 700;
-    color: var(--navy);
-    font-size: 14px;
-    min-width: 24px;
-    margin-top: 2px;
-  }
-  .q-text {
-    flex: 1;
-    font-size: 14.5px;
-    line-height: 1.55;
-    color: var(--text);
-  }
-  .q-answers {
-    display: flex;
-    gap: 10px;
-    min-width: 110px;
-    align-items: center;
-  }
-  .q-answers label {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 500;
-  }
-  .q-answers input[type="radio"] { accent-color: var(--navy); cursor: pointer; }
-
-  /* ── EXPANSION BOXES ── */
-  .expand-box {
-    display: none;
-    background: #eef5ff;
-    border: 1.5px solid #b8d0ef;
-    border-radius: 8px;
-    padding: 18px 22px;
-    margin: 6px 0 16px 40px;
-  }
-  .expand-box.shown { display: block; }
-  .expand-box .box-label {
-    font-family: 'Playfair Display', serif;
-    font-size: 14.5px;
-    font-weight: 700;
-    color: var(--navy);
-    margin-bottom: 12px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .expand-box .box-label span.badge {
-    background: var(--navy);
-    color: white;
-    font-size: 11px;
-    padding: 2px 8px;
-    border-radius: 20px;
-    font-family: 'Source Sans 3', sans-serif;
-    font-weight: 600;
-  }
-  .expand-box .q-row { border-bottom: 1px solid #c8daf0; }
-  .expand-box .q-row:last-child { border-bottom: none; }
-
-  /* ── PHYSICIAN NOTE ── */
-  .physician-note {
-    background: #fff8ec;
-    border: 1.5px solid var(--orange);
-    border-radius: 8px;
-    padding: 14px 18px;
-    font-size: 13.5px;
-    color: #6b2c00;
-    display: none;
-    margin-top: 8px;
-  }
-  .physician-note.shown { display: block; }
-
-  /* ── SIGNATURE AREA ── */
-  .sig-area {
-    border: 1.5px dashed var(--border);
-    border-radius: 8px;
-    padding: 20px;
-    background: #fafcfe;
-  }
-  .sig-canvas-wrap {
-    border: 1.5px solid var(--border);
-    border-radius: 6px;
-    background: var(--white);
-    position: relative;
-    margin-bottom: 10px;
-  }
-  canvas.sig-canvas {
-    display: block;
-    width: 100%;
-    height: 120px;
-    cursor: crosshair;
-    touch-action: none;
-    border-radius: 6px;
-  }
-  .sig-placeholder {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    color: #bdc8d4;
-    font-size: 13px;
-    pointer-events: none;
-    font-style: italic;
-  }
-  .sig-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 8px;
-  }
-  .btn-clear {
-    background: none;
-    border: 1.5px solid var(--border);
-    border-radius: 5px;
-    padding: 5px 14px;
-    font-size: 12.5px;
-    color: var(--muted);
-    cursor: pointer;
-  }
-  .btn-clear:hover { border-color: var(--red); color: var(--red); }
-
-  /* ── INITIALS ── */
-  .initials-row {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    padding: 10px 0;
-    border-bottom: 1px solid #edf2f7;
-  }
-  .initials-box {
-    width: 60px;
-    border: 1.5px solid var(--border);
-    border-radius: 5px;
-    padding: 7px 10px;
-    font-size: 14px;
-    text-align: center;
-    font-weight: 600;
-    color: var(--navy);
-    background: #fafcfe;
-  }
-  .initials-box:focus { outline: none; border-color: var(--teal); background: var(--white); }
-  .initials-text { font-size: 14px; color: var(--text); flex: 1; line-height: 1.5; }
-
-  /* ── CHECKBOX AGREE ── */
-  .agree-row {
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    padding: 11px 0;
-    border-bottom: 1px solid #edf2f7;
-  }
-  .agree-row:last-child { border-bottom: none; }
-  .agree-row input[type="checkbox"] {
-    accent-color: var(--navy);
-    width: 17px;
-    height: 17px;
-    margin-top: 2px;
-    cursor: pointer;
-    flex-shrink: 0;
-  }
-  .agree-row label { font-size: 14px; line-height: 1.55; cursor: pointer; }
-
-  /* ── SUBMIT BTN ── */
-  .btn-submit {
-    background: var(--orange);
-    color: white;
-    border: none;
-    border-radius: 7px;
-    padding: 14px 36px;
-    font-family: 'Source Sans 3', sans-serif;
-    font-size: 15px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.2s;
-    margin-top: 22px;
-    letter-spacing: 0.3px;
-  }
-  .btn-submit:hover { background: #b85520; }
-
-  .btn-print {
-    background: none;
-    border: 2px solid var(--navy);
-    color: var(--navy);
-    border-radius: 7px;
-    padding: 12px 28px;
-    font-family: 'Source Sans 3', sans-serif;
-    font-size: 14.5px;
-    font-weight: 600;
-    cursor: pointer;
-    margin-top: 22px;
-    margin-left: 12px;
-    transition: all 0.2s;
-  }
-  .btn-print:hover { background: var(--navy); color: white; }
-
-  .form-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
-
-  /* ── SUCCESS BANNER ── */
-  .success-banner {
-    display: none;
-    background: #e8f7ef;
-    border: 1.5px solid var(--green);
-    border-radius: 8px;
-    padding: 16px 22px;
-    font-size: 14.5px;
-    color: #1a5c35;
-    margin-top: 20px;
-    font-weight: 500;
-  }
-
-  /* ── PRINT ── */
-  @media print {
-    header, .tabs, .form-actions, .btn-submit, .btn-print, .sig-actions { display: none !important; }
-    .panel { display: block !important; }
-    .main { margin: 0; padding: 0; max-width: 100%; }
-    .card { box-shadow: none; border: 1px solid #ccc; }
-  }
-
-  @media (max-width: 600px) {
-    .field-row { grid-template-columns: 1fr; }
-    .field-row.triple { grid-template-columns: 1fr 1fr; }
-    header { padding: 16px 20px; }
-    .tabs { padding: 0 10px; }
-    .tab-btn { font-size: 12px; padding: 10px 12px; }
-    .card-body { padding: 18px; }
-    .main { padding: 0 10px 40px; }
-    .expand-box { margin-left: 0; }
-  }
+:root{--navy:#1a3a5c;--teal:#1a7a8a;--orange:#d4692a;--bg:#f4f7fa;--border:#c8d6e5;--text:#1e2d3d;--muted:#6b7f94;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Source Sans 3',sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.6;}
+header{background:var(--navy);padding:22px 40px;display:flex;align-items:center;gap:18px;box-shadow:0 2px 10px rgba(0,0,0,.25);}
+header h1{font-family:'Playfair Display',serif;color:#fff;font-size:21px;font-weight:500;}
+header p{color:rgba(255,255,255,.6);font-size:13px;margin-top:2px;}
+.anchor{font-size:30px;color:var(--orange);}
+.tabs{background:var(--navy);display:flex;padding:0 40px;border-top:1px solid rgba(255,255,255,.1);}
+.tab{background:none;border:none;color:rgba(255,255,255,.55);font-family:'Source Sans 3',sans-serif;font-size:13.5px;font-weight:500;padding:12px 20px;cursor:pointer;border-bottom:3px solid transparent;}
+.tab.active{color:#fff;border-bottom-color:var(--orange);}
+.main{max-width:860px;margin:32px auto;padding:0 20px 60px;}
+.panel{display:none;}.panel.active{display:block;}
+.card{background:#fff;border-radius:10px;box-shadow:0 2px 14px rgba(26,58,92,.08);overflow:hidden;margin-bottom:18px;}
+.ch{background:var(--navy);color:#fff;padding:18px 28px;}
+  .ch h2{font-family:'Playfair Display',serif;font-size:19px;font-weight:500;}
+.ch p{font-size:13px;color:rgba(255,255,255,.65);margin-top:4px;}
+.cb{padding:26px 28px;}
+.notice{background:#eaf3ff;border-left:4px solid var(--teal);border-radius:6px;padding:13px 17px;font-size:13.5px;margin-bottom:22px;color:#1a4060;}
+.fr{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+.field{display:flex;flex-direction:column;gap:5px;}
+.field label{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;}
+.field input{border:1.5px solid var(--border);border-radius:6px;padding:9px 12px;font-family:'Source Sans 3',sans-serif;font-size:14px;color:var(--text);background:#fafcfe;}
+.field input:focus{outline:none;border-color:var(--teal);}
+.divider{border:none;border-top:1.5px solid var(--border);margin:22px 0;}
+  .sec-title{font-family:'Playfair Display',serif;font-size:16px;color:var(--navy);margin-bottom:14px;padding-bottom:7px;border-bottom:2px solid var(--border);}
+.qrow{display:flex;align-items:flex-start;gap:14px;padding:13px 0;border-bottom:1px solid #edf2f7;}
+.qrow:last-child{border-bottom:none;}
+.qnum{font-weight:700;color:var(--navy);font-size:14px;min-width:22px;margin-top:2px;}
+.qtext{flex:1;font-size:14.5px;line-height:1.55;}
+.qans{display:flex;gap:10px;min-width:110px;align-items:center;}
+.qans label{display:flex;align-items:center;gap:5px;cursor:pointer;font-size:14px;font-weight:500;}
+.qans input[type=radio]{accent-color:var(--navy);cursor:pointer;touch-action:manipulation;}
+.agree-row input[type=checkbox]{touch-action:manipulation;}
+.expand{display:none;background:#eef5ff;border:1.5px solid #b8d0ef;border-radius:8px;padding:16px 20px;margin:4px 0 14px 36px;}
+.expand.shown{display:block;}
+  .expand .blabel{font-family:'Playfair Display',serif;font-size:14px;font-weight:700;color:var(--navy);margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.badge{background:var(--navy);color:#fff;font-size:11px;padding:2px 8px;border-radius:20px;font-weight:600;}
+.expand .qrow{border-bottom:1px solid #c8daf0;}
+.expand .qrow:last-child{border-bottom:none;}
+.phys-warn{display:none;background:#fff4ec;border:2px solid var(--orange);border-radius:8px;padding:16px 20px;margin-top:14px;}
+.phys-warn.shown{display:block;}
+  .phys-warn h3{color:var(--orange);font-family:'Playfair Display',serif;font-size:16px;margin-bottom:6px;}
+.phys-warn p{font-size:13.5px;color:#6b2c00;}
+.eval-form{display:none;background:#fff;border:1px solid var(--border);border-radius:8px;padding:32px;margin-top:6px;}
+.eval-form.shown{display:block;}
+  .eval-form h2{font-family:'Playfair Display',serif;font-size:18px;margin-bottom:18px;}
+.eval-line{border-bottom:1px solid #333;min-height:28px;margin-bottom:4px;}
+.eval-lbl{font-size:11px;color:#666;margin-bottom:12px;}
+.eval-flbl{font-weight:700;font-size:13px;margin-bottom:5px;margin-top:13px;}
+.sig-area{border:1.5px dashed var(--border);border-radius:8px;padding:18px;background:#fafcfe;}
+.sig-wrap{border:1.5px solid var(--border);border-radius:6px;background:#fff;position:relative;margin-bottom:8px;}
+canvas.sig{display:block;width:100%;height:110px;cursor:crosshair;touch-action:none;border-radius:6px;-ms-touch-action:none;}
+.sig-ph{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#bdc8d4;font-size:13px;pointer-events:none;font-style:italic;}
+.sig-acts{display:flex;justify-content:flex-end;}
+.btn-clr{background:none;border:1.5px solid var(--border);border-radius:5px;padding:4px 13px;font-size:12.5px;color:var(--muted);cursor:pointer;}
+.btn-clr:hover{border-color:#c0392b;color:#c0392b;}
+.init-box{width:70px;border:1.5px solid var(--border);border-radius:5px;padding:6px 9px;font-size:14px;text-align:center;font-weight:600;color:var(--navy);background:#fafcfe;}
+.init-box:focus{outline:none;border-color:var(--teal);}
+.agree-row{display:flex;align-items:flex-start;gap:11px;padding:10px 0;border-bottom:1px solid #edf2f7;}
+.agree-row:last-child{border-bottom:none;}
+.agree-row input[type=checkbox]{accent-color:var(--navy);width:16px;height:16px;margin-top:3px;flex-shrink:0;cursor:pointer;}
+.agree-row label{font-size:14px;line-height:1.55;cursor:pointer;}
+.btn-next{background:var(--navy);color:#fff;border:none;border-radius:7px;padding:13px 34px;font-family:'Source Sans 3',sans-serif;font-size:15px;font-weight:600;cursor:pointer;margin-top:20px;}
+.btn-next:hover{background:#0f2440;}
+.btn-print{background:var(--orange);color:#fff;border:none;border-radius:7px;padding:13px 34px;font-family:'Source Sans 3',sans-serif;font-size:15px;font-weight:600;cursor:pointer;margin-top:20px;}
+.btn-print:hover{background:#b85520;}
+@media print{
+  header,.tabs,.btn-print,.btn-next,.phys-warn,.btn-clr{display:none!important;}
+  .panel{display:none!important;}
+  #panel-0,#panel-1,#panel-2{display:block!important;}
+  #panel-1{page-break-before:always;}
+  #panel-1 .card{margin-bottom:6px;box-shadow:none;border:1px solid #ccc;}
+  #panel-1 .ch{padding:10px 20px;}
+  #panel-1 .ch h2{font-size:15px;}
+  #panel-1 .cb{padding:14px 20px;font-size:11.5px;line-height:1.5;}
+  #panel-1 .cb p{margin-bottom:9px;}
+  #panel-1 .notice{display:none;}
+  #panel-1 .divider{margin:10px 0;}
+  #panel-1 .sec-title{font-size:13px;margin-bottom:8px;padding-bottom:4px;}
+  #panel-1 .agree-row{padding:6px 0;}
+  #panel-1 .agree-row label{font-size:11.5px;}
+  #panel-1 .fr{gap:12px;margin-bottom:10px;}
+  #panel-1 .field label{font-size:11px;}
+  #panel-1 .field input{padding:6px 10px;font-size:12px;}
+  #panel-1 .sig-area{padding:12px;}
+  #panel-1 .sig-wrap{margin-bottom:6px;}
+  #panel-1 .sig-wrap canvas{height:80px !important;}
+  #panel-2{page-break-before:always;}
+  .main{margin:0;padding:0;max-width:100%;}
+  .card{box-shadow:none;border:1px solid #ccc;}
+  .preread-card{display:none!important;}
+  .eval-form{display:none;}
+  .eval-form.shown{display:block;page-break-before:always;border:none;}
+}
+@media(max-width:600px){
+  .fr{grid-template-columns:1fr;}
+  .expand{margin-left:0;}
+  .tabs{padding:0 4px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  .tab{font-size:12px;padding:10px 12px;white-space:nowrap;flex-shrink:0;}
+  .cb{padding:16px;}
+  .main{margin:12px auto;padding:0 10px 40px;}
+  canvas.sig{height:130px !important;}
+  .qans{min-width:90px;}
+  .qans label{font-size:13px;}
+  .btn-next,.btn-print{width:100%;text-align:center;padding:15px;}
+  header{padding:16px 16px;}
+  header h1{font-size:17px;}
+  .field input{font-size:16px;}
+}
 </style>
 </head>
 <body>
-
 <header>
-  <div class="anchor-icon">⚓</div>
+  <div class="anchor">&#9875;</div>
   <div>
-    <h1>NAI'A Cruises Fiji — Guest Documentation</h1>
+    <h1>NAI'A Cruises Fiji &mdash; Guest Documentation</h1>
     <p>Please complete all three forms prior to your departure</p>
   </div>
 </header>
-
 <div class="tabs">
-  <button class="tab-btn active" onclick="switchTab(0)">1. Diver Medical</button>
-  <button class="tab-btn" onclick="switchTab(1)">2. Named Storm Policy</button>
-  <button class="tab-btn" onclick="switchTab(2)">3. Liability Waiver</button>
+  <button class="tab active" data-tab="0">1. Diver Medical</button>
+  <button class="tab" data-tab="1">2. Named Storm Policy</button>
+  <button class="tab" data-tab="2">3. Liability Waiver</button>
 </div>
-
 <div class="main">
-
-  <!-- ═══════════════════════════════════════
-       PANEL 1 – DIVER MEDICAL
-  ═══════════════════════════════════════ -->
-  <div class="panel active" id="panel-0">
-
-    <div class="notice">
-      <strong>Important:</strong> Recreational scuba diving requires good physical and mental health. Answer all questions honestly.
-      If you are pregnant or attempting to become pregnant, do not dive.
+<div class="panel active" id="panel-0">
+  <div class="card preread-card">
+    <div class="ch preread-header" style="background:#222;">
+      <h2 style="text-align:center;font-size:16px;text-transform:uppercase;text-decoration:underline;letter-spacing:1px;">Please Read This Before Filling Out the Dive Medical Questionnaire</h2>
     </div>
-
-    <div class="card">
-      <div class="card-header">
-        <h2>Diver Medical | Participant Questionnaire</h2>
-        <p>Endorsed by DAN, WRSTC, RSTC, Undersea &amp; Hyperbaric Medical Society, CMAS</p>
-      </div>
-      <div class="card-body">
-
-        <div class="field-row">
-          <div class="field">
-            <label>Full Name</label>
-            <input type="text" id="med-name" placeholder="As on passport">
-          </div>
-          <div class="field">
-            <label>Date of Birth</label>
-            <input type="date" id="med-dob">
-          </div>
-        </div>
-        <div class="field-row">
-          <div class="field">
-            <label>Date Completed</label>
-            <input type="date" id="med-date" value="">
-          </div>
-          <div class="field">
-            <label>Facility / Charter</label>
-            <input type="text" id="med-facility" value="NAI'A Cruises Fiji">
-          </div>
-        </div>
-
-        <hr class="section-divider">
-        <p class="section-title">Medical Questions</p>
-
-        <!-- Q1 -->
-        <div class="q-row">
-          <div class="q-num">1</div>
-          <div class="q-text">I have had problems with my lungs, breathing, heart and/or blood affecting my normal physical or mental performance.</div>
-          <div class="q-answers">
-            <label><input type="radio" name="q1" value="yes" onchange="handleQ('q1','A')"> Yes</label>
-            <label><input type="radio" name="q1" value="no" onchange="handleQ('q1','A',true)"> No</label>
-          </div>
-        </div>
-        <div class="expand-box" id="box-A">
-          <div class="box-label">Box A <span class="badge">Physician approval required if any Yes</span></div>
-          <div class="q-row"><div class="q-text">Chest surgery, heart surgery, heart valve surgery, an implantable medical device (e.g. stent, pacemaker, neurostimulator), pneumothorax, and/or chronic lung disease.</div><div class="q-answers"><label><input type="radio" name="A1" value="yes"> Yes</label><label><input type="radio" name="A1" value="no"> No</label></div></div>
-          <div class="q-row"><div class="q-text">Asthma, wheezing, severe allergies, hay fever or congested airways within the last 12 months that limits my physical activity/exercise.</div><div class="q-answers"><label><input type="radio" name="A2" value="yes"> Yes</label><label><input type="radio" name="A2" value="no"> No</label></div></div>
-          <div class="q-row"><div class="q-text">A heart problem such as: angina, chest pain on exertion, heart failure, immersion pulmonary edema, heart attack or stroke, OR taking medication for any heart condition.</div><div class="q-answers"><label><input type="radio" name="A3" value="yes"> Yes</label><label><input type="radio" name="A3" value="no"> No</label></div></div>
-          <div class="q-row"><div class="q-text">Recurrent bronchitis and currently coughing within the past 12 months, OR diagnosed with emphysema.</div><div class="q-answers"><label><input type="radio" name="A4" value="yes"> Yes</label><label><input type="radio" name="A4" value="no"> No</label></div></div>
-          <div class="q-row"><div class="q-text">Symptoms affecting my lungs, breathing, heart and/or blood in the last 30 days that impair my physical or mental performance.</div><div class="q-answers"><label><input type="radio" name="A5" value="yes"> Yes</label><label><input type="radio" name="A5" value="no"> No</label></div></div>
-        </div>
-
-        <!-- Q2 -->
-        <div class="q-row">
-          <div class="q-num">2</div>
-          <div class="q-text">I struggle to perform moderate exercise (e.g. walk 1.6 km in 14 minutes or swim 200 meters without resting), OR I have been unable to participate in normal physical activity due to fitness or health reasons within the past 12 months.</div>
-          <div class="q-answers">
-            <label><input type="radio" name="q2" value="yes" onchange="showPhysician('q2')"> Yes*</label>
-            <label><input type="radio" name="q2" value="no" onchange="hidePhysician('q2')"> No</label>
-          </div>
-        </div>
-        <div class="physician-note" id="physician-q2">⚕️ <strong>Physician approval required.</strong> Please obtain a signed Medical Examiner's Evaluation before diving.</div>
-
-        <!-- Q3 -->
-        <div class="q-row">
-          <div class="q-num">3</div>
-          <div class="q-text">I have had problems with my eyes, ears, or nasal passages/sinuses.</div>
-          <div class="q-answers">
-            <label><input type="radio" name="q3" value="yes" onchange="handleQ('q3','C')"> Yes</label>
-            <label><input type="radio" name="q3" value="no" onchange="handleQ('q3','C',true)"> No</label>
-          </div>
-        </div>
-        <div class="expand-box" id="box-C">
-          <div class="box-label">Box C <span class="badge">Physician approval required if any Yes</span></div>
-          <div class="q-row"><div class="q-text">Sinus surgery within the last 6 months.</div><div class="q-answers"><label><input type="radio" name="C1" value="yes"> Yes</label><label><input type="radio" name="C1" value="no"> No</label></div></div>
-          <div class="q-row"><div class="q-text">Ear disease or ear surgery, hearing loss, or problems with balance.</div><div class="q-answers"><label><input type="radio" name="C2" value="yes"> Yes</label><label><input type="radio" name="C2" value="no"> No</label></div></div>
-          <div class="q-row"><div class="q-text">Recurrent sinusitis within the past 12 months.</div><div class="q-answers"><label><input type="radio" name="C3" value="yes"> Yes</label><label><input type="radio" name="C3" value="no"> No</label></div></div>
-          <div class="q-row"><div class="q-text">Eye surgery within the past 3 months.</div><div class="q-answers"><label><input type="radio" name="C4" value="yes"> Yes</label><label><input type="radio" name="C4" value="no"> No</label></div></div>
-        </div>
-
-        <!-- Q4 -->
-        <div class="q-row">
-          <div class="q-num">4</div>
-          <div class="q-text">I have had surgery within the last 12 months, OR I have ongoing problems related to past surgery.</div>
-          <div class="q-answers">
-            <label><input type="radio" name="q4" value="yes" onchange="showPhysician('q4')"> Yes*</label>
-            <label><input type="radio" name="q4" value="no" onchange="hidePhysician('q4')"> No</label>
-          </div>
-        </div>
-        <div class="physician-note" id="physician-q4">⚕️ <strong>Physician approval required.</strong> Please obtain a signed Medical Examiner's Evaluation before diving.</div>
-
-        <!-- Q5 -->
-        <div class="q-row">
-          <div class="q-num">5</div>
-          <div class="q-text">I have lost consciousness, had migraine headaches, seizures, stroke, significant head injury, or suffer from persistent neurologic injury or disease.</div>
-          <div class="q-answers">
-            <label><input type="radio" name="q5" value="yes" onchange="handleQ('q5','D')"> Yes</label>
-            <label><input type="radio" name="q5" value="no" onchange="handleQ('q5','D',true)"> No</label>
-          </div>
-        </div>
-        <div class="expand-box" id="box-D">
-          <div class="box-label">Box D <span class="badge">Physician approval required if any Yes</span></div>
-          <div class="q-row"><div class="q-text">Head injury with loss of consciousness within the past 5 years.</div><div class="q-answers"><label><input type="radio" name="D1" value="yes"> Yes</label><label><input type="radio" name="D1" value="no"> No</label></div></div>
-          <div class="q-row"><div class="q-text">Persistent neurologic injury or disease.</div><div class="q-answers"><label><input type="radio" name="D2" value="yes"> Yes</label><label><input type="radio" name="D2" value="no"> No</label></div></div>
-          <div class="q-row"><div class="q-text">Recurring migraine headaches within the past 12 months, or take medications to prevent them.</div><div class="q-answers"><label><input type="radio" name="D3" value="yes"> Yes</label><label><input type="radio" name="D3" value="no"> No</label></div></div>
-          <div class="q-row"><div class="q-text">Blackouts or fainting (full/partial loss of consciousness) within the last 5 years.</div><div class="q-answers"><label><input type="radio" name="D4" value="yes"> Yes</label><label><input type="radio" name="D4" value="no"> No</label></div></div>
-          <div class="q-row"><div class="q-text">Epilepsy, seizures, or convulsions, OR take medications to prevent them.</div><div class="q-answers"><label><input type="radio" name="D5" value="yes"> Yes</label><label><input type="radio" name="D5" value="no"> No</label></div></div>
-        </div>
-
-        <!-- Q6 -->
-        <div class="q-row">
-          <div class="q-num">6</div>
-          <div class="q-text">I am currently undergoing treatment (or have required treatment within the last 5 years) for psychological problems, personality disorder, panic attacks, or addiction to drugs or alcohol; or, I have been diagnosed with a learning or developmental disability.</div>
-          <div class="q-answers">
-            <label><input type="radio" name="q6" value="yes" onchange="handleQ('q6','E')"> Yes</label>
-            <label><input type="radio" name="q6" value="no" onchange="handleQ('q6','E',true)"> No</label>
-          </div>
-        </div>
-        <div class="expand-box" id="box-E">
-          <div class="box-label">Box E <span class="badge">Physician approval required if any Yes</span></div>
-          <div class="q-row"><div class="q-text">Behavioral health, mental or psychological problems requiring medical/psychiatric treatment.</div><div class="q-answers"><label><input type="radio" name="E1" value="yes"> Yes</label><label><input type="radio" name="E1" value="no"> No</label></div></div>
-          <div class="q-row"><div class="q-text">Major depression, suicidal ideation, panic attacks, uncontrolled bipolar disorder requiring medication/psychiatric treatment.</div><div class="q-answers"><label><input type="radio" name="E2" value="yes"> Yes</label><label><input type="radio" name="E2" value="no"> No</label></div></div>
-          <div class="q-row"><div class="q-text">Diagnosed with a mental health condition or learning/developmental disorder that requires ongoing care or special accommodation.</div><div class="q-answers"><label><input type="radio" name="E3" value="yes"> Yes</label><label><input type="radio" name="E3" value="no"> No</label></div></div>
-          <div class="q-row"><div class="q-text">An addiction to drugs or alcohol requiring treatment within the last 5 years.</div><div class="q-answers"><label><input type="radio" name="E4" value="yes"> Yes</label><label><input type="radio" name="E4" value="no"> No</label></div></div>
-        </div>
-
-        <!-- Q7 -->
-        <div class="q-row">
-          <div class="q-num">7</div>
-          <div class="q-text">I have had back problems, hernia, ulcers, or diabetes.</div>
-          <div class="q-answers">
-            <label><input type="radio" name="q7" value="yes" onchange="handleQ('q7','F')"> Yes</label>
-            <label><input type="radio" name="q7" value="no" onchange="handleQ('q7','F',true)"> No</label>
-          </div>
-        </div>
-        <div class="expand-box" id="box-F">
-          <div class="box-label">Box F <span class="badge">Physician approval required if any Yes</span></div>
-          <div class="q-row"><div class="q-text">Recurrent back problems in the last 6 months that limit everyday activity.</div><div class="q-answers"><label><input type="radio" name="F1" value="yes"> Yes</label><label><input type="radio" name="F1" value="no"> No</label></div></div>
-          <div class="q-row"><div class="q-text">Back or spinal surgery within the last 12 months.</div><div class="q-answers"><label><input type="radio" name="F2" value="yes"> Yes</label><label><input type="radio" name="F2" value="no"> No</label></div></div>
-          <div class="q-row"><div class="q-text">Diabetes, either drug or diet controlled, OR gestational diabetes within the last 12 months.</div><div class="q-answers"><label><input type="radio" name="F3" value="yes"> Yes</label><label><input type="radio" name="F3" value="no"> No</label></div></div>
-          <div class="q-row"><div class="q-text">An uncorrected hernia that limits physical abilities.</div><div class="q-answers"><label><input type="radio" name="F4" value="yes"> Yes</label><label><input type="radio" name="F4" value="no"> No</label></div></div>
-          <div class="q-row"><div class="q-text">Active or untreated ulcers, problem wounds, or ulcer surgery within the last 6 months.</div><div class="q-answers"><label><input type="radio" name="F5" value="yes"> Yes</label><label><input type="radio" name="F5" value="no"> No</label></div></div>
-        </div>
-
-        <!-- Q8 -->
-        <div class="q-row">
-          <div class="q-num">8</div>
-          <div class="q-text">I have had stomach or intestine problems, including recent diarrhea.</div>
-          <div class="q-answers">
-            <label><input type="radio" name="q8" value="yes" onchange="handleQ('q8','G')"> Yes</label>
-            <label><input type="radio" name="q8" value="no" onchange="handleQ('q8','G',true)"> No</label>
-          </div>
-        </div>
-        <div class="expand-box" id="box-G">
-          <div class="box-label">Box G <span class="badge">Physician approval required if any Yes</span></div>
-          <div class="q-row"><div class="q-text">Ostomy surgery and do not have medical clearance to swim or engage in physical activity.</div><div class="q-answers"><label><input type="radio" name="G1" value="yes"> Yes</label><label><input type="radio" name="G1" value="no"> No</label></div></div>
-          <div class="q-row"><div class="q-text">Dehydration requiring medical intervention within the last 7 days.</div><div class="q-answers"><label><input type="radio" name="G2" value="yes"> Yes</label><label><input type="radio" name="G2" value="no"> No</label></div></div>
-          <div class="q-row"><div class="q-text">Active or untreated stomach or intestinal ulcers or ulcer surgery within the last 6 months.</div><div class="q-answers"><label><input type="radio" name="G3" value="yes"> Yes</label><label><input type="radio" name="G3" value="no"> No</label></div></div>
-          <div class="q-row"><div class="q-text">Frequent heartburn, regurgitation, or gastroesophageal reflux disease (GERD).</div><div class="q-answers"><label><input type="radio" name="G4" value="yes"> Yes</label><label><input type="radio" name="G4" value="no"> No</label></div></div>
-          <div class="q-row"><div class="q-text">Active or uncontrolled ulcerative colitis or Crohn's disease.</div><div class="q-answers"><label><input type="radio" name="G5" value="yes"> Yes</label><label><input type="radio" name="G5" value="no"> No</label></div></div>
-          <div class="q-row"><div class="q-text">Bariatric surgery within the last 12 months.</div><div class="q-answers"><label><input type="radio" name="G6" value="yes"> Yes</label><label><input type="radio" name="G6" value="no"> No</label></div></div>
-        </div>
-
-        <!-- Q9 -->
-        <div class="q-row">
-          <div class="q-num">9</div>
-          <div class="q-text">I am taking prescription medications (with the exception of birth control or anti-malarial drugs other than mefloquine/Lariam).</div>
-          <div class="q-answers">
-            <label><input type="radio" name="q9" value="yes" onchange="showPhysician('q9')"> Yes*</label>
-            <label><input type="radio" name="q9" value="no" onchange="hidePhysician('q9')"> No</label>
-          </div>
-        </div>
-        <div class="physician-note" id="physician-q9">⚕️ <strong>Physician approval required.</strong> Please obtain a signed Medical Examiner's Evaluation before diving.</div>
-
-        <!-- Over 45 -->
-        <hr class="section-divider">
-        <p class="section-title">Additional Question — Divers Over 45</p>
-        <div class="notice" style="margin-bottom:16px;">Complete Box B only if you are over 45 years of age.</div>
-        <div class="expand-box shown" id="box-B" style="margin-left:0;">
-          <div class="box-label">Box B — Over 45 <span class="badge">Physician approval required if any Yes</span></div>
-          <div class="q-row"><div class="q-text">I currently smoke or inhale nicotine by other means.</div><div class="q-answers"><label><input type="radio" name="B1" value="yes"> Yes</label><label><input type="radio" name="B1" value="no"> No</label><label><input type="radio" name="B1" value="na"> N/A</label></div></div>
-          <div class="q-row"><div class="q-text">I have a high cholesterol level.</div><div class="q-answers"><label><input type="radio" name="B2" value="yes"> Yes</label><label><input type="radio" name="B2" value="no"> No</label><label><input type="radio" name="B2" value="na"> N/A</label></div></div>
-          <div class="q-row"><div class="q-text">I have high blood pressure.</div><div class="q-answers"><label><input type="radio" name="B3" value="yes"> Yes</label><label><input type="radio" name="B3" value="no"> No</label><label><input type="radio" name="B3" value="na"> N/A</label></div></div>
-          <div class="q-row"><div class="q-text">I have had a close blood relative die suddenly or of cardiac disease or stroke before age 50, OR have a family history of heart disease before age 50.</div><div class="q-answers"><label><input type="radio" name="B4" value="yes"> Yes</label><label><input type="radio" name="B4" value="no"> No</label><label><input type="radio" name="B4" value="na"> N/A</label></div></div>
-        </div>
-
-        <!-- Signature -->
-        <hr class="section-divider">
-        <p class="section-title">Participant Statement &amp; Signature</p>
-        <div class="notice" style="margin-bottom:20px;">
-          I have answered all questions honestly, and understand that I accept responsibility for any consequences resulting from any questions I may have answered inaccurately or for my failure to disclose any existing or past health conditions.
-        </div>
-        <div class="sig-area">
-          <label style="font-size:13px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:10px;">Participant Signature</label>
-          <div class="sig-canvas-wrap">
-            <canvas class="sig-canvas" id="sig-med" width="800" height="120"></canvas>
-            <span class="sig-placeholder" id="sig-med-placeholder">Sign here with mouse or finger</span>
-          </div>
-          <div class="sig-actions">
-            <button class="btn-clear" onclick="clearSig('sig-med','sig-med-placeholder')">Clear</button>
-          </div>
-        </div>
-        <div class="form-actions">
-          <button class="btn-submit" onclick="submitForm('med','success-med')">Submit Form</button>
-          <button class="btn-print" onclick="window.print()">Print / Save PDF</button>
-        </div>
-        <div class="success-banner" id="success-med">✅ Medical questionnaire submitted successfully. NAI'A will contact you if a physician evaluation is required.</div>
-      </div>
+    <div class="cb" style="font-size:14.5px;line-height:1.75;">
+      <p style='margin-bottom:14px;'>Here is the Dive Medical Questionnaire. You only need to have a Physician Approval if you answer <strong>yes to any</strong> of these questions, and or answer <strong>yes to any of the follow-up questions in Boxes A through G.</strong></p>
+      <p style='margin-bottom:11px;'>Q 2. I struggle to perform moderate exercise (i.e. walk 1.6 K's/One mile or swim 200 meters/yards without resting) or I have been unable to participate in a normal physical activity due to illness or health reasons within the last 12 months.</p>
+      <p style='margin-bottom:11px;'>Q 4. I have had surgery within the last 12 months, OR I have ongoing problems related to past surgery.</p>
+      <p>Q 9. I am taking prescription medications (with the exception of birth control or anti-malarial drugs other than Lariam).</p>
     </div>
   </div>
-
-  <!-- ═══════════════════════════════════════
-       PANEL 2 – NAMED STORM POLICY
-  ═══════════════════════════════════════ -->
-  <div class="panel" id="panel-1">
-
-    <div class="card">
-      <div class="card-header">
-        <h2>NAI'A Named Storm Policy</h2>
-        <p>Acknowledgement of storm compensation program</p>
+  <div class="card">
+    <div class="ch">
+      <h2>Diver Medical | Participant Questionnaire</h2>
+      <p>DAN &nbsp;|&nbsp; WRSTC &nbsp;|&nbsp; RSTC &nbsp;|&nbsp; Undersea &amp; Hyperbaric Medical Society &nbsp;|&nbsp; CMAS</p>
+    </div>
+    <div class="cb">
+      <p style='font-size:13.5px;line-height:1.7;margin-bottom:18px;'>Recreational scuba diving and freediving requires good physical and mental health. There are a few medical conditions which can be hazardous while diving, listed below. Those who have, or are predisposed to, any of these conditions, should be evaluated by a physician. This Diver Medical Participant Questionnaire provides a basis to determine if you should seek out that evaluation. If you have any concerns about your diving fitness not represented on this form, consult with your physician before diving. If you are feeling ill, avoid diving. If you think you may have a contagious disease, protect yourself and others by not participating in dive training and/ or dive activities. References to &ldquo;diving&rdquo; on this form encompass both recreational scuba diving and freediving. For your safety, and that of others who may dive with you, answer all questions honestly.</p>
+      <p style='font-size:13.5px;margin-bottom:4px;'><strong>Directions</strong></p>
+      <p style='font-size:13.5px;line-height:1.7;margin-bottom:18px;'><strong>Complete this questionnaire as a prerequisite to a recreational scuba diving or freediving course. Note to women:</strong> If you are pregnant, or attempting to become pregnant, <em>do not dive.</em></p>
+      <hr class="divider">
+      <div class="fr">
+        <div class="field"><label>Participant Name</label><input type="text" id="med-name"></div>
+        <div class="field"><label>Email Address</label><input type="email" id="med-email" placeholder="email@example.com"></div>
       </div>
-      <div class="card-body">
-        <p style="font-size:15px;line-height:1.75;color:var(--text);margin-bottom:20px;">
-          A week or ten days diving in the South Pacific is a rare opportunity for most people, often planned years in advance. Unfortunately, tropical cyclones occasionally occur during the summer and, although we have only lost a total of 12 days since 1993 its horrible if the storm happens to choose your week in paradise. NAI'A will compensate the guests for diving days lost from their charter due to a named storm.
-        </p>
-        <p style="font-size:15px;line-height:1.75;color:var(--text);margin-bottom:20px;">
-          Any guest whose diving is interrupted as a result of a named storm will receive a Named Storm credit voucher based on the number of diving days missed. If a charter has to be cancelled in advance, started late or ended early due to an approaching named storm, guests will receive a voucher for the total number of days credited. The "Named Storm" vouchers allow guests to use those days towards another trip within two years of their interrupted charter.
-        </p>
-        <p style="font-size:15px;line-height:1.75;color:var(--text);margin-bottom:20px;">
-          Our Named Storm program is not a substitute for the purchase of a comprehensive Trip Cancellation and Interruption Insurance policy. Please Note: Trip Cancellation and Interruption Insurance cannot be purchased once a storm has been named and Named Storm vouchers apply to passengers who do not receive compensation from their trip insurance carrier. The Named Storm program is specifically for lost days on a charter and is not issued when guests are unable to get to the destination due to transportation or other issues, storm-related or not.
-        </p>
-        <p style="font-size:15px;line-height:1.75;color:var(--text);margin-bottom:24px;">
-          NAI'A has a comprehensive if seldom enacted storm plan in case of such events. If weather forecasts or conditions appear threatening to the safety of the passengers and crew, we will make necessary arrangements to evacuate the guests. The captain will order and arrange for guests to depart NAI'A with a crew member, and be taken to a resort, hotel or government approved shelter. In most cases we can get guests back to one of the major hotels near the international airport. NAI'A will then be moved to our cyclone mooring where she will be prepared and secured by the remaining crew.
-        </p>
-
-        <hr class="section-divider">
-        <p class="section-title">Acknowledgement</p>
-        <div class="agree-row">
-          <input type="checkbox" id="storm-ack">
-          <label for="storm-ack">I have read and understood the NAI'A Named Storm Policy. I acknowledge that this program is not a substitute for travel insurance and applies only to diving days lost directly due to a named storm during my charter.</label>
-        </div>
-
-        <div class="field-row" style="margin-top:22px;">
-          <div class="field">
-            <label>Full Name</label>
-            <input type="text" id="storm-name" placeholder="As on passport">
-          </div>
-          <div class="field">
-            <label>Date</label>
-            <input type="date" id="storm-date">
-          </div>
-        </div>
-
-        <div style="margin-top:20px;">
-          <div class="sig-area">
-            <label style="font-size:13px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:10px;">Signature</label>
-            <div class="sig-canvas-wrap">
-              <canvas class="sig-canvas" id="sig-storm" width="800" height="120"></canvas>
-              <span class="sig-placeholder" id="sig-storm-placeholder">Sign here with mouse or finger</span>
-            </div>
-            <div class="sig-actions">
-              <button class="btn-clear" onclick="clearSig('sig-storm','sig-storm-placeholder')">Clear</button>
-            </div>
-          </div>
-        </div>
-        <div class="form-actions">
-          <button class="btn-submit" onclick="submitForm('storm','success-storm')">Submit Form</button>
-          <button class="btn-print" onclick="window.print()">Print / Save PDF</button>
-        </div>
-        <div class="success-banner" id="success-storm">✅ Named Storm Policy acknowledgement submitted successfully.</div>
+      <div class="fr">
+        <div class="field"><label>Birthdate (dd/mm/yyyy)</label><input type="date" id="med-dob"></div>
+        <div class="field"><label>Today's Date (dd/mm/yyyy)</label><input type="date" id="med-date"></div>
       </div>
+      <div class="fr">
+        <div class='field'><label>Facility Name (Print)</label><input type='text' value="NAI'A Cruises Fiji"></div>
+        <div class="field"><label>Instructor Name (Print)</label><input type="text"></div>
+      </div>
+      <hr class="divider">
+      <div class="qrow">
+        <div class="qnum">1</div>
+        <div class="qtext">I have had problems with my lungs, breathing, heart and/or blood affecting my normal physical or mental performance.</div>
+        <div class="qans">
+          <label><input type="radio" name="q1" value="yes" data-show="box-A"> Yes</label>
+          <label><input type="radio" name="q1" value="no" data-hide="box-A"> No</label>
+        </div>
+      </div>
+      <div class="expand" id="box-A">
+        <div class="blabel">Box A <span class="badge">Physician approval required if any Yes</span></div>
+        <div class="qrow"><div class="qtext">Chest surgery, heart surgery, heart valve surgery, an implantable medical device (e.g. stent, pacemaker, neurostimulator), pneumothorax, and/or chronic lung disease.</div><div class="qans"><label><input type="radio" name="A1" value="yes"> Yes</label><label><input type="radio" name="A1" value="no"> No</label></div></div>
+        <div class="qrow"><div class="qtext">Asthma, wheezing, severe allergies, hay fever or congested airways within the last 12 months that limits my physical activity/exercise.</div><div class="qans"><label><input type="radio" name="A2" value="yes"> Yes</label><label><input type="radio" name="A2" value="no"> No</label></div></div>
+        <div class="qrow"><div class="qtext">A heart problem such as: angina, chest pain on exertion, heart failure, immersion pulmonary edema, heart attack or stroke, OR taking medication for any heart condition.</div><div class="qans"><label><input type="radio" name="A3" value="yes"> Yes</label><label><input type="radio" name="A3" value="no"> No</label></div></div>
+        <div class="qrow"><div class="qtext">Recurrent bronchitis and currently coughing within the past 12 months, OR diagnosed with emphysema.</div><div class="qans"><label><input type="radio" name="A4" value="yes"> Yes</label><label><input type="radio" name="A4" value="no"> No</label></div></div>
+        <div class="qrow"><div class="qtext">Symptoms affecting my lungs, breathing, heart and/or blood in the last 30 days that impair my physical or mental performance.</div><div class="qans"><label><input type="radio" name="A5" value="yes"> Yes</label><label><input type="radio" name="A5" value="no"> No</label></div></div>
+      </div>
+      <div class="qrow">
+        <div class="qnum">2</div>
+        <div class="qtext">I struggle to perform moderate exercise (for example, walk 1.6 kilometer/one mile in 14 minutes or swim 200 meters/yards without resting), OR I have been unable to participate in a normal physical activity due to fitness or health reasons within the past 12 months.</div>
+        <div class="qans">
+          <label><input type="radio" name="q2" value="yes" data-physician="1"> Yes *</label>
+          <label><input type="radio" name="q2" value="no"> No</label>
+        </div>
+      </div>
+      <div class="qrow">
+        <div class="qnum">3</div>
+        <div class="qtext">I have had problems with my eyes, ears, or nasal passages/sinuses.</div>
+        <div class="qans">
+          <label><input type="radio" name="q3" value="yes" data-show="box-C"> Yes</label>
+          <label><input type="radio" name="q3" value="no" data-hide="box-C"> No</label>
+        </div>
+      </div>
+      <div class="expand" id="box-C">
+        <div class="blabel">Box C <span class="badge">Physician approval required if any Yes</span></div>
+        <div class="qrow"><div class="qtext">Sinus surgery within the last 6 months.</div><div class="qans"><label><input type="radio" name="C1" value="yes"> Yes</label><label><input type="radio" name="C1" value="no"> No</label></div></div>
+        <div class="qrow"><div class="qtext">Ear disease or ear surgery, hearing loss, or problems with balance.</div><div class="qans"><label><input type="radio" name="C2" value="yes"> Yes</label><label><input type="radio" name="C2" value="no"> No</label></div></div>
+        <div class="qrow"><div class="qtext">Recurrent sinusitis within the past 12 months.</div><div class="qans"><label><input type="radio" name="C3" value="yes"> Yes</label><label><input type="radio" name="C3" value="no"> No</label></div></div>
+        <div class="qrow"><div class="qtext">Eye surgery within the past 3 months.</div><div class="qans"><label><input type="radio" name="C4" value="yes"> Yes</label><label><input type="radio" name="C4" value="no"> No</label></div></div>
+      </div>
+      <div class="qrow">
+        <div class="qnum">4</div>
+        <div class="qtext">I have had surgery within the last 12 months, OR I have ongoing problems related to past surgery.</div>
+        <div class="qans">
+          <label><input type="radio" name="q4" value="yes" data-physician="1"> Yes *</label>
+          <label><input type="radio" name="q4" value="no"> No</label>
+        </div>
+      </div>
+      <div class="qrow">
+        <div class="qnum">5</div>
+        <div class="qtext">I have lost consciousness, had migraine headaches, seizures, stroke, significant head injury, or suffer from persistent neurologic injury or disease.</div>
+        <div class="qans">
+          <label><input type="radio" name="q5" value="yes" data-show="box-D"> Yes</label>
+          <label><input type="radio" name="q5" value="no" data-hide="box-D"> No</label>
+        </div>
+      </div>
+      <div class="expand" id="box-D">
+        <div class="blabel">Box D <span class="badge">Physician approval required if any Yes</span></div>
+        <div class="qrow"><div class="qtext">Head injury with loss of consciousness within the past 5 years.</div><div class="qans"><label><input type="radio" name="D1" value="yes"> Yes</label><label><input type="radio" name="D1" value="no"> No</label></div></div>
+        <div class="qrow"><div class="qtext">Persistent neurologic injury or disease.</div><div class="qans"><label><input type="radio" name="D2" value="yes"> Yes</label><label><input type="radio" name="D2" value="no"> No</label></div></div>
+        <div class="qrow"><div class="qtext">Recurring migraine headaches within the past 12 months, or take medications to prevent them.</div><div class="qans"><label><input type="radio" name="D3" value="yes"> Yes</label><label><input type="radio" name="D3" value="no"> No</label></div></div>
+        <div class="qrow"><div class="qtext">Blackouts or fainting (full/partial loss of consciousness) within the last 5 years.</div><div class="qans"><label><input type="radio" name="D4" value="yes"> Yes</label><label><input type="radio" name="D4" value="no"> No</label></div></div>
+        <div class="qrow"><div class="qtext">Epilepsy, seizures, or convulsions, OR take medications to prevent them.</div><div class="qans"><label><input type="radio" name="D5" value="yes"> Yes</label><label><input type="radio" name="D5" value="no"> No</label></div></div>
+      </div>
+      <div class="qrow">
+        <div class="qnum">6</div>
+        <div class="qtext">I am currently undergoing treatment (or have required treatment within the last five years) for psychological problems, personality disorder, panic attacks, or an addiction to drugs or alcohol; or, I have been diagnosed with a learning or developmental disability.</div>
+        <div class="qans">
+          <label><input type="radio" name="q6" value="yes" data-show="box-E"> Yes</label>
+          <label><input type="radio" name="q6" value="no" data-hide="box-E"> No</label>
+        </div>
+      </div>
+      <div class="expand" id="box-E">
+        <div class="blabel">Box E <span class="badge">Physician approval required if any Yes</span></div>
+        <div class="qrow"><div class="qtext">Behavioral health, mental or psychological problems requiring medical/psychiatric treatment.</div><div class="qans"><label><input type="radio" name="E1" value="yes"> Yes</label><label><input type="radio" name="E1" value="no"> No</label></div></div>
+        <div class="qrow"><div class="qtext">Major depression, suicidal ideation, panic attacks, uncontrolled bipolar disorder requiring medication/psychiatric treatment.</div><div class="qans"><label><input type="radio" name="E2" value="yes"> Yes</label><label><input type="radio" name="E2" value="no"> No</label></div></div>
+        <div class="qrow"><div class="qtext">Diagnosed with a mental health condition or learning/developmental disorder requiring ongoing care or special accommodation.</div><div class="qans"><label><input type="radio" name="E3" value="yes"> Yes</label><label><input type="radio" name="E3" value="no"> No</label></div></div>
+        <div class="qrow"><div class="qtext">An addiction to drugs or alcohol requiring treatment within the last 5 years.</div><div class="qans"><label><input type="radio" name="E4" value="yes"> Yes</label><label><input type="radio" name="E4" value="no"> No</label></div></div>
+      </div>
+      <div class="qrow">
+        <div class="qnum">7</div>
+        <div class="qtext">I have had back problems, hernia, ulcers, or diabetes.</div>
+        <div class="qans">
+          <label><input type="radio" name="q7" value="yes" data-show="box-F"> Yes</label>
+          <label><input type="radio" name="q7" value="no" data-hide="box-F"> No</label>
+        </div>
+      </div>
+      <div class="expand" id="box-F">
+        <div class="blabel">Box F <span class="badge">Physician approval required if any Yes</span></div>
+        <div class="qrow"><div class="qtext">Recurrent back problems in the last 6 months that limit my everyday activity.</div><div class="qans"><label><input type="radio" name="F1" value="yes"> Yes</label><label><input type="radio" name="F1" value="no"> No</label></div></div>
+        <div class="qrow"><div class="qtext">Back or spinal surgery within the last 12 months.</div><div class="qans"><label><input type="radio" name="F2" value="yes"> Yes</label><label><input type="radio" name="F2" value="no"> No</label></div></div>
+        <div class="qrow"><div class="qtext">Diabetes, either drug or diet controlled, OR gestational diabetes within the last 12 months.</div><div class="qans"><label><input type="radio" name="F3" value="yes"> Yes</label><label><input type="radio" name="F3" value="no"> No</label></div></div>
+        <div class="qrow"><div class="qtext">An uncorrected hernia that limits my physical abilities.</div><div class="qans"><label><input type="radio" name="F4" value="yes"> Yes</label><label><input type="radio" name="F4" value="no"> No</label></div></div>
+        <div class="qrow"><div class="qtext">Active or untreated ulcers, problem wounds, or ulcer surgery within the last 6 months.</div><div class="qans"><label><input type="radio" name="F5" value="yes"> Yes</label><label><input type="radio" name="F5" value="no"> No</label></div></div>
+      </div>
+      <div class="qrow">
+        <div class="qnum">8</div>
+        <div class="qtext">I have had stomach or intestine problems, including recent diarrhea.</div>
+        <div class="qans">
+          <label><input type="radio" name="q8" value="yes" data-show="box-G"> Yes</label>
+          <label><input type="radio" name="q8" value="no" data-hide="box-G"> No</label>
+        </div>
+      </div>
+      <div class="expand" id="box-G">
+        <div class="blabel">Box G <span class="badge">Physician approval required if any Yes</span></div>
+        <div class="qrow"><div class="qtext">Ostomy surgery and do not have medical clearance to swim or engage in physical activity.</div><div class="qans"><label><input type="radio" name="G1" value="yes"> Yes</label><label><input type="radio" name="G1" value="no"> No</label></div></div>
+        <div class="qrow"><div class="qtext">Dehydration requiring medical intervention within the last 7 days.</div><div class="qans"><label><input type="radio" name="G2" value="yes"> Yes</label><label><input type="radio" name="G2" value="no"> No</label></div></div>
+        <div class="qrow"><div class="qtext">Active or untreated stomach or intestinal ulcers or ulcer surgery within the last 6 months.</div><div class="qans"><label><input type="radio" name="G3" value="yes"> Yes</label><label><input type="radio" name="G3" value="no"> No</label></div></div>
+        <div class="qrow"><div class="qtext">Frequent heartburn, regurgitation, or gastroesophageal reflux disease (GERD).</div><div class="qans"><label><input type="radio" name="G4" value="yes"> Yes</label><label><input type="radio" name="G4" value="no"> No</label></div></div>
+        <div class="qrow"><div class="qtext">Active or uncontrolled ulcerative colitis or Crohn's disease.</div><div class="qans"><label><input type="radio" name="G5" value="yes"> Yes</label><label><input type="radio" name="G5" value="no"> No</label></div></div>
+        <div class="qrow"><div class="qtext">Bariatric surgery within the last 12 months.</div><div class="qans"><label><input type="radio" name="G6" value="yes"> Yes</label><label><input type="radio" name="G6" value="no"> No</label></div></div>
+      </div>
+      <div class="qrow">
+        <div class="qnum">9</div>
+        <div class="qtext">I am taking prescription medications (with the exception of birth control or anti-malarial drugs other than mefloquine (Lariam).</div>
+        <div class="qans">
+          <label><input type="radio" name="q9" value="yes" data-physician="1"> Yes *</label>
+          <label><input type="radio" name="q9" value="no"> No</label>
+        </div>
+      </div>
+      <hr class="divider">
+      <p class="sec-title">Additional Question - Divers Over 45</p>
+      <div class="notice" style="margin-bottom:14px;">Complete Box B only if you are over 45 years of age.</div>
+      <div class="expand shown" id="box-B" style="margin-left:0;">
+        <div class="blabel">Box B - Over 45 <span class="badge">Physician approval required if any Yes</span></div>
+        <div class="qrow"><div class="qtext">I currently smoke or inhale nicotine by other means.</div><div class="qans"><label><input type="radio" name="B1" value="yes"> Yes</label><label><input type="radio" name="B1" value="no"> No</label></div></div>
+        <div class="qrow"><div class="qtext">I have a high cholesterol level.</div><div class="qans"><label><input type="radio" name="B2" value="yes"> Yes</label><label><input type="radio" name="B2" value="no"> No</label></div></div>
+        <div class="qrow"><div class="qtext">I have high blood pressure.</div><div class="qans"><label><input type="radio" name="B3" value="yes"> Yes</label><label><input type="radio" name="B3" value="no"> No</label></div></div>
+        <div class="qrow"><div class="qtext">I have had a close blood relative die suddenly or of cardiac disease or stroke before the age of 50, OR have a family history of heart disease before age 50 (including abnormal heart rhythms, coronary artery disease or cardiomyopathy).</div><div class="qans"><label><input type="radio" name="B4" value="yes"> Yes</label><label><input type="radio" name="B4" value="no"> No</label></div></div>
+      </div>
+      <hr class="divider">
+      <p class="sec-title">Participant Signature</p>
+      <div class="notice" style="margin-bottom:18px;"><strong>Participant Statement:</strong> I have answered all questions honestly, and understand that I accept responsibility for any consequences resulting from any questions I may have answered inaccurately or for my failure to disclose any existing or past health conditions.</div>
+      <div class="sig-area">
+        <label style='font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:9px;'>Participant Signature (or, if a minor, participant's parent/guardian signature required)</label>
+        <div class="sig-wrap"><canvas class="sig" id="sig-med" width="800" height="110"></canvas><span class="sig-ph" id="sig-med-ph">Sign here with mouse or finger</span></div>
+        <div class="sig-acts"><button class="btn-clr" data-canvas="sig-med" data-ph="sig-med-ph">Clear</button></div>
+      </div>
+      <div class="fr" style="margin-top:14px;">
+        <div class="field"><label>Date (dd/mm/yyyy)</label><input type="date" id="med-sig-date"></div>
+        <div class="field"></div>
+      </div>
+      <div id="phys-warn" class="phys-warn">
+        <h3>&#9888; Physician Approval Required</h3>
+        <p>Based on your answers, a Medical Examiner's Evaluation must be completed by your doctor before diving. The evaluation form (page 3) is included when you print.</p>
+      </div>
+      <button class="btn-next" data-next="1">Next &rarr;</button>
     </div>
   </div>
-
-  <!-- ═══════════════════════════════════════
-       PANEL 3 – LIABILITY WAIVER
-  ═══════════════════════════════════════ -->
-  <div class="panel" id="panel-2">
-
-    <div class="card">
-      <div class="card-header">
-        <h2>Waiver and Release Agreement</h2>
-        <p>This document affects substantial legal rights, including your right to sue — please read carefully</p>
+  <div id="eval-form" class="eval-form">
+    <p style='text-align:center;color:#999;font-size:12px;margin-bottom:14px;'>3.</p>
+    <h2><strong>Diver Medical</strong> | Medical Examiner's Evaluation Form</h2>
+    <div style='display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:8px;'>
+      <div><div style='font-weight:700;font-size:13px;margin-bottom:18px;'>Participant Name</div><div class='eval-line'></div><div class='eval-lbl'>(Print)</div></div>
+      <div><div style='font-weight:700;font-size:13px;margin-bottom:18px;'>Birthdate</div><div class='eval-line'></div><div class='eval-lbl'>Date (dd/mm/yyyy)</div></div>
+    </div>
+    <p style='font-size:13.5px;line-height:1.7;margin:18px 0;'>The above-named person requests your opinion of his/her medical suitability to participate in recreational scuba diving or freediving training or activity. Please visit <u>uhms.org</u> for medical guidance on medical conditions as they relate to diving. Review the areas relevant to your patient as part of your evaluation.</p>
+    <h3 style='font-size:17px;margin:18px 0 12px;'>Evaluation Result</h3>
+    <div style='display:flex;align-items:flex-start;gap:11px;margin-bottom:12px;'><input type='checkbox'><label style='font-size:13.5px;'>Approved - I find no conditions that I consider incompatible with recreational scuba diving or freediving.</label></div>
+    <div style='display:flex;align-items:flex-start;gap:11px;margin-bottom:26px;'><input type='checkbox'><label style='font-size:13.5px;'>Not approved - I find conditions that I consider incompatible with recreational scuba diving or freediving.</label></div>
+    <div style='display:grid;grid-template-columns:2fr 1fr;gap:24px;margin-bottom:18px;'><div><div class='eval-line'></div><div class='eval-lbl'>Signature of certified medical doctor or other legally certified medical provider</div></div><div><div class='eval-line'></div><div class='eval-lbl'>Date (dd/mm/yyyy)</div></div></div>
+    <div class='eval-flbl'>Medical Examiner's Name</div><div class='eval-line'></div><div class='eval-lbl'>(Print)</div>
+    <div class='eval-flbl'>Clinical Degrees/Credentials</div><div class='eval-line'></div>
+    <div class='eval-flbl'>Clinic/Hospital</div><div class='eval-line'></div>
+    <div class='eval-flbl'>Address</div><div class='eval-line'></div><div style='min-height:8px;'></div>
+    <div style='display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:14px;'><div><div class='eval-flbl'>Phone</div><div class='eval-line'></div></div><div><div class='eval-flbl'>Email</div><div class='eval-line'></div></div></div>
+    <div style='border:1px solid #999;padding:8px;text-align:center;font-size:12px;color:#777;margin-top:18px;'>Physician/Clinic Stamp (optional)</div>
+  </div>
+</div>
+<div class="panel" id="panel-1">
+  <div class="card">
+    <div class='ch'><h2>Nai'a Named Storm Policy</h2></div>
+    <div class="cb">
+      <p style='font-size:15px;line-height:1.75;margin-bottom:18px;'>A week or ten days diving in the South Pacific is a rare opportunity for most people, often planned years in advance. Unfortunately, tropical cyclones occasionally occur during the summer and, although we have only lost a total of 12 days since 1993 its horrible if the storm happens to choose your week in paradise. NAI'A will compensate the guests for diving days lost from their charter due to a named storm.</p>
+      <p style='font-size:15px;line-height:1.75;margin-bottom:18px;'>Any guest whose diving is interrupted as a result of a named storm will receive a Named Storm credit voucher based on the number of diving days missed. If a charter has to be cancelled in advance, started late or ended early due to an approaching named storm, guests will receive a voucher for the total number of days credited. The &ldquo;Named Storm&rdquo; vouchers allow guests to use those days towards another trip within two years of their interrupted charter.</p>
+      <p style='font-size:15px;line-height:1.75;margin-bottom:18px;'>Our Named Storm program is not a substitute for the purchase of a comprehensive Trip Cancellation and Interruption Insurance policy. Please Note: Trip Cancellation and Interruption Insurance cannot be purchased once a storm has been named and Named Storm vouchers apply to passengers who do not receive compensation from their trip insurance carrier. The Named Storm program is specifically for lost days on a charter and is not issued when guests are unable to get to the destination due to transportation or other issues, storm-related or not.</p>
+      <p style='font-size:15px;line-height:1.75;margin-bottom:22px;'>NAI'A has a comprehensive if seldom enacted storm plan in case of such events. If weather forecasts or conditions appear threatening to the safety of the passengers and crew, we will make necessary arrangements to evacuate the guests. The captain will order and arrange for guests to depart NAI'A with a crew member, and be taken to a resort, hotel or government approved shelter. In most cases we can get guests back to one of the major hotels near the international airport. NAI'A will then be moved to our cyclone mooring where she will be prepared and secured by the remaining crew.</p>
+      <hr class="divider">
+      <p class="sec-title">Acknowledgement</p>
+      <div class='agree-row'><input type='checkbox' id='storm-ack'><label for='storm-ack'>I have read and understood the NAI'A Named Storm Policy.</label></div>
+      <div class="fr" style="margin-top:20px;">
+        <div class="field"><label>Name</label><input type="text" id="storm-name" placeholder="Print"></div>
+        <div class="field"><label>Date</label><input type="date" id="storm-date"></div>
       </div>
-      <div class="card-body">
-
-        <div class="field-row">
-          <div class="field">
-            <label>Full Name</label>
-            <input type="text" id="waiver-name" placeholder="As on passport">
-          </div>
-          <div class="field">
-            <label>Departure Date</label>
-            <input type="date" id="waiver-departure">
-          </div>
-        </div>
-
-        <hr class="section-divider">
-        <p class="section-title">Terms — Please initial each item to confirm you have read and understood it</p>
-
-        <div class="initials-row">
-          <input class="initials-box" type="text" maxlength="4" placeholder="Init.">
-          <div class="initials-text">NAI'A assumes no responsibility or liability for services, transportation or equipment made available by any airline, travel agency, resort, hotel or other entity.</div>
-        </div>
-        <div class="initials-row">
-          <input class="initials-box" type="text" maxlength="4" placeholder="Init.">
-          <div class="initials-text">I hereby waive, release, and absolve NAI'A from any and all liability for personal injury, property loss, death, and all other damages arising out of my participation in the trip and its activities, whether resulting from negligence, products liability, strict liability, seaworthiness of the yacht, or fault of NAI'A.</div>
-        </div>
-        <div class="initials-row">
-          <input class="initials-box" type="text" maxlength="4" placeholder="Init.">
-          <div class="initials-text">I agree to defend, indemnify, and hold harmless NAI'A from any claim or lawsuit by me or anyone acting on my behalf for personal injury, property loss, death or other damages.</div>
-        </div>
-        <div class="initials-row">
-          <input class="initials-box" type="text" maxlength="4" placeholder="Init.">
-          <div class="initials-text">NAI'A accepts no responsibility for determining my physical fitness for activities. It is my responsibility to determine, through medical examination or consultation with my physician, my fitness for this trip.</div>
-        </div>
-        <div class="initials-row">
-          <input class="initials-box" type="text" maxlength="4" placeholder="Init.">
-          <div class="initials-text">In case of a medical emergency, I authorize the Captain and/or crew to administer first aid or obtain medical attention. I understand the nearest medical care/recompression chamber may require air evacuation many hours away, and I voluntarily accept this risk and agree to pay all related expenses.</div>
-        </div>
-        <div class="initials-row">
-          <input class="initials-box" type="text" maxlength="4" placeholder="Init.">
-          <div class="initials-text">I certify that I fully understand the risks inherent in snorkelling, scuba diving, technical diving (including solo diving), and other open water activities, and I expressly assume all risks involved.</div>
-        </div>
-        <div class="initials-row">
-          <input class="initials-box" type="text" maxlength="4" placeholder="Init.">
-          <div class="initials-text">I will inspect all snorkelling, scuba or other equipment prior to engaging in activities and will notify NAI'A of any equipment not working properly. I will not hold NAI'A responsible for injuries resulting from my failure to inspect equipment.</div>
-        </div>
-        <div class="initials-row">
-          <input class="initials-box" type="text" maxlength="4" placeholder="Init.">
-          <div class="initials-text">I will furnish my own equipment and be responsible for its good order and operating condition. If I obtain equipment from NAI'A, I accept it as is and agree its use is entirely at my own risk. I shall be financially liable for any breakage.</div>
-        </div>
-        <div class="initials-row">
-          <input class="initials-box" type="text" maxlength="4" placeholder="Init.">
-          <div class="initials-text">NAI'A reserves the right to deny my application for any reason. I will conduct myself reasonably and follow all rules set by the captain and crew. If my behavior endangers the yacht, passengers or divers, the captain has the right to refuse service or remove me from the yacht.</div>
-        </div>
-        <div class="initials-row">
-          <input class="initials-box" type="text" maxlength="4" placeholder="Init.">
-          <div class="initials-text">Remoteness, local customs, and weather may cause substitution of facilities/equipment and modifications to the itinerary. NAI'A reserves the right to modify or cancel arrangements due to unfavorable weather. No refunds for weather-related cancellations except as detailed in the Named Storm Policy.</div>
-        </div>
-        <div class="initials-row">
-          <input class="initials-box" type="text" maxlength="4" placeholder="Init.">
-          <div class="initials-text">In the event of yacht equipment failure, legal seizure, labor strikes, or insufficient bookings, NAI'A reserves the right to cancel the charter and refund all deposits. NAI'A is not responsible for cancellations arising from wars, riots, acts of terrorism or other incidents.</div>
-        </div>
-        <div class="initials-row">
-          <input class="initials-box" type="text" maxlength="4" placeholder="Init.">
-          <div class="initials-text">Any claim arising from this agreement must be adjudicated solely within the tribunals and courts of Fiji and must be brought within one (1) year from the date of the incident giving rise to the claim.</div>
-        </div>
-
-        <hr class="section-divider">
-        <p class="section-title">Further Representations</p>
-
-        <div class="agree-row">
-          <input type="checkbox" id="w-age">
-          <label for="w-age">I am of legal age and competent to sign this Waiver and Release Agreement (or, if a minor, my parent or legal guardian shall sign on my behalf).</label>
-        </div>
-        <div class="agree-row">
-          <input type="checkbox" id="w-truth">
-          <label for="w-truth">The statements I have made concerning my personal information, medical suitability for scuba diving or snorkelling, diving experience, and certification are correct and truthful in all respects.</label>
-        </div>
-        <div class="agree-row">
-          <input type="checkbox" id="w-nomod">
-          <label for="w-nomod">I understand that voiding, deleting, erasing, striking, or by any other means altering any part of this waiver is prohibited and does not discharge or release me of that or any other part of this agreement.</label>
-        </div>
-
-        <div style="margin-top:24px;">
-          <div class="sig-area">
-            <label style="font-size:13px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:10px;">Participant Signature</label>
-            <div class="sig-canvas-wrap">
-              <canvas class="sig-canvas" id="sig-waiver" width="800" height="120"></canvas>
-              <span class="sig-placeholder" id="sig-waiver-placeholder">Sign here with mouse or finger</span>
-            </div>
-            <div class="sig-actions">
-              <button class="btn-clear" onclick="clearSig('sig-waiver','sig-waiver-placeholder')">Clear</button>
-            </div>
-          </div>
-          <div style="margin-top:14px;">
-            <div class="field-row">
-              <div class="field">
-                <label>Parent / Guardian Name (if applicable)</label>
-                <input type="text" placeholder="Leave blank if not applicable">
-              </div>
-              <div class="field">
-                <label>Date Signed</label>
-                <input type="date" id="waiver-sig-date">
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div style="margin-top:16px;font-size:12.5px;color:var(--muted);border-top:1px solid var(--border);padding-top:14px;">
-          NAI'A Cruises Fiji Ltd. | PO Box 332, Pacific Harbour, Fiji | Tel: +679 345 0382 | <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="ea8f929a8685988faa848b838bc4898587c48c80">[email&#160;protected]</a>
-        </div>
-
-        <div class="form-actions">
-          <button class="btn-submit" onclick="submitForm('waiver','success-waiver')">Submit Form</button>
-          <button class="btn-print" onclick="window.print()">Print / Save PDF</button>
-        </div>
-        <div class="success-banner" id="success-waiver">✅ Waiver and Release Agreement submitted successfully. A copy will be held on file for your charter.</div>
+      <div class="sig-area" style="margin-top:18px;">
+        <label style='font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:9px;'>Signature</label>
+        <div class="sig-wrap"><canvas class="sig" id="sig-storm" width="800" height="110"></canvas><span class="sig-ph" id="sig-storm-ph">Sign here with mouse or finger</span></div>
+        <div class="sig-acts"><button class="btn-clr" data-canvas="sig-storm" data-ph="sig-storm-ph">Clear</button></div>
       </div>
+      <button class="btn-next" data-next="2">Next &rarr;</button>
     </div>
   </div>
+</div>
+<div class="panel" id="panel-2">
+  <div class="card">
+    <div class="ch">
+      <h2>Waiver and Release Agreement</h2>
+      <p>This Document Affects Substantial Legal Rights, Including Your Right to Sue</p>
+    </div>
+    <div class="cb">
+      <div class="fr">
+        <div class="field"><label>Name</label><input type="text" id="waiver-name" placeholder="Print"></div>
+        <div class="field"><label>Departure Date</label><input type="date" id="waiver-depart"></div>
+      </div>
+      <hr class="divider">
+      <p style='font-size:13.5px;line-height:1.7;margin-bottom:14px;'>I expressly understand and agree that:</p>
+      <ul style='font-size:13.5px;line-height:1.75;padding-left:20px;list-style:disc;'>
+        <li style='margin-bottom:10px;'>Nai'a Cruises Fiji Ltd, the Yacht, the Yacht Owners, charterers and operators of the Yacht, and their officers, directors, shareholders, agents, employees, and affiliated companies (hereinafter collectively referred to as NAI'A), assume no responsibility or liability for service, transportation or equipment made available by any airline, travel or booking agency, resort, hotel or other such entity, as to availability or safety, quality or condition, nor for the acts of any employee or agent of such entity.</li>
+        <li style='margin-bottom:10px;'>I agree that, in consideration of being allowed to participate in the trip for which I have applied and the activities that may be available in connection with that trip, I hereby waive, release, and absolve NAI'A of and from any and all liability and responsibility for personal injury, property loss, death, and any and all other damages that I may sustain in conjunction with or arising out of my participation in the trip for which I have applied and the activities made available in connection therewith, whether such injuries, losses or damages result from negligence, products liability, strict liability, seaworthiness of the yacht, or fault of NAI'A.</li>
+        <li style='margin-bottom:10px;'>I agree to defend, indemnify, and hold harmless NAI'A from any claim or lawsuit by me or anyone purporting to act on my behalf for any such personal injury, property loss, death or other damages.</li>
+        <li style='margin-bottom:10px;'>I understand and agree that NAI'A accepts no responsibility whatsoever for determining my physical fitness to engage in snorkelling, scuba diving or any other physical activities in which I may participate in connection with the trip for which I have applied.</li>
+        <li style='margin-bottom:10px;'>I acknowledge and agree that it is my responsibility to determine, through a thorough medical examination or consultation with my personal physician, my physical fitness for this trip.</li>
+        <li style='margin-bottom:10px;'>In case of a medical emergency, I authorize the Captain and/or crew of the Yacht to administer first aid or get proper medical attention if necessary. I understand that the nearest medical care/operational recompression chamber may be many hours away and may require air evacuation. The time involved with boat and air transport poses additional risk to my personal safety. I voluntarily accept this additional risk and am fully prepared to pay all expenses related to evacuation and recompression chamber treatment should it be deemed necessary by myself or the yacht.</li>
+        <li style='margin-bottom:10px;'>I certify that I have informed myself of and fully understand the risks inherent in snorkelling, scuba diving, technical diving (including solo diving) and other open water activities, and travel to and from dive sites and I expressly assume all risks involved in such activities.</li>
+        <li style='margin-bottom:10px;'>I understand and agree that I will inspect my snorkelling, scuba diving or other program equipment prior to engaging in the Activities and that I will notify NAI'A if any of the equipment is not working properly. I will not hold NAI'A responsible for any injuries received as a result of my failure to inspect the equipment and/or to notify NAI'A of any equipment that is not working properly prior to engaging in the Activities.</li>
+        <li style='margin-bottom:10px;'>I will furnish my own equipment and be responsible for its good order and operating conditions, regardless of where I obtain it. Prior to each Activity, I will check my own equipment to ensure proper function, completeness and familiarity. I do not expect my equipment to be inspected by anyone else.</li>
+        <li style='margin-bottom:10px;'>If I do obtain any equipment for any program Activity from NAI'A, I accept the equipment as is. NAI'A accepts no responsibility for any defect in any of the equipment of NAI'A and does not warrant that it is suitable for any particular purpose. I agree that the use of any such equipment is entirely at my own risk. I shall return any equipment so obtained in good order and operating condition and shall be financially liable for any breakage or deviations there from.</li>
+        <li style='margin-bottom:10px;'>I understand and agree that NAI'A reserves the right to deny my application for any reason whatsoever.</li>
+        <li style='margin-bottom:10px;'>I fully understand that it is my responsibility to conduct myself with reasonableness and follow all of the rules and regulations set forth by the captain and crew. I acknowledge and agree that if, at any time, my behavior is deemed inappropriate, unsuitable or in any way endangers the yacht, passengers or divers, the yacht Captain has the right to refuse service to me or remove me from the yacht.</li>
 
-</div><!-- /main -->
-
+        <li style='margin-bottom:10px;'>I fully understand that the remoteness of the area, local custom and prevailing weather conditions may cause substitution of facilities and/or equipment, and minor inconvenience or modification to portions of the program itinerary, and NAI'A reserves the right to modify and/or cancel program arrangements due to unfavorable weather conditions and to substitute alternate facilities and equipment.</li>
+        <li style='margin-bottom:10px;'>In the event of equipment failure of the Yacht, seizure or arrest of the Yacht under color of law, unavailability of labor due to strikes, lockouts, political or labor disturbances or the like, or passenger bookings which are, in the sole discretion of NAI'A insufficient to permit a charter, NAI'A reserves the right to cancel the charter and to refund all deposits. No refunds can be made for cancelled program arrangements due to adverse weather or for substitution of facilities and/or equipment or for minor inconvenience once a trip begins except as detailed in the NAI'A NamedStorm policy.</li>
+        <li style='margin-bottom:10px;'>NAI'A is not responsible and has no liability for cancellations arising from wars, riots, acts of terrorism or other incidents.</li>
+        <li style='margin-bottom:10px;'>I understand and agree that, in the event that one or more of the provisions of this agreement, for any reason, is held by a court of competent jurisdiction to be invalid or unenforceable in any respect, such invalidity or unenforceability shall not affect any other provision hereof, and this agreement shall be construed as if such invalid or unenforceable provision had never been contained herein.</li>
+        <li style='margin-bottom:10px;'>I agree that any claim brought by me or my successors against any party or persons whatsoever, arising in any matter out of or relating in any manner to this application or any contract formed hereby or hereafter on the basis of this application, or any act or circumstance arising from or related to any use by applicant of any vessel, facility or employee of NAI'A, its subsidiaries or affiliates, whether in tort, in contract or otherwise must be adjudicated solely within the tribunals and courts of Fiji and not in any other place, tribunal or court, including, but not limited to, the applicant's place of residence as stated herein, and must be brought within one (1) year from the date of the incident giving rise to claim.</li>
+        <li style='margin-bottom:10px;'>I have read the terms and conditions set forth above in their entirety and I understand them and accept them unconditionally. I further agree to observe strictly and comply with any additional reasonable terms and regulations as NAI'A may from time to time deem desirable or needful or prescribe during the course of the charter.</li>
+      </ul>
+      <div style='display:flex;justify-content:flex-end;align-items:center;gap:14px;margin-top:18px;padding-top:14px;'>
+        <span style='font-weight:700;font-size:14px;'>Initial</span><input class='init-box' id='waiver-initial' type='text' maxlength='4' placeholder='____'>
+      </div>
+      <hr class="divider">
+      <p class="sec-title">I further represent and agree:</p>
+      <div class='agree-row'><input type='checkbox' id='w1'><label for='w1'>That I am of legal age and am competent to sign this Waiver and Release Agreement or, if not, that my parent or legal guardian shall sign on my behalf, or has given written consent to my signing this document, and that my guardian or parent completely understands and concurs this Waiver and Release Agreement.</label></div>
+      <div class='agree-row'><input type='checkbox' id='w2'><label for='w2'>That the statements made by me in the NAI'A Application concerning my personal information, medical suitability for scuba diving or snorkelling, diving experience, and certification are correct and truthful in all respects.</label></div>
+      <div class='agree-row'><input type='checkbox' id='w3'><label for='w3'>That, in executing this Waiver and Release Agreement, I am not relying upon any oral or written representations or statements made by NAI'A, or others, except as what is set forth in this Waiver and Release Agreement. I also understand that voiding, deleting, erasing, striking or by any other means altering any part of this waiver and release is prohibited and does not discharge or release me of that or any other part of this waiver and release.</label></div>
+      <p style='font-size:13.5px;line-height:1.7;margin:18px 0;'>Delivery of an executed signature page to this Agreement by fax or e-mail shall be effective as delivery of a manually executed signature of this Agreement.</p>
+      <p style='font-size:13.5px;margin-bottom:18px;'>Undersigned acknowledges receipt of a copy of this contract.</p>
+      <div class="sig-area">
+        <label style='font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:9px;'>Participant Signature</label>
+        <div class="sig-wrap"><canvas class="sig" id="sig-waiver" width="800" height="110"></canvas><span class="sig-ph" id="sig-waiver-ph">Sign here with mouse or finger</span></div>
+        <div class="sig-acts"><button class="btn-clr" data-canvas="sig-waiver" data-ph="sig-waiver-ph">Clear</button></div>
+      </div>
+      <div class="fr" style="margin-top:14px;">
+        <div class="field"><label>Parent or Guardian</label><input type="text" placeholder="If applicable"></div>
+        <div class="field"><label>Date</label><input type="date" id="waiver-sig-date"></div>
+      </div>
+      <p style='font-size:12px;color:var(--muted);border-top:1px solid var(--border);padding-top:12px;margin-top:16px;'>NAI'A Cruises Fiji Ltd. &nbsp;|&nbsp; PO Box 332, Pacific Harbour, Fiji &nbsp;|&nbsp; Tel: 679.345.0382 &nbsp;|&nbsp; Fax: 679.345.0566 &nbsp;|&nbsp; <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="482d303824273a2d0826292129662b2725662e22">[email&#160;protected]</a></p>
+      <button class="btn-print">Print / Save PDF</button>
+    </div>
+  </div>
+</div>
+</div>
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
-// ── TAB SWITCHING ──
-function switchTab(idx) {
-  document.querySelectorAll('.panel').forEach((p,i) => p.classList.toggle('active', i===idx));
-  document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', i===idx));
+var tabs = document.querySelectorAll(".tab");
+tabs.forEach(function(btn) {
+  btn.addEventListener("click", function() {
+    var idx = parseInt(this.getAttribute("data-tab"));
+    document.querySelectorAll(".panel").forEach(function(p,i){ p.classList[i===idx?"add":"remove"]("active"); });
+    tabs.forEach(function(b,i){ b.classList[i===idx?"add":"remove"]("active"); });
+  });
+});
+document.querySelectorAll(".btn-next").forEach(function(btn) {
+  btn.addEventListener("click", function() {
+    var fromIdx = parseInt(this.getAttribute("data-next")) - 1;
+    var panel = document.getElementById("panel-" + fromIdx);
+    var errors = validatePanel(panel, fromIdx);
+    if(errors.length > 0) {
+      showErrors(errors, panel);
+      return;
+    }
+    clearErrors(panel);
+    var idx = parseInt(this.getAttribute("data-next"));
+    document.querySelectorAll(".panel").forEach(function(p,i){ p.classList[i===idx?"add":"remove"]("active"); });
+    tabs.forEach(function(b,i){ b.classList[i===idx?"add":"remove"]("active"); });
+    window.scrollTo(0,0);
+  });
+});
+document.querySelectorAll("input[type=radio]").forEach(function(r) {
+  r.addEventListener("click", function() {
+    var show = this.getAttribute("data-show");
+    var hide = this.getAttribute("data-hide");
+    if (show) { var el = document.getElementById(show); if(el) el.classList.add("shown"); }
+    if (hide) {
+      var el2 = document.getElementById(hide);
+      if(el2) {
+        el2.classList.remove("shown");
+        // Clear all radio selections inside the collapsed box
+        el2.querySelectorAll("input[type=radio]").forEach(function(cr){ cr.checked = false; });
+      }
+    }
+    checkPhysician();
+  });
+});
+function checkPhysician() {
+  var need = false;
+  // Q2, Q4, Q9 direct physician triggers
+  if(document.querySelector("input[name=q2][value=yes]").checked) need = true;
+  if(document.querySelector("input[name=q4][value=yes]").checked) need = true;
+  if(document.querySelector("input[name=q9][value=yes]").checked) need = true;
+  // Any yes inside expand boxes (A-G) or Box B
+  document.querySelectorAll(".expand input[type=radio][value=yes]").forEach(function(r){ if(r.checked) need = true; });
+  var warn = document.getElementById("phys-warn");
+  var ef = document.getElementById("eval-form");
+  if(warn) warn.classList[need?"add":"remove"]("shown");
+  if(ef) ef.classList[need?"add":"remove"]("shown");
+}
+document.querySelectorAll(".btn-clr").forEach(function(btn) {
+  btn.addEventListener("click", function() {
+    var c = document.getElementById(this.getAttribute("data-canvas"));
+    var p = document.getElementById(this.getAttribute("data-ph"));
+    if(c) c.getContext("2d").clearRect(0,0,c.width,c.height);
+    if(p) p.style.display="";
+  });
+});
+document.querySelectorAll(".btn-print").forEach(function(btn) {
+  btn.addEventListener("click", function() {
+    var panel = document.getElementById("panel-2");
+    var errors = validatePanel(panel, 2);
+    if(errors.length > 0) {
+      showErrors(errors, panel);
+      return;
+    }
+    clearErrors(panel);
+    window.print();
+  });
+});
+// Error display
+function showErrors(errors, panel) {
+  clearErrors(panel);
+  var box = document.createElement("div");
+  box.className = "val-errors";
+  box.style.cssText = "background:#fff0f0;border:2px solid #c0392b;border-radius:8px;padding:14px 18px;margin-bottom:16px;font-size:13.5px;color:#c0392b;";
+  box.innerHTML = "<strong>Please complete the following before continuing:</strong><ul style='margin-top:8px;padding-left:18px;'>" +
+    errors.map(function(e){ return "<li style='margin-bottom:4px;'>"+e+"</li>"; }).join("") + "</ul>";
+  panel.insertBefore(box, panel.firstChild);
+  panel.scrollIntoView({behavior:"smooth", block:"start"});
+}
+function clearErrors(panel) {
+  var existing = panel.querySelector(".val-errors");
+  if(existing) existing.remove();
 }
 
-// ── MEDICAL LOGIC ──
-function handleQ(qName, boxId, hide) {
-  const box = document.getElementById('box-' + boxId);
-  if (!box) return;
-  if (hide) { box.classList.remove('shown'); } else { box.classList.add('shown'); }
-}
-function showPhysician(qName) {
-  const note = document.getElementById('physician-' + qName);
-  if (note) note.classList.add('shown');
-}
-function hidePhysician(qName) {
-  const note = document.getElementById('physician-' + qName);
-  if (note) note.classList.remove('shown');
+function validatePanel(panel, idx) {
+  var errors = [];
+  if(idx === 0) {
+    // Medical form
+    var name = document.getElementById("med-name");
+    if(!name || !name.value.trim()) errors.push("Participant name is required");
+    var email = document.getElementById("med-email");
+    if(!email || !email.value.trim()) errors.push("Email address is required");
+    var dob = document.getElementById("med-dob");
+    if(!dob || !dob.value) errors.push("Birthdate is required");
+    // All 9 main questions answered
+    ["q1","q2","q3","q4","q5","q6","q7","q8","q9"].forEach(function(q) {
+      if(!document.querySelector("input[name="+q+"]:checked")) errors.push("Question "+q.replace("q","")+" must be answered");
+    });
+    // Calculate age from birthdate
+    var dob = document.getElementById("med-dob");
+    var over45 = false;
+    if(dob && dob.value) {
+      var dobDate = new Date(dob.value);
+      var ageDiff = Date.now() - dobDate.getTime();
+      var ageDate = new Date(ageDiff);
+      var age = Math.abs(ageDate.getUTCFullYear() - 1970);
+      over45 = age > 45;
+    }
+    // Sub-questions in visible expand boxes
+    panel.querySelectorAll(".expand.shown").forEach(function(box) {
+      // Skip Box B if diver is not over 45
+      if(box.id === "box-B" && !over45) return;
+      var names = {};
+      box.querySelectorAll("input[type=radio]").forEach(function(r){ names[r.name]=true; });
+      var unanswered = [];
+      Object.keys(names).forEach(function(n){
+        if(!document.querySelector("input[name="+n+"]:checked")) unanswered.push(n);
+      });
+      if(unanswered.length > 0) {
+        var boxLabel = box.querySelector(".blabel") ? box.querySelector(".blabel").textContent.split("Physician")[0].trim() : "follow-up";
+        errors.push("All questions in " + boxLabel + " must be answered");
+      }
+    });
+    // Signature
+    var sigCanvas = document.getElementById("sig-med");
+    if(sigCanvas) {
+      var blank = !sigCanvas.getContext("2d").getImageData(0,0,sigCanvas.width,sigCanvas.height).data.some(function(v,i){ return i%4!==3 && v!==0; });
+      if(blank) errors.push("Participant signature is required");
+    }
+  } else if(idx === 1) {
+    // Named Storm
+    var name = document.getElementById("storm-name");
+    if(!name || !name.value.trim()) errors.push("Name is required");
+    if(!document.getElementById("storm-ack").checked) errors.push("Please confirm you have read and understood the Named Storm Policy");
+    var sigCanvas = document.getElementById("sig-storm");
+    if(sigCanvas) {
+      var blank = !sigCanvas.getContext("2d").getImageData(0,0,sigCanvas.width,sigCanvas.height).data.some(function(v,i){ return i%4!==3 && v!==0; });
+      if(blank) errors.push("Signature is required");
+    }
+  } else if(idx === 2) {
+    // Waiver
+    var name = document.getElementById("waiver-name");
+    if(!name || !name.value.trim()) errors.push("Name is required");
+    var wdepart = document.getElementById("waiver-depart");
+    if(!wdepart || !wdepart.value) errors.push("Departure date is required");
+    var wi = document.getElementById("waiver-initial");
+    if(!wi || !wi.value.trim()) errors.push("Initial is required at the end of the agreement clauses");
+    if(!document.getElementById("w1").checked) errors.push("Please confirm you are of legal age (agreement box 1)");
+    if(!document.getElementById("w2").checked) errors.push("Please confirm your statements are truthful (agreement box 2)");
+    if(!document.getElementById("w3").checked) errors.push("Please confirm you understand the waiver terms (agreement box 3)");
+    var sigCanvas = document.getElementById("sig-waiver");
+    if(sigCanvas) {
+      var blank = !sigCanvas.getContext("2d").getImageData(0,0,sigCanvas.width,sigCanvas.height).data.some(function(v,i){ return i%4!==3 && v!==0; });
+      if(blank) errors.push("Participant signature is required");
+    }
+  }
+  return errors;
 }
 
-// ── SIGNATURE CANVAS ──
-function initCanvas(canvasId, placeholderId) {
-  const canvas = document.getElementById(canvasId);
-  const placeholder = document.getElementById(placeholderId);
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  let drawing = false;
-  let lastX = 0, lastY = 0;
+function initSig(cid,pid) {
+  var cnv=document.getElementById(cid), ph=document.getElementById(pid);
+  if(!cnv) return;
+  // Use the canvas at its natural HTML size with scale correction
+  var ctx=cnv.getContext("2d"), drawing=false, lx=0, ly=0;
 
   function getPos(e) {
-    const rect = canvas.getBoundingClientRect();
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
-    if (e.touches) {
-      return {
-        x: (e.touches[0].clientX - rect.left) * scaleX,
-        y: (e.touches[0].clientY - rect.top) * scaleY
-      };
-    }
-    return {
-      x: (e.clientX - rect.left) * scaleX,
-      y: (e.clientY - rect.top) * scaleY
-    };
+    var r=cnv.getBoundingClientRect();
+    var sx=cnv.width/r.width, sy=cnv.height/r.height;
+    var src=(e.touches&&e.touches.length) ? e.touches[0] : e;
+    return {x:(src.clientX-r.left)*sx, y:(src.clientY-r.top)*sy};
   }
-
-  function start(e) {
-    e.preventDefault();
-    drawing = true;
-    const pos = getPos(e);
-    lastX = pos.x; lastY = pos.y;
-    if (placeholder) placeholder.style.display = 'none';
+  function draw(lx,ly,x,y){
+    ctx.beginPath(); ctx.moveTo(lx,ly); ctx.lineTo(x,y);
+    ctx.strokeStyle="#1a3a5c"; ctx.lineWidth=2.5; ctx.lineCap="round"; ctx.stroke();
   }
-  function draw(e) {
-    if (!drawing) return;
-    e.preventDefault();
-    const pos = getPos(e);
-    ctx.beginPath();
-    ctx.moveTo(lastX, lastY);
-    ctx.lineTo(pos.x, pos.y);
-    ctx.strokeStyle = '#1a3a5c';
-    ctx.lineWidth = 2.5;
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-    ctx.stroke();
-    lastX = pos.x; lastY = pos.y;
-  }
-  function stop() { drawing = false; }
-
-  canvas.addEventListener('mousedown', start);
-  canvas.addEventListener('mousemove', draw);
-  canvas.addEventListener('mouseup', stop);
-  canvas.addEventListener('mouseleave', stop);
-  canvas.addEventListener('touchstart', start, { passive: false });
-  canvas.addEventListener('touchmove', draw, { passive: false });
-  canvas.addEventListener('touchend', stop);
+  // Pointer events — single unified handler for mouse AND touch
+  cnv.addEventListener("pointerdown",function(e){
+    cnv.setPointerCapture(e.pointerId);
+    drawing=true;
+    var p=getPos(e); lx=p.x; ly=p.y;
+    if(ph) ph.style.display="none";
+  });
+  cnv.addEventListener("pointermove",function(e){
+    if(!drawing) return;
+    var p=getPos(e); draw(lx,ly,p.x,p.y); lx=p.x; ly=p.y;
+  });
+  cnv.addEventListener("pointerup",function(){ drawing=false; });
+  cnv.addEventListener("pointercancel",function(){ drawing=false; });
 }
-
-function clearSig(canvasId, placeholderId) {
-  const canvas = document.getElementById(canvasId);
-  if (!canvas) return;
-  canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
-  const ph = document.getElementById(placeholderId);
-  if (ph) ph.style.display = '';
-}
-
-initCanvas('sig-med', 'sig-med-placeholder');
-initCanvas('sig-storm', 'sig-storm-placeholder');
-initCanvas('sig-waiver', 'sig-waiver-placeholder');
-
-// ── SUBMIT ──
-function submitForm(formId, bannerId) {
-  const banner = document.getElementById(bannerId);
-  if (banner) {
-    banner.style.display = 'block';
-    banner.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  }
-}
-
-// Set today's 
+initSig("sig-med","sig-med-ph");
+initSig("sig-storm","sig-storm-ph");
+initSig("sig-waiver","sig-waiver-ph");
+document.getElementById("med-name").addEventListener("input", function() {
+  var v = this.value;
+  var s = document.getElementById("storm-name"); if(s) s.value = v;
+  var w = document.getElementById("waiver-name"); if(w) w.value = v;
+});
+var today = new Date().toISOString().split("T")[0];
+["med-date","med-sig-date","storm-date","waiver-sig-date"].forEach(function(id){ var el=document.getElementById(id); if(el)el.value=today; });
+</script>
+</body>
+</html>
