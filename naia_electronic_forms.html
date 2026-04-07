@@ -598,7 +598,7 @@ function initSig(cid,pid) {
     ctx.beginPath(); ctx.moveTo(lx,ly); ctx.lineTo(x,y);
     ctx.strokeStyle="#1a3a5c"; ctx.lineWidth=2.5; ctx.lineCap="round"; ctx.stroke();
   }
-  // Pointer events — single unified handler for mouse AND touch
+  // Pointer events - single unified handler for mouse AND touch
   cnv.addEventListener("pointerdown",function(e){
     cnv.setPointerCapture(e.pointerId);
     drawing=true;
