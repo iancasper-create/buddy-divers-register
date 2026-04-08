@@ -70,9 +70,6 @@ canvas.sig{display:block;width:100%;height:110px;cursor:crosshair;touch-action:n
 .agree-row label{font-size:14px;line-height:1.55;cursor:pointer;}
 .btn-next{background:var(--navy);color:#fff;border:none;border-radius:7px;padding:13px 34px;font-family:'Source Sans 3',sans-serif;font-size:15px;font-weight:600;cursor:pointer;margin-top:20px;}
 .btn-next:hover{background:#0f2440;}
-.btn-submit{background:#27ae60;color:#fff;border:none;border-radius:7px;padding:13px 34px;font-family:'Source Sans 3',sans-serif;font-size:15px;font-weight:600;cursor:pointer;margin-top:20px;margin-left:12px;}
-.btn-submit:hover{background:#1e8449;}
-@media(max-width:600px){.btn-submit{margin-left:0;width:100%;}}
 .btn-print{background:var(--orange);color:#fff;border:none;border-radius:7px;padding:13px 34px;font-family:'Source Sans 3',sans-serif;font-size:15px;font-weight:600;cursor:pointer;margin-top:20px;}
 .btn-print:hover{background:#b85520;}
 @media print{
@@ -416,8 +413,6 @@ canvas.sig{display:block;width:100%;height:110px;cursor:crosshair;touch-action:n
       </div>
       <p style='font-size:12px;color:var(--muted);border-top:1px solid var(--border);padding-top:12px;margin-top:16px;'>NAI'A Cruises Fiji Ltd. &nbsp;|&nbsp; PO Box 332, Pacific Harbour, Fiji &nbsp;|&nbsp; Tel: 679.345.0382 &nbsp;|&nbsp; Fax: 679.345.0566 &nbsp;|&nbsp; <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="0a6f727a6665786f4a646b636b24696567246c60">[email&#160;protected]</a></p>
       <button class="btn-print">Print / Save PDF</button>
-      <button class="btn-submit" id="btn-submit">Submit All Forms</button>
-      <div id="submit-msg" style="display:none;background:#e8f7ef;border:1.5px solid #27ae60;border-radius:8px;padding:14px 18px;margin-top:16px;font-size:14px;color:#1a5c35;"><strong>&#10003; Forms submitted successfully.</strong> A copy has been sent to your email address.</div>
     </div>
   </div>
 </div>
@@ -624,160 +619,6 @@ document.getElementById("med-name").addEventListener("input", function() {
   var v = this.value;
   var s = document.getElementById("storm-name"); if(s) s.value = v;
   var w = document.getElementById("waiver-name"); if(w) w.value = v;
-});
-
-// SUBMIT
-document.getElementById("btn-submit").addEventListener("click", function() {
-  var panel = document.getElementById("panel-2");
-  var errors = validatePanel(panel, 2);
-  if(errors.length > 0) { showErrors(errors, panel); return; }
-  clearErrors(panel);
-
-  function val(id){ var el=document.getElementById(id); return el ? el.value : ""; }
-  function chk(id){ var el=document.getElementById(id); return el && el.checked ? "Yes" : "No"; }
-  function radio(name){ var el=document.querySelector("input[name="+name+"]:checked"); return el ? el.value : "Not answered"; }
-  function sig(id){ var el=document.getElementById(id); return el ? el.toDataURL("image/png") : ""; }
-
-  var n = val("med-name"), em = val("med-email"), bd = val("med-dob"), dc = val("med-date");
-  var sd = val("storm-date"), wd = val("waiver-depart"), wi = val("waiver-initial"), wsd = val("waiver-sig-date");
-  var smSrc = sig("sig-med"), ssSrc = sig("sig-storm"), swSrc = sig("sig-waiver");
-
-  function row(label, v, shade) {
-    var bg = shade ? "background:#eaf3ff;" : "";
-    return "<tr style=\""+bg+"\"><td width=\"70%\" style=\"padding:5px 8px;font-size:13px;\">"+label+"</td><td style=\"padding:5px 8px;font-size:13px;\"><strong>"+v+"</strong></td></tr>";
-  }
-  function boxSection(title, rows) {
-    var h = "<h3 style=\"color:#1a3a5c;font-size:13px;margin:14px 0 5px;\">"+title+"</h3>";
-    h += "<table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"font-size:12px;background:#f9f9f9;border:1px solid #e0e8f0;\">";
-    rows.forEach(function(r,i){ h += row(r[0],r[1],i%2===0); });
-    return h + "</table>";
-  }
-
-  var emailHTML =
-    "<div style=\"font-family:Arial,sans-serif;max-width:700px;margin:0 auto;color:#1e2d3d;\">" +
-    "<div style=\"background:#1a3a5c;padding:20px 28px;border-radius:8px 8px 0 0;\">" +
-    "<h1 style=\"color:#ffffff;margin:0;font-size:20px;\">NAI\'A Cruises Fiji &mdash; Completed Guest Forms</h1></div>" +
-
-    "<div style=\"background:#f4f7fa;padding:16px 28px;border-bottom:2px solid #c8d6e5;\">" +
-    "<table width=\"100%\" cellpadding=\"5\" cellspacing=\"0\">" +
-    row("Participant Name", n, true) + row("Email", em, false) +
-    row("Birthdate", bd, true) + row("Date Completed", dc, false) +
-    "</table></div>" +
-
-    "<div style=\"background:#fff;padding:20px 28px;border-bottom:2px solid #c8d6e5;\">" +
-    "<h2 style=\"color:#1a3a5c;font-size:16px;border-bottom:1px solid #c8d6e5;padding-bottom:8px;\">Diver Medical Questionnaire</h2>" +
-    "<table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\">" +
-    row("1. Lung / heart / blood problems", radio("q1"), true) +
-    row("2. Struggle with moderate exercise", radio("q2"), false) +
-    row("3. Eye / ear / sinus problems", radio("q3"), true) +
-    row("4. Surgery in last 12 months", radio("q4"), false) +
-    row("5. Loss of consciousness / neurologic", radio("q5"), true) +
-    row("6. Psychological treatment / addiction", radio("q6"), false) +
-    row("7. Back / hernia / ulcers / diabetes", radio("q7"), true) +
-    row("8. Stomach / intestine problems", radio("q8"), false) +
-    row("9. Prescription medications", radio("q9"), true) +
-    "</table>" +
-    boxSection("Box A - Lungs / Heart", [
-      ["Chest/heart surgery, implantable device, pneumothorax", radio("A1")],
-      ["Asthma / wheezing / severe allergies", radio("A2")],
-      ["Angina / heart failure / heart attack / stroke", radio("A3")],
-      ["Recurrent bronchitis / emphysema", radio("A4")],
-      ["Lung/heart symptoms in last 30 days", radio("A5")]
-    ]) +
-    boxSection("Box C - Eyes / Ears / Sinuses", [
-      ["Sinus surgery last 6 months", radio("C1")],
-      ["Ear disease / hearing loss / balance problems", radio("C2")],
-      ["Recurrent sinusitis last 12 months", radio("C3")],
-      ["Eye surgery last 3 months", radio("C4")]
-    ]) +
-    boxSection("Box D - Neurological", [
-      ["Head injury with loss of consciousness last 5 years", radio("D1")],
-      ["Persistent neurologic injury or disease", radio("D2")],
-      ["Recurring migraines last 12 months", radio("D3")],
-      ["Blackouts / fainting last 5 years", radio("D4")],
-      ["Epilepsy / seizures / convulsions", radio("D5")]
-    ]) +
-    boxSection("Box E - Psychological", [
-      ["Behavioral / mental health treatment", radio("E1")],
-      ["Major depression / panic attacks / bipolar", radio("E2")],
-      ["Mental health condition / learning disorder", radio("E3")],
-      ["Drug / alcohol addiction last 5 years", radio("E4")]
-    ]) +
-    boxSection("Box F - Back / Hernia / Diabetes", [
-      ["Recurrent back problems last 6 months", radio("F1")],
-      ["Back / spinal surgery last 12 months", radio("F2")],
-      ["Diabetes", radio("F3")],
-      ["Uncorrected hernia", radio("F4")],
-      ["Active ulcers / ulcer surgery last 6 months", radio("F5")]
-    ]) +
-    boxSection("Box G - Stomach / Intestines", [
-      ["Ostomy surgery without medical clearance", radio("G1")],
-      ["Dehydration requiring medical intervention last 7 days", radio("G2")],
-      ["Stomach ulcers / ulcer surgery last 6 months", radio("G3")],
-      ["Frequent heartburn / GERD", radio("G4")],
-      ["Ulcerative colitis / Crohns disease", radio("G5")],
-      ["Bariatric surgery last 12 months", radio("G6")]
-    ]) +
-    boxSection("Box B - Over 45", [
-      ["Currently smoke / nicotine", radio("B1")],
-      ["High cholesterol", radio("B2")],
-      ["High blood pressure", radio("B3")],
-      ["Family history of cardiac disease before 50", radio("B4")]
-    ]) +
-    "<h3 style=\"color:#1a3a5c;font-size:13px;margin:14px 0 6px;\">Medical Signature</h3>" +
-    "<img src=\""+smSrc+"\" style=\"max-width:300px;border:1px solid #ccc;border-radius:4px;\">" +
-    "</div>" +
-
-    "<div style=\"background:#fff;padding:20px 28px;border-bottom:2px solid #c8d6e5;\">" +
-    "<h2 style=\"color:#1a3a5c;font-size:16px;border-bottom:1px solid #c8d6e5;padding-bottom:8px;\">Named Storm Policy</h2>" +
-    "<table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\">" +
-    row("Policy acknowledged", chk("storm-ack"), true) + row("Date", sd, false) +
-    "</table>" +
-    "<h3 style=\"color:#1a3a5c;font-size:13px;margin:14px 0 6px;\">Named Storm Signature</h3>" +
-    "<img src=\""+ssSrc+"\" style=\"max-width:300px;border:1px solid #ccc;border-radius:4px;\">" +
-    "</div>" +
-
-    "<div style=\"background:#fff;padding:20px 28px;border-bottom:2px solid #c8d6e5;\">" +
-    "<h2 style=\"color:#1a3a5c;font-size:16px;border-bottom:1px solid #c8d6e5;padding-bottom:8px;\">Waiver and Release Agreement</h2>" +
-    "<table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\">" +
-    row("Departure date", wd, true) + row("Initialled agreement clauses", wi, false) +
-    row("Confirmed legal age", chk("w1"), true) + row("Confirmed statements truthful", chk("w2"), false) +
-    row("Confirmed waiver terms understood", chk("w3"), true) + row("Signature date", wsd, false) +
-    "</table>" +
-    "<h3 style=\"color:#1a3a5c;font-size:13px;margin:14px 0 6px;\">Waiver Signature</h3>" +
-    "<img src=\""+swSrc+"\" style=\"max-width:300px;border:1px solid #ccc;border-radius:4px;\">" +
-    "</div>" +
-
-    "<div style=\"background:#1a3a5c;padding:14px 28px;border-radius:0 0 8px 8px;text-align:center;\">" +
-    "<p style=\"color:rgba(255,255,255,0.7);font-size:12px;margin:0;\">NAI\'A Cruises Fiji Ltd. | explore@naia.com.fj | Submitted via Buddy-Divers registration system</p>" +
-    "</div></div>";
-
-  var data = {
-    participant_name: n,
-    email: em,
-    email_html: emailHTML
-  };
-
-  var btn = document.getElementById("btn-submit");
-  btn.textContent = "Sending...";
-  btn.disabled = true;
-
-  fetch("https://hook.eu1.make.com/tukoqg4pbob61k3n9c0whx74rnnof8t2", {
-    method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(data)
-  })
-  .then(function(r){
-    if(r.ok){
-      document.getElementById("submit-msg").style.display="block";
-      btn.textContent="Submitted";
-    } else {
-      btn.textContent="Submit All Forms"; btn.disabled=false;
-      alert("Submission failed. Please try again or use Print/Save PDF.");
-    }
-  })
-  .catch(function(){
-    btn.textContent="Submit All Forms"; btn.disabled=false;
-    alert("Submission failed. Please check your connection and try again.");
-  });
 });
 
 var today = new Date().toISOString().split("T")[0];
