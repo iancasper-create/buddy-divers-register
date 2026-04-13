@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-MANIFEST 2026-03-27c | View Manifest(s) button moved to top of trip list -->
+<!-- BD-MANIFEST 2026-04-13a | Fix: null atFetch returns now show "Error connecting to Airtable" instead of misleading "No trips found" -->
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -515,7 +515,7 @@ const TABLE_BOOKINGS   = 'tblMCB8nCSoRuiTKI';
 const TABLE_DIVERS     = 'tblE9d3rE4uDv2uxO';
 const MANIFEST_OTP_WEBHOOK = 'https://hook.eu1.make.com/w626oz6o3f6bp1m1spacjv7t6u1tg1um';
 const OTP_EXPIRY_MINUTES = 10;
-const READONLY_TOKEN   = 'patlTOY5CIZQiCwX6.128e3422e74128f058aa8b3f51fe39ec5483eb7b6f23dc761c7c9a259bf82979';
+const READONLY_TOKEN   = 'patVlcrtvZEjogMHB.a7dd960fd7b7d5658bfa69d442710f8351d49c1044c8b65e2f942f0f016183f5';
 
 // ============================================================
 // TOKEN — read-only token hardcoded, no user input needed
@@ -638,11 +638,21 @@ async function requestOtp(resend = false) {
       resolvedEmail = ADMINS[phoneNorm].email;
       resolvedName  = ADMINS[phoneNorm].name;
       const data = await atFetch(TABLE_TRIPS, 'maxRecords=100');
-      if (data && data.records) trips = data.records;
+      if (!data) {
+        setLoading('btnRequestOtp', false, 'Send Verification Code');
+        showStatus('loginStatus', 'error', 'Error connecting to Airtable. Please try again.');
+        return;
+      }
+      if (data.records) trips = data.records;
     } else {
       // Fetch all trips and filter in JS — Airtable formula filtering on phone fields is unreliable
       const data = await atFetch(TABLE_TRIPS, 'maxRecords=100');
-      if (data && data.records) {
+      if (!data) {
+        setLoading('btnRequestOtp', false, 'Send Verification Code');
+        showStatus('loginStatus', 'error', 'Error connecting to Airtable. Please try again.');
+        return;
+      }
+      if (data.records) {
         trips = data.records.filter(function(rec) {
           const stored = (rec.fields['Leader Phone'] || '').replace(/\D/g,'').slice(-9);
           return stored && stored === phoneNorm;
