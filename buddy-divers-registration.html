@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-REG 2026-04-18b | Fixed 270814 Siladen upgrades: EUR→USD, Beach View $270→$320, Luxury Villa $510→$590 -->
+<!-- BD-REG 2026-04-18d | 270814 tweaks: cabin labels cleaned, quad credit display fixed, addon labels cleaned, resort private guide added -->
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8" />
@@ -1930,68 +1930,75 @@ const TRIPS = {
     roomOptions: [
       {
         value: "boat_twin_0",
-        he: "חדר זוגי סטנדרטי (כלול במחיר)",
-        en: "Standard twin cabin (included in price)",
-        price: "+$0",
+        he: "חדר זוגי סטנדרטי במפלס העליון",
+        en: "Standard twin cabin — upper deck",
+        price: "$0",
         priceNum: 0
       },
       {
         value: "boat_quad_neg500",
         he: "חדר לארבעה — זיכוי $500",
-        en: "4-person cabin — $500 credit",
-        price: "−$500",
+        en: "Four-person cabin — $500 credit",
+        price: "<span style=\"color:#c0392b\">($500)</span>",
         priceNum: -500
       },
       {
         value: "boat_stateroom_490",
         he: "Stateroom — תוספת $490",
-        en: "Stateroom upgrade — +$490",
-        price: "+$490",
+        en: "Stateroom upgrade — $490 supplement",
+        price: "$490",
         priceNum: 490
       }
     ],
     addons: [
       {
         value: "coral_garden_290",
-        he: "Coral Eye Resort: שדרוג Garden View (+$290)",
-        en: "Coral Eye Resort: Garden View upgrade (+$290)",
+        he: "Coral Eye Resort: שדרוג Garden View",
+        en: "Coral Eye Resort: Garden View upgrade",
         price: "$290",
         priceNum: 290
       },
       {
         value: "coral_beach_470",
-        he: "Coral Eye Resort: שדרוג Beach View (+$470)",
-        en: "Coral Eye Resort: Beach View upgrade (+$470)",
+        he: "Coral Eye Resort: שדרוג Beach View",
+        en: "Coral Eye Resort: Beach View upgrade",
         price: "$470",
         priceNum: 470
       },
       {
         value: "coral_beachpool_820",
-        he: "Coral Eye Resort: שדרוג Beach Front Pool (+$820)",
-        en: "Coral Eye Resort: Beach Front Pool upgrade (+$820)",
+        he: "Coral Eye Resort: שדרוג Beach Front Pool",
+        en: "Coral Eye Resort: Beach Front Pool upgrade",
         price: "$820",
         priceNum: 820
       },
       {
         value: "siladen_beach_usd320",
-        he: "Siladen Resort & Spa: שדרוג Beach View (+$320)",
-        en: "Siladen Resort & Spa: Beach View upgrade (+$320)",
+        he: "Siladen Resort & Spa: שדרוג Beach View",
+        en: "Siladen Resort & Spa: Beach View upgrade",
         price: "$320",
         priceNum: 320
       },
       {
         value: "siladen_villa_usd590",
-        he: "Siladen Resort & Spa: שדרוג Luxury Villa (+$590)",
-        en: "Siladen Resort & Spa: Luxury Villa upgrade (+$590)",
+        he: "Siladen Resort & Spa: שדרוג Luxury Villa",
+        en: "Siladen Resort & Spa: Luxury Villa upgrade",
         price: "$590",
         priceNum: 590
       },
       {
         value: "private_guide_750",
-        he: "מדריך צלילה פרטי — Solitude Adventurer ($750 להפלגה)",
-        en: "Private dive guide — Solitude Adventurer ($750 full cruise)",
+        he: "מדריך צלילה פרטי — Solitude Adventurer",
+        en: "Private dive guide — Solitude Adventurer",
         price: "$750",
         priceNum: 750
+      },
+      {
+        value: "private_guide_resort_110",
+        he: "מדריך צלילה פרטי — ריזורטים ($110 ליום צלילה)",
+        en: "Private dive guide — Resorts ($110 per diving day)",
+        price: "$110/day",
+        priceNum: 0
       }
     ]
   },
