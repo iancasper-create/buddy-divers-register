@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-REG 2026-04-16a | 261219 prices updated: 5990→4590, 4390→2990; כולל→ללא טיסות; credit_1400 addon removed -->
+<!-- BD-REG 2026-04-18b | Fixed 270814 Siladen upgrades: EUR→USD, Beach View $270→$320, Luxury Villa $510→$590 -->
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8" />
@@ -837,7 +837,7 @@
 
     <!-- SECTION 5b: Cabin Type (shown only for trips with roomOptions) -->
     <div class="card" id="roomOptionsSection" style="display:none;">
-      <div class="section-title"><span class="icon">🛏️</span> תוספות שדרוג עבור חדרים בספינה <span style="font-weight:400;color:var(--muted);font-size:12px;margin-right:6px;">Cabin Type</span><span class="req">*</span></div>
+      <div class="section-title" id="roomOptionsSectionTitle"><span class="icon">🛏️</span> תוספות שדרוג עבור חדרים בספינה <span style="font-weight:400;color:var(--muted);font-size:12px;margin-right:6px;">Cabin Type</span><span class="req">*</span></div>
       <div class="options-group" id="roomOptions">
         <!-- Dynamically populated -->
       </div>
@@ -1736,18 +1736,18 @@ const TRIPS = {
     currency: "USD",
     pricing: [
       {
-        value: "full_package_4590",
-        he: "החבילה המלאה, ים + יבשה, 11 לילות (ללא טיסות)",
-        en: "Full package, sea + land, 11 nights (flights not included)",
-        price: "$4,590",
-        priceNum: 4590
+        value: "full_package_5990",
+        he: "החבילה המלאה, ים + יבשה, 11 לילות (כולל טיסות)",
+        en: "Full package, sea + land, 11 nights (flights included)",
+        price: "$5,990",
+        priceNum: 5990
       },
       {
-        value: "boat_only_2990",
-        he: "ספארי ימי בלבד, 7 לילות (ללא טיסות)",
-        en: "Boat only, 7 nights (flights not included)",
-        price: "$2,990",
-        priceNum: 2990
+        value: "boat_only_4390",
+        he: "ספארי ימי בלבד, 7 לילות (כולל טיסות)",
+        en: "Boat only, 7 nights (flights included)",
+        price: "$4,390",
+        priceNum: 4390
       }
     ],
     roomOptions: [
@@ -1795,6 +1795,13 @@ const TRIPS = {
         price: "$185",
         priceNum: 185,
         fullPackageOnly: true
+      },
+      {
+        value: "credit_1400",
+        he: "זיכוי כספי עבור רכישת טיסות עצמאית",
+        en: "Cash Credit for Self Flight Purchase",
+        price: "$1,400",
+        priceNum: -1400
       },
       {
         value: "nitrox_boat_180",
@@ -1898,6 +1905,96 @@ const TRIPS = {
       }
     ]
   },
+  "270814": {
+    name: "🇮🇩 מסע הדגל | קומודו וצפון סולאווסי",
+    dates: "14–28 באוגוסט 2027",
+    note: "🚢 Solitude Adventurer — Komodo (14–20/8) | 🌊 Coral Eye Resort — Bangka (20–24/8) | 🏝️ Siladen Resort & Spa — Bunaken (24–28/8) | מדריך: איתי גריסרו",
+    currency: "USD",
+    pricingTitle: {
+      he: "עלות המסע ללא טיסות",
+      en: "Trip Pricing (excl. flights)"
+    },
+    roomOptionsTitle: {
+      he: "חדר בספינה — Solitude Adventurer",
+      en: "Boat Cabin — Solitude Adventurer"
+    },
+    pricing: [
+      {
+        value: "full_trip_5980",
+        he: "מחיר בסיס — לינה לשניים בכל שלבי המסע",
+        en: "Base price — twin share throughout all segments",
+        price: "$5,980",
+        priceNum: 5980
+      }
+    ],
+    roomOptions: [
+      {
+        value: "boat_twin_0",
+        he: "חדר זוגי סטנדרטי (כלול במחיר)",
+        en: "Standard twin cabin (included in price)",
+        price: "+$0",
+        priceNum: 0
+      },
+      {
+        value: "boat_quad_neg500",
+        he: "חדר לארבעה — זיכוי $500",
+        en: "4-person cabin — $500 credit",
+        price: "−$500",
+        priceNum: -500
+      },
+      {
+        value: "boat_stateroom_490",
+        he: "Stateroom — תוספת $490",
+        en: "Stateroom upgrade — +$490",
+        price: "+$490",
+        priceNum: 490
+      }
+    ],
+    addons: [
+      {
+        value: "coral_garden_290",
+        he: "Coral Eye Resort: שדרוג Garden View (+$290)",
+        en: "Coral Eye Resort: Garden View upgrade (+$290)",
+        price: "$290",
+        priceNum: 290
+      },
+      {
+        value: "coral_beach_470",
+        he: "Coral Eye Resort: שדרוג Beach View (+$470)",
+        en: "Coral Eye Resort: Beach View upgrade (+$470)",
+        price: "$470",
+        priceNum: 470
+      },
+      {
+        value: "coral_beachpool_820",
+        he: "Coral Eye Resort: שדרוג Beach Front Pool (+$820)",
+        en: "Coral Eye Resort: Beach Front Pool upgrade (+$820)",
+        price: "$820",
+        priceNum: 820
+      },
+      {
+        value: "siladen_beach_usd320",
+        he: "Siladen Resort & Spa: שדרוג Beach View (+$320)",
+        en: "Siladen Resort & Spa: Beach View upgrade (+$320)",
+        price: "$320",
+        priceNum: 320
+      },
+      {
+        value: "siladen_villa_usd590",
+        he: "Siladen Resort & Spa: שדרוג Luxury Villa (+$590)",
+        en: "Siladen Resort & Spa: Luxury Villa upgrade (+$590)",
+        price: "$590",
+        priceNum: 590
+      },
+      {
+        value: "private_guide_750",
+        he: "מדריך צלילה פרטי — Solitude Adventurer ($750 להפלגה)",
+        en: "Private dive guide — Solitude Adventurer ($750 full cruise)",
+        price: "$750",
+        priceNum: 750
+      }
+    ]
+  },
   "default": {
     name: "🤿 ספארי Buddy-Divers",
     dates: "תאריכים יעודכנו / Dates TBD",
@@ -1940,6 +2037,15 @@ function init() {
     pricingSectionTitle.innerHTML =
       '<span class="icon">💳</span> ' + tripConfig.pricingTitle.he +
       ' <span style="font-weight:400;color:var(--muted);font-size:12px;margin-right:6px;">' + tripConfig.pricingTitle.en + '</span>' +
+      '<span class="req">*</span>';
+  }
+
+  // Update room options section title if trip has custom roomOptionsTitle
+  const roomOptionsSectionTitle = document.getElementById('roomOptionsSectionTitle');
+  if (roomOptionsSectionTitle && tripConfig.roomOptionsTitle) {
+    roomOptionsSectionTitle.innerHTML =
+      '<span class="icon">🛏️</span> ' + tripConfig.roomOptionsTitle.he +
+      ' <span style="font-weight:400;color:var(--muted);font-size:12px;margin-right:6px;">' + tripConfig.roomOptionsTitle.en + '</span>' +
       '<span class="req">*</span>';
   }
 
