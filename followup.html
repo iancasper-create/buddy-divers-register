@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-FOLLOWUP 2026-04-28a | Added trip 270422 Tubbataha to tripNames and tripCountries -->
+<!-- BD-FOLLOWUP 2026-04-28b | Added trip 260801 Maldives Black Manta -->
 <html lang="en" dir="ltr">
 <head>
 <meta charset="UTF-8"/>
@@ -1284,6 +1284,7 @@ function buildPaymentHTML(booking, amount, nisAmount, rate, notes, paidSoFar, sa
     '270118': 'אינדונזיה — ראג׳ה אמפאט',
     '270814': 'אינדונזיה — קומודו וצפון סולאווסי',
     '270422': 'פיליפינים — טובטאהה',
+    '260801': 'מלדיביים',
   };
   const tripCountry = tripCountries[booking.tripId] || '';
 
@@ -1462,6 +1463,7 @@ async function generatePaymentImage() {
     '270118':'ראג׳ה אמפאט — ינואר 2027',
     '270814':'מסע הדגל — קומודו וצפון סולאווסי — אוגוסט 2027',
     '270422':'טובטאהה — פיליפינים — אפריל 2027',
+    '260801':'מלדיביים — Black Manta — אוגוסט 2026',
   };
   const tripDisplayName = tripNames[booking.tripId] || `טיול ${booking.tripId}`;
   const tripCurrency = booking.currency || 'USD';
