@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-FOLLOWUP 2026-04-28b | Added trip 260801 Maldives Black Manta -->
+<!-- BD-FOLLOWUP 2026-05-01a | Added Amount ILS field to WA Messages Airtable log -->
 <html lang="en" dir="ltr">
 <head>
 <meta charset="UTF-8"/>
@@ -1615,6 +1615,7 @@ async function openWhatsApp() {
           'Sent At': new Date().toISOString(),
           'Image URL': imageUrl,
           'Amount': parseFloat(document.getElementById('paymentRequestAmount').value) || 0,
+          'Amount ILS': Math.round((parseFloat(document.getElementById('paymentRequestAmount').value) || 0) * (parseFloat(document.getElementById('exchangeRate').value) || 0)),
           'Payment Type': _selectedPaymentType === 'custom'
             ? (document.getElementById('customPaymentLabel').value.trim() || 'Custom')
             : _selectedPaymentType,
