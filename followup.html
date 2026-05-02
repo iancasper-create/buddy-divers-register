@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-FOLLOWUP 2026-05-01d | Pro Forma: fixed discount field manual edit -->
+<!-- BD-FOLLOWUP 2026-05-01e | Pro Forma: payment method dropdown added -->
 <html lang="en" dir="ltr">
 <head>
 <meta charset="UTF-8"/>
@@ -768,6 +768,17 @@
         <label>Trip / Description / תיאור הטיול</label>
         <input type="text" id="pfTripDesc" placeholder="e.g. גלפגוס — אוקטובר 2026" />
       </div>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>Payment Method / שיטת תשלום</label>
+        <select id="pfPaymentMethod">
+          <option value="bank">העברה בנקאית — Bank Transfer</option>
+          <option value="credit">כרטיס אשראי — Credit Card</option>
+          <option value="standing order">הוראת קבע — Standing Order</option>
+        </select>
+      </div>
+      <div class="field"></div>
     </div>
   </div>
 
@@ -2058,9 +2069,11 @@ async function generateProFormaImage() {
     currency: _pfCurrency
   };
 
+  const pfPaymentMethod = document.getElementById('pfPaymentMethod').value;
+
   // Set global diver vars for WhatsApp send
   _diverPhone = phone;
-  _diverPaymentMethod = null;
+  _diverPaymentMethod = pfPaymentMethod;
   _diverIsraelId = null;
   _diverFirstName = firstName;
   _diverLastName  = lastName;
@@ -2076,7 +2089,7 @@ async function generateProFormaImage() {
 
   const rateTimeStr = (document.getElementById('boiRateTime') && document.getElementById('boiRateTime').textContent) || '';
   const target = document.getElementById('jpgRenderTarget');
-  target.innerHTML = buildPaymentHTML(syntheticBooking, amount, nisAmount, rate, notes, paidSoFar, safari, typeLabel, today, tripDesc, rateTimeStr, flightAmt, hotelAmt, extrasAmt, extrasNotes, discount, null, currencySymbol);
+  target.innerHTML = buildPaymentHTML(syntheticBooking, amount, nisAmount, rate, notes, paidSoFar, safari, typeLabel, today, tripDesc, rateTimeStr, flightAmt, hotelAmt, extrasAmt, extrasNotes, discount, pfPaymentMethod, currencySymbol);
 
   // Inject logo
   const logoEl = document.getElementById('paymentLogo');
