@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-FOLLOWUP 2026-05-01b | Added Pro Forma tab — manual payment request without trip/diver lookup -->
+<!-- BD-FOLLOWUP 2026-05-01c | Pro Forma: full cost breakdown identical to regular payment manager -->
 <html lang="en" dir="ltr">
 <head>
 <meta charset="UTF-8"/>
@@ -746,6 +746,7 @@
 <div id="tabProforma" style="display:none;">
 <div class="container">
 
+  <!-- CARD 1: CUSTOMER DETAILS -->
   <div class="card">
     <div class="card-title"><span class="step-badge">1</span> פרטי הלקוח — Customer Details</div>
     <div class="field-row">
@@ -770,8 +771,112 @@
     </div>
   </div>
 
+  <!-- CARD 2: FINANCIAL SUMMARY + COSTS -->
   <div class="card">
-    <div class="card-title"><span class="step-badge">2</span> סוג תשלום — Payment Type</div>
+    <div class="card-title"><span class="step-badge">2</span> Financial Summary</div>
+
+    <div class="summary-grid">
+      <div class="summary-box owed">
+        <div class="s-label">Total Cost to Customer</div>
+        <div class="s-value" id="pfSumOwed">$0</div>
+      </div>
+      <div class="summary-box paid">
+        <div class="s-label">Total Paid</div>
+        <div class="s-value" id="pfSumPaid">$0</div>
+      </div>
+      <div class="summary-box balance" id="pfSumBalanceBox">
+        <div class="s-label">Balance Due</div>
+        <div class="s-value" id="pfSumBalance">$0</div>
+      </div>
+    </div>
+
+    <!-- COSTS -->
+    <div class="section-label">💰 Costs</div>
+    <div class="field-row">
+      <div class="field">
+        <label>Safari Price</label>
+        <div class="currency-wrap pf-cw" data-symbol="$">
+          <input type="number" id="pfSafariPrice" placeholder="0" oninput="pfUpdateSummary()"/>
+        </div>
+      </div>
+      <div class="field">
+        <label>Flight Cost</label>
+        <div class="currency-wrap pf-cw" data-symbol="$">
+          <input type="number" id="pfFlightCost" placeholder="0" oninput="pfUpdateSummary()"/>
+        </div>
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>Hotel Cost</label>
+        <div class="currency-wrap pf-cw" data-symbol="$">
+          <input type="number" id="pfHotelCost" placeholder="0" oninput="pfUpdateSummary()"/>
+        </div>
+      </div>
+      <div class="field">
+        <label>Extras Amount</label>
+        <div class="currency-wrap pf-cw" data-symbol="$">
+          <input type="number" id="pfExtrasAmount" placeholder="0" oninput="pfUpdateSummary()"/>
+        </div>
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>Returning Customer Discount (5%)</label>
+        <div class="currency-wrap pf-cw" data-symbol="$">
+          <input type="number" id="pfDiscount" placeholder="0" oninput="pfUpdateSummary()" step="1"/>
+        </div>
+      </div>
+      <div class="field" style="align-self:flex-end;">
+        <div style="font-size:12px;color:var(--muted);padding-bottom:8px;">Auto-calculated as 5% of safari price. Edit if needed. Leave 0 to exclude from image.</div>
+      </div>
+    </div>
+    <div class="field-row full">
+      <div class="field">
+        <label>Extras Notes</label>
+        <textarea id="pfExtrasNotes" placeholder="Describe any extras..."></textarea>
+      </div>
+    </div>
+
+    <hr class="section-divider"/>
+
+    <!-- PAYMENTS -->
+    <div class="section-label">💳 New Payment to Add</div>
+    <div class="field-row three">
+      <div class="field">
+        <label>Trip Payment</label>
+        <div class="currency-wrap pf-cw" data-symbol="$">
+          <input type="number" id="pfTripPayment" placeholder="0" oninput="pfUpdateSummary()"/>
+        </div>
+      </div>
+      <div class="field">
+        <label>Flight Payment</label>
+        <div class="currency-wrap pf-cw" data-symbol="$">
+          <input type="number" id="pfFlightPayment" placeholder="0" oninput="pfUpdateSummary()"/>
+        </div>
+      </div>
+      <div class="field">
+        <label>Hotel Payment</label>
+        <div class="currency-wrap pf-cw" data-symbol="$">
+          <input type="number" id="pfHotelPayment" placeholder="0" oninput="pfUpdateSummary()"/>
+        </div>
+      </div>
+    </div>
+    <div class="field-row full">
+      <div class="field">
+        <label>Extras Payment</label>
+        <div class="currency-wrap pf-cw" data-symbol="$" style="max-width:280px;">
+          <input type="number" id="pfExtrasPayment" placeholder="0" oninput="pfUpdateSummary()"/>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CARD 3: PAYMENT REQUEST -->
+  <div class="card">
+    <div class="card-title"><span class="step-badge">3</span> בקשת תשלום — Payment Request</div>
+
+    <div class="section-label">סוג תשלום</div>
     <div class="payment-type-grid">
       <div class="payment-type-btn selected" data-type="downpayment" onclick="pfSelectPaymentType(this)">
         <span class="pt-emoji">🔑</span>מקדמה<br/>Downpayment
@@ -790,11 +895,17 @@
       <label style="font-size:13px;font-weight:600;color:var(--teal);display:block;margin-bottom:4px;">טקסט חופשי אחרי "בקשת תשלום"</label>
       <input type="text" id="pfCustomPaymentLabel" placeholder="לדוגמה: ציוד, תוספת מיוחדת..." style="width:100%;border:2px solid var(--teal);border-radius:8px;padding:8px 12px;font-size:15px;color:var(--navy);outline:none;"/>
     </div>
-  </div>
 
-  <div class="card">
-    <div class="card-title"><span class="step-badge">3</span> סכום ושער — Amount &amp; Rate</div>
+    <!-- CURRENCY TOGGLE -->
+    <div style="margin:20px 0 16px;">
+      <label style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:8px;">מטבע — Currency</label>
+      <div class="pf-currency-toggle">
+        <button id="pfCurrUSD" class="active" onclick="pfSetCurrency('USD')">$ USD</button>
+        <button id="pfCurrEUR" onclick="pfSetCurrency('EUR')">€ EUR</button>
+      </div>
+    </div>
 
+    <!-- RATE ROW -->
     <div class="rate-row" style="flex-direction:column;align-items:flex-start;gap:10px;">
       <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;width:100%;">
         <span class="rate-label">שער יציג בנק ישראל</span>
@@ -810,14 +921,6 @@
         <span class="rate-label" style="color:var(--teal);">שער סופי לחיוב</span>
         <input type="number" id="pfExchangeRate" step="0.0001" placeholder="0.0000" oninput="pfUpdateNisPreview()" style="width:110px;border:2px solid var(--teal);border-radius:8px;padding:7px 12px;font-family:'DM Mono',monospace;font-size:16px;font-weight:700;color:var(--navy);outline:none;"/>
         <span style="font-size:12px;color:var(--muted);">זה השער שיופיע בתמונה</span>
-      </div>
-    </div>
-
-    <div style="margin-bottom:16px;">
-      <label style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:8px;">מטבע — Currency</label>
-      <div class="pf-currency-toggle">
-        <button id="pfCurrUSD" class="active" onclick="pfSetCurrency('USD')">$ USD</button>
-        <button id="pfCurrEUR" onclick="pfSetCurrency('EUR')">€ EUR</button>
       </div>
     </div>
 
@@ -1847,11 +1950,12 @@ function pfSetCurrency(cur) {
   document.getElementById('pfActiveCurrencyBadge').textContent = cur;
   document.getElementById('pfPaymentAmountLabel').textContent = 'סכום לתשלום (' + sym + ')';
   document.getElementById('pfCurrencyWrap').dataset.symbol = sym;
+  document.querySelectorAll('.pf-cw').forEach(el => el.dataset.symbol = sym);
   pfSyncRates();
+  pfUpdateSummary();
 }
 
 function pfSyncRates() {
-  // Mirror rates already fetched by the main tab
   const rate = (_pfCurrency === 'EUR' && _eurBaseRate) ? _eurBaseRate : _boiBaseRate;
   const yatzig = (_pfCurrency === 'EUR' && _eurYatzig) ? _eurYatzig : null;
   const rateDisplayEl = document.getElementById('pfBoiRateDisplay');
@@ -1875,109 +1979,94 @@ function pfUpdateNisPreview() {
   document.getElementById('pfNisPreview').value = nis > 0 ? '₪' + Math.round(nis).toLocaleString('he-IL') : '—';
 }
 
-function buildProFormaHTML(firstName, lastName, tripDesc, amount, nisAmount, rate, notes, typeLabel, today, currencySymbol) {
-  const fullName = (firstName + ' ' + lastName).trim() || '—';
-  return `
-    <div style="width:900px;height:900px;box-sizing:border-box;padding:52px 60px;background:white;display:flex;flex-direction:column;justify-content:space-between;">
+function pfUpdateSummary() {
+  const sym = _pfCurrency === 'EUR' ? '€' : '$';
+  const safari   = parseFloat(document.getElementById('pfSafariPrice').value) || 0;
+  const flight   = parseFloat(document.getElementById('pfFlightCost').value) || 0;
+  const hotel    = parseFloat(document.getElementById('pfHotelCost').value) || 0;
+  const extras   = parseFloat(document.getElementById('pfExtrasAmount').value) || 0;
+  const discount = parseFloat(document.getElementById('pfDiscount').value) || 0;
+  const tripPmt  = parseFloat(document.getElementById('pfTripPayment').value) || 0;
+  const flightPmt= parseFloat(document.getElementById('pfFlightPayment').value) || 0;
+  const hotelPmt = parseFloat(document.getElementById('pfHotelPayment').value) || 0;
+  const extrasPmt= parseFloat(document.getElementById('pfExtrasPayment').value) || 0;
 
-      <!-- HEADER -->
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0;">
-        <div>
-          <div style="font-size:26px;font-weight:700;color:#007289;">בקשת תשלום <span style="color:#1B4F8A;">${typeLabel}</span></div>
-          <div style="font-size:17px;color:#888;margin-top:4px;">${today}</div>
-        </div>
-        <div style="text-align:left;">
-          <img id="paymentLogo" src="" style="height:64px;display:none;" alt="Buddy-Divers"/>
-          <div id="paymentLogoText">
-            <div style="font-size:28px;font-weight:800;color:#007289;letter-spacing:-0.5px;">BUDDY</div>
-            <div style="font-size:13px;font-weight:600;color:#1B4F8A;letter-spacing:2px;margin-top:-4px;">DIVERS</div>
-            <div style="font-size:10px;color:#aaa;letter-spacing:1px;margin-top:1px;">LIVE YOUR DREAM</div>
-          </div>
-        </div>
-      </div>
+  // Auto-calc 5% discount from safari
+  const discountInput = document.getElementById('pfDiscount');
+  if (safari > 0 && discountInput.value === '' || (discountInput.dataset.auto === 'true')) {
+    const auto = -Math.round(safari * 0.05);
+    discountInput.value = auto;
+    discountInput.dataset.auto = 'true';
+  } else if (safari === 0) {
+    discountInput.dataset.auto = 'true';
+  }
+  const discountFinal = parseFloat(document.getElementById('pfDiscount').value) || 0;
 
-      <div style="height:2px;background:linear-gradient(90deg,#007289,#1B4F8A);border-radius:2px;margin:18px 0;"></div>
+  const totalCost = safari + flight + hotel + extras + discountFinal;
+  const totalPaid = tripPmt + flightPmt + hotelPmt + extrasPmt;
+  const balance   = totalCost - totalPaid;
 
-      <!-- DIVER + TRIP ROW -->
-      <div style="display:flex;gap:24px;margin-bottom:18px;">
-        <div style="flex:1;background:#f0f7f9;border-radius:12px;padding:16px 20px;">
-          <div style="font-size:17px;font-weight:700;color:#007289;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">שם הלקוח.ה</div>
-          <div style="font-size:19px;font-weight:700;color:#1a3a4a;">${fullName}</div>
-        </div>
-        <div style="flex:1;background:#f0f7f9;border-radius:12px;padding:16px 20px;">
-          <div style="font-size:17px;font-weight:700;color:#007289;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">הזמנה</div>
-          <div style="font-size:15px;font-weight:700;color:#1a3a4a;">${tripDesc || '—'}</div>
-        </div>
-      </div>
+  document.getElementById('pfSumOwed').textContent    = sym + totalCost.toLocaleString('en-US');
+  document.getElementById('pfSumPaid').textContent    = sym + totalPaid.toLocaleString('en-US');
+  document.getElementById('pfSumBalance').textContent = sym + balance.toLocaleString('en-US');
 
-      <!-- AMOUNTS ROW -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px;">
-        <div style="display:flex;flex-direction:column;gap:8px;">
-          ${notes ? '<div style="flex:1;background:#f0f7f9;border:1.5px solid #c5dfe6;border-radius:10px;padding:12px 16px;"><div style="font-size:17px;color:#007289;font-weight:700;margin-bottom:6px;">הערות לתשלום</div><div style="font-size:17px;font-weight:400;color:#1a3a4a;">' + notes + '</div></div>' : '<div style="flex:1;"></div>'}
-        </div>
-        <div style="display:flex;flex-direction:column;gap:8px;">
-          <div style="flex:1;"></div>
-        </div>
-      </div>
-
-      <!-- BIG AMOUNT BOX -->
-      <div style="display:flex;gap:16px;margin-bottom:18px;">
-        <div style="flex:1;background:linear-gradient(135deg,#007289,#1B4F8A);border-radius:16px;padding:24px 28px;color:white;">
-          <div style="font-size:16px;opacity:0.75;margin-bottom:6px;">סכום לתשלום כעת</div>
-          <div style="font-size:32px;font-weight:700;line-height:1;">₪${nisAmount.toLocaleString('he-IL')}</div>
-          <div style="font-size:18px;opacity:0.75;margin-top:8px;">${currencySymbol}${amount.toLocaleString('en-US')}</div>
-          <div style="font-size:15px;opacity:0.65;margin-top:10px;">${(() => { const d = new Date(); const dd = String(d.getDate()).padStart(2,'0'); const mm = String(d.getMonth()+1).padStart(2,'0'); const yyyy = d.getFullYear(); return 'שער העברות של בנק לאומי: ' + rate.toFixed(4) + ' · ' + dd + '-' + mm + '-' + yyyy; })()}</div>
-        </div>
-        <div style="flex:1;border:2px solid #c5dfe6;border-radius:16px;padding:24px 28px;background:#f8fcfd;">
-          <div style="font-size:17px;font-weight:700;color:#007289;margin-bottom:8px;">פרטי חשבון בנק:</div>
-          <table style="border-collapse:collapse;font-size:17px;color:#1a3a4a;direction:rtl;margin-left:auto;">
-            <tr><td style="color:#888;font-weight:400;padding:3px 0;white-space:nowrap;text-align:right;min-width:140px;">חשבון על שם:</td><td style="font-weight:700;padding:3px 0 3px 16px;white-space:nowrap;">באדי-דייברס בע"מ</td></tr>
-            <tr><td style="color:#888;font-weight:400;padding:3px 0;white-space:nowrap;text-align:right;min-width:140px;">בנק מזרחי טפחות:</td><td style="font-weight:700;padding:3px 0 3px 16px;white-space:nowrap;">20</td></tr>
-            <tr><td style="color:#888;font-weight:400;padding:3px 0;white-space:nowrap;text-align:right;min-width:140px;">סניף:</td><td style="font-weight:700;padding:3px 0 3px 16px;white-space:nowrap;">422 מרכז עסקים פולג</td></tr>
-            <tr><td style="color:#888;font-weight:400;padding:3px 0;white-space:nowrap;text-align:right;min-width:140px;">חשבון:</td><td style="font-weight:700;padding:3px 0 3px 16px;white-space:nowrap;">625145</td></tr>
-          </table>
-        </div>
-      </div>
-
-      <!-- FOOTER -->
-      <div style="text-align:center;font-size:13px;color:#bbb;border-top:1px solid #eee;padding-top:12px;">
-        Buddy-Divers · buddy-divers.com
-      </div>
-    </div>
-  `;
+  const balBox = document.getElementById('pfSumBalanceBox');
+  balBox.classList.remove('cleared','overdue');
+  if (balance === 0) balBox.classList.add('cleared');
+  else if (balance < 0) balBox.classList.add('overdue');
 }
 
 async function generateProFormaImage() {
-  const firstName = document.getElementById('pfFirstName').value.trim();
-  const lastName  = document.getElementById('pfLastName').value.trim();
-  const phone     = document.getElementById('pfPhone').value.trim();
-  const tripDesc  = document.getElementById('pfTripDesc').value.trim();
-  const amount    = parseFloat(document.getElementById('pfAmount').value) || 0;
-  const rate      = parseFloat(document.getElementById('pfExchangeRate').value) || 0;
-  const notes     = document.getElementById('pfNotes').value.trim();
-  const validMsg  = document.getElementById('pfValidationMsg');
+  const firstName  = document.getElementById('pfFirstName').value.trim();
+  const lastName   = document.getElementById('pfLastName').value.trim();
+  const phone      = document.getElementById('pfPhone').value.trim();
+  const tripDesc   = document.getElementById('pfTripDesc').value.trim();
+  const amount     = parseFloat(document.getElementById('pfAmount').value) || 0;
+  const rate       = parseFloat(document.getElementById('pfExchangeRate').value) || 0;
+  const notes      = document.getElementById('pfNotes').value.trim();
+  const validMsg   = document.getElementById('pfValidationMsg');
 
-  // Validation
   if (!firstName && !lastName) { validMsg.textContent = 'נא להזין שם לקוח'; validMsg.style.display = 'block'; return; }
-  if (!phone) { validMsg.textContent = 'נא להזין מספר טלפון'; validMsg.style.display = 'block'; return; }
+  if (!phone)   { validMsg.textContent = 'נא להזין מספר טלפון'; validMsg.style.display = 'block'; return; }
   if (amount === 0) { validMsg.textContent = 'נא להזין סכום לתשלום'; validMsg.style.display = 'block'; return; }
   validMsg.style.display = 'none';
 
-  const nisAmount = Math.round(amount * rate);
+  const nisAmount      = Math.round(amount * rate);
   const currencySymbol = _pfCurrency === 'EUR' ? '€' : '$';
-  const typeLabels = { downpayment:'מקדמה', final:'סופי', extras:'תוספות' };
-  const typeLabel = _pfSelectedPaymentType === 'custom'
+  const typeLabels     = { downpayment:'מקדמה', final:'סופי', extras:'תוספות' };
+  const typeLabel      = _pfSelectedPaymentType === 'custom'
     ? (document.getElementById('pfCustomPaymentLabel').value.trim() || '')
     : (typeLabels[_pfSelectedPaymentType] || '');
   const today = new Date().toLocaleDateString('he-IL', { day:'2-digit', month:'2-digit', year:'numeric' });
 
-  // Show overlay with loading state
-  _jpgDataUrl = null;
+  // Build a synthetic booking object matching what buildPaymentHTML expects
+  const safari    = parseFloat(document.getElementById('pfSafariPrice').value) || 0;
+  const flightAmt = parseFloat(document.getElementById('pfFlightCost').value) || 0;
+  const hotelAmt  = parseFloat(document.getElementById('pfHotelCost').value) || 0;
+  const extrasAmt = parseFloat(document.getElementById('pfExtrasAmount').value) || 0;
+  const discount  = parseFloat(document.getElementById('pfDiscount').value) || 0;
+  const extrasNotes = document.getElementById('pfExtrasNotes').value.trim();
+  const tripPmt   = parseFloat(document.getElementById('pfTripPayment').value) || 0;
+  const flightPmt = parseFloat(document.getElementById('pfFlightPayment').value) || 0;
+  const hotelPmt  = parseFloat(document.getElementById('pfHotelPayment').value) || 0;
+  const extrasPmt = parseFloat(document.getElementById('pfExtrasPayment').value) || 0;
+  const paidSoFar = tripPmt + flightPmt + hotelPmt + extrasPmt;
+
+  const syntheticBooking = {
+    diverName: (firstName + ' ' + lastName).trim(),
+    tripId: tripDesc,
+    currency: _pfCurrency
+  };
+
+  // Set global diver vars for WhatsApp send
   _diverPhone = phone;
   _diverPaymentMethod = null;
   _diverIsraelId = null;
   _diverFirstName = firstName;
-  _diverLastName = lastName;
+  _diverLastName  = lastName;
+
+  // Show overlay
+  _jpgDataUrl = null;
   document.getElementById('jpgOutput').style.display = 'none';
   document.getElementById('jpgRenderMsg').textContent = 'מייצר תמונה...';
   document.getElementById('jpgPreviewOverlay').style.display = 'block';
@@ -1985,9 +2074,9 @@ async function generateProFormaImage() {
   document.getElementById('whatsappBtn').textContent = '💬 טוען...';
   document.getElementById('whatsappBtn').disabled = true;
 
-  // Render
+  const rateTimeStr = (document.getElementById('boiRateTime') && document.getElementById('boiRateTime').textContent) || '';
   const target = document.getElementById('jpgRenderTarget');
-  target.innerHTML = buildProFormaHTML(firstName, lastName, tripDesc, amount, nisAmount, rate, notes, typeLabel, today, currencySymbol);
+  target.innerHTML = buildPaymentHTML(syntheticBooking, amount, nisAmount, rate, notes, paidSoFar, safari, typeLabel, today, tripDesc, rateTimeStr, flightAmt, hotelAmt, extrasAmt, extrasNotes, discount, null, currencySymbol);
 
   // Inject logo
   const logoEl = document.getElementById('paymentLogo');
@@ -2009,8 +2098,6 @@ async function generateProFormaImage() {
     document.getElementById('downloadJpgBtn').disabled = false;
     document.getElementById('whatsappBtn').textContent = '💬 שלח וואטסאפ';
     document.getElementById('whatsappBtn').disabled = false;
-
-    // Replace whatsapp button action for pro forma
     document.getElementById('whatsappBtn').onclick = openProFormaWhatsApp;
   } catch(e) {
     document.getElementById('jpgRenderMsg').textContent = 'שגיאה ביצירת תמונה';
@@ -2021,7 +2108,6 @@ async function generateProFormaImage() {
 async function openProFormaWhatsApp() {
   const btn = document.getElementById('whatsappBtn');
   if (!_jpgDataUrl) { alert('נא לצור תמונה תחילה'); return; }
-
   const phone = document.getElementById('pfPhone').value.trim().replace(/\D/g,'');
   if (!phone) { alert('נא להזין מספר טלפון'); return; }
 
@@ -2029,7 +2115,6 @@ async function openProFormaWhatsApp() {
   btn.textContent = '⬆️ מעלה תמונה...';
 
   try {
-    // Upload to Cloudinary
     const blob = await (await fetch(_jpgDataUrl)).blob();
     const fd = new FormData();
     fd.append('file', blob, 'proforma.jpg');
@@ -2041,11 +2126,8 @@ async function openProFormaWhatsApp() {
     const imageUrl = clData.secure_url;
 
     btn.textContent = '💬 שולח וואטסאפ...';
-
-    // Send via Make webhook
     const makeRes = await fetch('https://hook.eu1.make.com/yabs6aeja0bz6eoxw29p8t9tpgqi7tio', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ phone: phone, imageUrl: imageUrl, caption: '' })
     });
     if (!makeRes.ok) throw new Error('Make webhook failed');
@@ -2053,12 +2135,10 @@ async function openProFormaWhatsApp() {
     btn.textContent = '✅ נשלח!';
     btn.style.background = '#22a06b';
 
-    // Log to WA Messages table (no Payment link — pro forma)
+    // Log to WA Messages (no Payment link)
     try {
-      const firstName = document.getElementById('pfFirstName').value.trim();
-      const lastName  = document.getElementById('pfLastName').value.trim();
-      const amount    = parseFloat(document.getElementById('pfAmount').value) || 0;
-      const rate      = parseFloat(document.getElementById('pfExchangeRate').value) || 0;
+      const amount = parseFloat(document.getElementById('pfAmount').value) || 0;
+      const rate   = parseFloat(document.getElementById('pfExchangeRate').value) || 0;
       const waFields = {
         'Sent At': new Date().toISOString(),
         'Image URL': imageUrl,
@@ -2068,8 +2148,8 @@ async function openProFormaWhatsApp() {
           ? (document.getElementById('pfCustomPaymentLabel').value.trim() || 'Custom')
           : _pfSelectedPaymentType,
         'Status': 'Sent',
-        'First Name': firstName || undefined,
-        'Last Name': lastName || undefined
+        'First Name': document.getElementById('pfFirstName').value.trim() || undefined,
+        'Last Name':  document.getElementById('pfLastName').value.trim()  || undefined
       };
       await fetch('https://api.airtable.com/v0/' + BASE_ID + '/' + WA_MESSAGES_TABLE, {
         method: 'POST',
