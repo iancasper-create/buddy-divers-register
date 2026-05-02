@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-FOLLOWUP 2026-05-01e | Pro Forma: payment method dropdown added -->
+<!-- BD-FOLLOWUP 2026-05-01f | Pro Forma: fixed download button crash when no booking selected -->
 <html lang="en" dir="ltr">
 <head>
 <meta charset="UTF-8"/>
@@ -1813,11 +1813,19 @@ async function generatePaymentImage() {
 
 function downloadJpg() {
   if (!_jpgDataUrl) return;
-  const idx = document.getElementById('diverSelect').value;
-  const booking = currentBookings[idx];
   const a = document.createElement('a');
   a.href = _jpgDataUrl;
-  a.download = `payment-request-${booking.diverName.replace(/\s+/g,'-')}-${booking.tripId}.jpg`;
+  // Build filename — works for both regular and pro forma
+  const idx = document.getElementById('diverSelect').value;
+  const booking = idx !== '' ? currentBookings[idx] : null;
+  if (booking) {
+    a.download = `payment-request-${booking.diverName.replace(/\s+/g,'-')}-${booking.tripId}.jpg`;
+  } else {
+    const first = (document.getElementById('pfFirstName').value.trim() || 'proforma').replace(/\s+/g,'-');
+    const last  = (document.getElementById('pfLastName').value.trim() || '').replace(/\s+/g,'-');
+    const name  = last ? first + '-' + last : first;
+    a.download = `payment-request-${name}.jpg`;
+  }
   a.click();
 }
 
