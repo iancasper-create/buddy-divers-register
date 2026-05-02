@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-FOLLOWUP 2026-05-01c | Pro Forma: full cost breakdown identical to regular payment manager -->
+<!-- BD-FOLLOWUP 2026-05-01d | Pro Forma: fixed discount field manual edit -->
 <html lang="en" dir="ltr">
 <head>
 <meta charset="UTF-8"/>
@@ -824,7 +824,7 @@
       <div class="field">
         <label>Returning Customer Discount (5%)</label>
         <div class="currency-wrap pf-cw" data-symbol="$">
-          <input type="number" id="pfDiscount" placeholder="0" oninput="pfUpdateSummary()" step="1"/>
+          <input type="number" id="pfDiscount" placeholder="0" oninput="pfDiscountManualEdit()" step="1"/>
         </div>
       </div>
       <div class="field" style="align-self:flex-end;">
@@ -1979,28 +1979,28 @@ function pfUpdateNisPreview() {
   document.getElementById('pfNisPreview').value = nis > 0 ? '₪' + Math.round(nis).toLocaleString('he-IL') : '—';
 }
 
+function pfDiscountManualEdit() {
+  document.getElementById('pfDiscount').dataset.manual = 'true';
+  pfUpdateSummary();
+}
+
 function pfUpdateSummary() {
   const sym = _pfCurrency === 'EUR' ? '€' : '$';
   const safari   = parseFloat(document.getElementById('pfSafariPrice').value) || 0;
   const flight   = parseFloat(document.getElementById('pfFlightCost').value) || 0;
   const hotel    = parseFloat(document.getElementById('pfHotelCost').value) || 0;
   const extras   = parseFloat(document.getElementById('pfExtrasAmount').value) || 0;
-  const discount = parseFloat(document.getElementById('pfDiscount').value) || 0;
   const tripPmt  = parseFloat(document.getElementById('pfTripPayment').value) || 0;
   const flightPmt= parseFloat(document.getElementById('pfFlightPayment').value) || 0;
   const hotelPmt = parseFloat(document.getElementById('pfHotelPayment').value) || 0;
   const extrasPmt= parseFloat(document.getElementById('pfExtrasPayment').value) || 0;
 
-  // Auto-calc 5% discount from safari
+  // Auto-calc 5% discount only if user hasn't manually edited the field
   const discountInput = document.getElementById('pfDiscount');
-  if (safari > 0 && discountInput.value === '' || (discountInput.dataset.auto === 'true')) {
-    const auto = -Math.round(safari * 0.05);
-    discountInput.value = auto;
-    discountInput.dataset.auto = 'true';
-  } else if (safari === 0) {
-    discountInput.dataset.auto = 'true';
+  if (discountInput.dataset.manual !== 'true') {
+    discountInput.value = safari > 0 ? -Math.round(safari * 0.05) : '';
   }
-  const discountFinal = parseFloat(document.getElementById('pfDiscount').value) || 0;
+  const discountFinal = parseFloat(discountInput.value) || 0;
 
   const totalCost = safari + flight + hotel + extras + discountFinal;
   const totalPaid = tripPmt + flightPmt + hotelPmt + extrasPmt;
