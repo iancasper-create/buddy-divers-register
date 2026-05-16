@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-REG 2026-04-28a | Added trip 270422 Tubbataha Philippines -->
+<!-- BD-REG 2026-05-16a | Trip 261219: pricing changed to excl. flights (-$1,400 both lines); flight credit addon removed -->
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8" />
@@ -1823,17 +1823,17 @@ const TRIPS = {
     pricing: [
       {
         value: "full_package_5990",
-        he: "החבילה המלאה, ים + יבשה, 11 לילות (כולל טיסות)",
-        en: "Full package, sea + land, 11 nights (flights included)",
-        price: "$5,990",
-        priceNum: 5990
+        he: "החבילה המלאה, ים + יבשה, 11 לילות (ללא טיסות)",
+        en: "Full package, sea + land, 11 nights (flights not included)",
+        price: "$4,590",
+        priceNum: 4590
       },
       {
-        value: "boat_only_4390",
-        he: "ספארי ימי בלבד, 7 לילות (כולל טיסות)",
-        en: "Boat only, 7 nights (flights included)",
-        price: "$4,390",
-        priceNum: 4390
+        value: "boat_only_2990",
+        he: "ספארי ימי בלבד, 7 לילות (ללא טיסות)",
+        en: "Boat only, 7 nights (flights not included)",
+        price: "$2,990",
+        priceNum: 2990
       }
     ],
     roomOptions: [
@@ -1881,13 +1881,6 @@ const TRIPS = {
         price: "$185",
         priceNum: 185,
         fullPackageOnly: true
-      },
-      {
-        value: "credit_1400",
-        he: "זיכוי כספי עבור רכישת טיסות עצמאית",
-        en: "Cash Credit for Self Flight Purchase",
-        price: "$1,400",
-        priceNum: -1400
       },
       {
         value: "nitrox_boat_180",
