@@ -569,7 +569,7 @@ function validatePanel(panel, idx) {
     });
     var sigCanvas = document.getElementById("sig-med");
     if(sigCanvas) {
-      var blank = !sigCanvas.getContext("2d").getImageData(0,0,sigCanvas.width,sigCanvas.height).data.some(function(v,i){ return i%4!==3 && v!==0; });
+      var blank = !sigCanvas.getContext("2d").getImageData(0,0,sigCanvas.width,sigCanvas.height).data.some(function(v,i){ return i%4===3 && v!==0; });
       if(blank) errors.push("Participant signature is required");
     }
   }
