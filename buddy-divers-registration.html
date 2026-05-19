@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-REG 2026-05-16a | Trip 261219: pricing changed to excl. flights (-$1,400 both lines); flight credit addon removed -->
+<!-- BD-REG 2026-05-19b | Trip 260708 Sinai: corrected dates to 08-12/07/2026 -->
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8" />
@@ -1428,6 +1428,103 @@ const TRIPS = {
         price: "€690 תוספת",
         priceNum: 690,
         supplement: true
+      }
+    ]
+  },
+  "260708": {
+    name: "🌊 ספארי 5 כוכבים — סיני",
+    dates: "08/07/2026 – 12/07/2026",
+    note: "🏨 Renaissance Sharm El Sheikh Golden View Beach Resort | מלווה: ירין שיטרית",
+    currency: "ILS",
+    pricingTitle: {
+      he: "עלות הספארי ללא טיסות",
+      en: "Safari Pricing (excl. flights)"
+    },
+    roomOptionsTitle: {
+      he: "שדרוג חדר",
+      en: "Room Upgrade"
+    },
+    pricing: [
+      {
+        value: "certified_3980",
+        he: "חבילת צלילה לצולל.ת מוסמך.ת",
+        en: "Certified diver package",
+        price: "₪3,980",
+        priceNum: 3980
+      },
+      {
+        value: "ow_course_3980",
+        he: "חבילת צלילה כולל קורס כוכב ראשון",
+        en: "Package incl. Open Water course",
+        price: "₪3,980",
+        priceNum: 3980
+      },
+      {
+        value: "advanced_course_3980",
+        he: "חבילת צלילה כולל קורס כוכב שני",
+        en: "Package incl. Advanced Open Water course",
+        price: "₪3,980",
+        priceNum: 3980
+      },
+      {
+        value: "nondiver_2890",
+        he: "חבילת אירוח לאינו.ה צולל.ת",
+        en: "Non-diver accommodation package",
+        price: "₪2,890",
+        priceNum: 2890
+      },
+      {
+        value: "single_supp_760",
+        he: "תוספת חדר זוגי בתפוסת יחיד.ה",
+        en: "Single use of double room supplement",
+        price: "₪760",
+        priceNum: 760,
+        supplement: true
+      },
+      {
+        value: "third_person_neg1000",
+        he: "אדם שלישי.ת בחדר (הנחה)",
+        en: "3rd person in room (discount)",
+        price: "(₪1,000)",
+        priceNum: -1000,
+        supplement: true
+      }
+    ],
+    roomOptions: [
+      {
+        value: "standard_room_0",
+        he: "חדר רגיל — ללא שדרוג נוף",
+        en: "Standard room — no view upgrade",
+        price: "₪0",
+        priceNum: 0
+      },
+      {
+        value: "sea_view_double_190",
+        he: "חדר עם נוף ים — תפוסה זוגית (לאדם)",
+        en: "Sea view room — double occupancy (per person)",
+        price: "₪190",
+        priceNum: 190
+      },
+      {
+        value: "sea_view_single_380",
+        he: "חדר עם נוף ים — תפוסת יחיד.ה",
+        en: "Sea view room — single occupancy",
+        price: "₪380",
+        priceNum: 380
+      },
+      {
+        value: "suite_double_290",
+        he: "סוויטה — תפוסה זוגית (לאדם)",
+        en: "Suite — double occupancy (per person)",
+        price: "₪290",
+        priceNum: 290
+      },
+      {
+        value: "suite_single_580",
+        he: "סוויטה — תפוסת יחיד.ה",
+        en: "Suite — single occupancy",
+        price: "₪580",
+        priceNum: 580
       }
     ]
   },
