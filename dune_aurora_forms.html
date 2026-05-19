@@ -25,9 +25,9 @@ header p{color:rgba(255,255,255,.6);font-size:13px;margin-top:2px;}
 .ch p{font-size:13px;color:rgba(255,255,255,.65);margin-top:4px;}
 .cb{padding:26px 28px;}
 .notice{background:#fdf6e3;border-left:4px solid var(--sand);border-radius:6px;padding:13px 17px;font-size:13.5px;margin-bottom:22px;color:#5a4a20;}
-.fr{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
-.fr3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:16px;}
-.fr4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:16px;margin-bottom:16px;}
+.fr{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;align-items:end;}
+.fr3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:16px;align-items:end;}
+.fr4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:16px;margin-bottom:16px;align-items:end;}
 .field{display:flex;flex-direction:column;gap:5px;}
 .field label{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;}
 .field input,.field select,.field textarea{border:1.5px solid var(--border);border-radius:6px;padding:9px 12px;font-family:'Source Sans 3',sans-serif;font-size:14px;color:var(--text);background:#fafcfe;}
@@ -113,7 +113,7 @@ canvas.sig{display:block;width:100%;height:110px;cursor:crosshair;touch-action:n
     </div>
     <div class="cb">
       <div class="fr3">
-        <div class="field"><label>Cruise Date</label><input type="text" id="cruise-date" placeholder="e.g. 15 Jan 2027"></div>
+        <div class="field"><label>Cruise Date</label><input type="date" id="cruise-date"></div>
         <div class="field"><label>Itinerary</label><input type="text" id="itinerary" placeholder="e.g. Raja Ampat"></div>
         <div class="field"><label>REF</label><input type="text" id="cruise-ref"></div>
       </div>
@@ -170,12 +170,12 @@ canvas.sig{display:block;width:100%;height:110px;cursor:crosshair;touch-action:n
       <hr class="divider"><p class="sec-title">Diving Information</p>
       <div class="fr">
         <div class="field"><label>Dive Certification Level &amp; Agency (PADI, CMAS etc.)</label><input type="text"></div>
-        <div class="field"><label>Deep Dive / PA40 Certification (Y/N) — if no, would you like to do it on board?</label><input type="text"></div>
+        <div class="field"><label>Deep Dive / PA40 Certification — if no, would you like to do it on board?</label><select><option value="">-- Select --</option><option value="Yes">Yes</option><option value="No">No</option></select></div>
       </div>
       <div class="fr3">
         <div class="field"><label>Number of Dives</label><input type="number" min="0"></div>
         <div class="field"><label>Date of Last Dive</label><input type="date"></div>
-        <div class="field"><label>Nitrox Certification (Y/N) — if no, would you like to on board?</label><input type="text"></div>
+        <div class="field"><label>Nitrox Certification — if no, would you like to on board?</label><select><option value="">-- Select --</option><option value="Yes">Yes</option><option value="No">No</option></select></div>
       </div>
       <div class="field" style="margin-bottom:16px;">
         <label>Tell us about the amazing places you have been diving</label>
@@ -189,9 +189,9 @@ canvas.sig{display:block;width:100%;height:110px;cursor:crosshair;touch-action:n
       </div>
       <hr class="divider"><p class="sec-title">On Board Extras</p>
       <div class="fr4">
-        <div class="field"><label>15L Tank (Y/N)</label><input type="text"></div>
-        <div class="field"><label>Private Guide (Y/N) +$7/day</label><input type="text"></div>
-        <div class="field"><label>Underwater Photographer / Videographer (Y/N)</label><input type="text"></div>
+        <div class="field"><label>15L Tank — $7/day</label><select><option value="">-- Select --</option><option value="Yes">Yes</option><option value="No">No</option></select></div>
+        <div class="field"><label>Private Guide</label><p style="font-size:13px;color:var(--muted);margin:0;padding:9px 0;">Available at additional cost — our team will advise on board.</p></div>
+        <div class="field"><label>Underwater Photographer / Videographer</label><select><option value="">-- Select --</option><option value="Yes">Yes</option><option value="No">No</option></select></div>
         <div class="field"></div>
       </div>
       <p class="sec-title" style="margin-top:8px;">Equipment Rental</p>
