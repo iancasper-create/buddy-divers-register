@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-REG 2026-05-19b | Trip 260708 Sinai: corrected dates to 08-12/07/2026 -->
+<!-- BD-REG 2026-05-19c | Trip 260708: remove ₪0 room option, roomOptional, noFlights -->
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8" />
@@ -831,7 +831,7 @@
     </div>
 
     <!-- SECTION 6: Flights -->
-    <div class="card">
+    <div class="card" id="flightsCard">
       <div class="section-title"><span class="icon">✈️</span> טיסות <span style="font-weight:400;color:var(--muted);font-size:12px;margin-right:6px;">Flights</span><span class="req">*</span></div>
 
       <div class="options-group" id="flightOptions">
@@ -1490,14 +1490,9 @@ const TRIPS = {
         supplement: true
       }
     ],
+    noFlights: true,
+    roomOptional: true,
     roomOptions: [
-      {
-        value: "standard_room_0",
-        he: "חדר רגיל — ללא שדרוג נוף",
-        en: "Standard room — no view upgrade",
-        price: "₪0",
-        priceNum: 0
-      },
       {
         value: "sea_view_double_190",
         he: "חדר עם נוף ים — תפוסה זוגית (לאדם)",
@@ -2251,6 +2246,23 @@ function init() {
       '<span class="req">*</span>';
   }
 
+  // Handle noFlights flag — hide flights card and pre-select SelfArranged
+  const flightsCard = document.getElementById('flightsCard');
+  if (tripConfig.noFlights) {
+    flightsCard.style.display = 'none';
+    const selfFlight = document.querySelector('input[name="flights"][value="SelfArranged"]');
+    if (selfFlight) { selfFlight.checked = true; }
+  } else {
+    flightsCard.style.display = '';
+    document.querySelectorAll('input[name="flights"]').forEach(function(r) { r.checked = false; });
+  }
+
+  // Handle roomOptional flag — show/hide asterisk on room section title
+  const roomReqSpan = document.querySelector('#roomOptionsSectionTitle .req');
+  if (roomReqSpan) {
+    roomReqSpan.style.display = tripConfig.roomOptional ? 'none' : '';
+  }
+
   // Build pricing options
   const container = document.getElementById('pricingOptions');
   container.innerHTML = '';
@@ -2908,20 +2920,26 @@ function validateForm() {
   document.getElementById('pricingError').style.display = pricingOk ? 'none' : 'block';
   if (!pricingOk) { valid = false; missingFields.push('בחירת מחיר / Pricing Selection'); }
 
-  // Cabin type (only validate if section is visible)
+  // Cabin type (skip if section hidden, or if trip marks room as optional)
   const roomSectionVisible = document.getElementById('roomOptionsSection').style.display !== 'none';
-  if (roomSectionVisible) {
+  const _tripId = (new URLSearchParams(window.location.search)).get('trip') || '';
+  const _roomOptional = (TRIPS[_tripId] && TRIPS[_tripId].roomOptional) ? true : false;
+  if (roomSectionVisible && !_roomOptional) {
     const roomOption = document.querySelector('[name="room_option"]:checked');
     const roomOptionOk = !!roomOption;
     document.getElementById('roomOptionError').style.display = roomOptionOk ? 'none' : 'block';
     if (!roomOptionOk) { valid = false; missingFields.push('בחירת חדר / Cabin Selection'); }
   }
 
-  // Flights selection
-  const flights = document.querySelector('[name="flights"]:checked');
-  const flightsOk = !!flights;
-  document.getElementById('flightsError').style.display = flightsOk ? 'none' : 'block';
-  if (!flightsOk) { valid = false; missingFields.push('הסדרי טיסה / Flight Arrangements'); }
+  // Flights selection (skip when flights section is hidden for this trip)
+  const _flightsCard = document.getElementById('flightsCard');
+  const _flightsVisible = !_flightsCard || _flightsCard.style.display !== 'none';
+  if (_flightsVisible) {
+    const flights = document.querySelector('[name="flights"]:checked');
+    const flightsOk = !!flights;
+    document.getElementById('flightsError').style.display = flightsOk ? 'none' : 'block';
+    if (!flightsOk) { valid = false; missingFields.push('הסדרי טיסה / Flight Arrangements'); }
+  }
 
   // Payment method
   const payment = document.querySelector('[name="paymentMethod"]:checked');
