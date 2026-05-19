@@ -579,7 +579,7 @@ function initSig(cid,pid) {
   var cnv=document.getElementById(cid), ph=document.getElementById(pid);
   if(!cnv) return;
   var ctx=cnv.getContext("2d"), drawing=false, lx=0, ly=0;
-  function sizeCanvas() { var r=cnv.getBoundingClientRect(); if(r.width===0) return; cnv.width=Math.round(r.width); cnv.height=Math.round(r.height); }
+  function sizeCanvas() { var r=cnv.getBoundingClientRect(); if(r.width===0) return; var w=Math.round(r.width),h=Math.round(r.height); if(cnv.width===w && cnv.height===h) return; cnv.width=w; cnv.height=h; }
   document.querySelectorAll(".tab,.btn-next").forEach(function(b){ b.addEventListener("click",function(){ setTimeout(sizeCanvas,100); }); });
   setTimeout(sizeCanvas,50);
   function getPos(e) { var r=cnv.getBoundingClientRect(); var scaleX=cnv.width/r.width,scaleY=cnv.height/r.height; var src=(e.touches&&e.touches.length)?e.touches[0]:e; return {x:(src.clientX-r.left)*scaleX,y:(src.clientY-r.top)*scaleY}; }
