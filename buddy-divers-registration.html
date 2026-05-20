@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-REG 2026-05-20a | Trip 260708: updated room upgrade pricing and suite label -->
+<!-- BD-REG 2026-05-20b | Trip 260708: updated room upgrade pricing and suite label -->
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8" />
@@ -2530,23 +2530,22 @@ async function handleUpload(input, areaId, urlFieldId, statusId, folder, docType
   urlField.value = '';
 
   try {
-    // Build deterministic public_id: {tripId}/{folderType}/{israeliId}_{lastName}_{firstName}_{docType}
-    // This organises all files by trip, then by document type, then by diver.
-    // Re-submissions overwrite the same asset (overwrite + invalidate CDN cache).
+    // Build public_id: {tripId}/{folderType}/{israeliId}_{lastName}_{firstName}_{docType}_{ts}
+    // Organises all files by trip, then by document type, then by diver.
+    // Timestamp suffix ensures uniqueness — unsigned upload presets don't support overwrite.
     const tripId = (document.getElementById('tripName') && document.getElementById('tripName').dataset.tripId) || 'unknown-trip';
     const diverId = (document.getElementById('idNumberInput') ? document.getElementById('idNumberInput').value.replace(/\D/g, '') : '') || 'unknown';
     const diverFirst = (document.getElementById('firstNameInput') ? document.getElementById('firstNameInput').value : '').trim().replace(/\s+/g, '-') || 'unknown';
     const diverLast = (document.getElementById('lastNameInput') ? document.getElementById('lastNameInput').value : '').trim().replace(/\s+/g, '-') || 'unknown';
     // Map folder param: 'passports' stays; 'diving' becomes 'certificates'
     const folderType = (folder === 'diving') ? 'certificates' : (folder || 'general');
-    const newPublicId = tripId + '/' + folderType + '/' + diverId + '_' + diverLast + '_' + diverFirst + '_' + docType;
+    const ts = Date.now();
+    const newPublicId = tripId + '/' + folderType + '/' + diverId + '_' + diverLast + '_' + diverFirst + '_' + docType + '_' + ts;
 
     const formData = new FormData();
     formData.append('file', file);
     formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
     formData.append('public_id', newPublicId);
-    formData.append('overwrite', 'true');
-    formData.append('invalidate', 'true');
 
     const response = await fetch(
       `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
