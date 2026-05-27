@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<!-- BD-CRM 2026-05-27b | Admin dashboard — light theme, brand colours -->
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Buddy-Divers · CRM</title>
+<link rel="icon" type="image/png" href="https://res.cloudinary.com/dccbsfte0/image/upload/v1773063708/logo_hnmilh.png"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --navy:      #1a3a5c;
+    --navy-mid:  #1e4570;
+    --navy-dark: #122845;
+    --teal:      #007289;
+    --teal2:     #009ab8;
+    --teal-lt:   #e0f4f8;
+    --orange:    #d4692a;
+    --orange2:   #e8844a;
+    --orange-lt: #fdf0e8;
+    --bg:        #d6e6f0;
+    --bg2:       #deedf5;
+    --surface:   #ffffff;
+    --border:    #d0e3ee;
+    --border2:   #b8d4e4;
+    --text:      #1a3a5c;
+    --text2:     #3a6080;
+    --muted:     #6e90a8;
+    --white:     #ffffff;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* subtle dot grid */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: radial-gradient(circle, #b8d4e4 1px, transparent 1px);
+    background-size: 28px 28px;
+    opacity: 0.35;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* soft blue radial glow top-right */
+  body::after {
+    content: '';
+    position: fixed;
+    top: -10%;
+    right: -10%;
+    width: 60vw;
+    height: 60vh;
+    background: radial-gradient(ellipse, rgba(0,154,184,0.12) 0%, transparent 65%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── LAYOUT ── */
+  .shell {
+    display: flex;
+    min-height: 100vh;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    width: 240px;
+    flex-shrink: 0;
+    background: var(--navy);
+    display: flex;
+    flex-direction: column;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow: hidden;
+  }
+  .sidebar-logo {
+    padding: 26px 22px 18px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .sidebar-logo img {
+    width: 150px;
+    display: block;
+    filter: brightness(1.15);
+  }
+  .sidebar-label {
+    font-size: 9px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.35);
+    margin-top: 8px;
+    font-weight: 600;
+  }
+  .sidebar-nav { padding: 18px 12px; flex: 1; }
+  .nav-section {
+    font-size: 11px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.6);
+    font-weight: 700;
+    padding: 0 10px;
+    margin: 14px 0 5px;
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 8px 10px;
+    border-radius: 7px;
+    font-size: 14px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.9);
+    cursor: pointer;
+    transition: all 0.15s;
+    text-decoration: none;
+  }
+  .nav-item:hover { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.85); }
+  .nav-item.active { background: rgba(0,154,184,0.22); color: #7dd4e8; }
+  .nav-dot { width: 5px; height: 5px; border-radius: 50%; background: rgba(255,255,255,0.6); flex-shrink: 0; }
+  .nav-item.active .nav-dot { background: #7dd4e8; }
+  .sidebar-footer {
+    padding: 14px 22px;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    font-size: 11px;
+    color: rgba(255,255,255,0.6);
+    line-height: 1.6;
+  }
+  .sidebar-footer strong { color: rgba(255,255,255,0.85); display: block; margin-bottom: 1px; }
+
+  /* ── MAIN ── */
+  .main { flex: 1; overflow-y: auto; }
+
+  /* ── TOPBAR ── */
+  .topbar {
+    padding: 0 40px;
+    height: 64px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(246,250,254,0.9);
+    backdrop-filter: blur(12px);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .topbar-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: -0.4px;
+  }
+  .topbar-title .t-buddy { color: var(--navy); }
+  .topbar-title .t-divers { color: var(--teal); }
+  .topbar-title .t-crm {
+    color: var(--orange);
+    font-size: 19px;
+    margin-left: 5px;
+    font-weight: 700;
+    letter-spacing: 1px;
+  }
+  .topbar-right { display: flex; align-items: center; gap: 10px; }
+  .status-pill {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #e6f7f0;
+    border: 1px solid #a8dfc8;
+    border-radius: 20px;
+    padding: 5px 13px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #1a7a56;
+    letter-spacing: 0.5px;
+  }
+  .status-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #2ab87a;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  /* ── CONTENT ── */
+  .content { padding: 34px 40px 60px; }
+
+  /* ── STATS ROW ── */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 36px;
+  }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px 22px;
+    transition: box-shadow 0.2s, border-color 0.2s;
+  }
+  .stat-card:hover { border-color: var(--border2); box-shadow: 0 4px 16px rgba(26,58,92,0.07); }
+  .stat-label {
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+  .stat-value {
+    font-family: 'Syne', sans-serif;
+    font-size: 32px;
+    font-weight: 800;
+    color: var(--navy);
+    line-height: 1;
+    margin-bottom: 5px;
+  }
+  .stat-value.teal  { color: var(--teal); }
+  .stat-value.orange { color: var(--orange); }
+  .stat-sub { font-size: 13px; color: var(--muted); }
+
+  /* ── SECTION HEADER ── */
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+  .section-header h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 2.5px;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+  .section-line { flex:1; height:1px; background: var(--border); }
+
+  /* ── MODULE GRID ── */
+  .module-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 36px;
+  }
+  .module-grid.two-col { grid-template-columns: repeat(2, 1fr); }
+
+  /* ── MODULE CARD ── */
+  .mod-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 22px;
+    display: flex;
+    flex-direction: column;
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .mod-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--teal), var(--teal2));
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .mod-card:hover {
+    border-color: var(--teal2);
+    box-shadow: 0 6px 24px rgba(0,114,137,0.10);
+    transform: translateY(-2px);
+  }
+  .mod-card:hover::after { opacity: 1; }
+
+  .mod-card.orange-card::after { background: linear-gradient(90deg, var(--orange), var(--orange2)); }
+  .mod-card.orange-card:hover { border-color: var(--orange2); box-shadow: 0 6px 24px rgba(212,105,42,0.10); }
+
+  .mod-icon-wrap {
+    width: 42px; height: 42px;
+    border-radius: 11px;
+    background: var(--teal-lt);
+    border: 1px solid rgba(0,114,137,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 14px;
+    font-size: 19px;
+  }
+  .mod-card.orange-card .mod-icon-wrap {
+    background: var(--orange-lt);
+    border-color: rgba(212,105,42,0.18);
+  }
+
+  .mod-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 7px;
+    letter-spacing: -0.2px;
+  }
+  .mod-desc {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.65;
+    flex: 1;
+    margin-bottom: 16px;
+  }
+  .mod-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .mod-tag {
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: var(--teal);
+    background: var(--teal-lt);
+    padding: 3px 9px;
+    border-radius: 4px;
+  }
+  .mod-card.orange-card .mod-tag {
+    color: var(--orange);
+    background: var(--orange-lt);
+  }
+  .mod-arrow {
+    width: 28px; height: 28px;
+    border-radius: 8px;
+    background: var(--teal-lt);
+    border: 1px solid rgba(0,114,137,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    color: var(--teal);
+    transition: all 0.15s;
+  }
+  .mod-card:hover .mod-arrow {
+    background: var(--teal);
+    border-color: var(--teal);
+    color: white;
+    transform: translateX(2px);
+  }
+  .mod-card.orange-card .mod-arrow {
+    background: var(--orange-lt);
+    border-color: rgba(212,105,42,0.18);
+    color: var(--orange);
+  }
+  .mod-card.orange-card:hover .mod-arrow {
+    background: var(--orange);
+    border-color: var(--orange);
+    color: white;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    padding: 3px 9px;
+    border-radius: 20px;
+    position: absolute;
+    top: 14px; right: 14px;
+  }
+  .badge-live {
+    background: #e6f7f0;
+    color: #1a7a56;
+    border: 1px solid #a8dfc8;
+  }
+
+  /* ── QUICK LINKS ── */
+  .quick-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-bottom: 40px;
+  }
+  .quick-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 18px;
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.15s;
+  }
+  .quick-card:hover {
+    border-color: var(--border2);
+    box-shadow: 0 3px 12px rgba(26,58,92,0.06);
+  }
+  .quick-icon { font-size: 20px; flex-shrink: 0; }
+  .quick-text { flex: 1; }
+  .quick-title { font-size: 14px; font-weight: 700; color: var(--navy); margin-bottom: 3px; }
+  .quick-sub { font-size: 12px; color: var(--muted); }
+  .quick-ext { font-size: 14px; color: var(--muted); }
+
+  /* ── FADE IN ── */
+  .fade-in { animation: fadeIn 0.45s ease both; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+  .mod-card:nth-child(1){animation-delay:.04s}
+  .mod-card:nth-child(2){animation-delay:.09s}
+  .mod-card:nth-child(3){animation-delay:.14s}
+  .mod-card:nth-child(4){animation-delay:.19s}
+  .mod-card:nth-child(5){animation-delay:.24s}
+
+  /* ── RESPONSIVE ── */
+  @media(max-width:1100px){
+    .module-grid{grid-template-columns:repeat(2,1fr)}
+    .stats-row{grid-template-columns:repeat(2,1fr)}
+  }
+  @media(max-width:780px){
+    .sidebar{display:none}
+    .content{padding:22px 18px 40px}
+    .topbar{padding:0 18px}
+    .module-grid,.module-grid.two-col,.quick-row,.stats-row{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <img src="https://res.cloudinary.com/dccbsfte0/image/upload/v1773063708/logo_hnmilh.png" alt="Buddy-Divers"/>
+      <div class="sidebar-label">CRM &amp; Operations</div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section">Dashboard</div>
+      <a class="nav-item active" href="#">
+        <span class="nav-dot"></span> Overview
+      </a>
+      <div class="nav-section">Client-Facing</div>
+      <a class="nav-item" href="buddy-divers-registration.html" target="_blank">
+        <span class="nav-dot"></span> Registration Form
+      </a>
+      <a class="nav-item" href="trips.html" target="_blank">
+        <span class="nav-dot"></span> Trips Manager
+      </a>
+      <div class="nav-section">Operations</div>
+      <a class="nav-item" href="manifest.html" target="_blank">
+        <span class="nav-dot"></span> Trip Manifest
+      </a>
+      <a class="nav-item" href="followup.html" target="_blank">
+        <span class="nav-dot"></span> Follow-up &amp; Payments
+      </a>
+      <a class="nav-item" href="edit-diver.html" target="_blank">
+        <span class="nav-dot"></span> Edit Diver
+      </a>
+      <div class="nav-section">Special</div>
+      <a class="nav-item" href="lottery-check.html" target="_blank">
+        <span class="nav-dot"></span> Lottery Check
+      </a>
+      <a class="nav-item" href="myanmar.html" target="_blank">
+        <span class="nav-dot"></span> Myanmar Page
+      </a>
+      <a class="nav-item" href="naia_electronic_forms.html" target="_blank">
+        <span class="nav-dot"></span> NAI'A Forms
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <strong>Ian Casper &middot; Buddy-Divers</strong>
+      register.buddy-divers.com
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div class="topbar-title">
+        <span class="t-buddy">Buddy</span><span class="t-divers">-Divers</span><span class="t-crm">CRM</span>
+      </div>
+      <div class="topbar-right">
+        <div class="status-pill">
+          <span class="status-dot"></span> System Live
+        </div>
+      </div>
+    </header>
+
+    <!-- CONTENT -->
+    <main class="content">
+
+      <!-- STATS -->
+      <div class="stats-row fade-in">
+        <div class="stat-card">
+          <div class="stat-label">Active Trips</div>
+          <div class="stat-value">22</div>
+          <div class="stat-sub">2026 &ndash; 2027 season</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Platform</div>
+          <div class="stat-value teal">Live</div>
+          <div class="stat-sub">GitHub Pages &middot; Airtable</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Automation</div>
+          <div class="stat-value">Make</div>
+          <div class="stat-sub">4 active scenarios</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">WhatsApp</div>
+          <div class="stat-value orange">On</div>
+          <div class="stat-sub">Production WABA active</div>
+        </div>
+      </div>
+
+      <!-- CLIENT-FACING -->
+      <div class="section-header fade-in">
+        <h2>Client-Facing</h2>
+        <div class="section-line"></div>
+      </div>
+      <div class="module-grid fade-in">
+        <a class="mod-card" href="buddy-divers-registration.html" target="_blank">
+          <span class="badge badge-live">&#9679; Live</span>
+          <div class="mod-icon-wrap">📋</div>
+          <div class="mod-title">Registration Form</div>
+          <div class="mod-desc">Main diver registration form. Clients submit personal details, passport, dive certs, insurance, pricing selection and documents. Triggers Make.com on submit.</div>
+          <div class="mod-footer">
+            <span class="mod-tag">Client Form</span>
+            <span class="mod-arrow">→</span>
+          </div>
+        </a>
+        <a class="mod-card" href="trips.html" target="_blank">
+          <div class="mod-icon-wrap">🗺️</div>
+          <div class="mod-title">Trips Manager</div>
+          <div class="mod-desc">Complete trip catalogue with WhatsApp share buttons and direct registration links. Copy trip URLs to send to clients or share to group chats instantly.</div>
+          <div class="mod-footer">
+            <span class="mod-tag">Trip Links</span>
+            <span class="mod-arrow">→</span>
+          </div>
+        </a>
+        <a class="mod-card" href="lottery-check.html" target="_blank">
+          <div class="mod-icon-wrap">🎰</div>
+          <div class="mod-title">Lottery Verification</div>
+          <div class="mod-desc">Public-facing page for clients to verify their annual lottery registration by Israeli ID. Checks against lottery trip bookings in Airtable in real time.</div>
+          <div class="mod-footer">
+            <span class="mod-tag">Public</span>
+            <span class="mod-arrow">→</span>
+          </div>
+        </a>
+      </div>
+
+      <!-- OPERATIONS -->
+      <div class="section-header fade-in">
+        <h2>Operations</h2>
+        <div class="section-line"></div>
+      </div>
+      <div class="module-grid fade-in">
+        <a class="mod-card orange-card" href="manifest.html" target="_blank">
+          <div class="mod-icon-wrap">📊</div>
+          <div class="mod-title">Trip Manifest</div>
+          <div class="mod-desc">Full diver manifest per trip. Passport details, certification levels, equipment sizes, medical notes and document photo status for every registered participant.</div>
+          <div class="mod-footer">
+            <span class="mod-tag">Admin Only</span>
+            <span class="mod-arrow">→</span>
+          </div>
+        </a>
+        <a class="mod-card orange-card" href="followup.html" target="_blank">
+          <div class="mod-icon-wrap">💳</div>
+          <div class="mod-title">Follow-up &amp; Payments</div>
+          <div class="mod-desc">Send payment request images via WhatsApp, log records to Airtable, manage pro forma invoices and track outstanding balances across all trips.</div>
+          <div class="mod-footer">
+            <span class="mod-tag">Admin Only</span>
+            <span class="mod-arrow">→</span>
+          </div>
+        </a>
+        <a class="mod-card orange-card" href="edit-diver.html" target="_blank">
+          <div class="mod-icon-wrap">✏️</div>
+          <div class="mod-title">Edit Diver</div>
+          <div class="mod-desc">Search and edit any diver record or booking directly. Update personal details, document URLs, pricing, flight status, and notes. Writes to Airtable in real time.</div>
+          <div class="mod-footer">
+            <span class="mod-tag">Admin Only</span>
+            <span class="mod-arrow">→</span>
+          </div>
+        </a>
+      </div>
+
+      <!-- DESTINATION PAGES -->
+      <div class="section-header fade-in">
+        <h2>Destination Pages</h2>
+        <div class="section-line"></div>
+      </div>
+      <div class="module-grid two-col fade-in">
+        <a class="mod-card" href="myanmar.html" target="_blank">
+          <div class="mod-icon-wrap">🤿</div>
+          <div class="mod-title">Myanmar Liveaboard</div>
+          <div class="mod-desc">Dedicated trip page for Myanmar liveaboard expeditions with itinerary, dive site info, pricing, and booking call-to-action.</div>
+          <div class="mod-footer">
+            <span class="mod-tag">Trip Page</span>
+            <span class="mod-arrow">→</span>
+          </div>
+        </a>
+        <a class="mod-card" href="naia_electronic_forms.html" target="_blank">
+          <div class="mod-icon-wrap">📄</div>
+          <div class="mod-title">NAI'A Electronic Forms</div>
+          <div class="mod-desc">Fiji / NAI'A Cruises combined guest forms &mdash; medical questionnaire, named storm policy, and liability waiver &mdash; with signature pads and PDF export.</div>
+          <div class="mod-footer">
+            <span class="mod-tag">Guest Forms</span>
+            <span class="mod-arrow">→</span>
+          </div>
+        </a>
+      </div>
+
+      <!-- EXTERNAL SYSTEMS -->
+      <div class="section-header fade-in">
+        <h2>External Systems</h2>
+        <div class="section-line"></div>
+      </div>
+      <div class="quick-row fade-in">
+        <a class="quick-card" href="https://airtable.com/app2RAeuaXaWrHOan" target="_blank">
+          <span class="quick-icon">🗄️</span>
+          <div class="quick-text">
+            <div class="quick-title">Airtable Base</div>
+            <div class="quick-sub">Divers &middot; Bookings &middot; Trips &middot; Payments &middot; WA Messages</div>
+          </div>
+          <span class="quick-ext">↗</span>
+        </a>
+        <a class="quick-card" href="https://www.make.com" target="_blank">
+          <span class="quick-icon">⚙️</span>
+          <div class="quick-text">
+            <div class="quick-title">Make.com Scenarios</div>
+            <div class="quick-sub">Registration &middot; Payments &middot; WhatsApp &middot; OTP &middot; Lookup</div>
+          </div>
+          <span class="quick-ext">↗</span>
+        </a>
+        <a class="quick-card" href="https://console.cloudinary.com/console/c-c74abd4b0e6bdcf6c5fe80bf04b9af/media_library/folders/home" target="_blank">
+          <span class="quick-icon">📁</span>
+          <div class="quick-text">
+            <div class="quick-title">Cloudinary Media Library</div>
+            <div class="quick-sub">Passports &middot; Dive certs &middot; Insurance &middot; Logos</div>
+          </div>
+          <span class="quick-ext">↗</span>
+        </a>
+        <a class="quick-card" href="https://business.facebook.com/wa/manage/phone-numbers/" target="_blank">
+          <span class="quick-icon">💬</span>
+          <div class="quick-text">
+            <div class="quick-title">WhatsApp Business</div>
+            <div class="quick-sub">WABA &middot; Phone Number &middot; Message Templates</div>
+          </div>
+          <span class="quick-ext">↗</span>
+        </a>
+      </div>
+
+    </main>
+  </div>
+</div>
+</body>
+</html>
