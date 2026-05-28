@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<!-- BD-FOLLOWUP 2026-05-13a | Auto-log to Payment Requests table on WhatsApp send (both main and pro forma flows) -->
+<!-- BD-FOLLOWUP 2026-05-28a | ILS currency symbol fix - shekel sign for ILS trips 260708 260927
+     BD-FOLLOWUP 2026-05-13a | Auto-log to Payment Requests table on WhatsApp send (both main and pro forma flows) -->
 <html lang="en" dir="ltr">
 <head>
 <meta charset="UTF-8"/>
@@ -1461,7 +1462,7 @@ function applyMarkup() {
   const idx = document.getElementById('diverSelect').value;
   const booking = idx !== '' ? currentBookings[idx] : null;
   const currency = (booking && booking.currency) || 'USD';
-  const currSym = currency === 'EUR' ? '€' : '$';
+  const currSym = currency === 'EUR' ? '€' : currency === 'ILS' ? '₪' : '$';
   const rate = (currency === 'EUR' && _eurBaseRate) ? _eurBaseRate : _boiBaseRate;
 
   document.getElementById('exchangeRate').value = rate.toFixed(4);
@@ -1742,7 +1743,7 @@ async function generatePaymentImage() {
   };
   const tripDisplayName = tripNames[booking.tripId] || `טיול ${booking.tripId}`;
   const tripCurrency = booking.currency || 'USD';
-  const currencySymbol = tripCurrency === 'EUR' ? '€' : '$';
+  const currencySymbol = tripCurrency === 'EUR' ? '€' : tripCurrency === 'ILS' ? '₪' : '$';
 
   // Fetch diver details BEFORE rendering image — paymentMethod needed for image content
   if (booking.diverId) {
@@ -2023,7 +2024,7 @@ function pfDiscountManualEdit() {
 }
 
 function pfUpdateSummary() {
-  const sym = _pfCurrency === 'EUR' ? '€' : '$';
+  const sym = _pfCurrency === 'EUR' ? '€' : _pfCurrency === 'ILS' ? '₪' : '$';
   const safari   = parseFloat(document.getElementById('pfSafariPrice').value) || 0;
   const flight   = parseFloat(document.getElementById('pfFlightCost').value) || 0;
   const hotel    = parseFloat(document.getElementById('pfHotelCost').value) || 0;
@@ -2070,7 +2071,7 @@ async function generateProFormaImage() {
   validMsg.style.display = 'none';
 
   const nisAmount      = Math.round(amount * rate);
-  const currencySymbol = _pfCurrency === 'EUR' ? '€' : '$';
+  const currencySymbol = _pfCurrency === 'EUR' ? '€' : _pfCurrency === 'ILS' ? '₪' : '$';
   const typeLabels     = { downpayment:'מקדמה', final:'סופי', extras:'תוספות' };
   const typeLabel      = _pfSelectedPaymentType === 'custom'
     ? (document.getElementById('pfCustomPaymentLabel').value.trim() || '')
