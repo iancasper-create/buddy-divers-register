@@ -366,9 +366,13 @@ canvas.sig{display:block;width:100%;height:110px;cursor:crosshair;touch-action:n
         </div>
         <div class="field" style="margin-top:20px;">
           <label>Diver Accident Insurance? <span style="color:#cc0000;">*</span></label>
-          <div style="display:flex;gap:28px;padding:10px 14px;border:1.5px solid var(--border);border-radius:6px;background:#fafcfe;">
+          <div style="display:flex;align-items:center;gap:28px;padding:10px 14px;border:1.5px solid var(--border);border-radius:6px;background:#fafcfe;flex-wrap:wrap;">
             <label style="display:flex;align-items:center;gap:7px;font-size:14px;font-weight:500;cursor:pointer;text-transform:none;letter-spacing:0;color:var(--text);"><input type="radio" name="ins-10086" value="no" style="accent-color:var(--dark);"> NO</label>
             <label style="display:flex;align-items:center;gap:7px;font-size:14px;font-weight:500;cursor:pointer;text-transform:none;letter-spacing:0;color:var(--text);"><input type="radio" name="ins-10086" value="yes" style="accent-color:var(--dark);"> YES</label>
+            <div style="display:flex;align-items:center;gap:8px;margin-left:8px;flex:1;">
+              <span style="font-size:13px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;white-space:nowrap;">Policy Number</span>
+              <input type="text" id="w1-policy" style="border:none;border-bottom:1.5px solid var(--border);border-radius:0;background:transparent;padding:4px 6px;font-size:14px;flex:1;min-width:120px;">
+            </div>
           </div>
         </div>
         <p class="padi-ref">PRODUCT NO. 10086 (Rev. 02/21) Version 3.0 &nbsp;&mdash;&nbsp; &copy; PADI 2021</p>
