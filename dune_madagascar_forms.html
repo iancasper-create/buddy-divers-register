@@ -64,6 +64,10 @@ canvas.sig{display:block;width:100%;height:110px;cursor:crosshair;touch-action:n
 .btn-next:hover{background:#3d3220;}
 .btn-print{background:var(--sand);color:#fff;border:none;border-radius:7px;padding:13px 34px;font-family:'Source Sans 3',sans-serif;font-size:15px;font-weight:600;cursor:pointer;margin-top:20px;}
 .btn-print:hover{background:#b8934a;}
+.btn-email{background:#2a6496;color:#fff;border:none;border-radius:7px;padding:13px 34px;font-family:'Source Sans 3',sans-serif;font-size:15px;font-weight:600;cursor:pointer;margin-top:12px;display:block;}
+.btn-email:hover{background:#1e4f75;}
+.btn-email:disabled{background:#aaa;cursor:not-allowed;}
+.email-status{display:none;margin-top:12px;padding:12px 16px;border-radius:6px;font-size:14px;line-height:1.5;}
 /* Waiver styles */
 .waiver-body{font-size:13.5px;line-height:1.8;color:#1a1a1a;text-align:justify;}
 .waiver-body p{margin-bottom:13px;}
@@ -106,6 +110,246 @@ canvas.sig{display:block;width:100%;height:110px;cursor:crosshair;touch-action:n
   .sig-block{grid-template-columns:1fr;}
 }
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js">
+// ── Email PDF ─────────────────────────────────────────────────────
+// Make.com webhook URL — replace with your scenario webhook URL
+var MAKE_WEBHOOK_URL = "https://hook.eu1.make.com/ugucimbs6p6tbac9sjmrr4as1l6pconu";
+
+async function sendPDFByEmail() {
+  var panel = document.getElementById("panel-2");
+  var errors = validatePanel(panel, 2);
+  if (errors.length > 0) { showErrors(errors, panel); return; }
+  clearErrors(panel);
+  var guestName  = (document.getElementById("med-name")  || {}).value || "Guest";
+  var guestEmail = (document.getElementById("med-email") || {}).value || "";
+  if (!guestEmail) { setEmailStatus("Please enter your email address in the Diver Medical form first.", "error"); return; }
+  var btn = document.getElementById("btn-email-pdf");
+  btn.disabled = true;
+  try {
+    setEmailStatus("Step 1 of 3 — Generating PDF&hellip;", "progress");
+    var pdf = await buildPDF();
+    setEmailStatus("Step 2 of 3 — Uploading&hellip;", "progress");
+    var pdfUrl = await uploadPDFToCloudinary(pdf, guestName);
+    setEmailStatus("Step 3 of 3 — Sending email&hellip;", "progress");
+    await triggerMakeWebhook(guestName, guestEmail, pdfUrl);
+    setEmailStatus("&#10003; Email sent to " + guestEmail, "success");
+  } catch(err) {
+    setEmailStatus("&#10007; " + (err.message || "Something went wrong. Please use Print and email the PDF manually."), "error");
+    console.error(err);
+  }
+  btn.disabled = false;
+}
+
+function setEmailStatus(msg, type) {
+  var el = document.getElementById("email-status");
+  if (!el) return;
+  el.innerHTML = msg;
+  el.style.display = "block";
+  el.style.background = type==="success"?"#e8f5e9":type==="error"?"#fff0f0":"#f0f4ff";
+  el.style.color      = type==="success"?"#2a6430":type==="error"?"#c0392b":"#2c4070";
+  el.style.border     = "1.5px solid "+(type==="success"?"#81c784":type==="error"?"#e57373":"#9db4e8");
+}
+
+async function buildPDF() {
+  if (!window.jspdf)       throw new Error("jsPDF not loaded — please refresh.");
+  if (!window.html2canvas) throw new Error("html2canvas not loaded — please refresh.");
+  var jsPDF = window.jspdf.jsPDF;
+  var pdf = new jsPDF("p","mm","a4");
+  var a4W = 210, a4H = 297;
+  var panelIds = ["panel-0","panel-1","panel-2"];
+  var evalForm = document.getElementById("eval-form");
+  // Show all panels so html2canvas can render them
+  panelIds.forEach(function(id){ document.getElementById(id).style.display="block"; });
+  await new Promise(function(r){ setTimeout(r, 300); });
+  var firstPage = true;
+  for (var i = 0; i < panelIds.length; i++) {
+    var el = document.getElementById(panelIds[i]);
+    var c = await html2canvas(el, {
+      scale: 2, useCORS: true, allowTaint: false, logging: false,
+      ignoreElements: function(n){
+        return n.classList.contains("preread-card") ||
+               n.classList.contains("btn-next")     ||
+               n.classList.contains("btn-print")    ||
+               n.classList.contains("btn-email")    ||
+               n.classList.contains("email-section")||
+               n.classList.contains("val-errors");
+      }
+    });
+    var imgData = c.toDataURL("image/jpeg", 0.92);
+    var imgH = (c.height * a4W) / c.width;
+    if (!firstPage) pdf.addPage();
+    firstPage = false;
+    // Handle panels taller than one A4 page
+    pdf.addImage(imgData,"JPEG",0,0,a4W,imgH);
+    var remaining = imgH - a4H, offsetY = -a4H;
+    while (remaining > 0) {
+      pdf.addPage();
+      pdf.addImage(imgData,"JPEG",0,offsetY,a4W,imgH);
+      offsetY -= a4H; remaining -= a4H;
+    }
+  }
+  // Include physician eval form if triggered
+  if (evalForm && evalForm.classList.contains("shown")) {
+    evalForm.style.display = "block";
+    await new Promise(function(r){ setTimeout(r,100); });
+    var ec = await html2canvas(evalForm, {scale:2, useCORS:true, logging:false});
+    var eImg = ec.toDataURL("image/jpeg",0.92);
+    var eH = (ec.height * a4W) / ec.width;
+    pdf.addPage();
+    pdf.addImage(eImg,"JPEG",0,0,a4W,eH);
+    evalForm.style.display = "";
+  }
+  // Restore — remove inline override so CSS classes take over again
+  panelIds.forEach(function(id){ document.getElementById(id).style.display=""; });
+  return pdf;
+}
+
+async function uploadPDFToCloudinary(pdf, guestName) {
+  var safe = guestName.replace(/[^a-zA-Z0-9]/g,"_") || "Guest";
+  var fname = "DUNE_Madagascar_" + safe + "_" + Date.now();
+  var blob = pdf.output("blob");
+  var fd = new FormData();
+  fd.append("file", blob, fname + ".pdf");
+  fd.append("upload_preset", "buddy_divers_uploads");
+  fd.append("public_id", "guest_forms/madagascar/" + fname);
+  var res = await fetch("https://api.cloudinary.com/v1_1/dccbsfte0/raw/upload", {method:"POST",body:fd});
+  if (!res.ok) {
+    var e = await res.json().catch(function(){return {};});
+    throw new Error("Cloudinary upload failed: " + ((e.error||{}).message || res.status));
+  }
+  return (await res.json()).secure_url;
+}
+
+async function triggerMakeWebhook(name, email, pdfUrl) {
+  if (MAKE_WEBHOOK_URL === "PASTE_MAKE_WEBHOOK_URL_HERE") throw new Error("Webhook URL not configured — please contact Buddy-Divers.");
+  var res = await fetch(MAKE_WEBHOOK_URL, {
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({name:name, email:email, pdf_url:pdfUrl, form:"DUNE Madagascar"})
+  });
+  if (!res.ok) throw new Error("Webhook failed (" + res.status + "). PDF saved at: " + pdfUrl);
+}
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js">
+// ── Email PDF ─────────────────────────────────────────────────────
+// Make.com webhook URL — replace with your scenario webhook URL
+var MAKE_WEBHOOK_URL = "https://hook.eu1.make.com/ugucimbs6p6tbac9sjmrr4as1l6pconu";
+
+async function sendPDFByEmail() {
+  var panel = document.getElementById("panel-2");
+  var errors = validatePanel(panel, 2);
+  if (errors.length > 0) { showErrors(errors, panel); return; }
+  clearErrors(panel);
+  var guestName  = (document.getElementById("med-name")  || {}).value || "Guest";
+  var guestEmail = (document.getElementById("med-email") || {}).value || "";
+  if (!guestEmail) { setEmailStatus("Please enter your email address in the Diver Medical form first.", "error"); return; }
+  var btn = document.getElementById("btn-email-pdf");
+  btn.disabled = true;
+  try {
+    setEmailStatus("Step 1 of 3 — Generating PDF&hellip;", "progress");
+    var pdf = await buildPDF();
+    setEmailStatus("Step 2 of 3 — Uploading&hellip;", "progress");
+    var pdfUrl = await uploadPDFToCloudinary(pdf, guestName);
+    setEmailStatus("Step 3 of 3 — Sending email&hellip;", "progress");
+    await triggerMakeWebhook(guestName, guestEmail, pdfUrl);
+    setEmailStatus("&#10003; Email sent to " + guestEmail, "success");
+  } catch(err) {
+    setEmailStatus("&#10007; " + (err.message || "Something went wrong. Please use Print and email the PDF manually."), "error");
+    console.error(err);
+  }
+  btn.disabled = false;
+}
+
+function setEmailStatus(msg, type) {
+  var el = document.getElementById("email-status");
+  if (!el) return;
+  el.innerHTML = msg;
+  el.style.display = "block";
+  el.style.background = type==="success"?"#e8f5e9":type==="error"?"#fff0f0":"#f0f4ff";
+  el.style.color      = type==="success"?"#2a6430":type==="error"?"#c0392b":"#2c4070";
+  el.style.border     = "1.5px solid "+(type==="success"?"#81c784":type==="error"?"#e57373":"#9db4e8");
+}
+
+async function buildPDF() {
+  if (!window.jspdf)       throw new Error("jsPDF not loaded — please refresh.");
+  if (!window.html2canvas) throw new Error("html2canvas not loaded — please refresh.");
+  var jsPDF = window.jspdf.jsPDF;
+  var pdf = new jsPDF("p","mm","a4");
+  var a4W = 210, a4H = 297;
+  var panelIds = ["panel-0","panel-1","panel-2"];
+  var evalForm = document.getElementById("eval-form");
+  // Show all panels so html2canvas can render them
+  panelIds.forEach(function(id){ document.getElementById(id).style.display="block"; });
+  await new Promise(function(r){ setTimeout(r, 300); });
+  var firstPage = true;
+  for (var i = 0; i < panelIds.length; i++) {
+    var el = document.getElementById(panelIds[i]);
+    var c = await html2canvas(el, {
+      scale: 2, useCORS: true, allowTaint: false, logging: false,
+      ignoreElements: function(n){
+        return n.classList.contains("preread-card") ||
+               n.classList.contains("btn-next")     ||
+               n.classList.contains("btn-print")    ||
+               n.classList.contains("btn-email")    ||
+               n.classList.contains("email-section")||
+               n.classList.contains("val-errors");
+      }
+    });
+    var imgData = c.toDataURL("image/jpeg", 0.92);
+    var imgH = (c.height * a4W) / c.width;
+    if (!firstPage) pdf.addPage();
+    firstPage = false;
+    // Handle panels taller than one A4 page
+    pdf.addImage(imgData,"JPEG",0,0,a4W,imgH);
+    var remaining = imgH - a4H, offsetY = -a4H;
+    while (remaining > 0) {
+      pdf.addPage();
+      pdf.addImage(imgData,"JPEG",0,offsetY,a4W,imgH);
+      offsetY -= a4H; remaining -= a4H;
+    }
+  }
+  // Include physician eval form if triggered
+  if (evalForm && evalForm.classList.contains("shown")) {
+    evalForm.style.display = "block";
+    await new Promise(function(r){ setTimeout(r,100); });
+    var ec = await html2canvas(evalForm, {scale:2, useCORS:true, logging:false});
+    var eImg = ec.toDataURL("image/jpeg",0.92);
+    var eH = (ec.height * a4W) / ec.width;
+    pdf.addPage();
+    pdf.addImage(eImg,"JPEG",0,0,a4W,eH);
+    evalForm.style.display = "";
+  }
+  // Restore — remove inline override so CSS classes take over again
+  panelIds.forEach(function(id){ document.getElementById(id).style.display=""; });
+  return pdf;
+}
+
+async function uploadPDFToCloudinary(pdf, guestName) {
+  var safe = guestName.replace(/[^a-zA-Z0-9]/g,"_") || "Guest";
+  var fname = "DUNE_Madagascar_" + safe + "_" + Date.now();
+  var blob = pdf.output("blob");
+  var fd = new FormData();
+  fd.append("file", blob, fname + ".pdf");
+  fd.append("upload_preset", "buddy_divers_uploads");
+  fd.append("public_id", "guest_forms/madagascar/" + fname);
+  var res = await fetch("https://api.cloudinary.com/v1_1/dccbsfte0/raw/upload", {method:"POST",body:fd});
+  if (!res.ok) {
+    var e = await res.json().catch(function(){return {};});
+    throw new Error("Cloudinary upload failed: " + ((e.error||{}).message || res.status));
+  }
+  return (await res.json()).secure_url;
+}
+
+async function triggerMakeWebhook(name, email, pdfUrl) {
+  if (MAKE_WEBHOOK_URL === "PASTE_MAKE_WEBHOOK_URL_HERE") throw new Error("Webhook URL not configured — please contact Buddy-Divers.");
+  var res = await fetch(MAKE_WEBHOOK_URL, {
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({name:name, email:email, pdf_url:pdfUrl, form:"DUNE Madagascar"})
+  });
+  if (!res.ok) throw new Error("Webhook failed (" + res.status + "). PDF saved at: " + pdfUrl);
+}
+</script>
 </head>
 <body>
 <header>
@@ -140,7 +384,7 @@ canvas.sig{display:block;width:100%;height:110px;cursor:crosshair;touch-action:n
   <div class="card">
     <div style="padding:17px 0 0 0;border-bottom:1px solid var(--border);">
       <div style="margin:0 0 17px 0;padding:0 28px;">
-        <img src="https://res.cloudinary.com/dccbsfte0/image/upload/e_trim/v1779976019/Banner_for_Dune_ajnigz.png" alt="DAN WRSTC RSTC UHMS CMAS" style="width:100%;display:block;">
+        <img src="https://res.cloudinary.com/dccbsfte0/image/upload/e_trim/v1779976019/Banner_for_Dune_ajnigz.png" alt="DAN WRSTC RSTC UHMS CMAS" crossOrigin="anonymous" style="width:100%;display:block;">
       </div>
       <h2 style="font-family:'Playfair Display',serif;font-size:24px;font-weight:400;border-bottom:none;padding:0 28px;margin-bottom:14px;color:#000;"><strong>Diver Medical</strong> | Participant Questionnaire</h2>
     </div>
@@ -431,6 +675,10 @@ canvas.sig{display:block;width:100%;height:110px;cursor:crosshair;touch-action:n
         <p class="padi-ref">PRODUCT NO. 10155 (Rev. 12/12) Version 1.01 &nbsp;&mdash;&nbsp; &copy; PADI 2012</p>
       </div>
       <button class="btn-print">&#128438; Print / Save PDF</button>
+      <div class="email-section">
+        <button class="btn-email" id="btn-email-pdf" onclick="sendPDFByEmail()">&#9993; Email PDF</button>
+        <div class="email-status" id="email-status"></div>
+      </div>
     </div>
   </div>
 </div>
@@ -642,6 +890,125 @@ var today = new Date().toISOString().split("T")[0];
 ["med-date","med-sig-date","w1-sig-date","w2-sig-date"].forEach(function(id){
   var el = document.getElementById(id); if(el) el.value = today;
 });
+
+// ── Email PDF ─────────────────────────────────────────────────────
+// Make.com webhook URL — replace with your scenario webhook URL
+var MAKE_WEBHOOK_URL = "https://hook.eu1.make.com/ugucimbs6p6tbac9sjmrr4as1l6pconu";
+
+async function sendPDFByEmail() {
+  var panel = document.getElementById("panel-2");
+  var errors = validatePanel(panel, 2);
+  if (errors.length > 0) { showErrors(errors, panel); return; }
+  clearErrors(panel);
+  var guestName  = (document.getElementById("med-name")  || {}).value || "Guest";
+  var guestEmail = (document.getElementById("med-email") || {}).value || "";
+  if (!guestEmail) { setEmailStatus("Please enter your email address in the Diver Medical form first.", "error"); return; }
+  var btn = document.getElementById("btn-email-pdf");
+  btn.disabled = true;
+  try {
+    setEmailStatus("Step 1 of 3 — Generating PDF&hellip;", "progress");
+    var pdf = await buildPDF();
+    setEmailStatus("Step 2 of 3 — Uploading&hellip;", "progress");
+    var pdfUrl = await uploadPDFToCloudinary(pdf, guestName);
+    setEmailStatus("Step 3 of 3 — Sending email&hellip;", "progress");
+    await triggerMakeWebhook(guestName, guestEmail, pdfUrl);
+    setEmailStatus("&#10003; Email sent to " + guestEmail, "success");
+  } catch(err) {
+    setEmailStatus("&#10007; " + (err.message || "Something went wrong. Please use Print and email the PDF manually."), "error");
+    console.error(err);
+  }
+  btn.disabled = false;
+}
+
+function setEmailStatus(msg, type) {
+  var el = document.getElementById("email-status");
+  if (!el) return;
+  el.innerHTML = msg;
+  el.style.display = "block";
+  el.style.background = type==="success"?"#e8f5e9":type==="error"?"#fff0f0":"#f0f4ff";
+  el.style.color      = type==="success"?"#2a6430":type==="error"?"#c0392b":"#2c4070";
+  el.style.border     = "1.5px solid "+(type==="success"?"#81c784":type==="error"?"#e57373":"#9db4e8");
+}
+
+async function buildPDF() {
+  if (!window.jspdf)       throw new Error("jsPDF not loaded — please refresh.");
+  if (!window.html2canvas) throw new Error("html2canvas not loaded — please refresh.");
+  var jsPDF = window.jspdf.jsPDF;
+  var pdf = new jsPDF("p","mm","a4");
+  var a4W = 210, a4H = 297;
+  var panelIds = ["panel-0","panel-1","panel-2"];
+  var evalForm = document.getElementById("eval-form");
+  // Show all panels so html2canvas can render them
+  panelIds.forEach(function(id){ document.getElementById(id).style.display="block"; });
+  await new Promise(function(r){ setTimeout(r, 300); });
+  var firstPage = true;
+  for (var i = 0; i < panelIds.length; i++) {
+    var el = document.getElementById(panelIds[i]);
+    var c = await html2canvas(el, {
+      scale: 2, useCORS: true, allowTaint: false, logging: false,
+      ignoreElements: function(n){
+        return n.classList.contains("preread-card") ||
+               n.classList.contains("btn-next")     ||
+               n.classList.contains("btn-print")    ||
+               n.classList.contains("btn-email")    ||
+               n.classList.contains("email-section")||
+               n.classList.contains("val-errors");
+      }
+    });
+    var imgData = c.toDataURL("image/jpeg", 0.92);
+    var imgH = (c.height * a4W) / c.width;
+    if (!firstPage) pdf.addPage();
+    firstPage = false;
+    // Handle panels taller than one A4 page
+    pdf.addImage(imgData,"JPEG",0,0,a4W,imgH);
+    var remaining = imgH - a4H, offsetY = -a4H;
+    while (remaining > 0) {
+      pdf.addPage();
+      pdf.addImage(imgData,"JPEG",0,offsetY,a4W,imgH);
+      offsetY -= a4H; remaining -= a4H;
+    }
+  }
+  // Include physician eval form if triggered
+  if (evalForm && evalForm.classList.contains("shown")) {
+    evalForm.style.display = "block";
+    await new Promise(function(r){ setTimeout(r,100); });
+    var ec = await html2canvas(evalForm, {scale:2, useCORS:true, logging:false});
+    var eImg = ec.toDataURL("image/jpeg",0.92);
+    var eH = (ec.height * a4W) / ec.width;
+    pdf.addPage();
+    pdf.addImage(eImg,"JPEG",0,0,a4W,eH);
+    evalForm.style.display = "";
+  }
+  // Restore — remove inline override so CSS classes take over again
+  panelIds.forEach(function(id){ document.getElementById(id).style.display=""; });
+  return pdf;
+}
+
+async function uploadPDFToCloudinary(pdf, guestName) {
+  var safe = guestName.replace(/[^a-zA-Z0-9]/g,"_") || "Guest";
+  var fname = "DUNE_Madagascar_" + safe + "_" + Date.now();
+  var blob = pdf.output("blob");
+  var fd = new FormData();
+  fd.append("file", blob, fname + ".pdf");
+  fd.append("upload_preset", "buddy_divers_uploads");
+  fd.append("public_id", "guest_forms/madagascar/" + fname);
+  var res = await fetch("https://api.cloudinary.com/v1_1/dccbsfte0/raw/upload", {method:"POST",body:fd});
+  if (!res.ok) {
+    var e = await res.json().catch(function(){return {};});
+    throw new Error("Cloudinary upload failed: " + ((e.error||{}).message || res.status));
+  }
+  return (await res.json()).secure_url;
+}
+
+async function triggerMakeWebhook(name, email, pdfUrl) {
+  if (MAKE_WEBHOOK_URL === "PASTE_MAKE_WEBHOOK_URL_HERE") throw new Error("Webhook URL not configured — please contact Buddy-Divers.");
+  var res = await fetch(MAKE_WEBHOOK_URL, {
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({name:name, email:email, pdf_url:pdfUrl, form:"DUNE Madagascar"})
+  });
+  if (!res.ok) throw new Error("Webhook failed (" + res.status + "). PDF saved at: " + pdfUrl);
+}
 </script>
 </body>
 </html>
