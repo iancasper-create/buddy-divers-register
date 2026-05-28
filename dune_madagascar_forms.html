@@ -395,6 +395,11 @@ async function triggerMakeWebhook(name, email, pdfUrl) {
       <h2 style="font-family:'Playfair Display',serif;font-size:24px;font-weight:400;border-bottom:none;padding:0 28px;margin-bottom:14px;color:#000;"><strong>Diver Medical</strong> | Participant Questionnaire</h2>
     </div>
     <div class="cb">
+      <div class="fr" style="margin-bottom:20px;">
+        <div class="field"><label>Date of Arrival</label><input type="date" id="arrival-date"></div>
+        <div class="field"><label>Agency Name</label><input type="text" id="agency-name" placeholder="e.g. PADI, CMAS, SSI"></div>
+      </div>
+      <hr class="divider" style="margin-top:0;">
       <p style='font-size:13px;line-height:1.75;margin-bottom:18px;text-align:justify;'>Recreational scuba diving and freediving requires good physical and mental health. There are a few medical conditions which can be hazardous while diving, listed below. Those who have, or are predisposed to, any of these conditions, should be evaluated by a physician. This Diver Medical Participant Questionnaire provides a basis to determine if you should seek out that evaluation. If you have any concerns about your diving fitness not represented on this form, consult with your physician before diving. If you are feeling ill, avoid diving. If you think you may have a contagious disease, protect yourself and others by not participating in dive training and/or dive activities. References to &ldquo;diving&rdquo; on this form encompass both recreational scuba diving and freediving. This form is principally designed as an initial medical screen for new divers, but is also appropriate for divers taking continuing education. For your safety, and that of others who may dive with you, answer all questions honestly.</p>
       <p style='font-size:13.5px;margin-bottom:4px;'><strong>Directions</strong></p>
       <p style='font-size:13.5px;line-height:1.7;margin-bottom:18px;'><strong>Complete this questionnaire as a prerequisite to a recreational scuba diving or freediving course. Note to women:</strong> If you are pregnant, or attempting to become pregnant, <em>do not dive.</em></p>
@@ -838,6 +843,10 @@ function validatePanel(panel, idx) {
         errors.push("All questions in " + label + " must be answered");
       }
     });
+    var arrDate = document.getElementById("arrival-date");
+    if(!arrDate || !arrDate.value) errors.push("Date of Arrival is required");
+    var agencyName = document.getElementById("agency-name");
+    if(!agencyName || !agencyName.value.trim()) errors.push("Agency Name is required");
     if(sigBlank("sig-med")) errors.push("Participant signature is required");
   } else if(idx === 1) {
     if(sigBlank("sig-w1")) errors.push("Signature is required on the Liability Waiver");
