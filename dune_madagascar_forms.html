@@ -213,11 +213,14 @@ async function uploadPDFToCloudinary(pdf, guestName) {
   fd.append("upload_preset", "buddy_divers_uploads");
   fd.append("public_id", "guest_forms/madagascar/" + fname);
   var res = await fetch("https://api.cloudinary.com/v1_1/dccbsfte0/raw/upload", {method:"POST",body:fd});
-  if (!res.ok) {
-    var e = await res.json().catch(function(){return {};});
-    throw new Error("Cloudinary upload failed: " + ((e.error||{}).message || res.status));
+  var resData = await res.json().catch(function(){ return {}; });
+  if (!res.ok || resData.error) {
+    throw new Error("Cloudinary upload failed: " + ((resData.error||{}).message || res.status));
   }
-  return (await res.json()).secure_url;
+  if (!resData.secure_url) {
+    throw new Error("Cloudinary returned no URL. Response: " + JSON.stringify(resData).substring(0,200));
+  }
+  return resData.secure_url;
 }
 
 async function triggerMakeWebhook(name, email, pdfUrl) {
@@ -333,11 +336,14 @@ async function uploadPDFToCloudinary(pdf, guestName) {
   fd.append("upload_preset", "buddy_divers_uploads");
   fd.append("public_id", "guest_forms/madagascar/" + fname);
   var res = await fetch("https://api.cloudinary.com/v1_1/dccbsfte0/raw/upload", {method:"POST",body:fd});
-  if (!res.ok) {
-    var e = await res.json().catch(function(){return {};});
-    throw new Error("Cloudinary upload failed: " + ((e.error||{}).message || res.status));
+  var resData = await res.json().catch(function(){ return {}; });
+  if (!res.ok || resData.error) {
+    throw new Error("Cloudinary upload failed: " + ((resData.error||{}).message || res.status));
   }
-  return (await res.json()).secure_url;
+  if (!resData.secure_url) {
+    throw new Error("Cloudinary returned no URL. Response: " + JSON.stringify(resData).substring(0,200));
+  }
+  return resData.secure_url;
 }
 
 async function triggerMakeWebhook(name, email, pdfUrl) {
@@ -993,11 +999,14 @@ async function uploadPDFToCloudinary(pdf, guestName) {
   fd.append("upload_preset", "buddy_divers_uploads");
   fd.append("public_id", "guest_forms/madagascar/" + fname);
   var res = await fetch("https://api.cloudinary.com/v1_1/dccbsfte0/raw/upload", {method:"POST",body:fd});
-  if (!res.ok) {
-    var e = await res.json().catch(function(){return {};});
-    throw new Error("Cloudinary upload failed: " + ((e.error||{}).message || res.status));
+  var resData = await res.json().catch(function(){ return {}; });
+  if (!res.ok || resData.error) {
+    throw new Error("Cloudinary upload failed: " + ((resData.error||{}).message || res.status));
   }
-  return (await res.json()).secure_url;
+  if (!resData.secure_url) {
+    throw new Error("Cloudinary returned no URL. Response: " + JSON.stringify(resData).substring(0,200));
+  }
+  return resData.secure_url;
 }
 
 async function triggerMakeWebhook(name, email, pdfUrl) {
