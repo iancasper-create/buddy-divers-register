@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-FOLLOWUP 2026-05-28a | ILS currency symbol fix - shekel sign for ILS trips 260708 260927
+<!-- BD-FOLLOWUP 2026-05-28b | ILS fix complete - getActiveCurrencySymbol() also fixed (Financial Summary totals)
      BD-FOLLOWUP 2026-05-13a | Auto-log to Payment Requests table on WhatsApp send (both main and pro forma flows) -->
 <html lang="en" dir="ltr">
 <head>
@@ -1370,7 +1370,7 @@ function parseFloatOrNull(id) { const v = parseFloat(document.getElementById(id)
 function getActiveCurrencySymbol() {
   const idx = document.getElementById('diverSelect').value;
   const booking = idx !== '' ? currentBookings[idx] : null;
-  return (booking && booking.currency === 'EUR') ? '€' : '$';
+  return (booking && booking.currency === 'EUR') ? '€' : (booking && booking.currency === 'ILS') ? '₪' : '$';
 }
 function formatCurrency(n) { return getActiveCurrencySymbol() + n.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 }); }
 function showMsg(id, type, text) { const el = document.getElementById(id); el.className = `msg ${type}`; el.textContent = text; el.style.display = 'block'; }
