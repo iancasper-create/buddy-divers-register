@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DUNE Madagascar - Guest Forms</title>
+<!-- BD-DUNE-MADAGASCAR 2026-05-28b -->
+<link rel="icon" type="image/jpeg" href="https://res.cloudinary.com/dccbsfte0/image/upload/v1774016253/logo2_swvqfe.jpg" />
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Source+Sans+3:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--sand:#d4762a;--dark:#b85c1a;--warm:#fdf6ee;--border:#e8c9a0;--text:#000000;--muted:#666666;--white:#ffffff;--red:#c0392b;--orange:#d4692a;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Source Sans 3',sans-serif;background:var(--warm);color:var(--text);font-size:15px;line-height:1.6;}
+header{background:var(--dark);padding:22px 40px;display:flex;align-items:center;gap:18px;box-shadow:0 2px 10px rgba(0,0,0,.4);}
+header h1{font-family:'Playfair Display',serif;color:#fff;font-size:21px;font-weight:500;}
+header p{color:rgba(255,255,255,.6);font-size:13px;margin-top:2px;}
+.anchor{font-size:28px;color:var(--sand);}
+.tabs{background:var(--dark);display:flex;padding:0 40px;border-top:1px solid rgba(255,255,255,.1);}
+.tab{background:none;border:none;color:rgba(255,255,255,.55);font-family:'Source Sans 3',sans-serif;font-size:13.5px;font-weight:500;padding:12px 20px;cursor:pointer;border-bottom:3px solid transparent;touch-action:manipulation;}
+.tab.active{color:#fff;border-bottom-color:var(--sand);}
+.main{max-width:880px;margin:32px auto;padding:0 20px 60px;}
+.panel{display:none;}.panel.active{display:block;}
+.card{background:#fff;border-radius:10px;box-shadow:0 2px 14px rgba(44,36,22,.1);overflow:hidden;margin-bottom:18px;}
+.ch{background:var(--dark);color:#fff;padding:18px 28px;}
+.ch h2{font-family:'Playfair Display',serif;font-size:19px;font-weight:500;}
+.ch p{font-size:13px;color:rgba(255,255,255,.65);margin-top:4px;}
+.cb{padding:26px 28px;}
+.notice{background:#fdf6e3;border-left:4px solid var(--sand);border-radius:6px;padding:13px 17px;font-size:13.5px;margin-bottom:22px;color:#5a4a20;}
+.fr{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+.field{display:flex;flex-direction:column;gap:5px;}
+.field label{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;}
+.field input,.field select,.field textarea{border:1.5px solid var(--border);border-radius:6px;padding:9px 12px;font-family:'Source Sans 3',sans-serif;font-size:14px;color:var(--text);background:#fafcfe;}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--sand);}
+.divider{border:none;border-top:1.5px solid var(--border);margin:22px 0;}
+.sec-title{font-family:'Playfair Display',serif;font-size:16px;color:var(--dark);margin-bottom:14px;padding-bottom:7px;border-bottom:2px solid var(--border);}
+.qrow{display:flex;align-items:flex-start;gap:14px;padding:13px 0;border-bottom:1px solid #f0e8d4;}
+.qrow:last-child{border-bottom:none;}
+.qnum{font-weight:700;color:var(--dark);font-size:14px;min-width:24px;margin-top:2px;}
+.qtext{flex:1;font-size:14.5px;line-height:1.55;}
+.qans{display:flex;gap:10px;min-width:110px;align-items:center;}
+.qans label{display:flex;align-items:center;gap:5px;cursor:pointer;font-size:14px;font-weight:500;touch-action:manipulation;}
+.qans input[type=radio]{accent-color:var(--dark);cursor:pointer;touch-action:manipulation;}
+.expand{display:none;background:#fdf6e3;border:1.5px solid var(--border);border-radius:8px;padding:16px 20px;margin:4px 0 14px 36px;}
+.expand.shown{display:block;}
+.expand .blabel{font-family:'Playfair Display',serif;font-size:14px;font-weight:700;color:var(--dark);margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.badge{background:var(--dark);color:#fff;font-size:11px;padding:2px 8px;border-radius:20px;font-weight:600;}
+.expand .qrow{border-bottom:1px solid var(--border);}
+.phys-warn{display:none;background:#fff4ec;border:2px solid var(--orange);border-radius:8px;padding:16px 20px;margin-top:14px;}
+.phys-warn.shown{display:block;}
+.phys-warn h3{color:var(--orange);font-family:'Playfair Display',serif;font-size:16px;margin-bottom:6px;}
+.eval-form{display:none;background:#fff;border:1px solid var(--border);border-radius:8px;padding:32px;margin-top:6px;}
+.eval-form.shown{display:block;}
+.eval-form h2{font-family:'Playfair Display',serif;font-size:18px;margin-bottom:18px;}
+.eval-line{border-bottom:1px solid #333;min-height:28px;margin-bottom:4px;}
+.eval-lbl{font-size:11px;color:#666;margin-bottom:12px;}
+.eval-flbl{font-weight:700;font-size:13px;margin-bottom:5px;margin-top:13px;}
+.sig-area{border:1.5px dashed var(--border);border-radius:8px;padding:18px;background:#fafcfe;}
+.sig-wrap{border:1.5px solid var(--border);border-radius:6px;background:#fff;position:relative;margin-bottom:8px;}
+canvas.sig{display:block;width:100%;height:110px;cursor:crosshair;touch-action:none;border-radius:6px;}
+.sig-ph{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#bdc8d4;font-size:13px;pointer-events:none;font-style:italic;}
+.sig-acts{display:flex;justify-content:flex-end;}
+.btn-clr{background:none;border:1.5px solid var(--border);border-radius:5px;padding:4px 13px;font-size:12.5px;color:var(--muted);cursor:pointer;}
+.btn-next{background:var(--dark);color:#fff;border:none;border-radius:7px;padding:13px 34px;font-family:'Source Sans 3',sans-serif;font-size:15px;font-weight:600;cursor:pointer;margin-top:20px;}
+.btn-next:hover{background:#3d3220;}
+.btn-print{background:var(--sand);color:#fff;border:none;border-radius:7px;padding:13px 34px;font-family:'Source Sans 3',sans-serif;font-size:15px;font-weight:600;cursor:pointer;margin-top:20px;}
+.btn-print:hover{background:#b8934a;}
+/* Waiver styles */
+.waiver-body{font-size:13.5px;line-height:1.8;color:#1a1a1a;text-align:justify;}
+.waiver-body p{margin-bottom:13px;}
+.waiver-sec{font-weight:700;font-size:14px;text-transform:uppercase;text-align:center;letter-spacing:.6px;margin:20px 0 12px;}
+.waiver-sec.first{margin-top:0;}
+.wi{display:inline-block;border:none;border-bottom:1.5px solid #555;background:transparent;font-size:13.5px;font-family:'Source Sans 3',sans-serif;padding:0 4px 1px;color:#000;vertical-align:baseline;}
+.wi:focus{outline:none;border-bottom-color:var(--dark);}
+.wi.pre{color:var(--dark);font-weight:600;min-width:200px;}
+.wi.name{min-width:200px;}
+.wi.policy{min-width:140px;}
+.waiver-caps{font-weight:700;font-size:13px;line-height:1.7;text-transform:uppercase;margin-bottom:13px;}
+.waiver-footer{margin-top:26px;padding-top:20px;border-top:2px solid var(--border);}
+.sig-block{display:grid;grid-template-columns:3fr 1fr;gap:20px;align-items:end;margin-bottom:20px;}
+.sig-block-label{font-size:11.5px;color:#666;margin-top:4px;}
+.sig-line-static{border-bottom:1px solid #333;min-height:28px;}
+.ins-row{display:flex;align-items:center;gap:16px;margin-top:18px;flex-wrap:wrap;font-size:14px;}
+.ins-row label{display:flex;align-items:center;gap:5px;cursor:pointer;font-weight:500;}
+.ins-row input[type=radio]{accent-color:var(--dark);}
+.padi-ref{font-size:11px;color:#999;margin-top:20px;text-align:center;}
+@media print{
+  header,.tabs,.btn-print,.btn-next,.phys-warn{display:none!important;}
+  .panel{display:none!important;}
+  #panel-0,#panel-1,#panel-2{display:block!important;}
+  #panel-1{page-break-before:always;}
+  #panel-2{page-break-before:always;}
+  .eval-form{display:none;}
+  .eval-form.shown{display:block;page-break-before:always;border:none;}
+  .main{margin:0;padding:0;max-width:100%;}
+  .card{box-shadow:none;border:1px solid #ccc;}
+  .preread-card{display:none!important;}
+  .wi.pre{color:#000;font-weight:normal;}
+}
+@media(max-width:600px){
+  .fr{grid-template-columns:1fr;}
+  .expand{margin-left:0;}.tabs{padding:0 6px;}.tab{font-size:12px;padding:10px 8px;}.cb{padding:16px;}
+  .main{margin:12px auto;padding:0 10px 40px;}
+  canvas.sig{height:130px !important;}
+  .btn-next,.btn-print{width:100%;text-align:center;padding:15px;}.field input,.field select{font-size:16px;}
+  header{padding:16px 20px;}header h1{font-size:17px;}
+  .sig-block{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="anchor">&#9875;</div>
+  <div>
+    <h1>DUNE Madagascar &mdash; Guest Documentation</h1>
+    <p>Please complete all forms prior to your departure</p>
+  </div>
+</header>
+<div class="tabs">
+  <button class="tab active" data-tab="0">1. Diver Medical</button>
+  <button class="tab" data-tab="1">2. Liability Waiver</button>
+  <button class="tab" data-tab="2">3. Solo Diver Waiver</button>
+</div>
+<div class="main">
+
+<!-- ============================================================ -->
+<!-- PANEL 0 — DIVER MEDICAL QUESTIONNAIRE                        -->
+<!-- ============================================================ -->
+<div class="panel active" id="panel-0">
+  <div class="card preread-card">
+    <div class="ch" style="background:#3d3220;">
+      <h2 style="text-align:center;font-size:15px;text-transform:uppercase;text-decoration:underline;letter-spacing:1px;">Please Read Before Completing the Diver Medical Questionnaire</h2>
+    </div>
+    <div class="cb" style="font-size:14.5px;line-height:1.75;">
+      <p style="margin-bottom:12px;">You only need a Physician Approval if you answer <strong>yes</strong> to questions 3, 5 or 10, <strong>OR</strong> to any of the follow-up questions in Boxes A through G.</p>
+      <p style="margin-bottom:10px;">Q 3. I struggle to perform moderate exercise (i.e. walk 1.6 km/one mile or swim 200 meters/yards without resting) or I have been unable to participate in normal physical activity due to fitness or health reasons within the past 12 months.</p>
+      <p style="margin-bottom:10px;">Q 5. I have had surgery within the last 12 months, OR I have ongoing problems related to past surgery.</p>
+      <p>Q 10. I am taking prescription medications (with the exception of birth control or anti-malarial drugs other than mefloquine/Lariam).</p>
+    </div>
+  </div>
+  <div class="card">
+    <div style="padding:12px 0 20px 0;border-bottom:1px solid var(--border);">
+      <div style="margin:0 0 14px 0;padding:0 28px;">
+        <img src="https://res.cloudinary.com/dccbsfte0/image/upload/e_trim:10/v1779181097/ChatGPT_Image_May_19_2026_11_52_26_AM_xqu1s9.png" alt="DAN WRSTC RSTC UHMS" style="width:100%;display:block;">
+      </div>
+      <h2 style="font-family:'Playfair Display',serif;font-size:24px;font-weight:400;border-bottom:none;padding:0 28px;margin-bottom:14px;color:#000;"><strong>Diver Medical</strong> | Participant Questionnaire</h2>
+    </div>
+    <div class="cb">
+      <p style='font-size:13px;line-height:1.75;margin-bottom:18px;text-align:justify;'>Recreational scuba diving and freediving requires good physical and mental health. There are a few medical conditions which can be hazardous while diving, listed below. Those who have, or are predisposed to, any of these conditions, should be evaluated by a physician. This Diver Medical Participant Questionnaire provides a basis to determine if you should seek out that evaluation. If you have any concerns about your diving fitness not represented on this form, consult with your physician before diving. If you are feeling ill, avoid diving. If you think you may have a contagious disease, protect yourself and others by not participating in dive training and/or dive activities. References to &ldquo;diving&rdquo; on this form encompass both recreational scuba diving and freediving. This form is principally designed as an initial medical screen for new divers, but is also appropriate for divers taking continuing education. For your safety, and that of others who may dive with you, answer all questions honestly.</p>
+      <p style='font-size:13.5px;margin-bottom:4px;'><strong>Directions</strong></p>
+      <p style='font-size:13.5px;line-height:1.7;margin-bottom:18px;'><strong>Complete this questionnaire as a prerequisite to a recreational scuba diving or freediving course. Note to women:</strong> If you are pregnant, or attempting to become pregnant, <em>do not dive.</em></p>
+      <hr class="divider">
+      <div class="fr">
+        <div class="field"><label>Participant Name</label><input type="text" id="med-name"></div>
+        <div class="field"><label>Email Address</label><input type="email" id="med-email" placeholder="email@example.com"></div>
+      </div>
+      <div class="fr">
+        <div class="field"><label>Birthdate (dd/mm/yyyy)</label><input type="date" id="med-dob"></div>
+        <div class="field"><label>Today's Date (dd/mm/yyyy)</label><input type="date" id="med-date"></div>
+      </div>
+      <div class="fr">
+        <div class="field"><label>Facility Name</label><input type="text" value="DUNE Madagascar Liveaboard"></div>
+        <div class="field"><label>Instructor Name</label><input type="text"></div>
+      </div>
+      <hr class="divider">
+      <div class="qrow">
+        <div class="qnum">1</div>
+        <div class="qtext">I have had problems with my lungs/breathing, heart, blood, or have been diagnosed with COVID-19.</div>
+        <div class="qans">
+          <label><input type="radio" name="q1" value="yes" data-show="box-A"> Yes</label>
+          <label><input type="radio" name="q1" value="no" data-hide="box-A"> No</label>
+        </div>
+      </div>
+      <div class="expand" id="box-A">
+        <div class="blabel">Box A <span class="badge">Physician approval required if any Yes</span></div>
+        <div class="qrow"><div class="qtext">Chest surgery, heart surgery, heart valve surgery, stent placement, or a pneumothorax (collapsed lung).</div><div class="qans"><label><input type="radio" name="A1" value="yes"> Yes</label><label><input type="radio" name="A1" value="no"> No</label></div></div>
+        <div class="qrow"><div class="qtext">Asthma, wheezing, severe allergies, hay fever or congested airways within the last 12 months that limits my physical activity/exercise.</div><div class="qans"><label><input type="radio" name="A2" value="yes"> Yes</label><label><input type="radio" name="A2" value="no"> No</label></div></div>
+        <div class="qrow"><div class="qtext">A heart problem such as: angina, chest pain on exertion, heart failure, immersion pulmonary edema, heart attack or stroke, OR taking medication for any heart condition.</div><div class="qans"><label><input type="radio" name="A3" value="yes"> Yes</label><label><input type="radio" name="A3" value="no"> No</label></div></div>
+        <div class="qrow"><div class="qtext">Recurrent bronchitis and currently coughing within the past 12 months, OR diagnosed with emphysema.</div><div class="qans"><label><input type="radio" name="A4" value="yes"> Yes</label><label><input type="radio" name="A4" value="no"> No</label></div></div>
+        <div class="qrow"><div class="qtext">A diagnosis of COVID-19.</div><div class="qans"><label><input type="radio" name="A5" value="yes"> Yes</label><label><input type="radio" name="A5" value="no"> No</label></div></div>
+      </div>
+      <div class="qrow">
+        <div class="qnum">2</div>
+        <div class="qtext">I am over 45 years of age.</div>
+        <div class="qans">
+          <label><input type="radio" name="q2" value="yes" data-show="box-B"> Yes</label>
+          <label><input type="radio" name="q2" value="no" data-hide="box-B"> No</label>
+        </div>
+      </div>
+      <div class="expand" id="box-B">
+        <div class="blabel">Box B <span class="badge">Physician approval required if any Yes</span></div>
+        <div class="qrow"><div class="qtext">I currently smoke or inhale nicotine by other means.</div><div class="qans"><label><input type="radio" name="B1" value="yes"> Yes</label><label><input type="radio" name="B1" value="no"> No</label></div></div>
+        <div class="qrow"><div class="qtext">I have a high cholesterol level.</div><div class="qans"><label><input type="radio" name="B2" value="yes"> Yes</label><label><input type="radio" name="B2" value="no"> No</label></div></div>
+        <div class="qrow"><div class="qtext">I have high blood pressure.</div><div class="qans"><label><input type="radio" name="B3" value="yes"> Yes</label><label><input type="radio" name="B3" value="no"> No</label></div></div>
+        <div class="qrow"><div class="qtext">I have had a close blood relative die suddenly or of cardiac disease or stroke before the age of 50, OR have a family history of heart disease before age 50 (including abnormal heart rhythms, coronary artery disease or cardiomyopathy).</div><div class="qans"><label><input type="radio" name="B4" value="yes"> Yes</label><label><input type="radio" name="B4" value="no"> No</label></div></div>
+      </div>
+      <div class="qrow">
+        <div class="qnum">3</div>
+        <div class="qtext">I struggle to perform moderate exercise (for example, walk 1.6 kilometer/one mile in 14 minutes or swim 200 meters/yards without resting), OR I have been unable to participate in a normal physical activity due to fitness or health reasons within the past 12 months.</div>
+        <div class="qans">
+          <label><input type="radio" name="q3" value="yes" data-physician="1"> Yes *</label>
+          <label><input type="radio" name="q3" value="no"> No</label>
+        </div>
+      </div>
+      <div class="qrow">
+        <div class="qnum">4</div>
+        <div class="qtext">I have had problems with my eyes, ears, or nasal passages/sinuses.</div>
+        <div class="qans">
+          <label><input type="radio" name="q4" value="yes" data-show="box-C"> Yes</label>
+          <label><input type="radio" name="q4" value="no" data-hide="box-C"> No</label>
+        </div>
+      </div>
+      <div class="expand" id="box-C">
+        <div class="blabel">Box C <span class="badge">Physician approval required if any Yes</span></div>
+        <div class="qrow"><div class="qtext">Sinus surgery within the last 6 months.</div><div class="qans"><label><input type="radio" name="C1" value="yes"> Yes</label><label><input type="radio" name="C1" value="no"> No</label></div></div>
+        <div class="qrow"><div class="qtext">Ear disease or ear surgery, hearing loss, or problems with balance.</div><div class="qans"><label><input type="radio" name="C2" value="yes"> Yes</label><label><input type="radio" name="C2" value="no"> No</label></div></div>
+        <div class="qrow"><div class="qtext">Recurrent sinusitis within the past 12 months.</div><div class="qans"><label><input type="radio" name="C3" value="yes"> Yes</label><label><input type="radio" name="C3" value="no"> No</label></div></div>
+        <div class="qrow"><div class="qtext">Eye surgery within the past 3 months.</div><div class="qans"><label><input type="radio" name="C4" value="yes"> Yes</label><label><input type="radio" name="C4" value="no"> No</label></div></div>
+      </div>
+      <div class="qrow">
+        <div class="qnum">5</div>
+        <div class="qtext">I have had surgery within the last 12 months, OR I have ongoing problems related to past surgery.</div>
+        <div class="qans">
+          <label><input type="radio" name="q5" value="yes" data-physician="1"> Yes *</label>
+          <label><input type="radio" name="q5" value="no"> No</label>
+        </div>
+      </div>
+      <div class="qrow">
+        <div class="qnum">6</div>
+        <div class="qtext">I have lost consciousness, had migraine headaches, seizures, stroke, significant head injury, or suffer from persistent neurologic injury or disease.</div>
+        <div class="qans">
+          <label><input type="radio" name="q6" value="yes" data-show="box-D"> Yes</label>
+          <label><input type="radio" name="q6" value="no" data-hide="box-D"> No</label>
+        </div>
+      </div>
+      <div class="expand" id="box-D">
+        <div class="blabel">Box D <span class="badge">Physician approval required if any Yes</span></div>
+        <div class="qrow"><div class="qtext">Head injury with loss of consciousness within the past 5 years.</div><div class="qans"><label><input type="radio" name="D1" value="yes"> Yes</label><label><input type="radio" name="D1" value="no"> No</label></div></div>
+        <div class="qrow"><div class="qtext">Persistent neurologic injury or disease.</div><div class="qans"><label><input type="radio" name="D2" value="yes"> Yes</label><label><input type="radio" name="D2" value="no"> No</label></div></div>
+        <div class="qrow"><div class="qtext">Recurring migraine headaches within the past 12 months, or take medications to prevent them.</div><div class="qans"><label><input type="radio" name="D3" value="yes"> Yes</label><label><input type="radio" name="D3" value="no"> No</label></div></div>
+        <div class="qrow"><div class="qtext">Blackouts or fainting (full/partial loss of consciousness) within the last 5 years.</div><div class="qans"><label><input type="radio" name="D4" value="yes"> Yes</label><label><input type="radio" name="D4" value="no"> No</label></div></div>
+        <div class="qrow"><div class="qtext">Epilepsy, seizures, or convulsions, OR take medications to prevent them.</div><div class="qans"><label><input type="radio" name="D5" value="yes"> Yes</label><label><input type="radio" name="D5" value="no"> No</label></div></div>
+      </div>
+      <div class="qrow">
+        <div class="qnum">7</div>
+        <div class="qtext">I am currently undergoing treatment (or have required treatment within the last five years) for psychological problems, personality disorder, panic attacks, or an addiction to drugs or alcohol; or, I have been diagnosed with a learning disability.</div>
+        <div class="qans">
+          <label><input type="radio" name="q7" value="yes" data-show="box-E"> Yes</label>
+          <label><input type="radio" name="q7" value="no" data-hide="box-E"> No</label>
+        </div>
+      </div>
+      <div class="expand" id="box-E">
+        <div class="blabel">Box E <span class="badge">Physician approval required if any Yes</span></div>
+        <div class="qrow"><div class="qtext">Behavioral health, mental or psychological problems requiring medical/psychiatric treatment.</div><div class="qans"><label><input type="radio" name="E1" value="yes"> Yes</label><label><input type="radio" name="E1" value="no"> No</label></div></div>
+        <div class="qrow"><div class="qtext">Major depression, suicidal ideation, panic attacks, uncontrolled bipolar disorder requiring medication/psychiatric treatment.</div><div class="qans"><label><input type="radio" name="E2" value="yes"> Yes</label><label><input type="radio" name="E2" value="no"> No</label></div></div>
+        <div class="qrow"><div class="qtext">Been diagnosed with a mental health condition or a learning/developmental disorder that requires ongoing care.</div><div class="qans"><label><input type="radio" name="E3" value="yes"> Yes</label><label><input type="radio" name="E3" value="no"> No</label></div></div>
+        <div class="qrow"><div class="qtext">An addiction to drugs or alcohol requiring treatment within the last 5 years.</div><div class="qans"><label><input type="radio" name="E4" value="yes"> Yes</label><label><input type="radio" name="E4" value="no"> No</label></div></div>
+      </div>
+      <div class="qrow">
+        <div class="qnum">8</div>
+        <div class="qtext">I have had back problems, hernia, ulcers, or diabetes.</div>
+        <div class="qans">
+          <label><input type="radio" name="q8" value="yes" data-show="box-F"> Yes</label>
+          <label><input type="radio" name="q8" value="no" data-hide="box-F"> No</label>
+        </div>
+      </div>
+      <div class="expand" id="box-F">
+        <div class="blabel">Box F <span class="badge">Physician approval required if any Yes</span></div>
+        <div class="qrow"><div class="qtext">Recurrent back problems in the last 6 months that limit my everyday activity.</div><div class="qans"><label><input type="radio" name="F1" value="yes"> Yes</label><label><input type="radio" name="F1" value="no"> No</label></div></div>
+        <div class="qrow"><div class="qtext">Back or spinal surgery within the last 12 months.</div><div class="qans"><label><input type="radio" name="F2" value="yes"> Yes</label><label><input type="radio" name="F2" value="no"> No</label></div></div>
+        <div class="qrow"><div class="qtext">Diabetes, drug- or diet-controlled, OR gestational diabetes within the last 12 months.</div><div class="qans"><label><input type="radio" name="F3" value="yes"> Yes</label><label><input type="radio" name="F3" value="no"> No</label></div></div>
+        <div class="qrow"><div class="qtext">An uncorrected hernia that limits my physical abilities.</div><div class="qans"><label><input type="radio" name="F4" value="yes"> Yes</label><label><input type="radio" name="F4" value="no"> No</label></div></div>
+        <div class="qrow"><div class="qtext">Active or untreated ulcers, problem wounds, or ulcer surgery within the last 6 months.</div><div class="qans"><label><input type="radio" name="F5" value="yes"> Yes</label><label><input type="radio" name="F5" value="no"> No</label></div></div>
+      </div>
+      <div class="qrow">
+        <div class="qnum">9</div>
+        <div class="qtext">I have had stomach or intestine problems, including recent diarrhea.</div>
+        <div class="qans">
+          <label><input type="radio" name="q9" value="yes" data-show="box-G"> Yes</label>
+          <label><input type="radio" name="q9" value="no" data-hide="box-G"> No</label>
+        </div>
+      </div>
+      <div class="expand" id="box-G">
+        <div class="blabel">Box G <span class="badge">Physician approval required if any Yes</span></div>
+        <div class="qrow"><div class="qtext">Ostomy surgery and do not have medical clearance to swim or engage in physical activity.</div><div class="qans"><label><input type="radio" name="G1" value="yes"> Yes</label><label><input type="radio" name="G1" value="no"> No</label></div></div>
+        <div class="qrow"><div class="qtext">Dehydration requiring medical intervention within the last 7 days.</div><div class="qans"><label><input type="radio" name="G2" value="yes"> Yes</label><label><input type="radio" name="G2" value="no"> No</label></div></div>
+        <div class="qrow"><div class="qtext">Active or untreated stomach or intestinal ulcers or ulcer surgery within the last 6 months.</div><div class="qans"><label><input type="radio" name="G3" value="yes"> Yes</label><label><input type="radio" name="G3" value="no"> No</label></div></div>
+        <div class="qrow"><div class="qtext">Frequent heartburn, regurgitation, or gastroesophageal reflux disease (GERD).</div><div class="qans"><label><input type="radio" name="G4" value="yes"> Yes</label><label><input type="radio" name="G4" value="no"> No</label></div></div>
+        <div class="qrow"><div class="qtext">Active or uncontrolled ulcerative colitis or Crohn's disease.</div><div class="qans"><label><input type="radio" name="G5" value="yes"> Yes</label><label><input type="radio" name="G5" value="no"> No</label></div></div>
+        <div class="qrow"><div class="qtext">Bariatric surgery within the last 12 months.</div><div class="qans"><label><input type="radio" name="G6" value="yes"> Yes</label><label><input type="radio" name="G6" value="no"> No</label></div></div>
+      </div>
+      <div class="qrow">
+        <div class="qnum">10</div>
+        <div class="qtext">I am taking prescription medications (with the exception of birth control or anti-malarial drugs other than mefloquine/Lariam).</div>
+        <div class="qans">
+          <label><input type="radio" name="q10" value="yes" data-physician="1"> Yes *</label>
+          <label><input type="radio" name="q10" value="no"> No</label>
+        </div>
+      </div>
+      <hr class="divider">
+      <p class="sec-title">Participant Signature</p>
+      <div class="notice" style="margin-bottom:18px;"><strong>Participant Statement:</strong> I have answered all questions honestly, and understand that I accept responsibility for any consequences resulting from any questions I may have answered inaccurately or for my failure to disclose any existing or past health conditions.</div>
+      <div class="sig-area">
+        <label style='font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:9px;'>Participant Signature (or, if a minor, parent/guardian signature required)</label>
+        <div class="sig-wrap"><canvas class="sig" id="sig-med" width="800" height="110"></canvas><span class="sig-ph" id="sig-med-ph">Sign here with mouse or finger</span></div>
+        <div class="sig-acts"><button class="btn-clr" data-canvas="sig-med" data-ph="sig-med-ph">Clear</button></div>
+      </div>
+      <div class="fr" style="margin-top:14px;">
+        <div class="field"><label>Date (dd/mm/yyyy)</label><input type="date" id="med-sig-date"></div>
+        <div class="field"></div>
+      </div>
+      <div id="phys-warn" class="phys-warn">
+        <h3>&#9888; Physician Approval Required</h3>
+        <p>Based on your answers, a Physician's Evaluation must be completed by your doctor before diving. The evaluation form is included when you print.</p>
+      </div>
+      <button class="btn-next" data-next="1">Next &rarr;</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- PANEL 1 — PADI RELEASE OF LIABILITY / DIVER ACTIVITIES 10086 -->
+<!-- ============================================================ -->
+<div class="panel" id="panel-1">
+  <div class="card">
+    <div class="ch">
+      <h2>Release of Liability / Assumption of Risk / Non-agency Acknowledgment</h2>
+      <p>PADI Form No. 10086 (Rev. 02/21) &mdash; Diver Activities &mdash; Please read carefully before signing</p>
+    </div>
+    <div class="cb">
+      <div class="waiver-body">
+        <div class="waiver-sec first">Non-Agency Disclosure and Acknowledgment Agreement</div>
+        <p>I understand and agree that PADI Members (&ldquo;Members&rdquo;), including <input type="text" id="w1-op-1" class="wi pre" value="DUNE Madagascar" readonly>, and/or any individual PADI Instructors and Divemasters associated with the program in which I am participating, are licensed to use various PADI Trademarks and to conduct PADI training, but are not agents, employees or franchisees of PADI Americas, Inc., or its parent, subsidiary and affiliated corporations (&ldquo;PADI&rdquo;). I further understand that Member business activities are independent, and are neither owned nor operated by PADI, and that while PADI establishes the standards for PADI diver training programs, it is not responsible for, nor does it have the right to control, the operation of the Members&rsquo; business activities and the day-to-day conduct of PADI programs and supervision of divers by the Members or their associated staff. I further understand and agree on behalf of myself, my heirs and my estate that in the event of an injury or death during this activity, neither I nor my estate shall seek to hold PADI liable for the actions, inactions or negligence of the entities listed above and/or the instructors and divemasters associated with the activity.</p>
+
+        <div class="waiver-sec">Liability Release and Assumption of Risk Agreement</div>
+        <p>I, <input type="text" id="w1-diver-1" class="wi name">, hereby affirm that I am a certified scuba diver trained in safe dive practices, or a student diver under the control and supervision of a certified scuba instructor. I know that skin diving, freediving and scuba diving have inherent risks including those risks associated with boat travel to and from the dive site (hereinafter &ldquo;Excursion&rdquo;), which may result in serious injury or death. I understand that scuba diving with compressed air involves certain inherent risks; including but not limited to decompression sickness, embolism or other hyperbaric/air expansion injury that require treatment in a recompression chamber. If I am scuba diving with oxygen enriched air (&ldquo;Enriched Air&rdquo;) or other gas blends including oxygen, I also understand that it involves inherent risks of oxygen toxicity and/or improper mixtures of breathing gas. I acknowledge this Excursion includes risks of slipping or falling while on board the boat, being cut or struck by a boat while in the water, injuries occurring while getting on or off a boat, and other perils of the sea. I further understand that the Excursion will be conducted at a site that is remote, either by time or distance or both, from a recompression chamber. I still choose to proceed with the Excursion in spite of the absence of a recompression chamber in proximity to the dive site(s).</p>
+        <p>I understand and agree that neither <input type="text" id="w1-op-2" class="wi pre" value="DUNE Madagascar" readonly>; nor the dive professional(s) who may be present at the dive site, nor PADI Americas, Inc., nor any of their affiliate and subsidiary corporations, nor any of their respective employees, officers, agents, contractors and assigns (hereinafter &ldquo;Released Parties&rdquo;) may be held liable or responsible in any way for any injury, death or other damages to me, my family, estate, heirs or assigns that may occur during the Excursion as a result of my participation in the Excursion or as a result of the negligence of any party, including the Released Parties, whether passive or active.</p>
+        <p>I affirm I am in good mental and physical fitness for the Excursion. I further state that I will not participate in the Excursion if I am under the influence of alcohol or any drugs that are contraindicated to diving. If I am taking medication, I affirm that I have seen a physician and have approval to dive while under the influence of the medication/drugs. I understand that diving is a physically strenuous activity and that I will be exerting myself during the Excursion and that if I am injured as a result of heart attack, panic, hyperventilation, drowning or any other cause, that I expressly assume the risk of said injuries and that I will not hold the Released Parties responsible for the same.</p>
+        <p>I am aware that safe dive practices suggest diving with a buddy unless trained as a self-reliant diver. I am aware it is my responsibility to plan my dive allowing for my diving experience and limitations, and the prevailing water conditions and environment. I will not hold the Released Parties responsible for my failure to safely plan my dive, dive my plan, and follow the instructions and dive briefing of the dive professional(s).</p>
+        <p>If diving from a boat, I will be present at and attentive to the briefing given by the boat crew. If there is anything I do not understand I will notify the boat crew or captain immediately. I acknowledge it is my responsibility to plan my dives as no-decompression dives, and within parameters that allow me to make a safety stop before ascending to the surface, arriving on board the vessel with gas remaining in my cylinder as a measure of safety. If I become distressed on the surface I will immediately drop my weights and inflate my BCD (orally or with low pressure inflator) to establish buoyancy on the surface.</p>
+        <p>I am aware safe dive practices recommend a refresher or guided orientation dive following a period of diving inactivity. I understand such refresher/guided dive is available for an additional fee. If I choose not to follow this recommendation I will not hold the Released Parties responsible for my decision.</p>
+        <p>I acknowledge Released Parties may provide an in-water guide (hereinafter &ldquo;Guide&rdquo;) during the Excursion. The Guide is present to assist in navigation during the dive and identifying local flora and fauna. If I choose to dive with the Guide I acknowledge it is my responsibility to stay in proximity to the Guide during the dive. I assume all risks associated with my choice whether to dive in proximity to the Guide or to dive independent of the Guide. I acknowledge my participation in diving is at my own risk and peril.</p>
+        <p>I affirm it is my responsibility to inspect all of the equipment I will be using prior to the leaving the dock for the Excursion and that I should not dive if the equipment is not functioning properly. I will not hold the Released Parties responsible for my failure to inspect the equipment prior to diving or if I choose to dive with equipment that may not be functioning properly.</p>
+        <p>I acknowledge Released Parties have made no representation to me, implied or otherwise, that they or their crew can or will perform affective rescues or render first aid. In the event I show signs of distress or call for aid I would like assistance and will not hold the Released Parties, their crew, dive boats or passengers responsible for their actions in attempting the performance of rescue or first aid.</p>
+        <p>I hereby state and agree that this Agreement will be effective for all Excursions in which I participate for one (1) year from the date on which I sign this Agreement.</p>
+        <p>I further state that I am of lawful age and legally competent to sign this liability release, or that I have acquired the written consent of my parent or guardian. I understand the terms herein are contractual and not a mere recital, and that I have signed this Agreement of my own free act and with the knowledge that I hereby agree to waive my legal rights. I further agree that if any provision of this Agreement is found to be unenforceable or invalid, that provision shall be severed from this Agreement. The remainder of this Agreement will then be construed as though the unenforceable provision had never been contained herein. I understand and agree that I am not only giving up my right to sue the Released Parties but also any rights my heirs, assigns, or beneficiaries may have to sue the Released Parties resulting from my death. I further represent that I have the authority to do so and that my heirs, assigns, and beneficiaries will be estopped from claiming otherwise because of my representations to the Released Parties.</p>
+        <p class="waiver-caps">I, <input type="text" id="w1-diver-2" class="wi name">, by this instrument, agree to exempt and release the Released Parties defined above from all liability or responsibility whatsoever for personal injury, property damage or wrongful death however caused, including but not limited to the negligence of the Released Parties, whether passive or active.</p>
+        <p class="waiver-caps">I have fully informed myself and my heirs of the contents of this Non-Agency Disclosure and Acknowledgment Agreement, and Liability Release and Assumption of Risk Agreement by reading both before signing below on behalf of myself and my heirs.</p>
+      </div>
+
+      <div class="waiver-footer">
+        <p class="sec-title">Participant Signature</p>
+        <div class="sig-area">
+          <label style='font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:9px;'>Participant Signature</label>
+          <div class="sig-wrap"><canvas class="sig" id="sig-w1" width="800" height="110"></canvas><span class="sig-ph" id="sig-w1-ph">Sign here with mouse or finger</span></div>
+          <div class="sig-acts"><button class="btn-clr" data-canvas="sig-w1" data-ph="sig-w1-ph">Clear</button></div>
+        </div>
+        <div class="fr" style="margin-top:14px;">
+          <div class="field"><label>Date (Day/Month/Year)</label><input type="date" id="w1-sig-date"></div>
+          <div class="field"></div>
+        </div>
+        <hr class="divider">
+        <p style="font-size:13px;color:var(--muted);margin-bottom:10px;font-style:italic;">Signature of Parent or Guardian (where applicable)</p>
+        <div class="sig-block">
+          <div><div class="sig-line-static"></div><div class="sig-block-label">Parent / Guardian Signature</div></div>
+          <div><div class="sig-line-static"></div><div class="sig-block-label">Date (Day/Month/Year)</div></div>
+        </div>
+        <div class="ins-row">
+          <strong>Diver Accident Insurance?</strong>
+          <label><input type="radio" name="ins-10086" value="no"> NO</label>
+          <label><input type="radio" name="ins-10086" value="yes"> YES</label>
+          <span style="display:flex;align-items:center;gap:8px;margin-left:8px;">Policy Number <input type="text" id="w1-policy" class="wi policy" placeholder="______________________"></span>
+        </div>
+        <p class="padi-ref">PRODUCT NO. 10086 (Rev. 02/21) Version 3.0 &nbsp;&mdash;&nbsp; &copy; PADI 2021</p>
+      </div>
+      <button class="btn-next" data-next="2">Next &rarr;</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- PANEL 2 — PADI CERTIFIED SELF-RELIANT DIVER WAIVER 10155     -->
+<!-- ============================================================ -->
+<div class="panel" id="panel-2">
+  <div class="card">
+    <div class="ch">
+      <h2>Release of Liability / Assumption of Risk / Non-agency Acknowledgement</h2>
+      <p>PADI Form No. 10155 (Rev. 12/12) &mdash; Certified Self-Reliant Diver &mdash; Please read carefully before signing</p>
+    </div>
+    <div class="cb">
+      <div class="notice">This form applies to certified Self-Reliant (solo) Divers who will be diving without a buddy.</div>
+      <div class="waiver-body">
+        <div class="waiver-sec first">Non-Agency Disclosure and Acknowledgment Agreement</div>
+        <p>I understand and agree that PADI Members (&ldquo;Members&rdquo;), including <input type="text" id="w2-op-1" class="wi pre" value="DUNE Madagascar" readonly> and/or any individual PADI Instructors and Divemasters associated with the program in which I am participating, are licensed to use various PADI Trademarks and to conduct PADI training, but are not agents, employees or franchisees of PADI Americas, Inc, or its parent, subsidiary and affiliated corporations (&ldquo;PADI&rdquo;). I further understand that Member business activities are independent, and are neither owned nor operated by PADI, and that while PADI establishes the standards for PADI diver training programs, it is not responsible for, nor does it have the right to control, the operation of the Members&rsquo; business activities and the day-to-day conduct of PADI programs and supervision of divers by the Members or their associated staff. I further understand and agree on behalf of myself, my heirs and my estate that in the event of an injury or death during this activity, neither I nor my estate shall seek to hold PADI liable for the actions, inactions or negligence of <input type="text" id="w2-op-2" class="wi pre" value="DUNE Madagascar" readonly> and/or the instructors and divemasters associated with the activity.</p>
+
+        <div class="waiver-sec">Liability Release and Assumption of Risk Agreement</div>
+        <p style="font-weight:600;font-size:14px;">This is a release of your rights to sue.</p>
+        <p>I acknowledge that I am a certified Self-Reliant (solo) Diver trained in safe dive practices and know that scuba diving has inherent risks which may result in serious injury or death. I further acknowledge that choosing to dive without a buddy has additional inherent risks and hazards, including but not limited to, the absence of a buddy to assist me should I experience any problem while diving and the likelihood that others will not be able to affect a timely assist or rescue.</p>
+        <p>I understand and agree that neither the facility, <input type="text" id="w2-op-3" class="wi pre" value="DUNE Madagascar" readonly>, nor the dive professional(s) associated with this activity, nor PADI Americas, Inc., nor its affiliate and subsidiary corporations, nor any of their respective employees, officers, agents, contractors and assigns (hereinafter &ldquo;Released Parties&rdquo;), may be held responsible in any way for any injury, death or other damages to me, my family, estate, heirs or assigns that may occur as a result of my participation in diving activities, or as a result of the negligence of the Released Parties, whether passive or active.</p>
+        <p>I understand that diving with compressed air involves certain inherent risks including but not limited to decompression sickness, embolism or other hyperbaric/air expansion injury that require treatment in a recompression chamber. I further understand that the scuba diving activities may be conducted at a site that is remote, either by time or distance or both, from such a recompression chamber. I still choose to proceed with these activities in spite of the absence of a recompression chamber in proximity to the dive site(s). I further understand that by choosing to dive alone, I will not have a buddy to assist me should any of these or other issues occur.</p>
+        <p>I affirm I am in good mental and physical fitness for diving and I am not under the influence of alcohol, nor am I under the influence of any drugs that are contraindicated to diving. If I am taking medication, I declare that I have seen a physician and have approval to dive while under the influence of the medication/drugs.</p>
+        <p>I understand that scuba diving is a physically strenuous activity and that I will be exerting myself during this activity and that if I am injured as a result of heart attack, panic, hyperventilation, etc. that I assume the risk of said injuries and that I will not hold the Released Parties responsible for the same.</p>
+        <p>I acknowledge that I will be diving without a buddy and it will be my responsibility to plan my dive allowing for my diving limitations and the prevailing water conditions and environment. I will not hold the Released Parties responsible for my failure to safely plan my dive.</p>
+        <p>I will inspect all of my equipment prior to the activity and will notify the Released Parties if any of my equipment is not working properly. I will not hold the Released Parties responsible for my failure to inspect my equipment prior to diving.</p>
+        <p>I further state that I am of lawful age and legally competent to sign this liability release, or that I have acquired the written consent of my parent or guardian. I understand the terms herein are contractual and not a mere recital, and that I have signed this Agreement of my own free act and with the knowledge that I hereby agree to waive my legal rights. I further agree that if any provision of this Agreement is found to be unenforceable or invalid, that provision shall be severed from this Agreement. The remainder of this Agreement will then be construed as though the unenforceable provision had never been contained herein.</p>
+        <p>I understand and agree that I am not only giving up my right to sue the Released Parties but also any rights my heirs, assigns, or beneficiaries may have to sue the Released Parties resulting from my death. I further represent I have the authority to do so and that my heirs, assigns, or beneficiaries will be estopped from claiming otherwise because of my representations to the Released Parties.</p>
+        <p class="waiver-caps">I, <input type="text" id="w2-diver-1" class="wi name">, by this instrument agree to exempt and release all related entities as defined above from all liability or responsibility whatsoever for personal injury, property damage or wrongful death however caused, including but not limited to the negligence of the Released Parties, whether passive or active.</p>
+        <p class="waiver-caps">I have also fully informed myself and my heirs of the contents of this Non-Agency Disclosure and Acknowledgement Agreement and Liability Release and Assumption of Risk Agreement by reading both before signing below on behalf of myself and my heirs.</p>
+      </div>
+
+      <div class="waiver-footer">
+        <p class="sec-title">Diver Signature</p>
+        <div class="sig-area">
+          <label style='font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:9px;'>Diver Signature</label>
+          <div class="sig-wrap"><canvas class="sig" id="sig-w2" width="800" height="110"></canvas><span class="sig-ph" id="sig-w2-ph">Sign here with mouse or finger</span></div>
+          <div class="sig-acts"><button class="btn-clr" data-canvas="sig-w2" data-ph="sig-w2-ph">Clear</button></div>
+        </div>
+        <div class="fr" style="margin-top:14px;">
+          <div class="field"><label>Date (Day/Month/Year)</label><input type="date" id="w2-sig-date"></div>
+          <div class="field"></div>
+        </div>
+        <hr class="divider">
+        <p style="font-size:13px;color:var(--muted);margin-bottom:10px;font-style:italic;">Signature of Parent or Guardian (where applicable)</p>
+        <div class="sig-block">
+          <div><div class="sig-line-static"></div><div class="sig-block-label">Parent / Guardian Signature</div></div>
+          <div><div class="sig-line-static"></div><div class="sig-block-label">Date (Day/Month/Year)</div></div>
+        </div>
+        <p class="padi-ref">PRODUCT NO. 10155 (Rev. 12/12) Version 1.01 &nbsp;&mdash;&nbsp; &copy; PADI 2012</p>
+      </div>
+      <button class="btn-print">&#128438; Print / Save PDF</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- PHYSICIAN EVAL FORM — prints only if triggered               -->
+<!-- ============================================================ -->
+<div id="eval-form" class="eval-form">
+  <p style='text-align:center;color:#999;font-size:12px;margin-bottom:14px;'>Physician Evaluation Form</p>
+  <h2><strong>Diver Medical</strong> | Physician's Evaluation Form</h2>
+  <div style='display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:8px;'>
+    <div><div style='font-weight:700;font-size:13px;margin-bottom:18px;'>Participant Name</div><div class='eval-line'></div><div class='eval-lbl'>(Print)</div></div>
+    <div><div style='font-weight:700;font-size:13px;margin-bottom:18px;'>Birthdate</div><div class='eval-line'></div><div class='eval-lbl'>Date (dd/mm/yyyy)</div></div>
+  </div>
+  <p style='font-size:13.5px;line-height:1.7;margin:18px 0;'>The above-named person requests your opinion of his/her medical suitability to participate in recreational scuba diving or freediving training or activity. Please visit <u>uhms.org</u> for medical guidance on medical conditions as they relate to diving.</p>
+  <h3 style='font-size:17px;margin:18px 0 12px;'>Evaluation Result</h3>
+  <div style='display:flex;align-items:flex-start;gap:11px;margin-bottom:12px;'><input type='checkbox'><label style='font-size:13.5px;'>Approved - I find no conditions that I consider incompatible with recreational scuba diving or freediving.</label></div>
+  <div style='display:flex;align-items:flex-start;gap:11px;margin-bottom:26px;'><input type='checkbox'><label style='font-size:13.5px;'>Not approved - I find conditions that I consider incompatible with recreational scuba diving or freediving.</label></div>
+  <div style='display:grid;grid-template-columns:2fr 1fr;gap:24px;margin-bottom:18px;'><div><div class='eval-line'></div><div class='eval-lbl'>Physician's Signature</div></div><div><div class='eval-line'></div><div class='eval-lbl'>Date (dd/mm/yyyy)</div></div></div>
+  <div class='eval-flbl'>Physician's Name</div><div class='eval-line'></div><div class='eval-lbl'>(Print)</div>
+  <div class='eval-flbl'>Specialty</div><div class='eval-line'></div>
+  <div class='eval-flbl'>Clinic / Hospital</div><div class='eval-line'></div>
+  <div class='eval-flbl'>Address</div><div class='eval-line'></div><div style='min-height:8px;'></div>
+  <div style='display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:14px;'><div><div class='eval-flbl'>Phone</div><div class='eval-line'></div></div><div><div class='eval-flbl'>Email</div><div class='eval-line'></div></div></div>
+  <div style='border:1px solid #999;padding:8px;text-align:center;font-size:12px;color:#777;margin-top:18px;'>Physician/Clinic Stamp (optional)</div>
+</div>
+
+</div><!-- .main -->
+<script>
+// ── Tab navigation ──────────────────────────────────────────────
+var tabs = document.querySelectorAll(".tab");
+tabs.forEach(function(btn) {
+  btn.addEventListener("click", function() {
+    var idx = parseInt(this.getAttribute("data-tab"));
+    document.querySelectorAll(".panel").forEach(function(p,i){ p.classList[i===idx?"add":"remove"]("active"); });
+    tabs.forEach(function(b,i){ b.classList[i===idx?"add":"remove"]("active"); });
+  });
+});
+
+// ── Next buttons ──────────────────────────────────────────────────
+document.querySelectorAll(".btn-next").forEach(function(btn) {
+  btn.addEventListener("click", function() {
+    var fromIdx = parseInt(this.getAttribute("data-next")) - 1;
+    var panel = document.getElementById("panel-" + fromIdx);
+    var errors = validatePanel(panel, fromIdx);
+    if(errors.length > 0) { showErrors(errors, panel); return; }
+    clearErrors(panel);
+    var idx = parseInt(this.getAttribute("data-next"));
+    document.querySelectorAll(".panel").forEach(function(p,i){ p.classList[i===idx?"add":"remove"]("active"); });
+    tabs.forEach(function(b,i){ b.classList[i===idx?"add":"remove"]("active"); });
+    window.scrollTo(0,0);
+  });
+});
+
+// ── Radio expand/hide + physician check ──────────────────────────
+document.querySelectorAll("input[type=radio]").forEach(function(r) {
+  r.addEventListener("click", function() {
+    var show = this.getAttribute("data-show");
+    var hide = this.getAttribute("data-hide");
+    if(show) { var el = document.getElementById(show); if(el) el.classList.add("shown"); }
+    if(hide) {
+      var el2 = document.getElementById(hide);
+      if(el2) {
+        el2.classList.remove("shown");
+        el2.querySelectorAll("input[type=radio]").forEach(function(cr){ cr.checked = false; });
+      }
+    }
+    checkPhysician();
+  });
+});
+function checkPhysician() {
+  var need = false;
+  if(document.querySelector("input[name=q3][value=yes]").checked) need = true;
+  if(document.querySelector("input[name=q5][value=yes]").checked) need = true;
+  if(document.querySelector("input[name=q10][value=yes]").checked) need = true;
+  document.querySelectorAll(".expand input[type=radio][value=yes]").forEach(function(r){ if(r.checked) need = true; });
+  var warn = document.getElementById("phys-warn");
+  var ef   = document.getElementById("eval-form");
+  if(warn) warn.classList[need?"add":"remove"]("shown");
+  if(ef)   ef.classList[need?"add":"remove"]("shown");
+}
+
+// ── Clear signature buttons ───────────────────────────────────────
+document.querySelectorAll(".btn-clr").forEach(function(btn) {
+  btn.addEventListener("click", function() {
+    var c = document.getElementById(this.getAttribute("data-canvas"));
+    var p = document.getElementById(this.getAttribute("data-ph"));
+    if(c) c.getContext("2d").clearRect(0,0,c.width,c.height);
+    if(p) p.style.display="";
+  });
+});
+
+// ── Print button ──────────────────────────────────────────────────
+document.querySelectorAll(".btn-print").forEach(function(btn) {
+  btn.addEventListener("click", function() {
+    var panel = document.getElementById("panel-2");
+    var errors = validatePanel(panel, 2);
+    if(errors.length > 0) { showErrors(errors, panel); return; }
+    clearErrors(panel);
+    window.print();
+  });
+});
+
+// ── Error display ─────────────────────────────────────────────────
+function showErrors(errors, panel) {
+  clearErrors(panel);
+  var box = document.createElement("div");
+  box.className = "val-errors";
+  box.style.cssText = "background:#fff0f0;border:2px solid #c0392b;border-radius:8px;padding:14px 18px;margin-bottom:16px;font-size:13.5px;color:#c0392b;";
+  box.innerHTML = "<strong>Please complete the following before continuing:</strong><ul style='margin-top:8px;padding-left:18px;'>" + errors.map(function(e){ return "<li style='margin-bottom:4px;'>"+e+"</li>"; }).join("") + "</ul>";
+  panel.insertBefore(box, panel.firstChild);
+  panel.scrollIntoView({behavior:"smooth", block:"start"});
+}
+function clearErrors(panel) {
+  var existing = panel.querySelector(".val-errors");
+  if(existing) existing.remove();
+}
+
+// ── Signature blank check (alpha channel) ────────────────────────
+function sigBlank(cid) {
+  var c = document.getElementById(cid);
+  if(!c) return true;
+  return !c.getContext("2d").getImageData(0,0,c.width,c.height).data.some(function(v,i){ return i%4===3 && v>0; });
+}
+
+// ── Validation ────────────────────────────────────────────────────
+function validatePanel(panel, idx) {
+  var errors = [];
+  if(idx === 0) {
+    var name = document.getElementById("med-name");
+    if(!name || !name.value.trim()) errors.push("Participant name is required");
+    var email = document.getElementById("med-email");
+    if(!email || !email.value.trim()) errors.push("Email address is required");
+    var dob = document.getElementById("med-dob");
+    if(!dob || !dob.value) errors.push("Birthdate is required");
+    ["q1","q2","q3","q4","q5","q6","q7","q8","q9","q10"].forEach(function(q) {
+      if(!document.querySelector("input[name="+q+"]:checked")) errors.push("Question "+q.replace("q","")+" must be answered");
+    });
+    panel.querySelectorAll(".expand.shown").forEach(function(box) {
+      if(box.id === "box-B" && !document.querySelector("input[name=q2][value=yes]").checked) return;
+      var names = {};
+      box.querySelectorAll("input[type=radio]").forEach(function(r){ names[r.name]=true; });
+      var unanswered = [];
+      Object.keys(names).forEach(function(n){ if(!document.querySelector("input[name="+n+"]:checked")) unanswered.push(n); });
+      if(unanswered.length > 0) {
+        var bl = box.querySelector(".blabel"); var label = bl ? bl.textContent.split("Physician")[0].trim() : "follow-up";
+        errors.push("All questions in " + label + " must be answered");
+      }
+    });
+    if(sigBlank("sig-med")) errors.push("Participant signature is required");
+  } else if(idx === 1) {
+    if(sigBlank("sig-w1")) errors.push("Signature is required on the Liability Waiver");
+  } else if(idx === 2) {
+    if(sigBlank("sig-w2")) errors.push("Signature is required on the Self-Reliant Diver Waiver");
+  }
+  return errors;
+}
+
+// ── Signature pad (all 3 bug fixes applied) ───────────────────────
+function initSig(cid, pid) {
+  var cnv = document.getElementById(cid), ph = document.getElementById(pid);
+  if(!cnv) return;
+  var ctx = cnv.getContext("2d"), drawing = false, lx = 0, ly = 0;
+  // Fix 1: only resize canvas if dimensions actually changed (prevents clearing ink)
+  function sizeCanvas() {
+    var r = cnv.getBoundingClientRect();
+    if(r.width === 0) return;
+    var w = Math.round(r.width), h = Math.round(r.height);
+    if(cnv.width === w && cnv.height === h) return;
+    cnv.width = w; cnv.height = h;
+  }
+  document.querySelectorAll(".tab,.btn-next").forEach(function(b){
+    b.addEventListener("click", function(){ setTimeout(sizeCanvas, 100); });
+  });
+  setTimeout(sizeCanvas, 50);
+  // Fix 2: getPos does not call sizeCanvas (was causing dot-only drawing)
+  function getPos(e) {
+    var r = cnv.getBoundingClientRect();
+    var scaleX = cnv.width / r.width, scaleY = cnv.height / r.height;
+    var src = (e.touches && e.touches.length) ? e.touches[0] : e;
+    return {x:(src.clientX - r.left) * scaleX, y:(src.clientY - r.top) * scaleY};
+  }
+  function draw(lx,ly,x,y){ ctx.beginPath();ctx.moveTo(lx,ly);ctx.lineTo(x,y);ctx.strokeStyle="#000";ctx.lineWidth=2.5;ctx.lineCap="round";ctx.stroke(); }
+  cnv.addEventListener("pointerdown", function(e){ cnv.setPointerCapture(e.pointerId); drawing=true; var p=getPos(e); lx=p.x; ly=p.y; if(ph) ph.style.display="none"; });
+  cnv.addEventListener("pointermove", function(e){ if(!drawing) return; var p=getPos(e); draw(lx,ly,p.x,p.y); lx=p.x; ly=p.y; });
+  cnv.addEventListener("pointerup",     function(){ drawing=false; });
+  cnv.addEventListener("pointercancel", function(){ drawing=false; });
+}
+initSig("sig-med", "sig-med-ph");
+initSig("sig-w1",  "sig-w1-ph");
+initSig("sig-w2",  "sig-w2-ph");
+
+// ── Sync name from medical form to waiver name fields ────────────
+function syncToWaivers() {
+  var name = (document.getElementById("med-name") || {}).value || "";
+  ["w1-diver-1","w1-diver-2","w2-diver-1"].forEach(function(id){
+    var el = document.getElementById(id); if(el) el.value = name;
+  });
+}
+document.getElementById("med-name").addEventListener("input", syncToWaivers);
+
+// ── Set today's date on all date fields ──────────────────────────
+var today = new Date().toISOString().split("T")[0];
+["med-date","med-sig-date","w1-sig-date","w2-sig-date"].forEach(function(id){
+  var el = document.getElementById(id); if(el) el.value = today;
+});
+</script>
+</body>
+</html>
