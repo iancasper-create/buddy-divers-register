@@ -158,8 +158,8 @@ canvas.sig{display:block;width:100%;height:110px;cursor:crosshair;touch-action:n
         <div class="field"><label>Today's Date (dd/mm/yyyy)</label><input type="date" id="med-date"></div>
       </div>
       <div class="fr">
-        <div class="field"><label>Facility Name</label><input type="text" value="DUNE Madagascar Liveaboard"></div>
-        <div class="field"><label>Instructor Name</label><input type="text"></div>
+        <div class="field"><label>Facility Name</label><input type="text" value="DUNE Madagascar"></div>
+        <div class="field"><label>Instructor Name <span style="font-size:11px;font-style:italic;font-weight:400;text-transform:none;letter-spacing:0;">(completed by dive centre)</span></label><div style="border-bottom:1.5px solid var(--border);min-height:34px;"></div></div>
       </div>
       <hr class="divider">
       <div class="qrow">
@@ -364,11 +364,12 @@ canvas.sig{display:block;width:100%;height:110px;cursor:crosshair;touch-action:n
           <div><div class="sig-line-static"></div><div class="sig-block-label">Parent / Guardian Signature</div></div>
           <div><div class="sig-line-static"></div><div class="sig-block-label">Date (Day/Month/Year)</div></div>
         </div>
-        <div class="ins-row">
-          <strong>Diver Accident Insurance?</strong>
-          <label><input type="radio" name="ins-10086" value="no"> NO</label>
-          <label><input type="radio" name="ins-10086" value="yes"> YES</label>
-          <span style="display:flex;align-items:center;gap:8px;margin-left:8px;">Policy Number <input type="text" id="w1-policy" class="wi policy" placeholder="______________________"></span>
+        <div class="field" style="margin-top:20px;">
+          <label>Diver Accident Insurance? <span style="color:#cc0000;">*</span></label>
+          <div style="display:flex;gap:28px;padding:10px 14px;border:1.5px solid var(--border);border-radius:6px;background:#fafcfe;">
+            <label style="display:flex;align-items:center;gap:7px;font-size:14px;font-weight:500;cursor:pointer;text-transform:none;letter-spacing:0;color:var(--text);"><input type="radio" name="ins-10086" value="no" style="accent-color:var(--dark);"> NO</label>
+            <label style="display:flex;align-items:center;gap:7px;font-size:14px;font-weight:500;cursor:pointer;text-transform:none;letter-spacing:0;color:var(--text);"><input type="radio" name="ins-10086" value="yes" style="accent-color:var(--dark);"> YES</label>
+          </div>
         </div>
         <p class="padi-ref">PRODUCT NO. 10086 (Rev. 02/21) Version 3.0 &nbsp;&mdash;&nbsp; &copy; PADI 2021</p>
       </div>
@@ -579,6 +580,7 @@ function validatePanel(panel, idx) {
     if(sigBlank("sig-med")) errors.push("Participant signature is required");
   } else if(idx === 1) {
     if(sigBlank("sig-w1")) errors.push("Signature is required on the Liability Waiver");
+    if(!document.querySelector("input[name=ins-10086]:checked")) errors.push("Please indicate whether you have diver accident insurance");
   } else if(idx === 2) {
     if(sigBlank("sig-w2")) errors.push("Signature is required on the Self-Reliant Diver Waiver");
   }
