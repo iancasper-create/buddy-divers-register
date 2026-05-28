@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-FOLLOWUP 2026-05-28b | ILS fix complete - getActiveCurrencySymbol() also fixed (Financial Summary totals)
+<!-- BD-FOLLOWUP 2026-05-28c | ILS exchange rate defaults to 1.0000 for ILS trips (applyMarkup + pfSyncRates)
      BD-FOLLOWUP 2026-05-13a | Auto-log to Payment Requests table on WhatsApp send (both main and pro forma flows) -->
 <html lang="en" dir="ltr">
 <head>
@@ -1463,6 +1463,11 @@ function applyMarkup() {
   const booking = idx !== '' ? currentBookings[idx] : null;
   const currency = (booking && booking.currency) || 'USD';
   const currSym = currency === 'EUR' ? '€' : currency === 'ILS' ? '₪' : '$';
+  if (currency === 'ILS') {
+    document.getElementById('exchangeRate').value = '1.0000';
+    updateNisPreview();
+    return;
+  }
   const rate = (currency === 'EUR' && _eurBaseRate) ? _eurBaseRate : _boiBaseRate;
 
   document.getElementById('exchangeRate').value = rate.toFixed(4);
@@ -1995,6 +2000,11 @@ function pfSetCurrency(cur) {
 }
 
 function pfSyncRates() {
+  if (_pfCurrency === 'ILS') {
+    document.getElementById('pfExchangeRate').value = '1.0000';
+    pfUpdateNisPreview();
+    return;
+  }
   const rate = (_pfCurrency === 'EUR' && _eurBaseRate) ? _eurBaseRate : _boiBaseRate;
   const yatzig = (_pfCurrency === 'EUR' && _eurYatzig) ? _eurYatzig : null;
   const rateDisplayEl = document.getElementById('pfBoiRateDisplay');
