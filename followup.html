@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-FOLLOWUP 2026-05-28d | ILS: currency-wrap symbols fixed; payment image hides duplicate amount + rate remark for ILS
+<!-- BD-FOLLOWUP 2026-05-28e | Fix broken JS (escaped backticks) - rate remark now uses string concatenation
      BD-FOLLOWUP 2026-05-13a | Auto-log to Payment Requests table on WhatsApp send (both main and pro forma flows) -->
 <html lang="en" dir="ltr">
 <head>
@@ -1652,7 +1652,7 @@ function buildPaymentHTML(booking, amount, nisAmount, rate, notes, paidSoFar, sa
           <div style="font-size:16px;opacity:0.75;margin-bottom:6px;">סכום לתשלום כעת</div>
           <div style="font-size:32px;font-weight:700;line-height:1;">₪${nisAmount.toLocaleString('he-IL')}</div>
           ${currencySymbol !== '₪' ? `<div style="font-size:18px;opacity:0.75;margin-top:8px;">${currencySymbol}${amount.toLocaleString('en-US')}</div>` : ''}
-          ${currencySymbol !== '₪' ? `<div style="font-size:15px;opacity:0.65;margin-top:10px;">${(() => { const d = new Date(); const dd = String(d.getDate()).padStart(2,'0'); const mm = String(d.getMonth()+1).padStart(2,'0'); const yyyy = d.getFullYear(); return \`שער העברות של בנק לאומי: \${rate.toFixed(4)} · \${dd}-\${mm}-\${yyyy}\`; })()}</div>` : ''}
+          ${currencySymbol !== '₪' ? '<div style="font-size:15px;opacity:0.65;margin-top:10px;">' + (() => { const d = new Date(); const dd = String(d.getDate()).padStart(2,'0'); const mm = String(d.getMonth()+1).padStart(2,'0'); const yyyy = d.getFullYear(); return 'שער העברות של בנק לאומי: ' + rate.toFixed(4) + ' · ' + dd + '-' + mm + '-' + yyyy; })() + '</div>' : ''}
         </div>
         <div style="flex:1;background:linear-gradient(135deg,#007289,#1B4F8A);border-radius:16px;padding:24px 28px;color:white;text-align:right;">
           <div style="font-size:16px;opacity:0.75;margin-bottom:6px;">יתרה לתשלום עד 90 יום לפני היציאה לספארי</div>
