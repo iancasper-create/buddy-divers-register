@@ -530,7 +530,11 @@ document.querySelectorAll(".btn-print").forEach(function(btn) {
     var errors = validatePanel(panel, 2);
     if(errors.length > 0) { showErrors(errors, panel); return; }
     clearErrors(panel);
+    var driverName = (document.getElementById("med-name") || {}).value || "";
+    var originalTitle = document.title;
+    document.title = "Dune Madagascar" + (driverName ? " - " + driverName : "");
     window.print();
+    document.title = originalTitle;
   });
 });
 
