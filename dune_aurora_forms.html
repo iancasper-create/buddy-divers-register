@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DUNE Aurora - Guest Forms</title>
-<!-- BD-DUNE-AURORA 2026-05-29b -->
+<!-- BD-DUNE-AURORA 2026-05-29c -->
 <link rel="icon" type="image/jpeg" href="https://res.cloudinary.com/dccbsfte0/image/upload/v1774016253/logo2_swvqfe.jpg" />
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Source+Sans+3:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -97,8 +97,6 @@ canvas.sig{display:block;width:100%;height:110px;cursor:crosshair;touch-action:n
   header{padding:16px 20px;}header h1{font-size:17px;}
 }
 </style>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
 <header>
@@ -624,27 +622,30 @@ var today = new Date().toISOString().split("T")[0];
 
 // ── Email PDF (Aurora) ────────────────────────────────────────────
 var MAKE_WEBHOOK_URL = "https://hook.eu1.make.com/ugucimbs6p6tbac9sjmrr4as1l6pconu";
+var FORM_NAME = "DUNE Aurora";
+var EMAIL_PANEL_INDEX = 1;
 
 async function sendPDFByEmail() {
-  var panel = document.getElementById("panel-1");
-  var errors = validatePanel(panel, 1);
+  var panel = document.getElementById("panel-" + EMAIL_PANEL_INDEX);
+  var errors = validatePanel(panel, EMAIL_PANEL_INDEX);
   if (errors.length > 0) { showErrors(errors, panel); return; }
   clearErrors(panel);
-  var guestName  = (document.getElementById("med-name")  || {}).value || "Guest";
-  var guestEmail = (document.getElementById("med-email") || {}).value || "";
-  if (!guestEmail) { setEmailStatus("Please enter your email address in the Diver Medical form first.", "error"); return; }
+  var guestName  = ((document.getElementById("med-name")  || {}).value || "Guest").trim();
+  var guestEmail = ((document.getElementById("med-email") || {}).value || "").trim();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(guestEmail)) {
+    setEmailStatus("Please enter a valid email address in the Diver Medical form first.", "error");
+    return;
+  }
   var btn = document.getElementById("btn-email-pdf");
   btn.disabled = true;
   try {
-    setEmailStatus("Step 1 of 3 — Generating PDF&hellip;", "progress");
-    var pdf = await buildPDF();
-    setEmailStatus("Step 2 of 3 — Uploading&hellip;", "progress");
-    var pdfUrl = await uploadPDFToCloudinary(pdf, guestName);
-    setEmailStatus("Step 3 of 3 — Sending email&hellip;", "progress");
-    await triggerMakeWebhook(guestName, guestEmail, pdfUrl);
-    setEmailStatus("&#10003; Email sent to " + guestEmail, "success");
-  } catch(err) {
-    setEmailStatus("&#10007; " + (err.message || "Something went wrong. Please use Print and email the PDF manually."), "error");
+    setEmailStatus("Preparing your forms&hellip;", "progress");
+    var formHtml = buildSnapshotHTML();
+    setEmailStatus("Sending&hellip;", "progress");
+    await sendToMake(guestName, guestEmail, formHtml);
+    setEmailStatus("&#10003; Submitted. A copy will be emailed to " + guestEmail + " shortly.", "success");
+  } catch (err) {
+    setEmailStatus("&#10007; " + (err.message || "Something went wrong. Please use Print / Save PDF and email it to info@buddy-divers.com."), "error");
     console.error(err);
   }
   btn.disabled = false;
@@ -660,130 +661,92 @@ function setEmailStatus(msg, type) {
   el.style.border     = "1.5px solid "+(type==="success"?"#81c784":type==="error"?"#e57373":"#9db4e8");
 }
 
-async function buildPDF() {
-  if (!window.jspdf)       throw new Error("jsPDF not loaded \u2014 please refresh.");
-  if (!window.html2canvas) throw new Error("html2canvas not loaded \u2014 please refresh.");
-  var jsPDF = window.jspdf.jsPDF;
-  var pdf = new jsPDF("p","mm","a4");
-  var a4W = 210, a4H = 297;
+// Build a self-contained, desktop-width copy of the completed form.
+// The phone does NOT render the PDF -- iOS Safari cannot lay the form out wider
+// than the phone screen, which broke every on-device attempt. Instead we
+// serialise the filled-in form to standalone HTML and let the renderer reproduce
+// it at full width, identical to the form. Field values, dropdown choices, radio
+// selections and hand-drawn signatures are all baked into the markup.
+function buildSnapshotHTML() {
+  function bakeClone(orig) {
+    var clone = orig.cloneNode(true);
+    var oF = orig.querySelectorAll("input,select,textarea");
+    var cF = clone.querySelectorAll("input,select,textarea");
+    for (var i = 0; i < oF.length; i++) {
+      var o = oF[i], c = cF[i]; if (!c) continue;
+      var tag = o.tagName.toLowerCase();
+      if (tag === "select") {
+        for (var s = 0; s < c.options.length; s++) {
+          if (s === o.selectedIndex) c.options[s].setAttribute("selected", "selected");
+          else c.options[s].removeAttribute("selected");
+        }
+      } else if (o.type === "radio" || o.type === "checkbox") {
+        if (o.checked) c.setAttribute("checked", "checked"); else c.removeAttribute("checked");
+      } else if (tag === "textarea") {
+        c.textContent = o.value;
+      } else {
+        c.setAttribute("value", o.value == null ? "" : o.value);
+      }
+    }
+    var oC = orig.querySelectorAll("canvas");
+    var cC = clone.querySelectorAll("canvas");
+    for (var k = 0; k < oC.length; k++) {
+      var oc = oC[k], cc = cC[k]; if (!cc) continue;
+      try {
+        var img = document.createElement("img");
+        img.src = oc.toDataURL("image/png");
+        img.setAttribute("style", "display:block;width:auto;max-width:100%;height:auto;border-radius:6px;");
+        if (cc.parentNode) cc.parentNode.replaceChild(img, cc);
+      } catch (e) {}
+    }
+    clone.style.display = "block";
+    return clone;
+  }
 
-  // --- iPhone-safe Email PDF ---
-  // At the iPhone's ~390px width the form's responsive CSS collapses every
-  // two-column row to one, and html2canvas captures whatever width it renders
-  // at. The previous attempt anchored the desktop width to a PARENT wrapper,
-  // but html2canvas re-renders the captured node and drops the parent's width,
-  // so it stayed narrow. Fix: the fixed pixel width AND the column overrides now
-  // live ON / UNDER the element actually handed to html2canvas (the .pdfcap
-  // wrapper), so they survive its internal re-render even when iOS pins that
-  // render to the phone width. Real nodes are moved (not cloned) so all typed
-  // values, dropdown choices and signatures are preserved.
-  var CAP_W = 880;
+  var head = '<meta charset="UTF-8"><meta name="viewport" content="width=900">';
+  document.querySelectorAll('link[rel="stylesheet"]').forEach(function(l){ head += l.outerHTML; });
+
+  var css = "";
+  document.querySelectorAll("style").forEach(function(s){ css += s.textContent + "\n"; });
+  css +=
+    "\n/* snapshot overrides: force the clean full-width multi-column document */\n" +
+    "body{background:#ffffff!important;}" +
+    ".main{max-width:100%!important;margin:0!important;padding:24px 30px 30px!important;}" +
+    ".panel{display:block!important;}" +
+    ".fr{grid-template-columns:1fr 1fr!important;}" +
+    ".fr3{grid-template-columns:1fr 1fr 1fr!important;}" +
+    ".fr4{grid-template-columns:1fr 1fr 1fr 1fr!important;}" +
+    ".sig-block{grid-template-columns:3fr 1fr!important;}" +
+    ".expand{margin-left:36px!important;}" +
+    "header,.tabs,.btn-next,.btn-print,.btn-email,.email-section,.preread-card,.val-errors,.phys-warn{display:none!important;}" +
+    ".card{box-shadow:none!important;border:1px solid #d8d8d8!important;}" +
+    ".snap-break{page-break-before:always;}";
 
   var targets = [];
   document.querySelectorAll(".main > .panel").forEach(function(p){ targets.push(p); });
   var evalForm = document.getElementById("eval-form");
   if (evalForm && evalForm.classList.contains("shown")) targets.push(evalForm);
 
-  var host = document.createElement("div");
-  host.id = "pdf-host";
-  host.style.cssText = "position:absolute;left:-10000px;top:0;width:" + CAP_W + "px;background:#ffffff;";
-  var style = document.createElement("style");
-  style.id = "pdf-host-style";
-  style.textContent =
-    ".pdfcap{width:" + CAP_W + "px!important;background:#ffffff;padding:0 20px;}" +
-    ".pdfcap .panel{display:block!important;}" +
-    ".pdfcap .fr{grid-template-columns:1fr 1fr!important;}" +
-    ".pdfcap .fr3{grid-template-columns:1fr 1fr 1fr!important;}" +
-    ".pdfcap .fr4{grid-template-columns:1fr 1fr 1fr 1fr!important;}" +
-    ".pdfcap .sig-block{grid-template-columns:3fr 1fr!important;}" +
-    ".pdfcap .expand{margin-left:36px!important;}" +
-    ".pdfcap .cb{padding:26px 28px!important;}" +
-    ".pdfcap canvas.sig{width:auto!important;height:auto!important;max-width:100%!important;}";
-  document.head.appendChild(style);
-  document.body.appendChild(host);
-
-  var ignore = function(n){
-    return !!(n.classList && (
-      n.classList.contains("preread-card") ||
-      n.classList.contains("btn-next")     ||
-      n.classList.contains("btn-print")    ||
-      n.classList.contains("btn-email")    ||
-      n.classList.contains("email-section")||
-      n.classList.contains("val-errors")));
-  };
-
-  var moved = [];
-  function restore() {
-    moved.forEach(function(r){
-      r.el.style.display = r.display;
-      if (r.marker.parentNode) r.marker.parentNode.replaceChild(r.el, r.marker);
-    });
-    moved = [];
-    if (host.parentNode)  host.parentNode.removeChild(host);
-    if (style.parentNode) style.parentNode.removeChild(style);
+  var body = '<div class="main">';
+  for (var t = 0; t < targets.length; t++) {
+    var clone = bakeClone(targets[t]);
+    if (t > 0) clone.className = (clone.className + " snap-break").replace(/^\s+/, "");
+    body += clone.outerHTML;
   }
+  body += '</div>';
 
-  try {
-    if (document.fonts && document.fonts.ready) { try { await document.fonts.ready; } catch(e){} }
-    var firstPage = true;
-    for (var t = 0; t < targets.length; t++) {
-      var el = targets[t];
-      var wrap = document.createElement("div");
-      wrap.className = "pdfcap";
-      var marker = document.createComment("pdf-slot");
-      el.parentNode.insertBefore(marker, el);
-      moved.push({ el: el, marker: marker, display: el.style.display });
-      wrap.appendChild(el);
-      el.style.display = "block";
-      host.appendChild(wrap);
-      await new Promise(function(r){ requestAnimationFrame(function(){ requestAnimationFrame(r); }); });
-      await new Promise(function(r){ setTimeout(r, 150); });
-      var c = await html2canvas(wrap, {
-        scale: 2, useCORS: true, allowTaint: false, logging: false,
-        backgroundColor: "#ffffff", width: CAP_W, windowWidth: CAP_W,
-        ignoreElements: ignore
-      });
-      var imgData = c.toDataURL("image/jpeg", 0.92);
-      var imgH = (c.height * a4W) / c.width;
-      if (!firstPage) pdf.addPage();
-      firstPage = false;
-      pdf.addImage(imgData,"JPEG",0,0,a4W,imgH);
-      var remaining = imgH - a4H, offsetY = -a4H;
-      while (remaining > 0) {
-        pdf.addPage();
-        pdf.addImage(imgData,"JPEG",0,offsetY,a4W,imgH);
-        offsetY -= a4H; remaining -= a4H;
-      }
-    }
-  } finally {
-    restore();
-  }
-  return pdf;
+  return '<!DOCTYPE html><html lang="en"><head>' + head + '<style>' + css + '</style></head><body>' + body + '</body></html>';
 }
 
-async function uploadPDFToCloudinary(pdf, guestName) {
-  var safe = guestName.replace(/[^a-zA-Z0-9]/g,"_") || "Guest";
-  var fname = "DUNE_Aurora_" + safe + "_" + Date.now();
-  var blob = pdf.output("blob");
-  var fd = new FormData();
-  fd.append("file", blob, fname + ".pdf");
-  fd.append("upload_preset", "buddy_divers_uploads");
-  fd.append("public_id", "guest_forms/aurora/" + fname);
-  var res = await fetch("https://api.cloudinary.com/v1_1/dccbsfte0/raw/upload", {method:"POST",body:fd});
-  var resData = await res.json().catch(function(){ return {}; });
-  if (!res.ok || resData.error) throw new Error("Cloudinary upload failed: " + ((resData.error||{}).message || res.status));
-  if (!resData.secure_url) throw new Error("Cloudinary returned no URL. Response: " + JSON.stringify(resData).substring(0,200));
-  return resData.secure_url;
-}
-
-async function triggerMakeWebhook(name, email, pdfUrl) {
+async function sendToMake(name, email, formHtml) {
   var res = await fetch(MAKE_WEBHOOK_URL, {
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body: JSON.stringify({name:name, email:email, pdf_url:pdfUrl, form:"DUNE Aurora"})
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name: name, email: email, form: FORM_NAME, form_html: formHtml })
   });
-  if (!res.ok) throw new Error("Webhook failed (" + res.status + "). PDF saved at: " + pdfUrl);
+  if (!res.ok) throw new Error("Could not submit (" + res.status + "). Please use Print / Save PDF instead.");
 }
+
 </script>
 </body>
 </html>
