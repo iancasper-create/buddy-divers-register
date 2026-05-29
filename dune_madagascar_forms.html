@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DUNE Madagascar - Guest Forms</title>
-<!-- BD-DUNE-MADAGASCAR 2026-05-29e -->
+<!-- BD-DUNE-MADAGASCAR 2026-05-29f -->
 <link rel="icon" type="image/jpeg" href="https://res.cloudinary.com/dccbsfte0/image/upload/v1774016253/logo2_swvqfe.jpg" />
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Source+Sans+3:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -109,6 +109,11 @@ canvas.sig{display:block;width:100%;height:110px;cursor:crosshair;touch-action:n
   .btn-next,.btn-print{width:100%;text-align:center;padding:15px;}.field input,.field select{font-size:16px;}
   header{padding:16px 20px;}header h1{font-size:17px;}
   .sig-block{grid-template-columns:1fr;}
+  /* mobile only: question text full-width on top, Yes/No as a tappable row underneath */
+  .qrow{flex-wrap:wrap;gap:8px;}
+  .qrow .qans{flex-basis:100%;width:100%;min-width:0;margin-top:2px;gap:12px;}
+  .qrow .qans label{flex:1;min-width:0;justify-content:center;border:1.5px solid var(--border);border-radius:8px;padding:11px 0;background:#fafcfe;font-size:15px;font-weight:600;}
+  .qrow .qans label:first-child{min-width:0;}
 }
 </style>
 </head>
