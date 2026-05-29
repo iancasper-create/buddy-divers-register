@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DUNE Madagascar - Guest Forms</title>
-<!-- BD-DUNE-MADAGASCAR 2026-05-28b -->
+<!-- BD-DUNE-MADAGASCAR 2026-05-29a -->
 <link rel="icon" type="image/jpeg" href="https://res.cloudinary.com/dccbsfte0/image/upload/v1774016253/logo2_swvqfe.jpg" />
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Source+Sans+3:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -110,298 +110,8 @@ canvas.sig{display:block;width:100%;height:110px;cursor:crosshair;touch-action:n
   .sig-block{grid-template-columns:1fr;}
 }
 </style>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js">
-// ── Email PDF ─────────────────────────────────────────────────────
-// Make.com webhook URL — replace with your scenario webhook URL
-var MAKE_WEBHOOK_URL = "https://hook.eu1.make.com/ugucimbs6p6tbac9sjmrr4as1l6pconu";
-
-async function sendPDFByEmail() {
-  var panel = document.getElementById("panel-2");
-  var errors = validatePanel(panel, 2);
-  if (errors.length > 0) { showErrors(errors, panel); return; }
-  clearErrors(panel);
-  var guestName  = (document.getElementById("med-name")  || {}).value || "Guest";
-  var guestEmail = (document.getElementById("med-email") || {}).value || "";
-  if (!guestEmail) { setEmailStatus("Please enter your email address in the Diver Medical form first.", "error"); return; }
-  var btn = document.getElementById("btn-email-pdf");
-  btn.disabled = true;
-  try {
-    setEmailStatus("Step 1 of 3 — Generating PDF&hellip;", "progress");
-    var pdf = await buildPDF();
-    setEmailStatus("Step 2 of 3 — Uploading&hellip;", "progress");
-    var pdfUrl = await uploadPDFToCloudinary(pdf, guestName);
-    setEmailStatus("Step 3 of 3 — Sending email&hellip;", "progress");
-    await triggerMakeWebhook(guestName, guestEmail, pdfUrl);
-    setEmailStatus("&#10003; Email sent to " + guestEmail, "success");
-  } catch(err) {
-    setEmailStatus("&#10007; " + (err.message || "Something went wrong. Please use Print and email the PDF manually."), "error");
-    console.error(err);
-  }
-  btn.disabled = false;
-}
-
-function setEmailStatus(msg, type) {
-  var el = document.getElementById("email-status");
-  if (!el) return;
-  el.innerHTML = msg;
-  el.style.display = "block";
-  el.style.background = type==="success"?"#e8f5e9":type==="error"?"#fff0f0":"#f0f4ff";
-  el.style.color      = type==="success"?"#2a6430":type==="error"?"#c0392b":"#2c4070";
-  el.style.border     = "1.5px solid "+(type==="success"?"#81c784":type==="error"?"#e57373":"#9db4e8");
-}
-
-async function buildPDF() {
-  if (!window.jspdf)       throw new Error("jsPDF not loaded — please refresh.");
-  if (!window.html2canvas) throw new Error("html2canvas not loaded — please refresh.");
-  var jsPDF = window.jspdf.jsPDF;
-  var pdf = new jsPDF("p","mm","a4");
-  var a4W = 210, a4H = 297;
-  var panelIds = ["panel-0","panel-1","panel-2"];
-  var evalForm = document.getElementById("eval-form");
-  // Show all panels so html2canvas can render them
-  // Inject desktop override CSS — !important beats mobile media query styles
-  // This forces the browser to reflow in desktop multi-column layout before capture
-  var captureStyle = document.createElement("style");
-  captureStyle.id = "pdf-capture-overrides";
-  captureStyle.textContent =
-    ".fr{grid-template-columns:1fr 1fr!important;}" +
-    ".fr3{grid-template-columns:1fr 1fr 1fr!important;}" +
-    ".fr4{grid-template-columns:1fr 1fr 1fr 1fr!important;}" +
-    ".expand{margin-left:36px!important;}" +
-    ".cb{padding:26px 28px!important;}" +
-    ".main{padding:0 20px 60px!important;}" +
-    "canvas.sig{height:110px!important;}" +
-    ".field input,.field select,.field textarea{font-size:14px!important;}" +
-    ".btn-next,.btn-print,.btn-email{width:auto!important;display:inline-block!important;padding:13px 34px!important;}" +
-    "header{padding:22px 40px!important;}" +
-    "header h1{font-size:21px!important;}" +
-    ".tabs{padding:0 40px!important;}" +
-    ".tab{font-size:13.5px!important;padding:12px 20px!important;}";
-  document.head.appendChild(captureStyle);
-  panelIds.forEach(function(id){ document.getElementById(id).style.display="block"; });
-  // Wait for browser to fully reflow with new styles
-  await new Promise(function(r){ setTimeout(r, 600); });
-  var firstPage = true;
-  for (var i = 0; i < panelIds.length; i++) {
-    var el = document.getElementById(panelIds[i]);
-    var c = await html2canvas(el, {
-      scale: 2, useCORS: true, allowTaint: false, logging: false, windowWidth: 900,
-      ignoreElements: function(n){
-        return n.classList.contains("preread-card") ||
-               n.classList.contains("btn-next")     ||
-               n.classList.contains("btn-print")    ||
-               n.classList.contains("btn-email")    ||
-               n.classList.contains("email-section")||
-               n.classList.contains("val-errors");
-      }
-    });
-    var imgData = c.toDataURL("image/jpeg", 0.92);
-    var imgH = (c.height * a4W) / c.width;
-    if (!firstPage) pdf.addPage();
-    firstPage = false;
-    // Handle panels taller than one A4 page
-    pdf.addImage(imgData,"JPEG",0,0,a4W,imgH);
-    var remaining = imgH - a4H, offsetY = -a4H;
-    while (remaining > 0) {
-      pdf.addPage();
-      pdf.addImage(imgData,"JPEG",0,offsetY,a4W,imgH);
-      offsetY -= a4H; remaining -= a4H;
-    }
-  }
-  // Include physician eval form if triggered
-  if (evalForm && evalForm.classList.contains("shown")) {
-    evalForm.style.display = "block";
-    await new Promise(function(r){ setTimeout(r,100); });
-    var ec = await html2canvas(evalForm, {scale:2, useCORS:true, logging:false, windowWidth:900});
-    var eImg = ec.toDataURL("image/jpeg",0.92);
-    var eH = (ec.height * a4W) / ec.width;
-    pdf.addPage();
-    pdf.addImage(eImg,"JPEG",0,0,a4W,eH);
-    evalForm.style.display = "";
-  }
-  // Restore — remove inline override so CSS classes take over again
-  panelIds.forEach(function(id){ document.getElementById(id).style.display=""; });
-  // Remove capture override styles
-  var overrideEl = document.getElementById("pdf-capture-overrides");
-  if(overrideEl) overrideEl.remove();
-  return pdf;
-}
-
-async function uploadPDFToCloudinary(pdf, guestName) {
-  var safe = guestName.replace(/[^a-zA-Z0-9]/g,"_") || "Guest";
-  var fname = "DUNE_Madagascar_" + safe + "_" + Date.now();
-  var blob = pdf.output("blob");
-  var fd = new FormData();
-  fd.append("file", blob, fname + ".pdf");
-  fd.append("upload_preset", "buddy_divers_uploads");
-  fd.append("public_id", "guest_forms/madagascar/" + fname);
-  var res = await fetch("https://api.cloudinary.com/v1_1/dccbsfte0/raw/upload", {method:"POST",body:fd});
-  var resData = await res.json().catch(function(){ return {}; });
-  if (!res.ok || resData.error) {
-    throw new Error("Cloudinary upload failed: " + ((resData.error||{}).message || res.status));
-  }
-  if (!resData.secure_url) {
-    throw new Error("Cloudinary returned no URL. Response: " + JSON.stringify(resData).substring(0,200));
-  }
-  return resData.secure_url;
-}
-
-async function triggerMakeWebhook(name, email, pdfUrl) {
-  if (MAKE_WEBHOOK_URL === "PASTE_MAKE_WEBHOOK_URL_HERE") throw new Error("Webhook URL not configured — please contact Buddy-Divers.");
-  var res = await fetch(MAKE_WEBHOOK_URL, {
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body: JSON.stringify({name:name, email:email, pdf_url:pdfUrl, form:"DUNE Madagascar"})
-  });
-  if (!res.ok) throw new Error("Webhook failed (" + res.status + "). PDF saved at: " + pdfUrl);
-}
-</script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js">
-// ── Email PDF ─────────────────────────────────────────────────────
-// Make.com webhook URL — replace with your scenario webhook URL
-var MAKE_WEBHOOK_URL = "https://hook.eu1.make.com/ugucimbs6p6tbac9sjmrr4as1l6pconu";
-
-async function sendPDFByEmail() {
-  var panel = document.getElementById("panel-2");
-  var errors = validatePanel(panel, 2);
-  if (errors.length > 0) { showErrors(errors, panel); return; }
-  clearErrors(panel);
-  var guestName  = (document.getElementById("med-name")  || {}).value || "Guest";
-  var guestEmail = (document.getElementById("med-email") || {}).value || "";
-  if (!guestEmail) { setEmailStatus("Please enter your email address in the Diver Medical form first.", "error"); return; }
-  var btn = document.getElementById("btn-email-pdf");
-  btn.disabled = true;
-  try {
-    setEmailStatus("Step 1 of 3 — Generating PDF&hellip;", "progress");
-    var pdf = await buildPDF();
-    setEmailStatus("Step 2 of 3 — Uploading&hellip;", "progress");
-    var pdfUrl = await uploadPDFToCloudinary(pdf, guestName);
-    setEmailStatus("Step 3 of 3 — Sending email&hellip;", "progress");
-    await triggerMakeWebhook(guestName, guestEmail, pdfUrl);
-    setEmailStatus("&#10003; Email sent to " + guestEmail, "success");
-  } catch(err) {
-    setEmailStatus("&#10007; " + (err.message || "Something went wrong. Please use Print and email the PDF manually."), "error");
-    console.error(err);
-  }
-  btn.disabled = false;
-}
-
-function setEmailStatus(msg, type) {
-  var el = document.getElementById("email-status");
-  if (!el) return;
-  el.innerHTML = msg;
-  el.style.display = "block";
-  el.style.background = type==="success"?"#e8f5e9":type==="error"?"#fff0f0":"#f0f4ff";
-  el.style.color      = type==="success"?"#2a6430":type==="error"?"#c0392b":"#2c4070";
-  el.style.border     = "1.5px solid "+(type==="success"?"#81c784":type==="error"?"#e57373":"#9db4e8");
-}
-
-async function buildPDF() {
-  if (!window.jspdf)       throw new Error("jsPDF not loaded — please refresh.");
-  if (!window.html2canvas) throw new Error("html2canvas not loaded — please refresh.");
-  var jsPDF = window.jspdf.jsPDF;
-  var pdf = new jsPDF("p","mm","a4");
-  var a4W = 210, a4H = 297;
-  var panelIds = ["panel-0","panel-1","panel-2"];
-  var evalForm = document.getElementById("eval-form");
-  // Show all panels so html2canvas can render them
-  // Inject desktop override CSS — !important beats mobile media query styles
-  // This forces the browser to reflow in desktop multi-column layout before capture
-  var captureStyle = document.createElement("style");
-  captureStyle.id = "pdf-capture-overrides";
-  captureStyle.textContent =
-    ".fr{grid-template-columns:1fr 1fr!important;}" +
-    ".fr3{grid-template-columns:1fr 1fr 1fr!important;}" +
-    ".fr4{grid-template-columns:1fr 1fr 1fr 1fr!important;}" +
-    ".expand{margin-left:36px!important;}" +
-    ".cb{padding:26px 28px!important;}" +
-    ".main{padding:0 20px 60px!important;}" +
-    "canvas.sig{height:110px!important;}" +
-    ".field input,.field select,.field textarea{font-size:14px!important;}" +
-    ".btn-next,.btn-print,.btn-email{width:auto!important;display:inline-block!important;padding:13px 34px!important;}" +
-    "header{padding:22px 40px!important;}" +
-    "header h1{font-size:21px!important;}" +
-    ".tabs{padding:0 40px!important;}" +
-    ".tab{font-size:13.5px!important;padding:12px 20px!important;}";
-  document.head.appendChild(captureStyle);
-  panelIds.forEach(function(id){ document.getElementById(id).style.display="block"; });
-  // Wait for browser to fully reflow with new styles
-  await new Promise(function(r){ setTimeout(r, 600); });
-  var firstPage = true;
-  for (var i = 0; i < panelIds.length; i++) {
-    var el = document.getElementById(panelIds[i]);
-    var c = await html2canvas(el, {
-      scale: 2, useCORS: true, allowTaint: false, logging: false, windowWidth: 900,
-      ignoreElements: function(n){
-        return n.classList.contains("preread-card") ||
-               n.classList.contains("btn-next")     ||
-               n.classList.contains("btn-print")    ||
-               n.classList.contains("btn-email")    ||
-               n.classList.contains("email-section")||
-               n.classList.contains("val-errors");
-      }
-    });
-    var imgData = c.toDataURL("image/jpeg", 0.92);
-    var imgH = (c.height * a4W) / c.width;
-    if (!firstPage) pdf.addPage();
-    firstPage = false;
-    // Handle panels taller than one A4 page
-    pdf.addImage(imgData,"JPEG",0,0,a4W,imgH);
-    var remaining = imgH - a4H, offsetY = -a4H;
-    while (remaining > 0) {
-      pdf.addPage();
-      pdf.addImage(imgData,"JPEG",0,offsetY,a4W,imgH);
-      offsetY -= a4H; remaining -= a4H;
-    }
-  }
-  // Include physician eval form if triggered
-  if (evalForm && evalForm.classList.contains("shown")) {
-    evalForm.style.display = "block";
-    await new Promise(function(r){ setTimeout(r,100); });
-    var ec = await html2canvas(evalForm, {scale:2, useCORS:true, logging:false, windowWidth:900});
-    var eImg = ec.toDataURL("image/jpeg",0.92);
-    var eH = (ec.height * a4W) / ec.width;
-    pdf.addPage();
-    pdf.addImage(eImg,"JPEG",0,0,a4W,eH);
-    evalForm.style.display = "";
-  }
-  // Restore — remove inline override so CSS classes take over again
-  panelIds.forEach(function(id){ document.getElementById(id).style.display=""; });
-  // Remove capture override styles
-  var overrideEl = document.getElementById("pdf-capture-overrides");
-  if(overrideEl) overrideEl.remove();
-  return pdf;
-}
-
-async function uploadPDFToCloudinary(pdf, guestName) {
-  var safe = guestName.replace(/[^a-zA-Z0-9]/g,"_") || "Guest";
-  var fname = "DUNE_Madagascar_" + safe + "_" + Date.now();
-  var blob = pdf.output("blob");
-  var fd = new FormData();
-  fd.append("file", blob, fname + ".pdf");
-  fd.append("upload_preset", "buddy_divers_uploads");
-  fd.append("public_id", "guest_forms/madagascar/" + fname);
-  var res = await fetch("https://api.cloudinary.com/v1_1/dccbsfte0/raw/upload", {method:"POST",body:fd});
-  var resData = await res.json().catch(function(){ return {}; });
-  if (!res.ok || resData.error) {
-    throw new Error("Cloudinary upload failed: " + ((resData.error||{}).message || res.status));
-  }
-  if (!resData.secure_url) {
-    throw new Error("Cloudinary returned no URL. Response: " + JSON.stringify(resData).substring(0,200));
-  }
-  return resData.secure_url;
-}
-
-async function triggerMakeWebhook(name, email, pdfUrl) {
-  if (MAKE_WEBHOOK_URL === "PASTE_MAKE_WEBHOOK_URL_HERE") throw new Error("Webhook URL not configured — please contact Buddy-Divers.");
-  var res = await fetch(MAKE_WEBHOOK_URL, {
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body: JSON.stringify({name:name, email:email, pdf_url:pdfUrl, form:"DUNE Madagascar"})
-  });
-  if (!res.ok) throw new Error("Webhook failed (" + res.status + "). PDF saved at: " + pdfUrl);
-}
-</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
 <header>
@@ -992,79 +702,106 @@ function setEmailStatus(msg, type) {
 }
 
 async function buildPDF() {
-  if (!window.jspdf)       throw new Error("jsPDF not loaded — please refresh.");
-  if (!window.html2canvas) throw new Error("html2canvas not loaded — please refresh.");
+  if (!window.jspdf)       throw new Error("jsPDF not loaded \u2014 please refresh.");
+  if (!window.html2canvas) throw new Error("html2canvas not loaded \u2014 please refresh.");
   var jsPDF = window.jspdf.jsPDF;
   var pdf = new jsPDF("p","mm","a4");
   var a4W = 210, a4H = 297;
-  var panelIds = ["panel-0","panel-1","panel-2"];
+
+  // --- iPhone-safe capture (works on iPhone Safari) ---
+  // iOS Safari locks the layout viewport to the device width (~390px) and
+  // ignores viewport-meta / html2canvas windowWidth changes, so the old code
+  // always captured the squeezed mobile layout. This fix does NOT touch the
+  // viewport: it physically relocates each REAL form section into an off-screen
+  // container with a FIXED 900px width. Because that width is an absolute pixel
+  // value (not %/vw) and the mobile @media rules are beaten by id-scoped
+  // !important overrides, each section lays out at desktop width regardless of
+  // what width iOS hands html2canvas internally. Real nodes are moved (not
+  // cloned), so every typed value, dropdown choice and signature is preserved.
+  var STAGE_W = 900;
+
+  // Collect capture targets (real nodes) in document order, before the stage exists.
+  var targets = [];
+  document.querySelectorAll(".main > .panel").forEach(function(p){ targets.push(p); });
   var evalForm = document.getElementById("eval-form");
-  // Show all panels so html2canvas can render them
-  // Inject desktop override CSS — !important beats mobile media query styles
-  // This forces the browser to reflow in desktop multi-column layout before capture
-  var captureStyle = document.createElement("style");
-  captureStyle.id = "pdf-capture-overrides";
-  captureStyle.textContent =
-    ".fr{grid-template-columns:1fr 1fr!important;}" +
-    ".fr3{grid-template-columns:1fr 1fr 1fr!important;}" +
-    ".fr4{grid-template-columns:1fr 1fr 1fr 1fr!important;}" +
-    ".expand{margin-left:36px!important;}" +
-    ".cb{padding:26px 28px!important;}" +
-    ".main{padding:0 20px 60px!important;}" +
-    "canvas.sig{height:110px!important;}" +
-    ".field input,.field select,.field textarea{font-size:14px!important;}" +
-    ".btn-next,.btn-print,.btn-email{width:auto!important;display:inline-block!important;padding:13px 34px!important;}" +
-    "header{padding:22px 40px!important;}" +
-    "header h1{font-size:21px!important;}" +
-    ".tabs{padding:0 40px!important;}" +
-    ".tab{font-size:13.5px!important;padding:12px 20px!important;}";
-  document.head.appendChild(captureStyle);
-  panelIds.forEach(function(id){ document.getElementById(id).style.display="block"; });
-  // Wait for browser to fully reflow with new styles
-  await new Promise(function(r){ setTimeout(r, 600); });
-  var firstPage = true;
-  for (var i = 0; i < panelIds.length; i++) {
-    var el = document.getElementById(panelIds[i]);
-    var c = await html2canvas(el, {
-      scale: 2, useCORS: true, allowTaint: false, logging: false, windowWidth: 900,
-      ignoreElements: function(n){
-        return n.classList.contains("preread-card") ||
-               n.classList.contains("btn-next")     ||
-               n.classList.contains("btn-print")    ||
-               n.classList.contains("btn-email")    ||
-               n.classList.contains("email-section")||
-               n.classList.contains("val-errors");
-      }
+  if (evalForm && evalForm.classList.contains("shown")) targets.push(evalForm);
+
+  var stage = document.createElement("div");
+  stage.id = "pdf-stage";
+  stage.style.cssText = "position:absolute;left:-10000px;top:0;width:" + STAGE_W + "px;background:#ffffff;";
+  var stageInner = document.createElement("div");
+  stageInner.className = "main";
+  stage.appendChild(stageInner);
+
+  var stageStyle = document.createElement("style");
+  stageStyle.id = "pdf-stage-style";
+  stageStyle.textContent =
+    "#pdf-stage .main{max-width:880px!important;margin:0 auto!important;padding:0 20px!important;}" +
+    "#pdf-stage .panel{display:block!important;}" +
+    "#pdf-stage .fr{grid-template-columns:1fr 1fr!important;}" +
+    "#pdf-stage .fr3{grid-template-columns:1fr 1fr 1fr!important;}" +
+    "#pdf-stage .fr4{grid-template-columns:1fr 1fr 1fr 1fr!important;}" +
+    "#pdf-stage .sig-block{grid-template-columns:3fr 1fr!important;}" +
+    "#pdf-stage .expand{margin-left:36px!important;}" +
+    "#pdf-stage .cb{padding:26px 28px!important;}" +
+    "#pdf-stage canvas.sig{width:auto!important;height:auto!important;max-width:100%!important;}";
+  document.head.appendChild(stageStyle);
+  document.body.appendChild(stage);
+
+  var moved = [];
+  function restoreAll() {
+    moved.forEach(function(rec){
+      rec.el.style.display = rec.display;
+      if (rec.marker.parentNode) rec.marker.parentNode.replaceChild(rec.el, rec.marker);
     });
-    var imgData = c.toDataURL("image/jpeg", 0.92);
-    var imgH = (c.height * a4W) / c.width;
-    if (!firstPage) pdf.addPage();
-    firstPage = false;
-    // Handle panels taller than one A4 page
-    pdf.addImage(imgData,"JPEG",0,0,a4W,imgH);
-    var remaining = imgH - a4H, offsetY = -a4H;
-    while (remaining > 0) {
-      pdf.addPage();
-      pdf.addImage(imgData,"JPEG",0,offsetY,a4W,imgH);
-      offsetY -= a4H; remaining -= a4H;
+    moved = [];
+    if (stage.parentNode)      stage.parentNode.removeChild(stage);
+    if (stageStyle.parentNode) stageStyle.parentNode.removeChild(stageStyle);
+  }
+
+  var ignore = function(n){
+    return !!(n.classList && (
+      n.classList.contains("preread-card") ||
+      n.classList.contains("btn-next")     ||
+      n.classList.contains("btn-print")    ||
+      n.classList.contains("btn-email")    ||
+      n.classList.contains("email-section")||
+      n.classList.contains("val-errors")));
+  };
+
+  try {
+    if (document.fonts && document.fonts.ready) { try { await document.fonts.ready; } catch(e){} }
+    var firstPage = true;
+    for (var t = 0; t < targets.length; t++) {
+      var el = targets[t];
+      var rec = { el: el, marker: document.createComment("pdf-slot"), display: el.style.display };
+      el.parentNode.insertBefore(rec.marker, el);
+      stageInner.appendChild(el);
+      el.style.display = "block";
+      moved.push(rec);
+      // Let the browser reflow at the fixed 900px width before capturing.
+      await new Promise(function(r){ requestAnimationFrame(function(){ requestAnimationFrame(r); }); });
+      await new Promise(function(r){ setTimeout(r, 150); });
+      var c = await html2canvas(el, {
+        scale: 2, useCORS: true, allowTaint: false, logging: false,
+        backgroundColor: "#ffffff", windowWidth: STAGE_W,
+        ignoreElements: ignore
+      });
+      var imgData = c.toDataURL("image/jpeg", 0.92);
+      var imgH = (c.height * a4W) / c.width;
+      if (!firstPage) pdf.addPage();
+      firstPage = false;
+      pdf.addImage(imgData,"JPEG",0,0,a4W,imgH);
+      var remaining = imgH - a4H, offsetY = -a4H;
+      while (remaining > 0) {
+        pdf.addPage();
+        pdf.addImage(imgData,"JPEG",0,offsetY,a4W,imgH);
+        offsetY -= a4H; remaining -= a4H;
+      }
     }
+  } finally {
+    restoreAll();
   }
-  // Include physician eval form if triggered
-  if (evalForm && evalForm.classList.contains("shown")) {
-    evalForm.style.display = "block";
-    await new Promise(function(r){ setTimeout(r,100); });
-    var ec = await html2canvas(evalForm, {scale:2, useCORS:true, logging:false, windowWidth:900});
-    var eImg = ec.toDataURL("image/jpeg",0.92);
-    var eH = (ec.height * a4W) / ec.width;
-    pdf.addPage();
-    pdf.addImage(eImg,"JPEG",0,0,a4W,eH);
-    evalForm.style.display = "";
-  }
-  // Restore — remove inline override so CSS classes take over again
-  panelIds.forEach(function(id){ document.getElementById(id).style.display=""; });
-  // Remove capture override styles
-  var overrideEl = document.getElementById("pdf-capture-overrides");
-  if(overrideEl) overrideEl.remove();
   return pdf;
 }
 
