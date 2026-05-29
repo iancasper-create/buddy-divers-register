@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DUNE Madagascar - Guest Forms</title>
-<!-- BD-DUNE-MADAGASCAR 2026-05-29d -->
+<!-- BD-DUNE-MADAGASCAR 2026-05-29e -->
 <link rel="icon" type="image/jpeg" href="https://res.cloudinary.com/dccbsfte0/image/upload/v1774016253/logo2_swvqfe.jpg" />
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Source+Sans+3:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -762,7 +762,17 @@ function buildSnapshotHTML() {
     ".expand{margin-left:36px!important;}" +
     "header,.tabs,.btn-next,.btn-print,.btn-email,.email-section,.preread-card,.val-errors,.phys-warn{display:none!important;}" +
     ".card{box-shadow:none!important;border:1px solid #d8d8d8!important;}" +
-    ".snap-break{page-break-before:always;}";
+    ".snap-break{page-break-before:always;}" +
+    "/* --- compact PADI waivers (10086 / 10155): tighten to a clean ~2-page document --- */" +
+    ".waiver-body{font-size:11px!important;line-height:1.4!important;}" +
+    ".waiver-body p{margin-bottom:5px!important;break-inside:avoid;}" +
+    ".waiver-sec{font-size:11.5px!important;margin:10px 0 5px!important;break-after:avoid;}" +
+    ".waiver-caps{font-size:10px!important;line-height:1.35!important;margin-bottom:6px!important;break-inside:avoid;}" +
+    ".wi{font-size:11px!important;}" +
+    ".ch h2{font-size:17px!important;}" +
+    ".waiver-footer{margin-top:12px!important;padding-top:10px!important;break-inside:avoid;}" +
+    ".sig-area,.sig-block{break-inside:avoid;}" +
+    ".padi-ref{margin-top:10px!important;}";
 
   var targets = [];
   document.querySelectorAll(".main > .panel").forEach(function(p){ targets.push(p); });
