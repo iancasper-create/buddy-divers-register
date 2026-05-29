@@ -142,13 +142,27 @@ async function buildPDF() {
   var a4W = 210, a4H = 297;
   var panelIds = ["panel-0","panel-1"];
   var evalForm = document.getElementById("eval-form");
-  // Force desktop layout by overriding viewport meta (the ONLY reliable fix on iPhone)
-  // width=device-width locks layout viewport to phone width; we must change it
-  var viewportMeta = document.querySelector("meta[name=viewport]");
-  var originalViewport = viewportMeta ? viewportMeta.getAttribute("content") : null;
-  if(viewportMeta) viewportMeta.setAttribute("content", "width=900");
+  // Inject desktop override CSS — !important beats mobile media query styles
+  // This forces the browser to reflow in desktop multi-column layout before capture
+  var captureStyle = document.createElement("style");
+  captureStyle.id = "pdf-capture-overrides";
+  captureStyle.textContent =
+    ".fr{grid-template-columns:1fr 1fr!important;}" +
+    ".fr3{grid-template-columns:1fr 1fr 1fr!important;}" +
+    ".fr4{grid-template-columns:1fr 1fr 1fr 1fr!important;}" +
+    ".expand{margin-left:36px!important;}" +
+    ".cb{padding:26px 28px!important;}" +
+    ".main{padding:0 20px 60px!important;}" +
+    "canvas.sig{height:110px!important;}" +
+    ".field input,.field select,.field textarea{font-size:14px!important;}" +
+    ".btn-next,.btn-print,.btn-email{width:auto!important;display:inline-block!important;padding:13px 34px!important;}" +
+    "header{padding:22px 40px!important;}" +
+    "header h1{font-size:21px!important;}" +
+    ".tabs{padding:0 40px!important;}" +
+    ".tab{font-size:13.5px!important;padding:12px 20px!important;}";
+  document.head.appendChild(captureStyle);
   panelIds.forEach(function(id){ document.getElementById(id).style.display="block"; });
-  // Wait for browser to reflow at new viewport width
+  // Wait for browser to fully reflow with new styles
   await new Promise(function(r){ setTimeout(r, 600); });
   var firstPage = true;
   for (var i = 0; i < panelIds.length; i++) {
@@ -187,8 +201,9 @@ async function buildPDF() {
     evalForm.style.display = "";
   }
   panelIds.forEach(function(id){ document.getElementById(id).style.display=""; });
-  // Restore original viewport
-  if(viewportMeta && originalViewport) viewportMeta.setAttribute("content", originalViewport);
+  // Remove capture override styles
+  var overrideEl = document.getElementById("pdf-capture-overrides");
+  if(overrideEl) overrideEl.remove();
   return pdf;
 }
 
@@ -263,13 +278,27 @@ async function buildPDF() {
   var a4W = 210, a4H = 297;
   var panelIds = ["panel-0","panel-1"];
   var evalForm = document.getElementById("eval-form");
-  // Force desktop layout by overriding viewport meta (the ONLY reliable fix on iPhone)
-  // width=device-width locks layout viewport to phone width; we must change it
-  var viewportMeta = document.querySelector("meta[name=viewport]");
-  var originalViewport = viewportMeta ? viewportMeta.getAttribute("content") : null;
-  if(viewportMeta) viewportMeta.setAttribute("content", "width=900");
+  // Inject desktop override CSS — !important beats mobile media query styles
+  // This forces the browser to reflow in desktop multi-column layout before capture
+  var captureStyle = document.createElement("style");
+  captureStyle.id = "pdf-capture-overrides";
+  captureStyle.textContent =
+    ".fr{grid-template-columns:1fr 1fr!important;}" +
+    ".fr3{grid-template-columns:1fr 1fr 1fr!important;}" +
+    ".fr4{grid-template-columns:1fr 1fr 1fr 1fr!important;}" +
+    ".expand{margin-left:36px!important;}" +
+    ".cb{padding:26px 28px!important;}" +
+    ".main{padding:0 20px 60px!important;}" +
+    "canvas.sig{height:110px!important;}" +
+    ".field input,.field select,.field textarea{font-size:14px!important;}" +
+    ".btn-next,.btn-print,.btn-email{width:auto!important;display:inline-block!important;padding:13px 34px!important;}" +
+    "header{padding:22px 40px!important;}" +
+    "header h1{font-size:21px!important;}" +
+    ".tabs{padding:0 40px!important;}" +
+    ".tab{font-size:13.5px!important;padding:12px 20px!important;}";
+  document.head.appendChild(captureStyle);
   panelIds.forEach(function(id){ document.getElementById(id).style.display="block"; });
-  // Wait for browser to reflow at new viewport width
+  // Wait for browser to fully reflow with new styles
   await new Promise(function(r){ setTimeout(r, 600); });
   var firstPage = true;
   for (var i = 0; i < panelIds.length; i++) {
@@ -308,8 +337,9 @@ async function buildPDF() {
     evalForm.style.display = "";
   }
   panelIds.forEach(function(id){ document.getElementById(id).style.display=""; });
-  // Restore original viewport
-  if(viewportMeta && originalViewport) viewportMeta.setAttribute("content", originalViewport);
+  // Remove capture override styles
+  var overrideEl = document.getElementById("pdf-capture-overrides");
+  if(overrideEl) overrideEl.remove();
   return pdf;
 }
 
@@ -906,13 +936,27 @@ async function buildPDF() {
   var a4W = 210, a4H = 297;
   var panelIds = ["panel-0","panel-1"];
   var evalForm = document.getElementById("eval-form");
-  // Force desktop layout by overriding viewport meta (the ONLY reliable fix on iPhone)
-  // width=device-width locks layout viewport to phone width; we must change it
-  var viewportMeta = document.querySelector("meta[name=viewport]");
-  var originalViewport = viewportMeta ? viewportMeta.getAttribute("content") : null;
-  if(viewportMeta) viewportMeta.setAttribute("content", "width=900");
+  // Inject desktop override CSS — !important beats mobile media query styles
+  // This forces the browser to reflow in desktop multi-column layout before capture
+  var captureStyle = document.createElement("style");
+  captureStyle.id = "pdf-capture-overrides";
+  captureStyle.textContent =
+    ".fr{grid-template-columns:1fr 1fr!important;}" +
+    ".fr3{grid-template-columns:1fr 1fr 1fr!important;}" +
+    ".fr4{grid-template-columns:1fr 1fr 1fr 1fr!important;}" +
+    ".expand{margin-left:36px!important;}" +
+    ".cb{padding:26px 28px!important;}" +
+    ".main{padding:0 20px 60px!important;}" +
+    "canvas.sig{height:110px!important;}" +
+    ".field input,.field select,.field textarea{font-size:14px!important;}" +
+    ".btn-next,.btn-print,.btn-email{width:auto!important;display:inline-block!important;padding:13px 34px!important;}" +
+    "header{padding:22px 40px!important;}" +
+    "header h1{font-size:21px!important;}" +
+    ".tabs{padding:0 40px!important;}" +
+    ".tab{font-size:13.5px!important;padding:12px 20px!important;}";
+  document.head.appendChild(captureStyle);
   panelIds.forEach(function(id){ document.getElementById(id).style.display="block"; });
-  // Wait for browser to reflow at new viewport width
+  // Wait for browser to fully reflow with new styles
   await new Promise(function(r){ setTimeout(r, 600); });
   var firstPage = true;
   for (var i = 0; i < panelIds.length; i++) {
@@ -951,8 +995,9 @@ async function buildPDF() {
     evalForm.style.display = "";
   }
   panelIds.forEach(function(id){ document.getElementById(id).style.display=""; });
-  // Restore original viewport
-  if(viewportMeta && originalViewport) viewportMeta.setAttribute("content", originalViewport);
+  // Remove capture override styles
+  var overrideEl = document.getElementById("pdf-capture-overrides");
+  if(overrideEl) overrideEl.remove();
   return pdf;
 }
 
