@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DUNE Aurora - Guest Forms</title>
-<!-- BD-DUNE-AURORA 2026-05-29c -->
+<!-- BD-DUNE-AURORA 2026-05-29d -->
 <link rel="icon" type="image/jpeg" href="https://res.cloudinary.com/dccbsfte0/image/upload/v1774016253/logo2_swvqfe.jpg" />
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Source+Sans+3:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -738,11 +738,16 @@ function buildSnapshotHTML() {
   return '<!DOCTYPE html><html lang="en"><head>' + head + '<style>' + css + '</style></head><body>' + body + '</body></html>';
 }
 
+function utf8ToBase64(str) {
+  // UTF-8 safe base64 (btoa alone breaks on non-Latin1 characters).
+  return btoa(unescape(encodeURIComponent(str)));
+}
+
 async function sendToMake(name, email, formHtml) {
   var res = await fetch(MAKE_WEBHOOK_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name: name, email: email, form: FORM_NAME, form_html: formHtml })
+    body: JSON.stringify({ name: name, email: email, form: FORM_NAME, html_b64: utf8ToBase64(formHtml) })
   });
   if (!res.ok) throw new Error("Could not submit (" + res.status + "). Please use Print / Save PDF instead.");
 }
