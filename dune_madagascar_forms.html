@@ -159,19 +159,14 @@ async function buildPDF() {
   var panelIds = ["panel-0","panel-1","panel-2"];
   var evalForm = document.getElementById("eval-form");
   // Show all panels so html2canvas can render them
-  // Force desktop layout width before capture (fixes iPhone mobile rendering)
-  var htmlEl = document.documentElement;
-  var bodyEl = document.body;
-  var savedHtmlW = htmlEl.style.width;
-  var savedBodyW = bodyEl.style.width;
-  var savedBodyMin = bodyEl.style.minWidth;
-  var savedOverflow = bodyEl.style.overflow;
-  htmlEl.style.width = "900px";
-  bodyEl.style.width = "900px";
-  bodyEl.style.minWidth = "900px";
-  bodyEl.style.overflow = "visible";
+  // Force desktop layout by overriding viewport meta (the ONLY reliable fix on iPhone)
+  // width=device-width locks layout viewport to phone width; we must change it
+  var viewportMeta = document.querySelector("meta[name=viewport]");
+  var originalViewport = viewportMeta ? viewportMeta.getAttribute("content") : null;
+  if(viewportMeta) viewportMeta.setAttribute("content", "width=900");
   panelIds.forEach(function(id){ document.getElementById(id).style.display="block"; });
-  await new Promise(function(r){ setTimeout(r, 500); });
+  // Wait for browser to reflow at new viewport width
+  await new Promise(function(r){ setTimeout(r, 600); });
   var firstPage = true;
   for (var i = 0; i < panelIds.length; i++) {
     var el = document.getElementById(panelIds[i]);
@@ -212,11 +207,8 @@ async function buildPDF() {
   }
   // Restore — remove inline override so CSS classes take over again
   panelIds.forEach(function(id){ document.getElementById(id).style.display=""; });
-  // Restore original layout
-  htmlEl.style.width = savedHtmlW;
-  bodyEl.style.width = savedBodyW;
-  bodyEl.style.minWidth = savedBodyMin;
-  bodyEl.style.overflow = savedOverflow;
+  // Restore original viewport
+  if(viewportMeta && originalViewport) viewportMeta.setAttribute("content", originalViewport);
   return pdf;
 }
 
@@ -298,19 +290,14 @@ async function buildPDF() {
   var panelIds = ["panel-0","panel-1","panel-2"];
   var evalForm = document.getElementById("eval-form");
   // Show all panels so html2canvas can render them
-  // Force desktop layout width before capture (fixes iPhone mobile rendering)
-  var htmlEl = document.documentElement;
-  var bodyEl = document.body;
-  var savedHtmlW = htmlEl.style.width;
-  var savedBodyW = bodyEl.style.width;
-  var savedBodyMin = bodyEl.style.minWidth;
-  var savedOverflow = bodyEl.style.overflow;
-  htmlEl.style.width = "900px";
-  bodyEl.style.width = "900px";
-  bodyEl.style.minWidth = "900px";
-  bodyEl.style.overflow = "visible";
+  // Force desktop layout by overriding viewport meta (the ONLY reliable fix on iPhone)
+  // width=device-width locks layout viewport to phone width; we must change it
+  var viewportMeta = document.querySelector("meta[name=viewport]");
+  var originalViewport = viewportMeta ? viewportMeta.getAttribute("content") : null;
+  if(viewportMeta) viewportMeta.setAttribute("content", "width=900");
   panelIds.forEach(function(id){ document.getElementById(id).style.display="block"; });
-  await new Promise(function(r){ setTimeout(r, 500); });
+  // Wait for browser to reflow at new viewport width
+  await new Promise(function(r){ setTimeout(r, 600); });
   var firstPage = true;
   for (var i = 0; i < panelIds.length; i++) {
     var el = document.getElementById(panelIds[i]);
@@ -351,11 +338,8 @@ async function buildPDF() {
   }
   // Restore — remove inline override so CSS classes take over again
   panelIds.forEach(function(id){ document.getElementById(id).style.display=""; });
-  // Restore original layout
-  htmlEl.style.width = savedHtmlW;
-  bodyEl.style.width = savedBodyW;
-  bodyEl.style.minWidth = savedBodyMin;
-  bodyEl.style.overflow = savedOverflow;
+  // Restore original viewport
+  if(viewportMeta && originalViewport) viewportMeta.setAttribute("content", originalViewport);
   return pdf;
 }
 
@@ -986,19 +970,14 @@ async function buildPDF() {
   var panelIds = ["panel-0","panel-1","panel-2"];
   var evalForm = document.getElementById("eval-form");
   // Show all panels so html2canvas can render them
-  // Force desktop layout width before capture (fixes iPhone mobile rendering)
-  var htmlEl = document.documentElement;
-  var bodyEl = document.body;
-  var savedHtmlW = htmlEl.style.width;
-  var savedBodyW = bodyEl.style.width;
-  var savedBodyMin = bodyEl.style.minWidth;
-  var savedOverflow = bodyEl.style.overflow;
-  htmlEl.style.width = "900px";
-  bodyEl.style.width = "900px";
-  bodyEl.style.minWidth = "900px";
-  bodyEl.style.overflow = "visible";
+  // Force desktop layout by overriding viewport meta (the ONLY reliable fix on iPhone)
+  // width=device-width locks layout viewport to phone width; we must change it
+  var viewportMeta = document.querySelector("meta[name=viewport]");
+  var originalViewport = viewportMeta ? viewportMeta.getAttribute("content") : null;
+  if(viewportMeta) viewportMeta.setAttribute("content", "width=900");
   panelIds.forEach(function(id){ document.getElementById(id).style.display="block"; });
-  await new Promise(function(r){ setTimeout(r, 500); });
+  // Wait for browser to reflow at new viewport width
+  await new Promise(function(r){ setTimeout(r, 600); });
   var firstPage = true;
   for (var i = 0; i < panelIds.length; i++) {
     var el = document.getElementById(panelIds[i]);
@@ -1039,11 +1018,8 @@ async function buildPDF() {
   }
   // Restore — remove inline override so CSS classes take over again
   panelIds.forEach(function(id){ document.getElementById(id).style.display=""; });
-  // Restore original layout
-  htmlEl.style.width = savedHtmlW;
-  bodyEl.style.width = savedBodyW;
-  bodyEl.style.minWidth = savedBodyMin;
-  bodyEl.style.overflow = savedOverflow;
+  // Restore original viewport
+  if(viewportMeta && originalViewport) viewportMeta.setAttribute("content", originalViewport);
   return pdf;
 }
 
