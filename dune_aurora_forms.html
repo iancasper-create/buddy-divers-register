@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DUNE Aurora - Guest Forms</title>
-<!-- BD-DUNE-AURORA 2026-05-29a -->
+<!-- BD-DUNE-AURORA 2026-05-29b -->
 <link rel="icon" type="image/jpeg" href="https://res.cloudinary.com/dccbsfte0/image/upload/v1774016253/logo2_swvqfe.jpg" />
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Source+Sans+3:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -76,6 +76,7 @@ canvas.sig{display:block;width:100%;height:110px;cursor:crosshair;touch-action:n
 .btn-email:disabled{background:#aaa;cursor:not-allowed;}
 .email-status{display:none;margin-top:12px;padding:12px 16px;border-radius:6px;font-size:14px;line-height:1.5;}
 @media print{
+  .fr{grid-template-columns:1fr 1fr!important;}.fr3{grid-template-columns:1fr 1fr 1fr!important;}.fr4{grid-template-columns:1fr 1fr 1fr 1fr!important;}.sig-block{grid-template-columns:3fr 1fr!important;}.expand{margin-left:36px!important;}
   header,.tabs,.btn-print,.btn-next,.phys-warn{display:none!important;}
   .panel{display:none!important;}
   #panel-0,#panel-1,#panel-2{display:block!important;}
@@ -666,56 +667,40 @@ async function buildPDF() {
   var pdf = new jsPDF("p","mm","a4");
   var a4W = 210, a4H = 297;
 
-  // --- iPhone-safe capture (works on iPhone Safari) ---
-  // iOS Safari locks the layout viewport to the device width (~390px) and
-  // ignores viewport-meta / html2canvas windowWidth changes, so the old code
-  // always captured the squeezed mobile layout. This fix does NOT touch the
-  // viewport: it physically relocates each REAL form section into an off-screen
-  // container with a FIXED 900px width. Because that width is an absolute pixel
-  // value (not %/vw) and the mobile @media rules are beaten by id-scoped
-  // !important overrides, each section lays out at desktop width regardless of
-  // what width iOS hands html2canvas internally. Real nodes are moved (not
-  // cloned), so every typed value, dropdown choice and signature is preserved.
-  var STAGE_W = 900;
+  // --- iPhone-safe Email PDF ---
+  // At the iPhone's ~390px width the form's responsive CSS collapses every
+  // two-column row to one, and html2canvas captures whatever width it renders
+  // at. The previous attempt anchored the desktop width to a PARENT wrapper,
+  // but html2canvas re-renders the captured node and drops the parent's width,
+  // so it stayed narrow. Fix: the fixed pixel width AND the column overrides now
+  // live ON / UNDER the element actually handed to html2canvas (the .pdfcap
+  // wrapper), so they survive its internal re-render even when iOS pins that
+  // render to the phone width. Real nodes are moved (not cloned) so all typed
+  // values, dropdown choices and signatures are preserved.
+  var CAP_W = 880;
 
-  // Collect capture targets (real nodes) in document order, before the stage exists.
   var targets = [];
   document.querySelectorAll(".main > .panel").forEach(function(p){ targets.push(p); });
   var evalForm = document.getElementById("eval-form");
   if (evalForm && evalForm.classList.contains("shown")) targets.push(evalForm);
 
-  var stage = document.createElement("div");
-  stage.id = "pdf-stage";
-  stage.style.cssText = "position:absolute;left:-10000px;top:0;width:" + STAGE_W + "px;background:#ffffff;";
-  var stageInner = document.createElement("div");
-  stageInner.className = "main";
-  stage.appendChild(stageInner);
-
-  var stageStyle = document.createElement("style");
-  stageStyle.id = "pdf-stage-style";
-  stageStyle.textContent =
-    "#pdf-stage .main{max-width:880px!important;margin:0 auto!important;padding:0 20px!important;}" +
-    "#pdf-stage .panel{display:block!important;}" +
-    "#pdf-stage .fr{grid-template-columns:1fr 1fr!important;}" +
-    "#pdf-stage .fr3{grid-template-columns:1fr 1fr 1fr!important;}" +
-    "#pdf-stage .fr4{grid-template-columns:1fr 1fr 1fr 1fr!important;}" +
-    "#pdf-stage .sig-block{grid-template-columns:3fr 1fr!important;}" +
-    "#pdf-stage .expand{margin-left:36px!important;}" +
-    "#pdf-stage .cb{padding:26px 28px!important;}" +
-    "#pdf-stage canvas.sig{width:auto!important;height:auto!important;max-width:100%!important;}";
-  document.head.appendChild(stageStyle);
-  document.body.appendChild(stage);
-
-  var moved = [];
-  function restoreAll() {
-    moved.forEach(function(rec){
-      rec.el.style.display = rec.display;
-      if (rec.marker.parentNode) rec.marker.parentNode.replaceChild(rec.el, rec.marker);
-    });
-    moved = [];
-    if (stage.parentNode)      stage.parentNode.removeChild(stage);
-    if (stageStyle.parentNode) stageStyle.parentNode.removeChild(stageStyle);
-  }
+  var host = document.createElement("div");
+  host.id = "pdf-host";
+  host.style.cssText = "position:absolute;left:-10000px;top:0;width:" + CAP_W + "px;background:#ffffff;";
+  var style = document.createElement("style");
+  style.id = "pdf-host-style";
+  style.textContent =
+    ".pdfcap{width:" + CAP_W + "px!important;background:#ffffff;padding:0 20px;}" +
+    ".pdfcap .panel{display:block!important;}" +
+    ".pdfcap .fr{grid-template-columns:1fr 1fr!important;}" +
+    ".pdfcap .fr3{grid-template-columns:1fr 1fr 1fr!important;}" +
+    ".pdfcap .fr4{grid-template-columns:1fr 1fr 1fr 1fr!important;}" +
+    ".pdfcap .sig-block{grid-template-columns:3fr 1fr!important;}" +
+    ".pdfcap .expand{margin-left:36px!important;}" +
+    ".pdfcap .cb{padding:26px 28px!important;}" +
+    ".pdfcap canvas.sig{width:auto!important;height:auto!important;max-width:100%!important;}";
+  document.head.appendChild(style);
+  document.body.appendChild(host);
 
   var ignore = function(n){
     return !!(n.classList && (
@@ -727,22 +712,35 @@ async function buildPDF() {
       n.classList.contains("val-errors")));
   };
 
+  var moved = [];
+  function restore() {
+    moved.forEach(function(r){
+      r.el.style.display = r.display;
+      if (r.marker.parentNode) r.marker.parentNode.replaceChild(r.el, r.marker);
+    });
+    moved = [];
+    if (host.parentNode)  host.parentNode.removeChild(host);
+    if (style.parentNode) style.parentNode.removeChild(style);
+  }
+
   try {
     if (document.fonts && document.fonts.ready) { try { await document.fonts.ready; } catch(e){} }
     var firstPage = true;
     for (var t = 0; t < targets.length; t++) {
       var el = targets[t];
-      var rec = { el: el, marker: document.createComment("pdf-slot"), display: el.style.display };
-      el.parentNode.insertBefore(rec.marker, el);
-      stageInner.appendChild(el);
+      var wrap = document.createElement("div");
+      wrap.className = "pdfcap";
+      var marker = document.createComment("pdf-slot");
+      el.parentNode.insertBefore(marker, el);
+      moved.push({ el: el, marker: marker, display: el.style.display });
+      wrap.appendChild(el);
       el.style.display = "block";
-      moved.push(rec);
-      // Let the browser reflow at the fixed 900px width before capturing.
+      host.appendChild(wrap);
       await new Promise(function(r){ requestAnimationFrame(function(){ requestAnimationFrame(r); }); });
       await new Promise(function(r){ setTimeout(r, 150); });
-      var c = await html2canvas(el, {
+      var c = await html2canvas(wrap, {
         scale: 2, useCORS: true, allowTaint: false, logging: false,
-        backgroundColor: "#ffffff", windowWidth: STAGE_W,
+        backgroundColor: "#ffffff", width: CAP_W, windowWidth: CAP_W,
         ignoreElements: ignore
       });
       var imgData = c.toDataURL("image/jpeg", 0.92);
@@ -758,7 +756,7 @@ async function buildPDF() {
       }
     }
   } finally {
-    restoreAll();
+    restore();
   }
   return pdf;
 }
