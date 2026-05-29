@@ -142,8 +142,19 @@ async function buildPDF() {
   var a4W = 210, a4H = 297;
   var panelIds = ["panel-0","panel-1"];
   var evalForm = document.getElementById("eval-form");
+  // Force desktop layout width before capture (fixes iPhone mobile rendering)
+  var htmlEl = document.documentElement;
+  var bodyEl = document.body;
+  var savedHtmlW = htmlEl.style.width;
+  var savedBodyW = bodyEl.style.width;
+  var savedBodyMin = bodyEl.style.minWidth;
+  var savedOverflow = bodyEl.style.overflow;
+  htmlEl.style.width = "900px";
+  bodyEl.style.width = "900px";
+  bodyEl.style.minWidth = "900px";
+  bodyEl.style.overflow = "visible";
   panelIds.forEach(function(id){ document.getElementById(id).style.display="block"; });
-  await new Promise(function(r){ setTimeout(r, 300); });
+  await new Promise(function(r){ setTimeout(r, 500); });
   var firstPage = true;
   for (var i = 0; i < panelIds.length; i++) {
     var el = document.getElementById(panelIds[i]);
@@ -181,6 +192,11 @@ async function buildPDF() {
     evalForm.style.display = "";
   }
   panelIds.forEach(function(id){ document.getElementById(id).style.display=""; });
+  // Restore original layout
+  htmlEl.style.width = savedHtmlW;
+  bodyEl.style.width = savedBodyW;
+  bodyEl.style.minWidth = savedBodyMin;
+  bodyEl.style.overflow = savedOverflow;
   return pdf;
 }
 
@@ -255,8 +271,19 @@ async function buildPDF() {
   var a4W = 210, a4H = 297;
   var panelIds = ["panel-0","panel-1"];
   var evalForm = document.getElementById("eval-form");
+  // Force desktop layout width before capture (fixes iPhone mobile rendering)
+  var htmlEl = document.documentElement;
+  var bodyEl = document.body;
+  var savedHtmlW = htmlEl.style.width;
+  var savedBodyW = bodyEl.style.width;
+  var savedBodyMin = bodyEl.style.minWidth;
+  var savedOverflow = bodyEl.style.overflow;
+  htmlEl.style.width = "900px";
+  bodyEl.style.width = "900px";
+  bodyEl.style.minWidth = "900px";
+  bodyEl.style.overflow = "visible";
   panelIds.forEach(function(id){ document.getElementById(id).style.display="block"; });
-  await new Promise(function(r){ setTimeout(r, 300); });
+  await new Promise(function(r){ setTimeout(r, 500); });
   var firstPage = true;
   for (var i = 0; i < panelIds.length; i++) {
     var el = document.getElementById(panelIds[i]);
@@ -294,6 +321,11 @@ async function buildPDF() {
     evalForm.style.display = "";
   }
   panelIds.forEach(function(id){ document.getElementById(id).style.display=""; });
+  // Restore original layout
+  htmlEl.style.width = savedHtmlW;
+  bodyEl.style.width = savedBodyW;
+  bodyEl.style.minWidth = savedBodyMin;
+  bodyEl.style.overflow = savedOverflow;
   return pdf;
 }
 
@@ -890,8 +922,19 @@ async function buildPDF() {
   var a4W = 210, a4H = 297;
   var panelIds = ["panel-0","panel-1"];
   var evalForm = document.getElementById("eval-form");
+  // Force desktop layout width before capture (fixes iPhone mobile rendering)
+  var htmlEl = document.documentElement;
+  var bodyEl = document.body;
+  var savedHtmlW = htmlEl.style.width;
+  var savedBodyW = bodyEl.style.width;
+  var savedBodyMin = bodyEl.style.minWidth;
+  var savedOverflow = bodyEl.style.overflow;
+  htmlEl.style.width = "900px";
+  bodyEl.style.width = "900px";
+  bodyEl.style.minWidth = "900px";
+  bodyEl.style.overflow = "visible";
   panelIds.forEach(function(id){ document.getElementById(id).style.display="block"; });
-  await new Promise(function(r){ setTimeout(r, 300); });
+  await new Promise(function(r){ setTimeout(r, 500); });
   var firstPage = true;
   for (var i = 0; i < panelIds.length; i++) {
     var el = document.getElementById(panelIds[i]);
@@ -929,6 +972,11 @@ async function buildPDF() {
     evalForm.style.display = "";
   }
   panelIds.forEach(function(id){ document.getElementById(id).style.display=""; });
+  // Restore original layout
+  htmlEl.style.width = savedHtmlW;
+  bodyEl.style.width = savedBodyW;
+  bodyEl.style.minWidth = savedBodyMin;
+  bodyEl.style.overflow = savedOverflow;
   return pdf;
 }
 
