@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DUNE Madagascar - Guest Forms</title>
-<!-- BD-DUNE-MADAGASCAR 2026-05-29h -->
+<!-- BD-DUNE-MADAGASCAR 2026-05-29i -->
 <link rel="icon" type="image/jpeg" href="https://res.cloudinary.com/dccbsfte0/image/upload/v1774016253/logo2_swvqfe.jpg" />
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Source+Sans+3:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -114,6 +114,8 @@ canvas.sig{display:block;width:100%;height:110px;cursor:crosshair;touch-action:n
   .qrow .qans{flex-basis:100%;width:100%;min-width:0;margin-top:4px;gap:10px;}
   .qrow .qans label{flex:1;min-width:0;justify-content:center;border:1.5px solid var(--border);border-radius:6px;padding:6px 14px;background:#fafcfe;font-size:14px;font-weight:600;}
   .qrow .qans label:first-child{min-width:0;}
+  /* mobile only: keep the policy-number input from overflowing its insurance box */
+  #w1-policy{min-width:0 !important;max-width:100% !important;box-sizing:border-box !important;}
 }
 </style>
 </head>
@@ -690,7 +692,7 @@ async function sendPDFByEmail() {
     var formHtml = buildSnapshotHTML();
     setEmailStatus("Sending&hellip;", "progress");
     await sendToMake(guestName, guestEmail, formHtml);
-    setEmailStatus("&#10003; Submitted. A copy will be emailed to " + guestEmail + " shortly.", "success");
+    setEmailStatus("&#10003; Submitted. A copy has been emailed to " + guestEmail + " and Buddy-Divers.", "success");
   } catch (err) {
     setEmailStatus("&#10007; " + (err.message || "Something went wrong. Please use Print / Save PDF and email it to info@buddy-divers.com."), "error");
     console.error(err);
