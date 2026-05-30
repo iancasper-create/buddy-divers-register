@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>NAI'A Cruises - Guest Forms</title>
-<!-- BD-NAIA 2026-05-30a -->
+<!-- BD-NAIA 2026-05-30d -->
 <link rel="icon" type="image/jpeg" href="https://res.cloudinary.com/dccbsfte0/image/upload/v1774016253/logo2_swvqfe.jpg" />
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Source+Sans+3:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -37,7 +37,7 @@ header p{color:rgba(255,255,255,.6);font-size:13px;margin-top:2px;}
 .qrow:last-child{border-bottom:none;}
 .qnum{font-weight:700;color:var(--navy);font-size:14px;min-width:22px;margin-top:2px;}
 .qtext{flex:1;font-size:14.5px;line-height:1.55;}
-.qans{display:flex;gap:10px;min-width:110px;align-items:center;}
+.qans{display:flex;flex-direction:row;gap:14px;min-width:100px;flex-shrink:0;align-items:center;}
 .qans label{display:flex;align-items:center;gap:5px;cursor:pointer;font-size:14px;font-weight:500;touch-action:manipulation;}
 .qans input[type=radio]{accent-color:var(--navy);cursor:pointer;touch-action:manipulation;}
 .agree-row input[type=checkbox]{touch-action:manipulation;}
@@ -96,9 +96,8 @@ canvas.sig{display:block;width:100%;height:110px;cursor:crosshair;touch-action:n
   #panel-0 .qrow{padding:5px 0!important;gap:10px!important;break-inside:avoid;}
   #panel-0 .qnum{font-size:11.5px!important;min-width:20px!important;margin-top:0!important;}
   #panel-0 .qtext{font-size:11.5px!important;line-height:1.38!important;}
-  #panel-0 .qans{min-width:88px!important;}
+  #panel-0 .qans{min-width:80px!important;flex-shrink:0!important;}
   #panel-0 .qans label{font-size:11px!important;}
-  #panel-0 .qans label:first-child{min-width:46px!important;}
   #panel-0 .expand{padding:8px 14px!important;margin:2px 0 8px 30px!important;break-inside:avoid;}
   #panel-0 .expand .blabel{font-size:11.5px!important;margin-bottom:5px!important;break-after:avoid;}
   #panel-0 .sig-area{padding:12px;break-inside:avoid;}
@@ -171,15 +170,17 @@ canvas.sig{display:block;width:100%;height:110px;cursor:crosshair;touch-action:n
     </div>
     <div class="cb" style="font-size:14.5px;line-height:1.75;">
       <p style='margin-bottom:14px;'>Here is the Dive Medical Questionnaire. You only need to have a Physician Approval if you answer <strong>yes to any</strong> of these questions, and or answer <strong>yes to any of the follow-up questions in Boxes A through G.</strong></p>
-      <p style='margin-bottom:11px;'>Q 2. I struggle to perform moderate exercise (i.e. walk 1.6 K's/One mile or swim 200 meters/yards without resting) or I have been unable to participate in a normal physical activity due to illness or health reasons within the last 12 months.</p>
-      <p style='margin-bottom:11px;'>Q 4. I have had surgery within the last 12 months, OR I have ongoing problems related to past surgery.</p>
-      <p>Q 9. I am taking prescription medications (with the exception of birth control or anti-malarial drugs other than Lariam).</p>
+      <p style='margin-bottom:11px;'>Q 3. I struggle to perform moderate exercise (i.e. walk 1.6 K's/One mile or swim 200 meters/yards without resting) or I have been unable to participate in a normal physical activity due to illness or health reasons within the last 12 months.</p>
+      <p style='margin-bottom:11px;'>Q 5. I have had surgery within the last 12 months, OR I have ongoing problems related to past surgery.</p>
+      <p>Q 10. I am taking prescription medications (with the exception of birth control or anti-malarial drugs other than Lariam).</p>
     </div>
   </div>
   <div class="card">
-    <div class="ch">
-      <h2>Diver Medical | Participant Questionnaire</h2>
-      <p>DAN &nbsp;|&nbsp; WRSTC &nbsp;|&nbsp; RSTC &nbsp;|&nbsp; Undersea &amp; Hyperbaric Medical Society &nbsp;|&nbsp; CMAS</p>
+    <div style="padding:17px 0 0 0;border-bottom:1px solid var(--border);">
+      <div style="margin:0 0 17px 0;padding:0 28px;">
+        <img src="https://res.cloudinary.com/dccbsfte0/image/upload/e_trim/v1779976019/Banner_for_Dune_ajnigz.png" alt="DAN WRSTC RSTC UHMS CMAS" crossOrigin="anonymous" style="width:100%;display:block;">
+      </div>
+      <h2 style="font-family:'Playfair Display',serif;font-size:24px;font-weight:400;border-bottom:none;padding:0 28px;margin-bottom:14px;color:#000;"><strong>Diver Medical</strong> | Participant Questionnaire</h2>
     </div>
     <div class="cb">
       <p style='font-size:13.5px;line-height:1.7;margin-bottom:18px;'>Recreational scuba diving and freediving requires good physical and mental health. There are a few medical conditions which can be hazardous while diving, listed below. Those who have, or are predisposed to, any of these conditions, should be evaluated by a physician. This Diver Medical Participant Questionnaire provides a basis to determine if you should seek out that evaluation. If you have any concerns about your diving fitness not represented on this form, consult with your physician before diving. If you are feeling ill, avoid diving. If you think you may have a contagious disease, protect yourself and others by not participating in dive training and/ or dive activities. References to &ldquo;diving&rdquo; on this form encompass both recreational scuba diving and freediving. For your safety, and that of others who may dive with you, answer all questions honestly.</p>
@@ -217,18 +218,33 @@ canvas.sig{display:block;width:100%;height:110px;cursor:crosshair;touch-action:n
       </div>
       <div class="qrow">
         <div class="qnum">2</div>
-        <div class="qtext">I struggle to perform moderate exercise (for example, walk 1.6 kilometer/one mile in 14 minutes or swim 200 meters/yards without resting), OR I have been unable to participate in a normal physical activity due to fitness or health reasons within the past 12 months.</div>
+        <div class="qtext">I am over 45 years of age.</div>
         <div class="qans">
-          <label><input type="radio" name="q2" value="yes" data-physician="1"> Yes *</label>
-          <label><input type="radio" name="q2" value="no"> No</label>
+          <label><input type="radio" name="q2" value="yes" data-show="box-B"> Yes</label>
+          <label><input type="radio" name="q2" value="no" data-hide="box-B"> No</label>
         </div>
+      </div>
+      <div class="expand" id="box-B">
+        <div class="blabel">Box B - Over 45 <span class="badge">Physician approval required if any Yes</span></div>
+        <div class="qrow"><div class="qtext">I currently smoke or inhale nicotine by other means.</div><div class="qans"><label><input type="radio" name="B1" value="yes"> Yes</label><label><input type="radio" name="B1" value="no"> No</label></div></div>
+        <div class="qrow"><div class="qtext">I have a high cholesterol level.</div><div class="qans"><label><input type="radio" name="B2" value="yes"> Yes</label><label><input type="radio" name="B2" value="no"> No</label></div></div>
+        <div class="qrow"><div class="qtext">I have high blood pressure.</div><div class="qans"><label><input type="radio" name="B3" value="yes"> Yes</label><label><input type="radio" name="B3" value="no"> No</label></div></div>
+        <div class="qrow"><div class="qtext">I have had a close blood relative die suddenly or of cardiac disease or stroke before the age of 50, OR have a family history of heart disease before age 50 (including abnormal heart rhythms, coronary artery disease or cardiomyopathy).</div><div class="qans"><label><input type="radio" name="B4" value="yes"> Yes</label><label><input type="radio" name="B4" value="no"> No</label></div></div>
       </div>
       <div class="qrow">
         <div class="qnum">3</div>
+        <div class="qtext">I struggle to perform moderate exercise (for example, walk 1.6 kilometer/one mile in 14 minutes or swim 200 meters/yards without resting), OR I have been unable to participate in a normal physical activity due to fitness or health reasons within the past 12 months.</div>
+        <div class="qans">
+          <label><input type="radio" name="q3" value="yes" data-physician="1"> Yes *</label>
+          <label><input type="radio" name="q3" value="no"> No</label>
+        </div>
+      </div>
+      <div class="qrow">
+        <div class="qnum">4</div>
         <div class="qtext">I have had problems with my eyes, ears, or nasal passages/sinuses.</div>
         <div class="qans">
-          <label><input type="radio" name="q3" value="yes" data-show="box-C"> Yes</label>
-          <label><input type="radio" name="q3" value="no" data-hide="box-C"> No</label>
+          <label><input type="radio" name="q4" value="yes" data-show="box-C"> Yes</label>
+          <label><input type="radio" name="q4" value="no" data-hide="box-C"> No</label>
         </div>
       </div>
       <div class="expand" id="box-C">
@@ -239,19 +255,19 @@ canvas.sig{display:block;width:100%;height:110px;cursor:crosshair;touch-action:n
         <div class="qrow"><div class="qtext">Eye surgery within the past 3 months.</div><div class="qans"><label><input type="radio" name="C4" value="yes"> Yes</label><label><input type="radio" name="C4" value="no"> No</label></div></div>
       </div>
       <div class="qrow">
-        <div class="qnum">4</div>
+        <div class="qnum">5</div>
         <div class="qtext">I have had surgery within the last 12 months, OR I have ongoing problems related to past surgery.</div>
         <div class="qans">
-          <label><input type="radio" name="q4" value="yes" data-physician="1"> Yes *</label>
-          <label><input type="radio" name="q4" value="no"> No</label>
+          <label><input type="radio" name="q5" value="yes" data-physician="1"> Yes *</label>
+          <label><input type="radio" name="q5" value="no"> No</label>
         </div>
       </div>
       <div class="qrow">
-        <div class="qnum">5</div>
+        <div class="qnum">6</div>
         <div class="qtext">I have lost consciousness, had migraine headaches, seizures, stroke, significant head injury, or suffer from persistent neurologic injury or disease.</div>
         <div class="qans">
-          <label><input type="radio" name="q5" value="yes" data-show="box-D"> Yes</label>
-          <label><input type="radio" name="q5" value="no" data-hide="box-D"> No</label>
+          <label><input type="radio" name="q6" value="yes" data-show="box-D"> Yes</label>
+          <label><input type="radio" name="q6" value="no" data-hide="box-D"> No</label>
         </div>
       </div>
       <div class="expand" id="box-D">
@@ -263,11 +279,11 @@ canvas.sig{display:block;width:100%;height:110px;cursor:crosshair;touch-action:n
         <div class="qrow"><div class="qtext">Epilepsy, seizures, or convulsions, OR take medications to prevent them.</div><div class="qans"><label><input type="radio" name="D5" value="yes"> Yes</label><label><input type="radio" name="D5" value="no"> No</label></div></div>
       </div>
       <div class="qrow">
-        <div class="qnum">6</div>
+        <div class="qnum">7</div>
         <div class="qtext">I am currently undergoing treatment (or have required treatment within the last five years) for psychological problems, personality disorder, panic attacks, or an addiction to drugs or alcohol; or, I have been diagnosed with a learning or developmental disability.</div>
         <div class="qans">
-          <label><input type="radio" name="q6" value="yes" data-show="box-E"> Yes</label>
-          <label><input type="radio" name="q6" value="no" data-hide="box-E"> No</label>
+          <label><input type="radio" name="q7" value="yes" data-show="box-E"> Yes</label>
+          <label><input type="radio" name="q7" value="no" data-hide="box-E"> No</label>
         </div>
       </div>
       <div class="expand" id="box-E">
@@ -278,11 +294,11 @@ canvas.sig{display:block;width:100%;height:110px;cursor:crosshair;touch-action:n
         <div class="qrow"><div class="qtext">An addiction to drugs or alcohol requiring treatment within the last 5 years.</div><div class="qans"><label><input type="radio" name="E4" value="yes"> Yes</label><label><input type="radio" name="E4" value="no"> No</label></div></div>
       </div>
       <div class="qrow">
-        <div class="qnum">7</div>
+        <div class="qnum">8</div>
         <div class="qtext">I have had back problems, hernia, ulcers, or diabetes.</div>
         <div class="qans">
-          <label><input type="radio" name="q7" value="yes" data-show="box-F"> Yes</label>
-          <label><input type="radio" name="q7" value="no" data-hide="box-F"> No</label>
+          <label><input type="radio" name="q8" value="yes" data-show="box-F"> Yes</label>
+          <label><input type="radio" name="q8" value="no" data-hide="box-F"> No</label>
         </div>
       </div>
       <div class="expand" id="box-F">
@@ -294,11 +310,11 @@ canvas.sig{display:block;width:100%;height:110px;cursor:crosshair;touch-action:n
         <div class="qrow"><div class="qtext">Active or untreated ulcers, problem wounds, or ulcer surgery within the last 6 months.</div><div class="qans"><label><input type="radio" name="F5" value="yes"> Yes</label><label><input type="radio" name="F5" value="no"> No</label></div></div>
       </div>
       <div class="qrow">
-        <div class="qnum">8</div>
+        <div class="qnum">9</div>
         <div class="qtext">I have had stomach or intestine problems, including recent diarrhea.</div>
         <div class="qans">
-          <label><input type="radio" name="q8" value="yes" data-show="box-G"> Yes</label>
-          <label><input type="radio" name="q8" value="no" data-hide="box-G"> No</label>
+          <label><input type="radio" name="q9" value="yes" data-show="box-G"> Yes</label>
+          <label><input type="radio" name="q9" value="no" data-hide="box-G"> No</label>
         </div>
       </div>
       <div class="expand" id="box-G">
@@ -311,22 +327,12 @@ canvas.sig{display:block;width:100%;height:110px;cursor:crosshair;touch-action:n
         <div class="qrow"><div class="qtext">Bariatric surgery within the last 12 months.</div><div class="qans"><label><input type="radio" name="G6" value="yes"> Yes</label><label><input type="radio" name="G6" value="no"> No</label></div></div>
       </div>
       <div class="qrow">
-        <div class="qnum">9</div>
+        <div class="qnum">10</div>
         <div class="qtext">I am taking prescription medications (with the exception of birth control or anti-malarial drugs other than mefloquine (Lariam).</div>
         <div class="qans">
-          <label><input type="radio" name="q9" value="yes" data-physician="1"> Yes *</label>
-          <label><input type="radio" name="q9" value="no"> No</label>
+          <label><input type="radio" name="q10" value="yes" data-physician="1"> Yes *</label>
+          <label><input type="radio" name="q10" value="no"> No</label>
         </div>
-      </div>
-      <hr class="divider">
-      <p class="sec-title">Additional Question - Divers Over 45</p>
-      <div class="notice" style="margin-bottom:14px;">Complete Box B only if you are over 45 years of age.</div>
-      <div class="expand shown" id="box-B" style="margin-left:0;">
-        <div class="blabel">Box B - Over 45 <span class="badge">Physician approval required if any Yes</span></div>
-        <div class="qrow"><div class="qtext">I currently smoke or inhale nicotine by other means.</div><div class="qans"><label><input type="radio" name="B1" value="yes"> Yes</label><label><input type="radio" name="B1" value="no"> No</label></div></div>
-        <div class="qrow"><div class="qtext">I have a high cholesterol level.</div><div class="qans"><label><input type="radio" name="B2" value="yes"> Yes</label><label><input type="radio" name="B2" value="no"> No</label></div></div>
-        <div class="qrow"><div class="qtext">I have high blood pressure.</div><div class="qans"><label><input type="radio" name="B3" value="yes"> Yes</label><label><input type="radio" name="B3" value="no"> No</label></div></div>
-        <div class="qrow"><div class="qtext">I have had a close blood relative die suddenly or of cardiac disease or stroke before the age of 50, OR have a family history of heart disease before age 50 (including abnormal heart rhythms, coronary artery disease or cardiomyopathy).</div><div class="qans"><label><input type="radio" name="B4" value="yes"> Yes</label><label><input type="radio" name="B4" value="no"> No</label></div></div>
       </div>
       <hr class="divider">
       <p class="sec-title">Participant Signature</p>
@@ -497,10 +503,10 @@ document.querySelectorAll("input[type=radio]").forEach(function(r) {
 });
 function checkPhysician() {
   var need = false;
-  // Q2, Q4, Q9 direct physician triggers
-  if(document.querySelector("input[name=q2][value=yes]").checked) need = true;
-  if(document.querySelector("input[name=q4][value=yes]").checked) need = true;
-  if(document.querySelector("input[name=q9][value=yes]").checked) need = true;
+  // Q3, Q5, Q10 direct physician triggers
+  if(document.querySelector("input[name=q3][value=yes]").checked) need = true;
+  if(document.querySelector("input[name=q5][value=yes]").checked) need = true;
+  if(document.querySelector("input[name=q10][value=yes]").checked) need = true;
   // Any yes inside expand boxes (A-G) or Box B
   document.querySelectorAll(".expand input[type=radio][value=yes]").forEach(function(r){ if(r.checked) need = true; });
   var warn = document.getElementById("phys-warn");
@@ -554,24 +560,12 @@ function validatePanel(panel, idx) {
     if(!email || !email.value.trim()) errors.push("Email address is required");
     var dob = document.getElementById("med-dob");
     if(!dob || !dob.value) errors.push("Birthdate is required");
-    // All 9 main questions answered
-    ["q1","q2","q3","q4","q5","q6","q7","q8","q9"].forEach(function(q) {
+    // All 10 main questions answered
+    ["q1","q2","q3","q4","q5","q6","q7","q8","q9","q10"].forEach(function(q) {
       if(!document.querySelector("input[name="+q+"]:checked")) errors.push("Question "+q.replace("q","")+" must be answered");
     });
-    // Calculate age from birthdate
-    var dob = document.getElementById("med-dob");
-    var over45 = false;
-    if(dob && dob.value) {
-      var dobDate = new Date(dob.value);
-      var ageDiff = Date.now() - dobDate.getTime();
-      var ageDate = new Date(ageDiff);
-      var age = Math.abs(ageDate.getUTCFullYear() - 1970);
-      over45 = age > 45;
-    }
     // Sub-questions in visible expand boxes
     panel.querySelectorAll(".expand.shown").forEach(function(box) {
-      // Skip Box B if diver is not over 45
-      if(box.id === "box-B" && !over45) return;
       var names = {};
       box.querySelectorAll("input[type=radio]").forEach(function(r){ names[r.name]=true; });
       var unanswered = [];
@@ -761,9 +755,8 @@ function buildSnapshotHTML() {
     "#panel-0 .qrow{padding:5px 0!important;gap:10px!important;break-inside:avoid;}" +
     "#panel-0 .qnum{font-size:11.5px!important;min-width:20px!important;margin-top:0!important;}" +
     "#panel-0 .qtext{font-size:11.5px!important;line-height:1.38!important;}" +
-    "#panel-0 .qans{min-width:88px!important;}" +
+    "#panel-0 .qans{min-width:80px!important;flex-shrink:0!important;}" +
     "#panel-0 .qans label{font-size:11px!important;}" +
-    "#panel-0 .qans label:first-child{min-width:46px!important;}" +
     "#panel-0 .expand{padding:8px 14px!important;margin:2px 0 8px 30px!important;break-inside:avoid;}" +
     "#panel-0 .expand .blabel{font-size:11.5px!important;margin-bottom:5px!important;break-after:avoid;}" +
     "#panel-0 .sec-title{font-size:13px!important;margin-bottom:8px!important;padding-bottom:5px!important;break-after:avoid;}" +
