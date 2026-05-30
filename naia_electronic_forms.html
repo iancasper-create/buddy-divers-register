@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>NAI'A Cruises - Guest Forms</title>
-<!-- BD-NAIA 2026-05-30d -->
+<!-- BD-NAIA 2026-05-30e -->
 <link rel="icon" type="image/jpeg" href="https://res.cloudinary.com/dccbsfte0/image/upload/v1774016253/logo2_swvqfe.jpg" />
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Source+Sans+3:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -37,8 +37,8 @@ header p{color:rgba(255,255,255,.6);font-size:13px;margin-top:2px;}
 .qrow:last-child{border-bottom:none;}
 .qnum{font-weight:700;color:var(--navy);font-size:14px;min-width:22px;margin-top:2px;}
 .qtext{flex:1;font-size:14.5px;line-height:1.55;}
-.qans{display:flex;flex-direction:row;gap:14px;min-width:100px;flex-shrink:0;align-items:center;}
-.qans label{display:flex;align-items:center;gap:5px;cursor:pointer;font-size:14px;font-weight:500;touch-action:manipulation;}
+.qans{display:flex;flex-direction:row;gap:10px;min-width:110px;flex-shrink:0;align-items:center;}
+.qans label{display:flex;align-items:center;gap:5px;cursor:pointer;font-size:14px;font-weight:500;touch-action:manipulation;}.qans label:first-child{min-width:54px;}
 .qans input[type=radio]{accent-color:var(--navy);cursor:pointer;touch-action:manipulation;}
 .agree-row input[type=checkbox]{touch-action:manipulation;}
 .expand{display:none;background:#eef5ff;border:1.5px solid #b8d0ef;border-radius:8px;padding:16px 20px;margin:4px 0 14px 36px;}
@@ -98,6 +98,7 @@ canvas.sig{display:block;width:100%;height:110px;cursor:crosshair;touch-action:n
   #panel-0 .qtext{font-size:11.5px!important;line-height:1.38!important;}
   #panel-0 .qans{min-width:80px!important;flex-shrink:0!important;}
   #panel-0 .qans label{font-size:11px!important;}
+  #panel-0 .qans label:first-child{min-width:46px!important;}
   #panel-0 .expand{padding:8px 14px!important;margin:2px 0 8px 30px!important;break-inside:avoid;}
   #panel-0 .expand .blabel{font-size:11.5px!important;margin-bottom:5px!important;break-after:avoid;}
   #panel-0 .sig-area{padding:12px;break-inside:avoid;}
@@ -757,6 +758,7 @@ function buildSnapshotHTML() {
     "#panel-0 .qtext{font-size:11.5px!important;line-height:1.38!important;}" +
     "#panel-0 .qans{min-width:80px!important;flex-shrink:0!important;}" +
     "#panel-0 .qans label{font-size:11px!important;}" +
+    "#panel-0 .qans label:first-child{min-width:46px!important;}" +
     "#panel-0 .expand{padding:8px 14px!important;margin:2px 0 8px 30px!important;break-inside:avoid;}" +
     "#panel-0 .expand .blabel{font-size:11.5px!important;margin-bottom:5px!important;break-after:avoid;}" +
     "#panel-0 .sec-title{font-size:13px!important;margin-bottom:8px!important;padding-bottom:5px!important;break-after:avoid;}" +
