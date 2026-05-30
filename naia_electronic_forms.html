@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>NAI'A Cruises - Guest Forms</title>
-<!-- BD-NAIA 2026-05-30e -->
+<!-- BD-NAIA 2026-05-30f -->
 <link rel="icon" type="image/jpeg" href="https://res.cloudinary.com/dccbsfte0/image/upload/v1774016253/logo2_swvqfe.jpg" />
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Source+Sans+3:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -668,6 +668,7 @@ async function sendPDFByEmail() {
   clearErrors(panel);
   var guestName  = ((document.getElementById("med-name")  || {}).value || "Guest").trim();
   var guestEmail = ((document.getElementById("med-email") || {}).value || "").trim();
+  var guestDate  = ((document.getElementById("med-sig-date") || {}).value || new Date().toISOString().split("T")[0]);
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(guestEmail)) {
     setEmailStatus("Please enter a valid email address in the Diver Medical form first.", "error");
     return;
@@ -678,7 +679,7 @@ async function sendPDFByEmail() {
     setEmailStatus("Preparing your forms&hellip;", "progress");
     var formHtml = buildSnapshotHTML();
     setEmailStatus("Sending&hellip;", "progress");
-    await sendToMake(guestName, guestEmail, formHtml);
+    await sendToMake(guestName, guestEmail, guestDate, formHtml);
     setEmailStatus("&#10003; Submitted. A copy has been emailed to " + guestEmail + " and Buddy-Divers.", "success");
   } catch (err) {
     setEmailStatus("&#10007; " + (err.message || "Something went wrong. Please use Print / Save PDF and email it to info@buddy-divers.com."), "error");
@@ -786,11 +787,11 @@ function utf8ToBase64(str) {
   return btoa(unescape(encodeURIComponent(str)));
 }
 
-async function sendToMake(name, email, formHtml) {
+async function sendToMake(name, email, date, formHtml) {
   var res = await fetch(MAKE_WEBHOOK_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name: name, email: email, form: FORM_NAME, html_b64: utf8ToBase64(formHtml) })
+    body: JSON.stringify({ name: name, email: email, date: date, form: FORM_NAME, html_b64: utf8ToBase64(formHtml) })
   });
   if (!res.ok) throw new Error("Could not submit (" + res.status + "). Please use Print / Save PDF instead.");
 }
