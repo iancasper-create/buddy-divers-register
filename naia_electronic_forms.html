@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>NAI'A Cruises - Guest Forms</title>
+<!-- BD-NAIA 2026-05-30a -->
 <link rel="icon" type="image/jpeg" href="https://res.cloudinary.com/dccbsfte0/image/upload/v1774016253/logo2_swvqfe.jpg" />
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Source+Sans+3:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -37,7 +38,7 @@ header p{color:rgba(255,255,255,.6);font-size:13px;margin-top:2px;}
 .qnum{font-weight:700;color:var(--navy);font-size:14px;min-width:22px;margin-top:2px;}
 .qtext{flex:1;font-size:14.5px;line-height:1.55;}
 .qans{display:flex;gap:10px;min-width:110px;align-items:center;}
-.qans label{display:flex;align-items:center;gap:5px;cursor:pointer;font-size:14px;font-weight:500;}
+.qans label{display:flex;align-items:center;gap:5px;cursor:pointer;font-size:14px;font-weight:500;touch-action:manipulation;}
 .qans input[type=radio]{accent-color:var(--navy);cursor:pointer;touch-action:manipulation;}
 .agree-row input[type=checkbox]{touch-action:manipulation;}
 .expand{display:none;background:#eef5ff;border:1.5px solid #b8d0ef;border-radius:8px;padding:16px 20px;margin:4px 0 14px 36px;}
@@ -69,14 +70,40 @@ canvas.sig{display:block;width:100%;height:110px;cursor:crosshair;touch-action:n
 .agree-row:last-child{border-bottom:none;}
 .agree-row input[type=checkbox]{accent-color:var(--navy);width:16px;height:16px;margin-top:3px;flex-shrink:0;cursor:pointer;}
 .agree-row label{font-size:14px;line-height:1.55;cursor:pointer;}
-.btn-next{background:var(--navy);color:#fff;border:none;border-radius:7px;padding:13px 34px;font-family:'Source Sans 3',sans-serif;font-size:15px;font-weight:600;cursor:pointer;margin-top:20px;}
+.btn-next{background:var(--navy);color:#fff;border:none;border-radius:7px;padding:13px 34px;font-family:'Source Sans 3',sans-serif;font-size:15px;font-weight:600;cursor:pointer;margin-top:20px;touch-action:manipulation;}
 .btn-next:hover{background:#0f2440;}
 .btn-print{background:var(--orange);color:#fff;border:none;border-radius:7px;padding:13px 34px;font-family:'Source Sans 3',sans-serif;font-size:15px;font-weight:600;cursor:pointer;margin-top:20px;}
 .btn-print:hover{background:#b85520;}
+.btn-email{background:#2a6496;color:#fff;border:none;border-radius:7px;padding:13px 34px;font-family:'Source Sans 3',sans-serif;font-size:15px;font-weight:600;cursor:pointer;margin-top:12px;display:block;}
+.btn-email:hover{background:#1e4f75;}
+.btn-email:disabled{background:#aaa;cursor:not-allowed;}
+.email-status{display:none;margin-top:12px;padding:12px 16px;border-radius:6px;font-size:14px;line-height:1.5;}
 @media print{
-  header,.tabs,.btn-print,.btn-next,.phys-warn,.btn-clr{display:none!important;}
+  header,.tabs,.btn-print,.btn-next,.phys-warn,.btn-clr,.btn-email,.email-section,.val-errors{display:none!important;}
   .panel{display:none!important;}
   #panel-0,#panel-1,#panel-2{display:block!important;}
+  /* compact panel-0 medical questionnaire for print */
+  #panel-0 .ch{padding:10px 20px;}
+  #panel-0 .ch h2{font-size:15px;}
+  #panel-0 .cb{padding:14px 20px;font-size:11.5px;line-height:1.5;}
+  #panel-0 .cb > p{margin-bottom:9px;}
+  #panel-0 .notice{display:none;}
+  #panel-0 .divider{margin:10px 0;}
+  #panel-0 .sec-title{font-size:13px;margin-bottom:8px;padding-bottom:4px;}
+  #panel-0 .fr{gap:12px;margin-bottom:10px;}
+  #panel-0 .field label{font-size:11px;}
+  #panel-0 .field input{padding:6px 10px;font-size:12px;}
+  #panel-0 .qrow{padding:5px 0!important;gap:10px!important;break-inside:avoid;}
+  #panel-0 .qnum{font-size:11.5px!important;min-width:20px!important;margin-top:0!important;}
+  #panel-0 .qtext{font-size:11.5px!important;line-height:1.38!important;}
+  #panel-0 .qans{min-width:88px!important;}
+  #panel-0 .qans label{font-size:11px!important;}
+  #panel-0 .qans label:first-child{min-width:46px!important;}
+  #panel-0 .expand{padding:8px 14px!important;margin:2px 0 8px 30px!important;break-inside:avoid;}
+  #panel-0 .expand .blabel{font-size:11.5px!important;margin-bottom:5px!important;break-after:avoid;}
+  #panel-0 .sig-area{padding:12px;break-inside:avoid;}
+  #panel-0 .sig-wrap{margin-bottom:6px;}
+  #panel-0 .sig-wrap canvas{height:80px !important;}
   #panel-1{page-break-before:always;}
   #panel-1 .card{margin-bottom:6px;box-shadow:none;border:1px solid #ccc;}
   #panel-1 .ch{padding:10px 20px;}
@@ -105,16 +132,21 @@ canvas.sig{display:block;width:100%;height:110px;cursor:crosshair;touch-action:n
   .fr{grid-template-columns:1fr;}
   .expand{margin-left:0;}
   .tabs{padding:0 4px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
-  .tab{font-size:12px;padding:10px 12px;white-space:nowrap;flex-shrink:0;}
+  .tab{font-size:12px;padding:10px 8px;white-space:nowrap;flex-shrink:0;touch-action:manipulation;}
   .cb{padding:16px;}
   .main{margin:12px auto;padding:0 10px 40px;}
   canvas.sig{height:130px !important;}
   .qans{min-width:90px;}
   .qans label{font-size:13px;}
-  .btn-next,.btn-print{width:100%;text-align:center;padding:15px;}
+  .btn-next,.btn-print,.btn-email{width:100%;text-align:center;padding:15px;}
   header{padding:16px 16px;}
   header h1{font-size:17px;}
   .field input{font-size:16px;}
+  /* mobile only: question text full-width on top, Yes/No as wide low-profile buttons underneath */
+  .qrow{flex-wrap:wrap;gap:6px;}
+  .qrow .qans{flex-basis:100%;width:100%;min-width:0;margin-top:4px;gap:10px;}
+  .qrow .qans label{flex:1;min-width:0;justify-content:center;border:1.5px solid var(--border);border-radius:6px;padding:6px 14px;background:#fafcfe;font-size:14px;font-weight:600;touch-action:manipulation;}
+  .qrow .qans label:first-child{min-width:0;}
 }
 </style>
 </head>
@@ -414,6 +446,10 @@ canvas.sig{display:block;width:100%;height:110px;cursor:crosshair;touch-action:n
       </div>
       <p style='font-size:12px;color:var(--muted);border-top:1px solid var(--border);padding-top:12px;margin-top:16px;'>NAI'A Cruises Fiji Ltd. &nbsp;|&nbsp; PO Box 332, Pacific Harbour, Fiji &nbsp;|&nbsp; Tel: 679.345.0382 &nbsp;|&nbsp; Fax: 679.345.0566 &nbsp;|&nbsp; explore@naia.com.fj</p>
       <button class="btn-print">Print / Save PDF</button>
+      <div class="email-section">
+        <button class="btn-email" id="btn-email-pdf" onclick="sendPDFByEmail()">&#9993; Email PDF</button>
+        <div class="email-status" id="email-status"></div>
+      </div>
     </div>
   </div>
 </div>
@@ -624,6 +660,146 @@ document.getElementById("med-name").addEventListener("input", function() {
 
 var today = new Date().toISOString().split("T")[0];
 ["med-date","med-sig-date","storm-date","waiver-sig-date"].forEach(function(id){ var el=document.getElementById(id); if(el)el.value=today; });
+
+// ── Email PDF ─────────────────────────────────────────────────────
+var MAKE_WEBHOOK_URL = "https://hook.eu1.make.com/ugucimbs6p6tbac9sjmrr4as1l6pconu";
+var FORM_NAME = "NAI'A";
+var EMAIL_PANEL_INDEX = 2;
+
+async function sendPDFByEmail() {
+  var panel = document.getElementById("panel-" + EMAIL_PANEL_INDEX);
+  var errors = validatePanel(panel, EMAIL_PANEL_INDEX);
+  if (errors.length > 0) { showErrors(errors, panel); return; }
+  clearErrors(panel);
+  var guestName  = ((document.getElementById("med-name")  || {}).value || "Guest").trim();
+  var guestEmail = ((document.getElementById("med-email") || {}).value || "").trim();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(guestEmail)) {
+    setEmailStatus("Please enter a valid email address in the Diver Medical form first.", "error");
+    return;
+  }
+  var btn = document.getElementById("btn-email-pdf");
+  btn.disabled = true;
+  try {
+    setEmailStatus("Preparing your forms&hellip;", "progress");
+    var formHtml = buildSnapshotHTML();
+    setEmailStatus("Sending&hellip;", "progress");
+    await sendToMake(guestName, guestEmail, formHtml);
+    setEmailStatus("&#10003; Submitted. A copy has been emailed to " + guestEmail + " and Buddy-Divers.", "success");
+  } catch (err) {
+    setEmailStatus("&#10007; " + (err.message || "Something went wrong. Please use Print / Save PDF and email it to info@buddy-divers.com."), "error");
+    console.error(err);
+  }
+  btn.disabled = false;
+}
+
+function setEmailStatus(msg, type) {
+  var el = document.getElementById("email-status");
+  if (!el) return;
+  el.innerHTML = msg;
+  el.style.display = "block";
+  el.style.background = type==="success"?"#e8f5e9":type==="error"?"#fff0f0":"#f0f4ff";
+  el.style.color      = type==="success"?"#2a6430":type==="error"?"#c0392b":"#2c4070";
+  el.style.border     = "1.5px solid "+(type==="success"?"#81c784":type==="error"?"#e57373":"#9db4e8");
+}
+
+// Build a self-contained desktop-width snapshot of all completed panels.
+// PDFBolt renders it at full width; mobile layout rules do not apply in the PDF.
+function buildSnapshotHTML() {
+  function bakeClone(orig) {
+    var clone = orig.cloneNode(true);
+    var oF = orig.querySelectorAll("input,select,textarea");
+    var cF = clone.querySelectorAll("input,select,textarea");
+    for (var i = 0; i < oF.length; i++) {
+      var o = oF[i], c = cF[i]; if (!c) continue;
+      var tag = o.tagName.toLowerCase();
+      if (tag === "select") {
+        for (var s = 0; s < c.options.length; s++) {
+          if (s === o.selectedIndex) c.options[s].setAttribute("selected", "selected");
+          else c.options[s].removeAttribute("selected");
+        }
+      } else if (o.type === "radio" || o.type === "checkbox") {
+        if (o.checked) c.setAttribute("checked", "checked"); else c.removeAttribute("checked");
+      } else if (tag === "textarea") {
+        c.textContent = o.value;
+      } else {
+        c.setAttribute("value", o.value == null ? "" : o.value);
+      }
+    }
+    var oC = orig.querySelectorAll("canvas");
+    var cC = clone.querySelectorAll("canvas");
+    for (var k = 0; k < oC.length; k++) {
+      var oc = oC[k], cc = cC[k]; if (!cc) continue;
+      try {
+        var img = document.createElement("img");
+        img.src = oc.toDataURL("image/png");
+        img.setAttribute("style", "display:block;width:auto;max-width:100%;height:auto;border-radius:6px;");
+        if (cc.parentNode) cc.parentNode.replaceChild(img, cc);
+      } catch (e) {}
+    }
+    clone.style.display = "block";
+    return clone;
+  }
+
+  var head = '<meta charset="UTF-8"><meta name="viewport" content="width=900">';
+  document.querySelectorAll('link[rel="stylesheet"]').forEach(function(l){ head += l.outerHTML; });
+
+  var css = "";
+  document.querySelectorAll("style").forEach(function(s){ css += s.textContent + "\n"; });
+  css +=
+    "\n/* snapshot overrides: force clean full-width document */\n" +
+    "body{background:#ffffff!important;}" +
+    ".main{max-width:100%!important;margin:0!important;padding:24px 30px 30px!important;}" +
+    ".panel{display:block!important;}" +
+    ".fr{grid-template-columns:1fr 1fr!important;}" +
+    ".expand{margin-left:36px!important;}" +
+    "header,.tabs,.btn-next,.btn-print,.btn-email,.email-section,.preread-card,.val-errors,.phys-warn{display:none!important;}" +
+    ".card{box-shadow:none!important;border:1px solid #d8d8d8!important;}" +
+    ".snap-break{page-break-before:always;}" +
+    "/* --- compact Diver Medical questionnaire (panel-0): tight, no rows/boxes split across pages --- */" +
+    "#panel-0 h2{font-size:18px!important;margin-bottom:8px!important;break-after:avoid;}" +
+    "#panel-0 p{font-size:11px!important;line-height:1.45!important;margin-bottom:10px!important;}" +
+    "#panel-0 .qrow{padding:5px 0!important;gap:10px!important;break-inside:avoid;}" +
+    "#panel-0 .qnum{font-size:11.5px!important;min-width:20px!important;margin-top:0!important;}" +
+    "#panel-0 .qtext{font-size:11.5px!important;line-height:1.38!important;}" +
+    "#panel-0 .qans{min-width:88px!important;}" +
+    "#panel-0 .qans label{font-size:11px!important;}" +
+    "#panel-0 .qans label:first-child{min-width:46px!important;}" +
+    "#panel-0 .expand{padding:8px 14px!important;margin:2px 0 8px 30px!important;break-inside:avoid;}" +
+    "#panel-0 .expand .blabel{font-size:11.5px!important;margin-bottom:5px!important;break-after:avoid;}" +
+    "#panel-0 .sec-title{font-size:13px!important;margin-bottom:8px!important;padding-bottom:5px!important;break-after:avoid;}" +
+    "#panel-0 .notice{font-size:11px!important;line-height:1.4!important;break-inside:avoid;}" +
+    "#panel-0 .field label{font-size:11px!important;}" +
+    "#panel-0 .sig-area{break-inside:avoid;}";
+
+  var targets = [];
+  document.querySelectorAll(".main > .panel").forEach(function(p){ targets.push(p); });
+  var evalForm = document.getElementById("eval-form");
+  if (evalForm && evalForm.classList.contains("shown")) targets.push(evalForm);
+
+  var body = '<div class="main">';
+  for (var t = 0; t < targets.length; t++) {
+    var clone = bakeClone(targets[t]);
+    if (t > 0) clone.className = (clone.className + " snap-break").replace(/^\s+/, "");
+    body += clone.outerHTML;
+  }
+  body += '</div>';
+
+  return '<!DOCTYPE html><html lang="en"><head>' + head + '<style>' + css + '</style></head><body>' + body + '</body></html>';
+}
+
+function utf8ToBase64(str) {
+  return btoa(unescape(encodeURIComponent(str)));
+}
+
+async function sendToMake(name, email, formHtml) {
+  var res = await fetch(MAKE_WEBHOOK_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name: name, email: email, form: FORM_NAME, html_b64: utf8ToBase64(formHtml) })
+  });
+  if (!res.ok) throw new Error("Could not submit (" + res.status + "). Please use Print / Save PDF instead.");
+}
+
 </script>
 </body>
 </html>
