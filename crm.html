@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-CRM 2026-05-30a | Admin dashboard — light theme, brand colours -->
+<!-- BD-CRM 2026-05-30b | Admin dashboard — light theme, brand colours -->
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
@@ -437,6 +437,19 @@
 </style>
 </head>
 <body>
+
+<!-- TOKEN OVERLAY -->
+<div id="tokenOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:2000;display:flex;align-items:center;justify-content:center;">
+  <div style="background:white;border-radius:16px;padding:36px;width:min(420px,90vw);box-shadow:0 8px 40px rgba(0,0,0,0.22);">
+    <img src="https://res.cloudinary.com/dccbsfte0/image/upload/v1773063708/logo_hnmilh.png" style="height:44px;display:block;margin:0 auto 22px;" alt="Buddy-Divers"/>
+    <h2 style="font-family:'Plus Jakarta Sans',sans-serif;font-size:18px;font-weight:700;color:#1a3a5c;text-align:center;margin-bottom:8px;">Buddy-Divers CRM</h2>
+    <p style="font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;color:#6e90a8;text-align:center;margin-bottom:22px;">Enter your Airtable token to continue.<br/>It will be remembered for this session.</p>
+    <input type="password" id="tokenInput" placeholder="pat..." style="width:100%;border:1.5px solid #c5dfe6;border-radius:8px;padding:11px 14px;font-family:'Plus Jakarta Sans',sans-serif;font-size:15px;color:#1a3a5c;outline:none;margin-bottom:12px;"/>
+    <button onclick="submitToken()" style="width:100%;background:#1a3a5c;color:white;border:none;border-radius:8px;padding:13px;font-family:'Plus Jakarta Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;">Enter</button>
+    <div id="tokenError" style="color:#d93f3f;font-size:13px;text-align:center;margin-top:10px;display:none;">Invalid token. Please try again.</div>
+  </div>
+</div>
+
 <div class="shell">
 
   <!-- SIDEBAR -->
@@ -513,13 +526,13 @@
       <div class="stats-row fade-in">
         <div class="stat-card">
           <div class="stat-label">Active Trips</div>
-          <div class="stat-value">22</div>
-          <div class="stat-sub">2026 &ndash; 2027 season</div>
+          <div class="stat-value" id="stat-trips">—</div>
+          <div class="stat-sub" id="stat-trips-sub">Loading...</div>
         </div>
         <div class="stat-card">
-          <div class="stat-label">Platform</div>
-          <div class="stat-value teal">Live</div>
-          <div class="stat-sub">GitHub Pages &middot; Airtable</div>
+          <div class="stat-label">Registered Divers</div>
+          <div class="stat-value teal" id="stat-divers">—</div>
+          <div class="stat-sub" id="stat-divers-sub">Loading...</div>
         </div>
         <div class="stat-card">
           <div class="stat-label">Automation</div>
@@ -699,5 +712,87 @@
     </main>
   </div>
 </div>
+<script>
+// ── CONSTANTS ────────────────────────────────────────────────────
+const BASE_ID            = 'app2RAeuaXaWrHOan';
+const TRIPS_TABLE        = 'tbl8KGVwkIHi26plq';
+const BOOKINGS_TABLE     = 'tblMCB8nCSoRuiTKI';
+
+let AIRTABLE_API_KEY = sessionStorage.getItem('bd_airtable_token') || '';
+
+// ── TOKEN MANAGEMENT ─────────────────────────────────────────────
+function checkToken() {
+  if (!AIRTABLE_API_KEY || !AIRTABLE_API_KEY.startsWith('pat')) {
+    document.getElementById('tokenOverlay').style.display = 'flex';
+  } else {
+    loadStats();
+  }
+}
+
+function submitToken() {
+  const val = document.getElementById('tokenInput').value.trim();
+  if (!val.startsWith('pat')) {
+    document.getElementById('tokenError').style.display = 'block';
+    return;
+  }
+  AIRTABLE_API_KEY = val;
+  sessionStorage.setItem('bd_airtable_token', val);
+  document.getElementById('tokenOverlay').style.display = 'none';
+  document.getElementById('tokenError').style.display = 'none';
+  loadStats();
+}
+
+document.getElementById('tokenInput').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') submitToken();
+});
+
+// ── LIVE STATS ───────────────────────────────────────────────────
+async function loadStats() {
+  loadTripCount();
+  loadDiverCount();
+}
+
+async function loadTripCount() {
+  try {
+    const url = `https://api.airtable.com/v0/${BASE_ID}/${TRIPS_TABLE}?fields%5B%5D=Trip+Id&pageSize=100`;
+    const res = await fetch(url, { headers: { Authorization: `Bearer ${AIRTABLE_API_KEY}` } });
+    if (!res.ok) { setStatError('trips'); return; }
+    const data = await res.json();
+    const count = (data.records || []).filter(r => r.fields['Trip Id']).length;
+    document.getElementById('stat-trips').textContent = count;
+    document.getElementById('stat-trips-sub').textContent = '2026 \u2013 2027 season';
+  } catch(e) {
+    setStatError('trips');
+  }
+}
+
+async function loadDiverCount() {
+  try {
+    // Count unique bookings (one row = one diver on one trip)
+    let total = 0;
+    let offset = '';
+    do {
+      const url = `https://api.airtable.com/v0/${BASE_ID}/${BOOKINGS_TABLE}?fields%5B%5D=Trip+ID&pageSize=100` + (offset ? `&offset=${offset}` : '');
+      const res = await fetch(url, { headers: { Authorization: `Bearer ${AIRTABLE_API_KEY}` } });
+      if (!res.ok) { setStatError('divers'); return; }
+      const data = await res.json();
+      total += (data.records || []).length;
+      offset = data.offset || '';
+    } while (offset);
+    document.getElementById('stat-divers').textContent = total;
+    document.getElementById('stat-divers-sub').textContent = 'Total bookings across all trips';
+  } catch(e) {
+    setStatError('divers');
+  }
+}
+
+function setStatError(which) {
+  document.getElementById('stat-' + which).textContent = '—';
+  document.getElementById('stat-' + which + '-sub').textContent = 'Could not load';
+}
+
+// ── INIT ─────────────────────────────────────────────────────────
+checkToken();
+</script>
 </body>
 </html>
