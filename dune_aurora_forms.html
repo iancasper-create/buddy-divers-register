@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DUNE Aurora - Guest Forms</title>
-<!-- BD-DUNE-AURORA 2026-05-29e -->
+<!-- BD-DUNE-AURORA 2026-05-30a -->
 <link rel="icon" type="image/jpeg" href="https://res.cloudinary.com/dccbsfte0/image/upload/v1774016253/logo2_swvqfe.jpg" />
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Source+Sans+3:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -77,10 +77,32 @@ canvas.sig{display:block;width:100%;height:110px;cursor:crosshair;touch-action:n
 .email-status{display:none;margin-top:12px;padding:12px 16px;border-radius:6px;font-size:14px;line-height:1.5;}
 @media print{
   .fr{grid-template-columns:1fr 1fr!important;}.fr3{grid-template-columns:1fr 1fr 1fr!important;}.fr4{grid-template-columns:1fr 1fr 1fr 1fr!important;}.sig-block{grid-template-columns:3fr 1fr!important;}.expand{margin-left:36px!important;}
-  header,.tabs,.btn-print,.btn-next,.phys-warn{display:none!important;}
+  header,.tabs,.btn-print,.btn-next,.btn-email,.email-section,.phys-warn,.val-errors{display:none!important;}
   .panel{display:none!important;}
   #panel-0,#panel-1,#panel-2{display:block!important;}
   #panel-1{page-break-before:always;}
+  /* compact Diver Medical (panel-1) for print */
+  #panel-1 .card{margin-bottom:6px;box-shadow:none;border:1px solid #ccc;}
+  #panel-1 .cb{padding:14px 20px;font-size:11.5px;line-height:1.5;}
+  #panel-1 .cb > p{margin-bottom:9px;}
+  #panel-1 .divider{margin:10px 0;}
+  #panel-1 .sec-title{font-size:13px;margin-bottom:8px;padding-bottom:4px;}
+  #panel-1 .fr{gap:12px;margin-bottom:10px;}
+  #panel-1 .field label{font-size:11px;}
+  #panel-1 .field input{padding:6px 10px;font-size:12px;}
+  #panel-1 .qrow{padding:5px 0!important;gap:10px!important;break-inside:avoid;}
+  #panel-1 .qnum{font-size:11.5px!important;min-width:20px!important;margin-top:0!important;}
+  #panel-1 .qtext{font-size:11.5px!important;line-height:1.38!important;}
+  #panel-1 .qans{min-width:88px!important;flex-shrink:0!important;}
+  #panel-1 .qans label{font-size:11px!important;}
+  #panel-1 .qans label:first-child{min-width:46px!important;}
+  #panel-1 .expand{padding:8px 14px!important;margin:2px 0 8px 30px!important;break-inside:avoid;}
+  #panel-1 .expand .blabel{font-size:11.5px!important;margin-bottom:5px!important;break-after:avoid;}
+  #panel-1 .sec-title{break-after:avoid;}
+  #panel-1 .notice{font-size:11px!important;line-height:1.4!important;break-inside:avoid;}
+  #panel-1 .sig-area{padding:12px;break-inside:avoid;}
+  #panel-1 .sig-wrap{margin-bottom:6px;}
+  #panel-1 .sig-wrap canvas{height:80px !important;}
   #panel-2{page-break-before:always;}
   .main{margin:0;padding:0;max-width:100%;}
   .card{box-shadow:none;border:1px solid #ccc;}
@@ -90,11 +112,17 @@ canvas.sig{display:block;width:100%;height:110px;cursor:crosshair;touch-action:n
 }
 @media(max-width:600px){
   .fr{grid-template-columns:1fr;}.fr3{grid-template-columns:1fr 1fr;}.fr4{grid-template-columns:1fr 1fr;}
-  .expand{margin-left:0;}.tabs{padding:0 8px;}.tab{font-size:12px;padding:10px;}.cb{padding:16px;}
+  .expand{margin-left:0;}.tabs{padding:0 6px;overflow-x:auto;-webkit-overflow-scrolling:touch;}.tab{font-size:12px;padding:10px 8px;white-space:nowrap;flex-shrink:0;touch-action:manipulation;}.cb{padding:16px;}
   .main{margin:12px auto;padding:0 10px 40px;}
   canvas.sig{height:130px !important;}
-  .btn-next,.btn-print{width:100%;text-align:center;padding:15px;}.field input,.field select{font-size:16px;}
+  .btn-next,.btn-print,.btn-email{width:100%;text-align:center;padding:15px;}.field input,.field select{font-size:16px;}
   header{padding:16px 20px;}header h1{font-size:17px;}
+  .sig-block{grid-template-columns:1fr;}
+  /* mobile only: question text full-width on top, Yes/No as wide low-profile buttons underneath */
+  .qrow{flex-wrap:wrap;gap:6px;}
+  .qrow .qans{flex-basis:100%;width:100%;min-width:0;margin-top:4px;gap:10px;}
+  .qrow .qans label{flex:1;min-width:0;justify-content:center;border:1.5px solid var(--border);border-radius:6px;padding:6px 14px;background:#fafcfe;font-size:14px;font-weight:600;touch-action:manipulation;}
+  .qrow .qans label:first-child{min-width:0;}
 }
 </style>
 </head>
@@ -566,7 +594,6 @@ function validatePanel(panel, idx) {
       if(!document.querySelector("input[name="+q+"]:checked")) errors.push("Question "+q.replace("q","")+" must be answered");
     });
     panel.querySelectorAll(".expand.shown").forEach(function(box) {
-      if(box.id === "box-B" && !document.querySelector("input[name=q2][value=yes]").checked) return;
       var names = {};
       box.querySelectorAll("input[type=radio]").forEach(function(r){ names[r.name]=true; });
       var unanswered = [];
@@ -632,6 +659,7 @@ async function sendPDFByEmail() {
   clearErrors(panel);
   var guestName  = ((document.getElementById("med-name")  || {}).value || "Guest").trim();
   var guestEmail = ((document.getElementById("med-email") || {}).value || "").trim();
+  var guestDate  = ((document.getElementById("med-sig-date") || {}).value || new Date().toISOString().split("T")[0]);
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(guestEmail)) {
     setEmailStatus("Please enter a valid email address in the Diver Medical form first.", "error");
     return;
@@ -642,7 +670,7 @@ async function sendPDFByEmail() {
     setEmailStatus("Preparing your forms&hellip;", "progress");
     var formHtml = buildSnapshotHTML();
     setEmailStatus("Sending&hellip;", "progress");
-    await sendToMake(guestName, guestEmail, formHtml);
+    await sendToMake(guestName, guestEmail, guestDate, formHtml);
     setEmailStatus("&#10003; Submitted. A copy has been emailed to " + guestEmail + " and Buddy-Divers.", "success");
   } catch (err) {
     setEmailStatus("&#10007; " + (err.message || "Something went wrong. Please use Print / Save PDF and email it to info@buddy-divers.com."), "error");
@@ -720,7 +748,22 @@ function buildSnapshotHTML() {
     ".expand{margin-left:36px!important;}" +
     "header,.tabs,.btn-next,.btn-print,.btn-email,.email-section,.preread-card,.val-errors,.phys-warn{display:none!important;}" +
     ".card{box-shadow:none!important;border:1px solid #d8d8d8!important;}" +
-    ".snap-break{page-break-before:always;}";
+    ".snap-break{page-break-before:always;}" +
+    "/* --- compact Diver Medical questionnaire (panel-1): tight, no rows/boxes split across pages --- */" +
+    "#panel-1 h2{font-size:18px!important;margin-bottom:8px!important;break-after:avoid;}" +
+    "#panel-1 p{font-size:11px!important;line-height:1.45!important;margin-bottom:10px!important;}" +
+    "#panel-1 .qrow{padding:5px 0!important;gap:10px!important;break-inside:avoid;}" +
+    "#panel-1 .qnum{font-size:11.5px!important;min-width:20px!important;margin-top:0!important;}" +
+    "#panel-1 .qtext{font-size:11.5px!important;line-height:1.38!important;}" +
+    "#panel-1 .qans{min-width:88px!important;flex-shrink:0!important;}" +
+    "#panel-1 .qans label{font-size:11px!important;}" +
+    "#panel-1 .qans label:first-child{min-width:46px!important;}" +
+    "#panel-1 .expand{padding:8px 14px!important;margin:2px 0 8px 30px!important;break-inside:avoid;}" +
+    "#panel-1 .expand .blabel{font-size:11.5px!important;margin-bottom:5px!important;break-after:avoid;}" +
+    "#panel-1 .sec-title{font-size:13px!important;margin-bottom:8px!important;padding-bottom:5px!important;break-after:avoid;}" +
+    "#panel-1 .notice{font-size:11px!important;line-height:1.4!important;break-inside:avoid;}" +
+    "#panel-1 .field label{font-size:11px!important;}" +
+    "#panel-1 .sig-area{break-inside:avoid;}";
 
   var targets = [];
   document.querySelectorAll(".main > .panel").forEach(function(p){ targets.push(p); });
@@ -743,11 +786,11 @@ function utf8ToBase64(str) {
   return btoa(unescape(encodeURIComponent(str)));
 }
 
-async function sendToMake(name, email, formHtml) {
+async function sendToMake(name, email, date, formHtml) {
   var res = await fetch(MAKE_WEBHOOK_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name: name, email: email, form: FORM_NAME, html_b64: utf8ToBase64(formHtml) })
+    body: JSON.stringify({ name: name, email: email, date: date, form: FORM_NAME, html_b64: utf8ToBase64(formHtml) })
   });
   if (!res.ok) throw new Error("Could not submit (" + res.status + "). Please use Print / Save PDF instead.");
 }
