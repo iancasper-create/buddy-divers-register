@@ -1,12 +1,48 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" translate="no" class="notranslate">
 <head>
 <meta charset="UTF-8">
 <meta name="google" content="notranslate">
 <meta http-equiv="Content-Language" content="en">
+<script>
+// Aggressively block browser translation.
+// If Chrome translates the page anyway, detect it and reload with translation killed.
+(function(){
+  // 1. Add notranslate to <html> immediately (belt-and-suspenders with the attribute)
+  document.documentElement.setAttribute('translate','no');
+  document.documentElement.classList.add('notranslate');
+  // 2. Watch for Chrome inserting font[_mstmutation] or changing xml:lang — the tell-tale of an active translation
+  var observer = new MutationObserver(function(mutations){
+    for(var i=0;i<mutations.length;i++){
+      var t = mutations[i].target;
+      if(t && t.tagName && (t.tagName==='FONT' || (t.getAttribute && t.getAttribute('_mstmutation')))){
+        observer.disconnect();
+        // Force a clean reload that suppresses translation
+        if(location.search.indexOf('notranslate')===-1){
+          location.replace(location.href + (location.search?'&':'?') + 'notranslate=1');
+        }
+        return;
+      }
+    }
+  });
+  observer.observe(document.documentElement,{subtree:true,childList:true,attributes:true,attributeFilter:['_mstmutation','class','lang']});
+  // 3. Also check on DOMContentLoaded — catches Firefox and Safari translate
+  document.addEventListener('DOMContentLoaded',function(){
+    if(document.documentElement.lang && document.documentElement.lang !== 'en'){
+      document.documentElement.lang = 'en';
+    }
+    // If any element has been wrapped in <font> tags (Chrome translate signature), reload
+    if(document.querySelector('font[_mstmutation],font[style*="vertical-align"]')){
+      if(location.search.indexOf('notranslate')===-1){
+        location.replace(location.href + (location.search?'&':'?') + 'notranslate=1');
+      }
+    }
+  });
+})();
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DUNE Aurora - Guest Forms</title>
-<!-- BD-DUNE-AURORA 2026-05-30b -->
+<!-- BD-DUNE-AURORA 2026-05-30c -->
 <link rel="icon" type="image/jpeg" href="https://res.cloudinary.com/dccbsfte0/image/upload/v1774016253/logo2_swvqfe.jpg" />
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Source+Sans+3:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
