@@ -42,7 +42,7 @@
 </script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>NAI'A Cruises - Guest Forms</title>
-<!-- BD-NAIA 2026-05-30i -->
+<!-- BD-NAIA 2026-06-01a -->
 <link rel="icon" type="image/jpeg" href="https://res.cloudinary.com/dccbsfte0/image/upload/v1774016253/logo2_swvqfe.jpg" />
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Source+Sans+3:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -755,6 +755,31 @@ function setEmailStatus(msg, type) {
   el.style.border     = "1.5px solid "+(type==="success"?"#81c784":type==="error"?"#e57373":"#9db4e8");
 }
 
+// ── Compact signature export ────────────────────────────────
+// Signatures used to be exported as full-size transparent PNGs, which pushed
+// the emailed payload past PDFBolt's 1 MB request limit (PAYLOAD_TOO_LARGE).
+// Flatten onto white and export a downscaled JPEG instead: visually identical
+// in the printed/PDF form (a signature is black ink on white anyway), but only
+// ~30 KB each instead of several hundred KB. Falls back to the original PNG
+// export if anything throws, so behaviour is never worse than before.
+function compactSig(src) {
+  try {
+    var maxW = 600;
+    var scale = src.width > maxW ? maxW / src.width : 1;
+    var w = Math.max(1, Math.round(src.width * scale));
+    var h = Math.max(1, Math.round(src.height * scale));
+    var tmp = document.createElement("canvas");
+    tmp.width = w; tmp.height = h;
+    var tctx = tmp.getContext("2d");
+    tctx.fillStyle = "#ffffff";
+    tctx.fillRect(0, 0, w, h);
+    tctx.drawImage(src, 0, 0, w, h);
+    return tmp.toDataURL("image/jpeg", 0.85);
+  } catch (e) {
+    return src.toDataURL("image/png");
+  }
+}
+
 // Build a self-contained desktop-width snapshot of all completed panels.
 // PDFBolt renders it at full width; mobile layout rules do not apply in the PDF.
 function buildSnapshotHTML() {
@@ -784,7 +809,7 @@ function buildSnapshotHTML() {
       var oc = oC[k], cc = cC[k]; if (!cc) continue;
       try {
         var img = document.createElement("img");
-        img.src = oc.toDataURL("image/png");
+        img.src = compactSig(oc);
         img.setAttribute("style", "display:block;width:auto;max-width:100%;height:auto;border-radius:6px;");
         if (cc.parentNode) cc.parentNode.replaceChild(img, cc);
       } catch (e) {}
