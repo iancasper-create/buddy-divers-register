@@ -1,4 +1,4 @@
-<!-- BD-EDIT 2026-06-04a | Current-doc thumbnail preview (load + on upload), shared curFileHTML helper -->
+<!-- BD-EDIT 2026-06-04b | Current-doc thumbnail preview; Returning Customer sends Yes/null not 'No' (Airtable select-option fix) -->
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
@@ -874,7 +874,10 @@ async function saveDiver() {
     if (pm) fields['Payment Method'] = pm.value;
     // Additional
     const rcCb = document.getElementById('f-returningCustomer');
-    if (rcCb) fields['Returning Customer'] = rcCb.checked ? 'Yes' : 'No';
+    // Send 'Yes' when ticked; clear the field (null) when not. Never send 'No' —
+    // the Airtable dropdown has no 'No' option and the token cannot create one,
+    // which would fail the whole save ("cannot create new select option").
+    if (rcCb) fields['Returning Customer'] = rcCb.checked ? 'Yes' : null;
     add('Notes','f-notes'); add('Referral Source','f-referral'); add('Media Consent','f-mediaConsent');
     // Photos — only new uploads
     [['f-passportPhoto','Passport Photo URL'],['f-certPhoto','Dive Cert Photo URL'],
