@@ -1,4 +1,4 @@
-<!-- BD-EDIT 2026-04-04g -->
+<!-- BD-EDIT 2026-06-04a | Current-doc thumbnail preview (load + on upload), shared curFileHTML helper -->
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
@@ -970,7 +970,7 @@ async function handleUpload(input, areaId, urlFieldId, statusId, folder, docType
     const short=file.name.length>35?file.name.substring(0,32)+'...':file.name;
     statusEl.innerHTML=`<span class="upload-success">✓ הועלה / Uploaded: ${short}</span>`;
     const curEl=document.getElementById(areaId.replace('Area','-current'));
-    if(curEl){curEl.style.display='block';curEl.innerHTML=`קובץ נוכחי: <a href="${result.secure_url}" target="_blank">צפה / View</a>`;}
+    if(curEl){curEl.style.display='block';curEl.innerHTML=curFileHTML(result.secure_url);}
     if(airtableField) currentDiverFields[airtableField]=result.secure_url;
   } catch(e) {
     area.classList.remove('uploading','upload-done'); area.classList.add('upload-error');
@@ -1010,10 +1010,16 @@ function setSel(id, val) {
   }
 }
 
+function curFileHTML(u) {
+  return 'קובץ נוכחי: <a href="' + u + '" target="_blank">צפה / View</a>'
+    + '<div style="margin-top:6px;"><a href="' + u + '" target="_blank">'
+    + '<img src="' + u + '" alt="" style="max-height:90px;max-width:140px;border-radius:8px;border:1px solid #c8d6e5;object-fit:cover;display:block;" /></a></div>';
+}
+
 function setCurFile(curId, hiddenId, url) {
   const el=document.getElementById(curId); const h=document.getElementById(hiddenId);
   if(!el) return;
-  if(url){el.style.display='block';el.innerHTML=`קובץ נוכחי: <a href="${url}" target="_blank">צפה / View</a>`;}
+  if(url){el.style.display='block';el.innerHTML=curFileHTML(url);}
   else{el.style.display='none';}
   if(h) h.value='';
 }
