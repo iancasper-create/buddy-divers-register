@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-REG 2026-05-21a | Added trip 260927 Sinai Sep 27 (same pricing as 260708) -->
+<!-- BD-REG 2026-06-04a | Returning-diver: refresh photo preview thumbnail on new upload (was showing old image) -->
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8" />
@@ -2656,6 +2656,12 @@ async function handleUpload(input, areaId, urlFieldId, statusId, folder, docType
       area.classList.add('upload-done');
       const shortName = file.name.length > 30 ? file.name.substring(0,27)+'...' : file.name;
       statusEl.innerHTML = `<span class="upload-success">✓ הועלה בהצלחה / Uploaded: ${shortName}</span>`;
+      // Returning-diver flow: prefill built a preview thumbnail from the OLD url.
+      // Refresh it to the newly uploaded image so the diver sees their replacement.
+      const prevImg = area.querySelector('.upload-photo-preview img');
+      if (prevImg) prevImg.src = result.secure_url;
+      const prevLink = area.querySelector('.upload-photo-preview a');
+      if (prevLink) prevLink.href = result.secure_url;
     } else {
       throw new Error('No URL in response');
     }
