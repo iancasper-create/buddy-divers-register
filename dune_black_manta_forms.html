@@ -262,7 +262,7 @@ canvas.sig{display:block;width:100%;height:110px;cursor:crosshair;touch-action:n
       <hr class="divider"><p class="sec-title">On Board Extras</p>
       <div class="fr4">
         <div class="field"><label>15L Tank (Y/N)</label><input type="text"></div>
-        <div class="field"><label>Private Guide (Y/N) +$7/day</label><input type="text"></div>
+        <div class="field"><label>Private Guide (Y/N)</label><input type="text"></div>
         <div class="field"><label>Underwater Photographer / Videographer (Y/N)</label><input type="text"></div>
         <div class="field"></div>
       </div>
@@ -285,7 +285,7 @@ canvas.sig{display:block;width:100%;height:110px;cursor:crosshair;touch-action:n
         <div class="field"><label>Shoe / Foot Size</label><input type="text" placeholder="e.g. EU 42"></div>
         <div class="field"></div>
       </div>
-      <hr class="divider"><p class="sec-title">Flight Information</p>
+      <hr class="divider"><p class="sec-title">Flight Information &mdash; <span style="color:#cc0000;font-weight:700;">Domestic Flight Details</span></p>
       <div class="fr4">
         <div class="field"><label>Arrival Date</label><input type="date"></div>
         <div class="field"><label>Arrival Flight No.</label><input type="text"></div>
@@ -657,10 +657,10 @@ function initSig(cid,pid) {
   var cnv=document.getElementById(cid), ph=document.getElementById(pid);
   if(!cnv) return;
   var ctx=cnv.getContext("2d"), drawing=false, lx=0, ly=0;
-  function sizeCanvas() { var r=cnv.getBoundingClientRect(); if(r.width===0) return; cnv.width=Math.round(r.width); cnv.height=Math.round(r.height); }
+  function sizeCanvas() { var r=cnv.getBoundingClientRect(); if(r.width===0) return; var w=Math.round(r.width),h=Math.round(r.height); if(cnv.width===w&&cnv.height===h) return; cnv.width=w; cnv.height=h; }
   document.querySelectorAll(".tab,.btn-next").forEach(function(b){ b.addEventListener("click",function(){ setTimeout(sizeCanvas,100); }); });
   setTimeout(sizeCanvas,50);
-  function getPos(e) { sizeCanvas(); var r=cnv.getBoundingClientRect(); var scaleX=cnv.width/r.width,scaleY=cnv.height/r.height; var src=(e.touches&&e.touches.length)?e.touches[0]:e; return {x:(src.clientX-r.left)*scaleX,y:(src.clientY-r.top)*scaleY}; }
+  function getPos(e) { var r=cnv.getBoundingClientRect(); var scaleX=cnv.width/r.width,scaleY=cnv.height/r.height; var src=(e.touches&&e.touches.length)?e.touches[0]:e; return {x:(src.clientX-r.left)*scaleX,y:(src.clientY-r.top)*scaleY}; }
   function draw(lx,ly,x,y){ ctx.beginPath();ctx.moveTo(lx,ly);ctx.lineTo(x,y);ctx.strokeStyle="#000000";ctx.lineWidth=2.5;ctx.lineCap="round";ctx.stroke(); }
   cnv.addEventListener("pointerdown",function(e){ cnv.setPointerCapture(e.pointerId); drawing=true; var p=getPos(e); lx=p.x; ly=p.y; if(ph)ph.style.display="none"; });
   cnv.addEventListener("pointermove",function(e){ if(!drawing)return; var p=getPos(e); draw(lx,ly,p.x,p.y); lx=p.x; ly=p.y; });
