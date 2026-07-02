@@ -42,7 +42,7 @@
 </script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>NAI'A Cruises - Guest Forms</title>
-<!-- BD-NAIA 2026-06-01a -->
+<!-- BD-NAIA 2026-07-02a -->
 <link rel="icon" type="image/jpeg" href="https://res.cloudinary.com/dccbsfte0/image/upload/v1774016253/logo2_swvqfe.jpg" />
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Source+Sans+3:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -716,6 +716,8 @@ var today = new Date().toISOString().split("T")[0];
 // ── Email PDF ─────────────────────────────────────────────────────
 var MAKE_WEBHOOK_URL = "https://hook.eu1.make.com/ugucimbs6p6tbac9sjmrr4as1l6pconu";
 var FORM_NAME = "NAI'A";
+var FOLDER_NAME = "NAIA Fiji";
+var TRIP_DATE_ID = "waiver-depart";
 var EMAIL_PANEL_INDEX = 2;
 
 async function sendPDFByEmail() {
@@ -887,10 +889,13 @@ function utf8ToBase64(str) {
 }
 
 async function sendToMake(name, email, date, formHtml) {
+  var tripEl = document.getElementById(TRIP_DATE_ID);
+  var tripDate = (tripEl && tripEl.value) ? tripEl.value : "date-tbd";
+  var folder = FOLDER_NAME + "/" + tripDate;
   var res = await fetch(MAKE_WEBHOOK_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name: name, email: email, date: date, form: FORM_NAME, html_b64: utf8ToBase64(formHtml) })
+    body: JSON.stringify({ name: name, email: email, date: date, form: FORM_NAME, folder: folder, html_b64: utf8ToBase64(formHtml) })
   });
   if (!res.ok) throw new Error("Could not submit (" + res.status + "). Please use Print / Save PDF instead.");
 }

@@ -42,7 +42,7 @@
 </script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DUNE Madagascar - Guest Forms</title>
-<!-- BD-DUNE-MADAGASCAR 2026-06-01a -->
+<!-- BD-DUNE-MADAGASCAR 2026-07-02a -->
 <link rel="icon" type="image/jpeg" href="https://res.cloudinary.com/dccbsfte0/image/upload/v1774016253/logo2_swvqfe.jpg" />
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Source+Sans+3:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -710,6 +710,8 @@ var today = new Date().toISOString().split("T")[0];
 // Make.com webhook URL — replace with your scenario webhook URL
 var MAKE_WEBHOOK_URL = "https://hook.eu1.make.com/ugucimbs6p6tbac9sjmrr4as1l6pconu";
 var FORM_NAME = "DUNE Madagascar";
+var FOLDER_NAME = "DUNE Madagascar";
+var TRIP_DATE_ID = "arrival-date";
 var EMAIL_PANEL_INDEX = 2;
 
 async function sendPDFByEmail() {
@@ -749,31 +751,6 @@ function setEmailStatus(msg, type) {
   el.style.border     = "1.5px solid "+(type==="success"?"#81c784":type==="error"?"#e57373":"#9db4e8");
 }
 
-// ── Compact signature export ────────────────────────────────
-// Signatures used to be exported as full-size transparent PNGs, which pushed
-// the emailed payload past PDFBolt's 1 MB request limit (PAYLOAD_TOO_LARGE).
-// Flatten onto white and export a downscaled JPEG instead: visually identical
-// in the printed/PDF form (a signature is black ink on white anyway), but only
-// ~30 KB each instead of several hundred KB. Falls back to the original PNG
-// export if anything throws, so behaviour is never worse than before.
-function compactSig(src) {
-  try {
-    var maxW = 600;
-    var scale = src.width > maxW ? maxW / src.width : 1;
-    var w = Math.max(1, Math.round(src.width * scale));
-    var h = Math.max(1, Math.round(src.height * scale));
-    var tmp = document.createElement("canvas");
-    tmp.width = w; tmp.height = h;
-    var tctx = tmp.getContext("2d");
-    tctx.fillStyle = "#ffffff";
-    tctx.fillRect(0, 0, w, h);
-    tctx.drawImage(src, 0, 0, w, h);
-    return tmp.toDataURL("image/jpeg", 0.85);
-  } catch (e) {
-    return src.toDataURL("image/png");
-  }
-}
-
 // Build a self-contained, desktop-width copy of the completed form.
 // The phone does NOT render the PDF -- iOS Safari cannot lay the form out wider
 // than the phone screen, which broke every on-device attempt. Instead we
@@ -807,7 +784,7 @@ function buildSnapshotHTML() {
       var oc = oC[k], cc = cC[k]; if (!cc) continue;
       try {
         var img = document.createElement("img");
-        img.src = compactSig(oc);
+        img.src = oc.toDataURL("image/png");
         img.setAttribute("style", "display:block;width:auto;max-width:100%;height:auto;border-radius:6px;");
         if (cc.parentNode) cc.parentNode.replaceChild(img, cc);
       } catch (e) {}
@@ -884,10 +861,13 @@ function utf8ToBase64(str) {
 }
 
 async function sendToMake(name, email, date, formHtml) {
+  var tripEl = document.getElementById(TRIP_DATE_ID);
+  var tripDate = (tripEl && tripEl.value) ? tripEl.value : "date-tbd";
+  var folder = FOLDER_NAME + "/" + tripDate;
   var res = await fetch(MAKE_WEBHOOK_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name: name, email: email, date: date, form: FORM_NAME, html_b64: utf8ToBase64(formHtml) })
+    body: JSON.stringify({ name: name, email: email, date: date, form: FORM_NAME, folder: folder, html_b64: utf8ToBase64(formHtml) })
   });
   if (!res.ok) throw new Error("Could not submit (" + res.status + "). Please use Print / Save PDF instead.");
 }
