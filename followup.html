@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<!-- BD-FOLLOWUP 2026-05-28h | Fix orphaned brace from catch cleanup (SyntaxError resolved)
+<!-- BD-FOLLOWUP 2026-07-04a | Search by trip and/or first/last name (any combination of the 3 fields)
+     BD-FOLLOWUP 2026-05-28h | Fix orphaned brace from catch cleanup (SyntaxError resolved)
      BD-FOLLOWUP 2026-05-13a | Auto-log to Payment Requests table on WhatsApp send (both main and pro forma flows) -->
 <html lang="en" dir="ltr">
 <head>
@@ -147,8 +148,9 @@
     display: flex;
     gap: 12px;
     align-items: flex-end;
+    flex-wrap: wrap;
   }
-  .search-row .field { flex: 1; }
+  .search-row .field { flex: 1 1 170px; }
   .btn {
     padding: 10px 24px;
     border-radius: 8px;
@@ -478,7 +480,7 @@
 
   <!-- STEP 1: TRIP ID -->
   <div class="card">
-    <div class="card-title"><span class="step-badge">1</span> Find Trip</div>
+    <div class="card-title"><span class="step-badge">1</span> Find Divers</div>
     <div class="search-row">
       <div class="field">
         <label>Trip</label>
@@ -486,8 +488,17 @@
           <option value="">Loading trips...</option>
         </select>
       </div>
+      <div class="field">
+        <label>First Name</label>
+        <input type="text" id="firstNameInput" placeholder="Optional" autocomplete="off">
+      </div>
+      <div class="field">
+        <label>Last Name</label>
+        <input type="text" id="lastNameInput" placeholder="Optional" autocomplete="off">
+      </div>
       <button class="btn btn-primary" id="searchBtn" onclick="searchTrip()">Search</button>
     </div>
+    <div style="font-size:12.5px;color:#5a7a8a;margin-top:8px;">Use any combination: trip only, name only (searches all trips), or trip + name.</div>
     <div class="msg info" id="searchMsg"></div>
   </div>
 
@@ -991,6 +1002,7 @@ const PAYMENT_REQUESTS_TABLE = 'tblqqgpdp5BOhSAH9';
 const DIVERS_TABLE = 'tblE9d3rE4uDv2uxO';
 
 let currentBookings = []; // [{bookingId, diverId, diverName, tripId, totalPrice}]
+let tripsCache = {};       // { airtableRecordId: { tripId, currency } } — filled by loadTripDropdown
 let currentPaymentRecordId = null; // existing payment record id if found
 
 // ── TOKEN MANAGEMENT ─────────────────────────────────────────────
@@ -1031,10 +1043,12 @@ async function loadTripDropdown() {
     data.records.sort((a, b) =>
       (b.fields['Trip Id'] || '').localeCompare(a.fields['Trip Id'] || ''));
     sel.innerHTML = '<option value="">— Select a trip —</option>';
+    tripsCache = {};
     data.records.forEach(function(rec) {
       const tid  = rec.fields['Trip Id']   || '';
       const name = rec.fields['Trip Name'] || '';
       if (!tid) return;
+      tripsCache[rec.id] = { tripId: tid, currency: rec.fields['Currency'] || 'USD' };
       const opt = document.createElement('option');
       opt.value = tid;
       opt.textContent = (name && name !== tid) ? name + ' (' + tid + ')' : tid;
@@ -1055,7 +1069,13 @@ checkToken();
 // ── SEARCH TRIP ──────────────────────────────────────────────────
 async function searchTrip() {
   const tripId = document.getElementById('tripIdInput').value.trim();
-  if (!tripId) { showMsg('searchMsg', 'info', 'Please select a trip.'); return; }
+  const fnQuery = document.getElementById('firstNameInput').value.trim().toLowerCase();
+  const lnQuery = document.getElementById('lastNameInput').value.trim().toLowerCase();
+
+  if (!tripId && !fnQuery && !lnQuery) {
+    showMsg('searchMsg', 'info', 'Select a trip and/or enter a first or last name.');
+    return;
+  }
 
   const btn = document.getElementById('searchBtn');
   btn.disabled = true;
@@ -1065,22 +1085,24 @@ async function searchTrip() {
   document.getElementById('formWrap').style.display = 'none';
 
   try {
-    // Step 1: Find the Trip record ID from the Trips table by Trip Id field
-    const tripFormula = encodeURIComponent(`{Trip Id} = "${tripId}"`);
-    const tripUrl = `https://api.airtable.com/v0/${BASE_ID}/tbl8KGVwkIHi26plq?filterByFormula=${tripFormula}&fields[]=Trip+Id&fields[]=Currency`;
-    const tripRes = await fetch(tripUrl, { headers: { Authorization: `Bearer ${AIRTABLE_API_KEY}` } });
-    const tripData = await tripRes.json();
-
+    // Step 1: If a trip was selected, resolve its Airtable record ID (from cache, with API fallback)
     let tripRecordId = null;
-    let tripCurrency = 'USD';
-    if (tripData.records && tripData.records.length > 0) {
-      tripRecordId = tripData.records[0].id;
-      tripCurrency = tripData.records[0].fields['Currency'] || 'USD';
-    }
-
-    if (!tripRecordId) {
-      showMsg('searchMsg', 'error', `Trip "${tripId}" not found in Trips table.`);
-      btn.disabled = false; btn.innerHTML = 'Search'; return;
+    if (tripId) {
+      tripRecordId = Object.keys(tripsCache).find(id => tripsCache[id].tripId === tripId) || null;
+      if (!tripRecordId) {
+        const tripFormula = encodeURIComponent(`{Trip Id} = "${tripId}"`);
+        const tripUrl = `https://api.airtable.com/v0/${BASE_ID}/tbl8KGVwkIHi26plq?filterByFormula=${tripFormula}&fields[]=Trip+Id&fields[]=Currency`;
+        const tripRes = await fetch(tripUrl, { headers: { Authorization: `Bearer ${AIRTABLE_API_KEY}` } });
+        const tripData = await tripRes.json();
+        if (tripData.records && tripData.records.length > 0) {
+          tripRecordId = tripData.records[0].id;
+          tripsCache[tripRecordId] = { tripId, currency: tripData.records[0].fields['Currency'] || 'USD' };
+        }
+      }
+      if (!tripRecordId) {
+        showMsg('searchMsg', 'error', `Trip "${tripId}" not found in Trips table.`);
+        btn.disabled = false; btn.innerHTML = 'Search'; return;
+      }
     }
 
     // Step 2: Fetch ALL bookings and filter in JS (avoids Airtable linked-record formula issues)
@@ -1098,16 +1120,29 @@ async function searchTrip() {
       offset = pageData.offset || null;
     } while (offset);
 
-    // Filter bookings where Trip array contains our tripRecordId
-    const matched = allBookings.filter(r => (r.fields['Trip'] || []).includes(tripRecordId));
+    // Step 3: Filter by any combination of trip / first name / last name
+    const matched = allBookings.filter(r => {
+      if (tripRecordId && !(r.fields['Trip'] || []).includes(tripRecordId)) return false;
+      if (fnQuery || lnQuery) {
+        const fnArr = r.fields['First Name (from Divers)'] || [];
+        const lnArr = r.fields['Last Name (from Divers)'] || [];
+        const fn = ((Array.isArray(fnArr) ? fnArr[0] : fnArr) || '').toLowerCase();
+        const ln = ((Array.isArray(lnArr) ? lnArr[0] : lnArr) || '').toLowerCase();
+        if (fnQuery && !fn.includes(fnQuery)) return false;
+        if (lnQuery && !ln.includes(lnQuery)) return false;
+      }
+      return true;
+    });
 
     if (matched.length === 0) {
-      showMsg('searchMsg', 'error', `No bookings found for Trip ID "${tripId}".`);
+      showMsg('searchMsg', 'error', 'No divers found matching your search.');
       btn.disabled = false; btn.innerHTML = 'Search'; return;
     }
 
-    await processBookings(matched, tripId, tripCurrency, tripRecordId);
-    showMsg('searchMsg', 'info', `Found ${matched.length} diver(s) on trip ${tripId}.`);
+    // Show trip name next to each diver when searching without a trip filter
+    await processBookings(matched, !tripId);
+    const where = tripId ? ` on trip ${tripId}` : ' across all trips';
+    showMsg('searchMsg', 'info', `Found ${matched.length} diver(s)${where}.`);
 
   } catch(e) {
     showMsg('searchMsg', 'error', 'Error connecting to Airtable. Check your connection.');
@@ -1117,8 +1152,7 @@ async function searchTrip() {
   btn.disabled = false; btn.innerHTML = 'Search';
 }
 
-async function processBookings(records, tripId, tripCurrency, tripRecordId) {
-  tripCurrency = tripCurrency || 'USD';
+async function processBookings(records, showTripInLabel) {
   currentBookings = [];
   for (const rec of records) {
     const diverIds = rec.fields['Diver ID'] || [];
@@ -1128,17 +1162,25 @@ async function processBookings(records, tripId, tripCurrency, tripRecordId) {
     const fn = Array.isArray(fnArr) ? fnArr[0] : fnArr;
     const ln = Array.isArray(lnArr) ? lnArr[0] : lnArr;
     const diverName = `${fn || ''} ${ln || ''}`.trim() || 'Unknown Diver';
+    // Per-booking trip info (a name-only search can return divers from different trips)
+    const tripLinks = rec.fields['Trip'] || [];
+    const tripRecId = tripLinks[0] || null;
+    const tripInfo = (tripRecId && tripsCache[tripRecId]) || {};
     currentBookings.push({
       bookingId: rec.id,
       diverId,
       diverName,
-      tripId,
-      tripRecordId: tripRecordId || null,
-      currency: tripCurrency,
+      tripId: tripInfo.tripId || '',
+      tripRecordId: tripRecId,
+      currency: tripInfo.currency || 'USD',
       totalPrice: (Array.isArray(rec.fields['Total Price']) ? rec.fields['Total Price'][0] : rec.fields['Total Price']) || 0,
       returningCustomer: (rec.fields['Returning Customer'] || '').toString().trim().toLowerCase() === 'yes'
     });
   }
+
+  // Sort by trip (newest first) then by name, so multi-trip results group nicely
+  currentBookings.sort((a, b) =>
+    (b.tripId || '').localeCompare(a.tripId || '') || a.diverName.localeCompare(b.diverName));
 
   // Populate diver dropdown
   const sel = document.getElementById('diverSelect');
@@ -1146,7 +1188,7 @@ async function processBookings(records, tripId, tripCurrency, tripRecordId) {
   currentBookings.forEach((b, i) => {
     const opt = document.createElement('option');
     opt.value = i;
-    opt.textContent = b.diverName;
+    opt.textContent = showTripInLabel && b.tripId ? `${b.diverName} — ${b.tripId}` : b.diverName;
     sel.appendChild(opt);
   });
 
@@ -1961,9 +2003,10 @@ async function openWhatsApp() {
   }
 }
 
-// Allow pressing Enter in trip ID field
-// Trip select — trigger search on Enter key (optional convenience)
-document.getElementById('tripIdInput').addEventListener('keydown', e => { if (e.key === 'Enter') searchTrip(); });
+// Trigger search on Enter key in any of the three search fields
+['tripIdInput', 'firstNameInput', 'lastNameInput'].forEach(id => {
+  document.getElementById(id).addEventListener('keydown', e => { if (e.key === 'Enter') searchTrip(); });
+});
 
 // Fetch BOI rate on page load
 fetchBoiRate();
