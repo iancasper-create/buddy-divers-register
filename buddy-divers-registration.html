@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-REG 2026-06-08a | Trip 260801 (Black Manta): all 6 cabin prices increased by $290 -->
+<!-- BD-REG 2026-07-09a | Added trip 260729 (Sinai safari, mirror of 260708), guide TBA -->
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8" />
@@ -1435,6 +1435,98 @@ const TRIPS = {
     name: "🌊 ספארי 5 כוכבים — סיני",
     dates: "08/07/2026 – 12/07/2026",
     note: "🏨 Renaissance Sharm El Sheikh Golden View Beach Resort | מלווה: ירין שיטרית",
+    currency: "ILS",
+    pricingTitle: {
+      he: "עלות הספארי ללא טיסות",
+      en: "Safari Pricing (excl. flights)"
+    },
+    roomOptionsTitle: {
+      he: "שדרוג חדר",
+      en: "Room Upgrade"
+    },
+    pricing: [
+      {
+        value: "certified_3980",
+        he: "חבילת צלילה לצולל.ת מוסמך.ת",
+        en: "Certified diver package",
+        price: "₪3,980",
+        priceNum: 3980
+      },
+      {
+        value: "ow_course_3980",
+        he: "חבילת צלילה כולל קורס כוכב ראשון",
+        en: "Package incl. Open Water course",
+        price: "₪3,980",
+        priceNum: 3980
+      },
+      {
+        value: "advanced_course_3980",
+        he: "חבילת צלילה כולל קורס כוכב שני",
+        en: "Package incl. Advanced Open Water course",
+        price: "₪3,980",
+        priceNum: 3980
+      },
+      {
+        value: "nondiver_2890",
+        he: "חבילת אירוח לאינו.ה צולל.ת",
+        en: "Non-diver accommodation package",
+        price: "₪2,890",
+        priceNum: 2890
+      },
+      {
+        value: "single_supp_760",
+        he: "תוספת חדר זוגי בתפוסת יחיד.ה",
+        en: "Single use of double room supplement",
+        price: "₪760",
+        priceNum: 760,
+        supplement: true
+      },
+      {
+        value: "third_person_neg1000",
+        he: "אדם שלישי.ת בחדר (הנחה)",
+        en: "3rd person in room (discount)",
+        price: "(₪1,000)",
+        priceNum: -1000,
+        supplement: true
+      }
+    ],
+    noFlights: true,
+    roomOptional: true,
+    roomOptions: [
+      {
+        value: "sea_view_double_175",
+        he: "חדר עם נוף לים — תפוסה זוגית (לאדם)",
+        en: "Sea view room — double occupancy (per person)",
+        price: "₪175",
+        priceNum: 175
+      },
+      {
+        value: "sea_view_single_350",
+        he: "חדר עם נוף לים — תפוסת יחיד.ה",
+        en: "Sea view room — single occupancy",
+        price: "₪350",
+        priceNum: 350
+      },
+      {
+        value: "suite_double_395",
+        he: "סוויטה עם יציאה לגינה או נוף לים — תפוסה זוגית (לאדם)",
+        en: "Suite with garden exit or sea view — double occupancy (per person)",
+        price: "₪395",
+        priceNum: 395
+      },
+      {
+        value: "suite_single_790",
+        he: "סוויטה עם יציאה לגינה או נוף לים — תפוסת יחיד.ה",
+        en: "Suite with garden exit or sea view — single occupancy",
+        price: "₪790",
+        priceNum: 790
+      }
+    ]
+  },
+  "260729": {
+    name: "🌊 ספארי 5 כוכבים — סיני",
+    dates: "29/07/2026 – 02/08/2026",
+    note: "🏨 Renaissance Sharm El Sheikh Golden View Beach Resort | מלווה יפורסם בהמשך",
     currency: "ILS",
     pricingTitle: {
       he: "עלות הספארי ללא טיסות",
