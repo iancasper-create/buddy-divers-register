@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-REG 2026-07-09a | Added trip 260729 (Sinai safari, mirror of 260708), guide TBA -->
+<!-- BD-REG 2026-07-10a | Photo-URL alias keys added to webhook payload so copy-email upload status works -->
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8" />
@@ -3269,6 +3269,15 @@ document.getElementById('regForm').addEventListener('submit', async function(e) 
   }
   data.submittedAt = new Date().toISOString();
   data.requestCopy = document.getElementById('requestCopyCheckbox').checked ? 'yes' : 'no';
+
+  // Alias photo-URL keys to the names the registration-copy email template expects.
+  // The Make email checks passportPhotoUrl / diveCertPhotoUrl / nitroxCertPhotoUrl / insurancePhotoUrl,
+  // while the form's native field names are passportPhoto / certPhoto / nitroxPhoto / diveInsurancePhotoUrl.
+  // Without these aliases every photo shows "Not uploaded" in the confirmation email.
+  data.passportPhotoUrl = data.passportPhoto || '';
+  data.diveCertPhotoUrl = data.certPhoto || '';
+  data.nitroxCertPhotoUrl = data.nitroxPhoto || '';
+  data.insurancePhotoUrl = data.diveInsurancePhotoUrl || '';
 
   // Last Dive Date is optional — strip if empty or not a real calendar date
   (function() {
