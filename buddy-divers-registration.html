@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-REG 2026-07-16a | Removed 3rd person in room discount option (₪1,000) from Sinai trips 260708/260729/260927 - added in error -->
+<!-- BD-REG 2026-07-18a | Added new trip 270525 (מסע הדגל לצפון סולאווסי, trip start 25/5 at Siladen check-in - not all travelers fly together; 23/5-5/6/2027 overall): diver/non-diver pricing per updated price sheet, Siladen/Coral Eye villa upgrade addons, and new qty-based "additional pre-booked dives" addon (€50/dive vs €60 walk-in at resort) -->
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8" />
@@ -2236,6 +2236,77 @@ const TRIPS = {
       }
     ]
   },
+  "270525": {
+    name: "🇮🇩 מסע הדגל לצפון סולאווסי",
+    dates: "23 במאי – 5 ביוני 2027",
+    note: "🏝️ Siladen Resort & Spa — Bunaken (25–30/5) | 🌊 Coral Eye Resort — Bangka (30/5–4/6) | 10 לילות, 16 צלילות",
+    currency: "EUR",
+    pricingTitle: {
+      he: "עלות המסע (ללא טיסות)",
+      en: "Trip Pricing (excl. flights)"
+    },
+    pricing: [
+      {
+        value: "diver_2990",
+        he: "חבילה לצוללים",
+        en: "Diver package",
+        price: "€2,990",
+        priceNum: 2990
+      },
+      {
+        value: "nondiver_1990",
+        he: "חבילה לאינו.ה צולל.ת",
+        en: "Non-diver package",
+        price: "€1,990",
+        priceNum: 1990
+      }
+    ],
+    addons: [
+      {
+        value: "siladen_seaview_338",
+        he: "Siladen Resort & Spa: שדרוג וילה נוף לים",
+        en: "Siladen Resort & Spa: Sea View Villa upgrade",
+        price: "€338",
+        priceNum: 338
+      },
+      {
+        value: "siladen_luxury_638",
+        he: "Siladen Resort & Spa: שדרוג וילת יוקרה",
+        en: "Siladen Resort & Spa: Luxury Villa upgrade",
+        price: "€638",
+        priceNum: 638
+      },
+      {
+        value: "coraleye_garden_313",
+        he: "Coral Eye Resort: שדרוג וילה נוף לגינה",
+        en: "Coral Eye Resort: Garden View Villa upgrade",
+        price: "€313",
+        priceNum: 313
+      },
+      {
+        value: "coraleye_seaview_500",
+        he: "Coral Eye Resort: שדרוג וילה נוף לים",
+        en: "Coral Eye Resort: Sea View Villa upgrade",
+        price: "€500",
+        priceNum: 500
+      },
+      {
+        value: "coraleye_pool_863",
+        he: "Coral Eye Resort: שדרוג וילה עם בריכה בקו ראשון לים",
+        en: "Coral Eye Resort: Beachfront Pool Villa upgrade",
+        price: "€863",
+        priceNum: 863
+      },
+      {
+        value: "extra_dives_50",
+        he: "צלילות נוספות בהזמנה מראש (יום/לילה) — €50 לצלילה במקום €60 ברכישה ישירה בריזורט",
+        en: "Additional pre-booked dives (day/night) — €50/dive instead of €60 if purchased directly at the resort",
+        price: "€50 לצלילה",
+        priceNum: 50,
+        qty: true
+      }
+    ]
+  },
   "270814": {
     name: "🇮🇩 מסע הדגל | קומודו וצפון סולאווסי",
     dates: "14–28 באוגוסט 2027",
@@ -2541,16 +2612,37 @@ function init() {
       const label = document.createElement('label');
       label.className = 'option-item';
       if (opt.fullPackageOnly) label.dataset.fullPackageOnly = 'true';
+      const qtyRowHTML = opt.qty
+        ? '<div class="addon-qty-row" style="margin-top:8px;display:flex;align-items:center;gap:8px;">' +
+            '<span style="font-size:12px;color:var(--muted);font-weight:600;">כמות צלילות <span style="font-weight:400;">/ Number of dives:</span></span>' +
+            '<input type="number" name="qty_' + opt.value + '" min="1" max="16" value="1" style="width:64px;padding:6px 8px;border:1.5px solid var(--border);border-radius:6px;font-size:13px;font-family:\'Heebo\',sans-serif;" />' +
+          '</div>'
+        : '';
       label.innerHTML =
         '<input type="checkbox" name="pricing_addon" value="' + opt.value + '" />' +
         '<div class="option-label">' +
           '<span class="he">' + opt.he + '</span>' +
           '<span class="en">' + opt.en + '</span>' +
           '<span class="price">' + opt.price + '</span>' +
+          qtyRowHTML +
         '</div>';
       label.addEventListener('click', function() {
         label.classList.toggle('selected', label.querySelector('input').checked);
       });
+      if (opt.qty) {
+        const qtyInput = label.querySelector('input[type="number"]');
+        const qtyCheckbox = label.querySelector('input[type="checkbox"]');
+        if (qtyInput) {
+          qtyInput.addEventListener('click', function(e) { e.stopPropagation(); });
+          qtyInput.addEventListener('input', function() {
+            const v = parseInt(qtyInput.value, 10);
+            if (v > 0) {
+              qtyCheckbox.checked = true;
+              label.classList.add('selected');
+            }
+          });
+        }
+      }
       addonsContainer.appendChild(label);
     });
 
@@ -3220,8 +3312,16 @@ document.getElementById('regForm').addEventListener('submit', async function(e) 
   if (tripPricingConf && tripPricingConf.addons && selectedAddons.length > 0) {
     tripPricingConf.addons.forEach(function(addon) {
       if (selectedAddons.indexOf(addon.value) !== -1) {
-        addonTotal += addon.priceNum * 1;
-        pricingLabel += ' + ' + addon.value;
+        if (addon.qty) {
+          let qtyVal = parseInt(fd.get('qty_' + addon.value), 10);
+          if (!qtyVal || qtyVal < 1) qtyVal = 1;
+          addonTotal += addon.priceNum * qtyVal;
+          pricingLabel += ' + ' + addon.value + ' x' + qtyVal;
+          data['qty_' + addon.value] = qtyVal;
+        } else {
+          addonTotal += addon.priceNum * 1;
+          pricingLabel += ' + ' + addon.value;
+        }
       }
     });
   }
