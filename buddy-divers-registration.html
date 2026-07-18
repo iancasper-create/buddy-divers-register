@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-REG 2026-07-18a | Added new trip 270525 (מסע הדגל לצפון סולאווסי, trip start 25/5 at Siladen check-in - not all travelers fly together; 23/5-5/6/2027 overall): diver/non-diver pricing per updated price sheet, Siladen/Coral Eye villa upgrade addons, and new qty-based "additional pre-booked dives" addon (€50/dive vs €60 walk-in at resort) -->
+<!-- BD-REG 2026-07-18b | Added new trip 270525 (מסע הדגל לצפון סולאווסי, trip start 25/5 at Siladen check-in - not all travelers fly together; 23/5-5/6/2027 overall): diver/non-diver pricing per updated price sheet, Siladen/Coral Eye villa upgrade addons, and new qty-based "additional pre-booked dives" addon (€50/dive vs €60 walk-in at resort); qty label clarified "beyond package dives" -->
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8" />
@@ -2614,7 +2614,7 @@ function init() {
       if (opt.fullPackageOnly) label.dataset.fullPackageOnly = 'true';
       const qtyRowHTML = opt.qty
         ? '<div class="addon-qty-row" style="margin-top:8px;display:flex;align-items:center;gap:8px;">' +
-            '<span style="font-size:12px;color:var(--muted);font-weight:600;">כמות צלילות <span style="font-weight:400;">/ Number of dives:</span></span>' +
+            '<span style="font-size:12px;color:var(--muted);font-weight:600;">כמות צלילות (מעבר לצלילות שבחבילה) <span style="font-weight:400;">/ Number of dives (beyond the package dives):</span></span>' +
             '<input type="number" name="qty_' + opt.value + '" min="1" max="16" value="1" style="width:64px;padding:6px 8px;border:1.5px solid var(--border);border-radius:6px;font-size:13px;font-family:\'Heebo\',sans-serif;" />' +
           '</div>'
         : '';
