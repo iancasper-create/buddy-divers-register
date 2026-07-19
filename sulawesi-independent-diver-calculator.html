@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-SULACALC 2026-07-19n | Round-13 fix: post-discount line wording "עלות" -> "מחיר" -->
+<!-- BD-SULACALC 2026-07-19o | Round-14 fix: combo option now notes the 2 bonus transfer dives; booking-details dive lines for combo divers show pre-booked count + the 2 transfer dives (shown even with 0 pre-booked) -->
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8" />
@@ -204,6 +204,7 @@
           <div class="option-label">
             <span class="he">שילוב שני הריזורטים</span>
             <span class="en">Both resorts - Siladen + Coral Eye</span>
+            <span class="en">(כולל 2 צלילות נוספות, מעבר לצלילות שהוזמנו מראש, במעבר הימי בין הריזורטים)</span>
           </div>
           <span class="badge">מומלץ</span>
         </label>
@@ -456,7 +457,16 @@
         const totalAfterDiscount = Math.round(accAfterDiscount + transfer + dCost);
         const finalTotal = returning ? totalAfterDiscount : totalBeforeDiscount;
         grandTotal += finalTotal;
-        if (qty > 0) diveLines.push(name + ': ' + qty + ' צלילות מראש');
+        if (diver) {
+          const transferDives = tripType === 'combo' ? 2 : 0;
+          if (qty > 0 && transferDives > 0) {
+            diveLines.push(name + ': ' + qty + ' צלילות הזמנה מוקדמת + 2 צלילות במעבר הימי');
+          } else if (qty > 0) {
+            diveLines.push(name + ': ' + qty + ' צלילות מראש');
+          } else if (transferDives > 0) {
+            diveLines.push(name + ': 2 צלילות במעבר הימי (כלול בהעברה)');
+          }
+        }
 
         travelerGroupsHtml += '<div class="traveler-group">';
         travelerGroupsHtml +=
