@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-SULACALC 2026-07-19q | Round-16 fix: WhatsApp message dive line was still using the old wording (no transfer-dives mention) - now matches the booking-details card exactly -->
+<!-- BD-SULACALC 2026-07-19r | Round-17 fix: combo-option parenthetical note de-emphasized (not bold, separate from the title) and wording "שמזמינים" -> "שמזמינים מראש" -->
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8" />
@@ -127,6 +127,7 @@
     .option-item .option-label { display:flex; flex-direction:column; gap:2px; flex:1; }
     .option-item .option-label .he { font-size:14px; font-weight:700; color:var(--text); }
     .option-item .option-label .en { font-size:11px; color:var(--muted); }
+    .option-item .option-label .option-note { font-weight:400; color:var(--muted); font-size:12px; }
     .option-item .badge {
       background:var(--orange); color:#3a2600; font-size:10px; font-weight:800;
       padding:3px 9px; border-radius:20px; letter-spacing:.3px;
@@ -202,8 +203,8 @@
         <label class="option-item" data-value="combo">
           <input type="radio" name="tripType" value="combo" checked />
           <div class="option-label">
-            <span class="he">שילוב שני הריזורטים (כולל 2 צלילות נוספות, מעבר לצלילות שמזמינים, במעבר הימי בין הריזורטים)</span>
-            <span class="en">Both resorts - Siladen + Coral Eye (includes 2 bonus dives, beyond the dives you book, during the sea crossing between the resorts)</span>
+            <span class="he">שילוב שני הריזורטים</span><span class="option-note"> (כולל 2 צלילות נוספות, מעבר לצלילות שמזמינים מראש, במעבר הימי בין הריזורטים)</span>
+            <span class="en">Both resorts - Siladen + Coral Eye</span><span class="option-note"> (includes 2 bonus dives, beyond the dives you pre-book, during the sea crossing between the resorts)</span>
           </div>
           <span class="badge">מומלץ</span>
         </label>
