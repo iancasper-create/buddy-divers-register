@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-SULACALC 2026-07-19i | Round-8 fixes: WhatsApp message opens with "שלום באדי-דייברס" instead of "היי"; pre-booked dive count no longer shows the euro cost, only the number of dives -->
+<!-- BD-SULACALC 2026-07-19j | Round-9 fixes: section-2 name field narrowed and returning-customer toggle widened so it never wraps; results box now opens with a trip-summary card (villa + nights per resort) and each traveler line shows their pre-booked dive count (no cost) -->
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8" />
@@ -112,6 +112,9 @@
     }
     .note.warn { color:#b02a1e; font-weight:600; }
     .discount-line { color:#b02a1e; font-weight:700; font-size:13px; text-align:left; padding:2px 0 10px; }
+    .trip-summary { background:var(--light-bg); border-radius:10px; padding:14px 16px; margin-bottom:16px; }
+    .trip-summary .ts-title { font-size:12px; font-weight:800; color:var(--teal); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px; }
+    .trip-summary .ts-line { font-size:13px; color:var(--text); line-height:1.7; }
 
     .option-item {
       display:flex; align-items:center; gap:12px;
@@ -146,9 +149,9 @@
     .traveler-name-row { margin-bottom:14px; }
     .traveler-name-row .toggle-label { margin-bottom:4px; }
     .traveler-name-row .name-toggle-line { display:flex; gap:8px; align-items:stretch; flex-wrap:wrap; }
-    .traveler-name-input { flex:1 1 140px; width:auto; padding:9px 12px; border:1.5px solid var(--border); border-radius:8px; font-family:'Heebo',sans-serif; font-size:13px; margin-bottom:0; }
-    .name-toggle-line .pill-toggle { flex:0 0 auto; margin-bottom:0; gap:6px; }
-    .name-toggle-line .pill-toggle label { padding:9px 12px; font-size:12px; }
+    .traveler-name-input { flex:0 1 120px; width:auto; padding:9px 12px; border:1.5px solid var(--border); border-radius:8px; font-family:'Heebo',sans-serif; font-size:13px; margin-bottom:0; }
+    .name-toggle-line .pill-toggle { flex:1 1 180px; margin-bottom:0; gap:6px; }
+    .name-toggle-line .pill-toggle label { padding:9px 10px; font-size:12px; }
 
     .btn {
       display:block; width:100%; padding:15px; border:none; border-radius:10px;
@@ -436,7 +439,9 @@
       const resultBox = document.getElementById('resultBox');
       const waLines = [];
       let grandTotal = 0;
-      let resultsHtml = '';
+      let resultsHtml = '<div class="trip-summary"><div class="ts-title">פרטי הטיול</div>';
+      resortSummary.forEach(function(line) { resultsHtml += '<div class="ts-line">' + line + '</div>'; });
+      resultsHtml += '<div class="ts-line">תפוסת חדר: ' + occ + ' אנשים</div></div>';
 
       for (let i = 1; i <= occ; i++) {
         const nameInput = document.getElementById('travelerName_' + i);
@@ -456,7 +461,7 @@
         resultsHtml += '<div class="traveler-group">';
         resultsHtml +=
           '<div class="traveler-result"><div><span class="tr-name">' + name + '</span>' +
-          '<span class="tr-sub">' + (diver ? 'צולל' : 'לא צולל') + '</span></div>' +
+          '<span class="tr-sub">' + (diver ? 'צולל' : 'לא צולל') + (qty > 0 ? ' · ' + qty + ' צלילות מראש' : '') + '</span></div>' +
           '<span class="tr-price">€' + totalBeforeDiscount.toLocaleString() + '</span></div>';
         if (returning) {
           resultsHtml += '<div class="discount-line">€' + discountAmount.toLocaleString() + ' הנחת לקוח חוזר</div>';
