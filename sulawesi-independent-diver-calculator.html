@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-SULACALC 2026-07-19e | Round-4 fixes: slash separator between מטייל N and Traveler N in the traveler block title; discount line no longer shows a minus sign; post-discount total line relabeled to עלות לאחר הנחת לקוח חוזר -->
+<!-- BD-SULACALC 2026-07-19i | Round-8 fixes: WhatsApp message opens with "שלום באדי-דייברס" instead of "היי"; pre-booked dive count no longer shows the euro cost, only the number of dives -->
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8" />
@@ -143,7 +143,12 @@
     .diveqty-row { display:flex; align-items:center; gap:10px; }
     .diveqty-row label { font-size:12px; color:var(--muted); font-weight:600; }
     .diveqty-row input { width:80px; padding:8px 10px; border:1.5px solid var(--border); border-radius:8px; font-family:'Heebo',sans-serif; font-size:13px; }
-    .traveler-name-input { width:100%; padding:9px 12px; border:1.5px solid var(--border); border-radius:8px; font-family:'Heebo',sans-serif; font-size:13px; margin-bottom:8px; }
+    .traveler-name-row { margin-bottom:14px; }
+    .traveler-name-row .toggle-label { margin-bottom:4px; }
+    .traveler-name-row .name-toggle-line { display:flex; gap:8px; align-items:stretch; flex-wrap:wrap; }
+    .traveler-name-input { flex:1 1 140px; width:auto; padding:9px 12px; border:1.5px solid var(--border); border-radius:8px; font-family:'Heebo',sans-serif; font-size:13px; margin-bottom:0; }
+    .name-toggle-line .pill-toggle { flex:0 0 auto; margin-bottom:0; gap:6px; }
+    .name-toggle-line .pill-toggle label { padding:9px 12px; font-size:12px; }
 
     .btn {
       display:block; width:100%; padding:15px; border:none; border-radius:10px;
@@ -155,6 +160,7 @@
     .btn.wa { background: linear-gradient(135deg, #25D366 0%, #1aa851 100%); color:var(--white); margin-top:14px; }
 
     #resultBox { margin-top:20px; border-top:2px dashed var(--border); padding-top:18px; }
+    .traveler-group + .traveler-group { border-top:2px dashed var(--teal); margin-top:16px; padding-top:16px; }
     .traveler-result { display:flex; justify-content:space-between; align-items:baseline; padding:10px 0; border-bottom:1px solid var(--light-bg); font-size:14px; }
     .traveler-result .tr-name { font-weight:700; color:var(--text); }
     .traveler-result .tr-sub { display:block; font-size:11px; color:var(--muted); font-weight:400; margin-top:2px; }
@@ -180,7 +186,7 @@
 
     <div class="card">
       <div class="section-title"><span class="icon">🏝️</span>שני הריזורטים הטובים ביותר בצפון סולאווסי</div>
-      <p class="intro-text">בחרנו שני ריזורטים שנחשבים מהטובים מסוגם באסיה.</p>
+      <p class="intro-text"><strong>בחרנו שני ריזורטים שנחשבים מהטובים מסוגם באסיה.</strong></p>
       <p class="intro-text"><strong>Siladen</strong> מציע אירוח אלגנטי ושקט בלב הפארק הימי בונאקן, לצד קירות אלמוגים עצומים, שוניות עשירות וצבי ים כמעט בכל צלילה.</p>
       <p class="intro-text"><strong>Coral Eye</strong> הוא ריזורט בוטיק ייחודי באי בנקה, שהחל את דרכו כתחנת מחקר ימית ומשלב כיום אתרי מאקרו מהטובים בעולם עם אווירה אינטימית ואישית.</p>
       <p class="intro-text"><strong>ההמלצה החמה שלנו היא לשלב בין שני הריזורטים וליהנות משני אזורי צלילה שונים לחלוטין באותו מסלול.</strong></p>
@@ -322,47 +328,67 @@
       });
     }
 
+    function travelerTitleHTML(i) {
+      const inp = document.getElementById('travelerName_' + i);
+      const name = inp && inp.value.trim();
+      if (name) return name;
+      return 'מטייל ' + i + ' / <span style="font-weight:400;color:var(--muted);">Traveler ' + i + '</span>';
+    }
+
+    function updateTravelerTitle(i) {
+      const titleEl = document.querySelector('[data-traveler-title="' + i + '"]');
+      if (titleEl) titleEl.innerHTML = travelerTitleHTML(i);
+    }
+
     function renderTravelerNames() {
       const occ = currentOccupancy();
       const container = document.getElementById('travelerNamesContainer');
-      const prevNames = {};
+      const prevNames = {}, prevReturning = {};
       for (let i = 1; i <= 4; i++) {
         const inp = document.getElementById('travelerName_' + i);
+        const r = document.querySelector('[name="returning_' + i + '"]:checked');
         if (inp) prevNames[i] = inp.value;
+        if (r) prevReturning[i] = r.value;
       }
       container.innerHTML = '';
       for (let i = 1; i <= occ; i++) {
-        const inp = document.createElement('input');
-        inp.type = 'text';
-        inp.className = 'traveler-name-input';
-        inp.id = 'travelerName_' + i;
-        inp.placeholder = 'שם מטייל ' + i + ' (אופציונלי) / Traveler ' + i + ' name (optional)';
-        if (prevNames[i]) inp.value = prevNames[i];
-        container.appendChild(inp);
+        const isReturning = prevReturning[i] === 'yes';
+        const row = document.createElement('div');
+        row.className = 'traveler-name-row';
+        row.innerHTML =
+          '<label class="toggle-label">מטייל ' + i + ' - לקוח חוזר של באדי-דייברס? <span style="font-weight:400;">/ Traveler ' + i + ' - returning customer of Buddy-Divers?</span></label>' +
+          '<div class="name-toggle-line">' +
+            '<input type="text" class="traveler-name-input" id="travelerName_' + i + '" placeholder="שם (אופציונלי) / Name (optional)" value="' + (prevNames[i] ? prevNames[i].replace(/"/g, '&quot;') : '') + '" />' +
+            '<div class="pill-toggle">' +
+              '<label><input type="radio" name="returning_' + i + '" value="no"' + (!isReturning ? ' checked' : '') + ' /><span>לא / No</span></label>' +
+              '<label><input type="radio" name="returning_' + i + '" value="yes"' + (isReturning ? ' checked' : '') + ' /><span>כן / Yes</span></label>' +
+            '</div>' +
+          '</div>';
+        container.appendChild(row);
+        const nameInput = row.querySelector('.traveler-name-input');
+        nameInput.addEventListener('input', function() { updateTravelerTitle(i); });
       }
     }
 
     function renderTravelers() {
       const occ = currentOccupancy();
       const container = document.getElementById('travelersContainer');
-      const prevDiver = {}, prevQty = {}, prevReturning = {};
+      const prevDiver = {}, prevQty = {};
       for (let i = 1; i <= 4; i++) {
         const d = document.querySelector('[name="diver_' + i + '"]:checked');
         const q = document.getElementById('diveqty_' + i);
-        const r = document.querySelector('[name="returning_' + i + '"]:checked');
         if (d) prevDiver[i] = d.value;
         if (q) prevQty[i] = q.value;
-        if (r) prevReturning[i] = r.value;
       }
       container.innerHTML = '';
       for (let i = 1; i <= occ; i++) {
         const isDiver = prevDiver[i] !== undefined ? prevDiver[i] === 'yes' : true;
         const qty = prevQty[i] !== undefined ? prevQty[i] : 0;
-        const isReturning = prevReturning[i] === 'yes';
         const block = document.createElement('div');
         block.className = 'traveler-block';
+        block.dataset.traveler = i;
         block.innerHTML =
-          '<div class="t-title">מטייל ' + i + ' / <span style="font-weight:400;color:var(--muted);">Traveler ' + i + '</span></div>' +
+          '<div class="t-title" data-traveler-title="' + i + '">' + travelerTitleHTML(i) + '</div>' +
           '<div class="pill-toggle">' +
             '<label><input type="radio" name="diver_' + i + '" value="yes"' + (isDiver ? ' checked' : '') + ' /><span>צולל / Diver</span></label>' +
             '<label><input type="radio" name="diver_' + i + '" value="no"' + (!isDiver ? ' checked' : '') + ' /><span>לא צולל / Non-diver</span></label>' +
@@ -370,11 +396,6 @@
           '<div class="diveqty-row" id="diveqtyRow_' + i + '" style="display:' + (isDiver ? 'flex' : 'none') + ';">' +
             '<label>צלילות מראש <span style="font-weight:400;">/ pre-booked dives (optional):</span></label>' +
             '<input type="number" id="diveqty_' + i + '" min="0" value="' + qty + '" />' +
-          '</div>' +
-          '<label class="toggle-label">לקוח חוזר של Buddy-Divers? <span style="font-weight:400;">/ Returning customer?</span></label>' +
-          '<div class="pill-toggle">' +
-            '<label><input type="radio" name="returning_' + i + '" value="no"' + (!isReturning ? ' checked' : '') + ' /><span>לא / No</span></label>' +
-            '<label><input type="radio" name="returning_' + i + '" value="yes"' + (isReturning ? ' checked' : '') + ' /><span>כן / Yes</span></label>' +
           '</div>';
         container.appendChild(block);
         block.querySelectorAll('[name="diver_' + i + '"]').forEach(function(radio) {
@@ -432,6 +453,7 @@
         const finalTotal = returning ? totalAfterDiscount : totalBeforeDiscount;
         grandTotal += finalTotal;
 
+        resultsHtml += '<div class="traveler-group">';
         resultsHtml +=
           '<div class="traveler-result"><div><span class="tr-name">' + name + '</span>' +
           '<span class="tr-sub">' + (diver ? 'צולל' : 'לא צולל') + '</span></div>' +
@@ -442,9 +464,10 @@
             '<div class="traveler-result"><div><span class="tr-name">עלות לאחר הנחת לקוח חוזר</span></div>' +
             '<span class="tr-price">€' + totalAfterDiscount.toLocaleString() + '</span></div>';
         }
+        resultsHtml += '</div>';
 
         const waSubParts = [diver ? 'צולל' : 'לא צולל'];
-        if (qty > 0) waSubParts.push(qty + ' צלילות מראש (€' + dCost + ')');
+        if (qty > 0) waSubParts.push(qty + ' צלילות מראש');
         if (returning) waSubParts.push('לקוח חוזר, הנחה €' + discountAmount);
         waLines.push(name + ': ' + waSubParts.join(', ') + ' - €' + finalTotal);
       }
@@ -453,7 +476,7 @@
       html += '<div class="note warn" style="margin-top:12px;">הערכת מחיר בלבד, לא כולל טיסות, ביטוח נסיעות וצלילה (חובה), אגרות שמורה (סילאדן כ-€15) וויזה. מחירים כפופים לזמינות בעת ההזמנה.</div>';
 
       const waMsg = encodeURIComponent(
-        'היי, חישבתי טיול פרטי לצפון סולאווסי במחשבון:\n' +
+        'שלום באדי-דייברס, חישבתי טיול פרטי לצפון סולאווסי במחשבון:\n' +
         resortSummary.join('\n') + '\n' +
         'תפוסת חדר: ' + occ + '\n' +
         waLines.join('\n') + '\n' +
