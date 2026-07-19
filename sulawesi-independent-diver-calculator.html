@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-SULACALC 2026-07-19j | Round-9 fixes: section-2 name field narrowed and returning-customer toggle widened so it never wraps; results box now opens with a trip-summary card (villa + nights per resort) and each traveler line shows their pre-booked dive count (no cost) -->
+<!-- BD-SULACALC 2026-07-19k | Round-10 fix: previous name/toggle width balance overcorrected (name field too narrow, placeholder truncated) - doubled the name field width and shrank the returning-customer toggle to match -->
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8" />
@@ -149,9 +149,9 @@
     .traveler-name-row { margin-bottom:14px; }
     .traveler-name-row .toggle-label { margin-bottom:4px; }
     .traveler-name-row .name-toggle-line { display:flex; gap:8px; align-items:stretch; flex-wrap:wrap; }
-    .traveler-name-input { flex:0 1 120px; width:auto; padding:9px 12px; border:1.5px solid var(--border); border-radius:8px; font-family:'Heebo',sans-serif; font-size:13px; margin-bottom:0; }
-    .name-toggle-line .pill-toggle { flex:1 1 180px; margin-bottom:0; gap:6px; }
-    .name-toggle-line .pill-toggle label { padding:9px 10px; font-size:12px; }
+    .traveler-name-input { flex:1 1 240px; width:auto; padding:9px 12px; border:1.5px solid var(--border); border-radius:8px; font-family:'Heebo',sans-serif; font-size:13px; margin-bottom:0; }
+    .name-toggle-line .pill-toggle { flex:0 1 200px; margin-bottom:0; gap:6px; }
+    .name-toggle-line .pill-toggle label { padding:9px 8px; font-size:12px; }
 
     .btn {
       display:block; width:100%; padding:15px; border:none; border-radius:10px;
