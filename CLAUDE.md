@@ -63,8 +63,6 @@ past decisions, ask Ian to provide HANDOVER.md before proceeding. Do not guess.
 | myanmar.html | Destination page |
 | dune_aurora_forms.html, dune_black_manta_forms.html, dune_madagascar_forms.html, naia_electronic_forms.html | Guest declaration forms (shared Make webhook, Cloudinary raw upload, PDFBolt) |
 | logo.png | Unused asset (all pages load the logo from Cloudinary); keep as-is |
-| emperor-explorer2-registration.html | Standalone trip-specific registration form: Emperor Explorer II, trip 020202, 1+1 promo (no date, half-price cabins) |
-| emperor-serenity-registration.html | Standalone trip-specific registration form: Emperor Serenity, trip 010101, 1+1 promo (no date, half-price cabins) |
 | sulawesi-independent-diver-calculator.html | Standalone private-trip (unescorted) price calculator for North Sulawesi (Siladen + Coral Eye) - not a `?trip=ID` entry, self-serve marketing page with its own JS calculator engine |
 
 Note: booking-sync.html exists but is intentionally NOT in this repo (local-only admin tool).
