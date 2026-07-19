@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<!-- BD-SULACALC 2026-07-19a | New: independent (unescorted) North Sulawesi private-trip calculator. Siladen + Coral Eye resort/villa/occupancy/nights simulator, per-diver pre-booked dive tiers, folded transfer cost, WhatsApp CTA -->
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>מחשבון טיול פרטי | צפון סולאווסי | Buddy-Divers</title>
+  <link rel="icon" type="image/jpeg" href="https://res.cloudinary.com/dccbsfte0/image/upload/v1774016253/logo2_swvqfe.jpg" />
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&family=Raleway:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --teal: #007289;
+      --teal2: #009495;
+      --orange: #F5A623;
+      --navy: #1B4F8A;
+      --dark: #0d2a3a;
+      --card-bg: rgba(255,255,255,0.97);
+      --light-bg: #f0f7f9;
+      --border: #c5dfe6;
+      --text: #1a3a4a;
+      --muted: #5a7a8a;
+      --error: #e05555;
+      --white: #ffffff;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Heebo', sans-serif;
+      background: var(--dark);
+      color: var(--text);
+      min-height: 100vh;
+      direction: rtl;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse at 20% 50%, rgba(0,148,149,0.18) 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 20%, rgba(27,79,138,0.22) 0%, transparent 50%),
+        linear-gradient(160deg, #0a1f2e 0%, #0d2d3e 40%, #0a2535 100%);
+      z-index: 0;
+    }
+    .bubbles { position:fixed; width:100%; height:100%; top:0; left:0; pointer-events:none; z-index:0; overflow:hidden; }
+    .bubble { position:absolute; bottom:-100px; border-radius:50%; background:rgba(0,148,149,0.07); border:1px solid rgba(0,148,149,0.15); animation:rise linear infinite; }
+    .bubble:nth-child(1){width:20px;height:20px;left:10%;animation-duration:12s;animation-delay:0s}
+    .bubble:nth-child(2){width:12px;height:12px;left:25%;animation-duration:9s;animation-delay:2s}
+    .bubble:nth-child(3){width:30px;height:30px;left:45%;animation-duration:15s;animation-delay:4s}
+    .bubble:nth-child(4){width:8px;height:8px;left:65%;animation-duration:10s;animation-delay:1s}
+    .bubble:nth-child(5){width:18px;height:18px;left:80%;animation-duration:13s;animation-delay:6s}
+    .bubble:nth-child(6){width:25px;height:25px;left:55%;animation-duration:11s;animation-delay:3s}
+    @keyframes rise {
+      0%{transform:translateY(0) translateX(0);opacity:0}
+      10%{opacity:1}
+      90%{opacity:0.5}
+      100%{transform:translateY(-110vh) translateX(30px);opacity:0}
+    }
+    .page-wrapper { position:relative; z-index:1; max-width:800px; margin:0 auto; padding:30px 16px 60px; }
+
+    .header { text-align:center; padding:30px 24px 24px; animation: fadeDown 0.7s ease both; }
+    @keyframes fadeDown { from{opacity:0;transform:translateY(-20px)} to{opacity:1;transform:translateY(0)} }
+    .logo-img { height:64px; margin-bottom:10px; filter: drop-shadow(0 2px 8px rgba(0,0,0,0.4)); }
+    .tagline { font-family:'Raleway',sans-serif; color:rgba(255,255,255,0.5); font-size:11px; letter-spacing:3px; text-transform:uppercase; margin-bottom:18px; }
+    .trip-banner {
+      background: linear-gradient(135deg, var(--teal) 0%, var(--navy) 100%);
+      border-radius: 14px;
+      padding: 16px 24px;
+      margin-bottom: 8px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .trip-name { font-family:'Raleway',sans-serif; color:var(--white); font-size:22px; font-weight:800; margin-bottom:4px; }
+    .trip-dates { color:rgba(255,255,255,0.75); font-size:15px; }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 16px;
+      padding: 26px 26px;
+      margin-bottom: 18px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+      animation: fadeUp 0.6s ease both;
+    }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+
+    .section-title {
+      font-family:'Raleway',sans-serif;
+      font-size:15px; font-weight:800;
+      color:var(--teal);
+      text-transform:uppercase;
+      letter-spacing:1.2px;
+      margin-bottom:18px;
+      padding-bottom:10px;
+      border-bottom:2px solid var(--light-bg);
+      display:flex; align-items:center; gap:8px;
+    }
+    .section-title .icon { font-size:18px; }
+    .intro-text { font-size:14px; line-height:1.8; color:var(--text); }
+    .intro-text + .intro-text { margin-top:10px; }
+
+    .form-row { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px; }
+    .form-row.full { grid-template-columns:1fr; }
+    @media(max-width:580px){ .form-row { grid-template-columns:1fr; } }
+
+    .field { display:flex; flex-direction:column; gap:6px; margin-bottom:14px; }
+    .field label { font-size:13px; font-weight:600; color:var(--text); }
+    .field label .en { font-weight:400; color:var(--muted); font-size:11px; margin-right:4px; }
+    .field select, .field input[type="number"] {
+      padding:11px 12px; border:1.5px solid var(--border); border-radius:8px;
+      font-family:'Heebo',sans-serif; font-size:14px; color:var(--text); background:var(--white);
+    }
+    .note {
+      font-size:12px; color:var(--muted); background:var(--light-bg);
+      border-radius:8px; padding:8px 12px; margin-top:6px; line-height:1.6;
+    }
+
+    .option-item {
+      display:flex; align-items:center; gap:12px;
+      border:1.5px solid var(--border); border-radius:10px;
+      padding:14px 16px; cursor:pointer; transition:all .15s ease; margin-bottom:10px;
+    }
+    .option-item:hover { border-color:var(--teal); }
+    .option-item.selected { border-color:var(--teal); background:rgba(0,114,137,0.06); }
+    .option-item input[type="radio"] { width:18px; height:18px; accent-color:var(--teal); flex-shrink:0; }
+    .option-item .option-label { display:flex; flex-direction:column; gap:2px; flex:1; }
+    .option-item .option-label .he { font-size:14px; font-weight:700; color:var(--text); }
+    .option-item .option-label .en { font-size:11px; color:var(--muted); }
+    .option-item .badge {
+      background:var(--orange); color:#3a2600; font-size:10px; font-weight:800;
+      padding:3px 9px; border-radius:20px; letter-spacing:.3px;
+    }
+
+    .traveler-block { border:1.5px solid var(--border); border-radius:10px; padding:16px; margin-bottom:12px; }
+    .traveler-block .t-title { font-size:14px; font-weight:800; color:var(--navy); margin-bottom:10px; }
+    .diver-toggle { display:flex; gap:10px; margin-bottom:10px; }
+    .diver-toggle label {
+      flex:1; text-align:center; border:1.5px solid var(--border); border-radius:8px;
+      padding:9px; font-size:13px; font-weight:600; cursor:pointer; transition:all .15s ease;
+    }
+    .diver-toggle input { display:none; }
+    .diver-toggle input:checked + span { color:var(--white); }
+    .diver-toggle label:has(input:checked) { background:var(--teal); border-color:var(--teal); color:var(--white); }
+    .diveqty-row { display:flex; align-items:center; gap:10px; }
+    .diveqty-row label { font-size:12px; color:var(--muted); font-weight:600; }
+    .diveqty-row input { width:80px; padding:8px 10px; border:1.5px solid var(--border); border-radius:8px; font-family:'Heebo',sans-serif; font-size:13px; }
+
+    .btn {
+      display:block; width:100%; padding:15px; border:none; border-radius:10px;
+      background: linear-gradient(135deg, var(--orange) 0%, #e08c1a 100%);
+      color:#3a2600; font-family:'Heebo',sans-serif; font-size:16px; font-weight:800;
+      cursor:pointer; transition:transform .15s ease;
+    }
+    .btn:hover { transform:translateY(-1px); }
+    .btn.wa { background: linear-gradient(135deg, #25D366 0%, #1aa851 100%); color:var(--white); margin-top:14px; }
+
+    #resultBox { margin-top:20px; border-top:2px dashed var(--border); padding-top:18px; }
+    .traveler-result { display:flex; justify-content:space-between; align-items:baseline; padding:10px 0; border-bottom:1px solid var(--light-bg); font-size:14px; }
+    .traveler-result .tr-name { font-weight:700; color:var(--text); }
+    .traveler-result .tr-sub { display:block; font-size:11px; color:var(--muted); font-weight:400; margin-top:2px; }
+    .traveler-result .tr-price { font-weight:800; color:var(--navy); font-size:16px; }
+    .grand-total { display:flex; justify-content:space-between; align-items:baseline; margin-top:16px; padding-top:14px; border-top:2px solid var(--teal); }
+    .grand-total .gt-label { font-size:15px; font-weight:800; color:var(--text); }
+    .grand-total .gt-price { font-size:24px; font-weight:800; color:var(--orange); }
+
+    .footer { text-align:center; padding:24px 16px; color:rgba(255,255,255,0.55); font-size:12px; line-height:2; }
+    .footer a { color:rgba(255,255,255,0.75); text-decoration:none; }
+  </style>
+</head>
+<body>
+  <div class="bubbles">
+    <div class="bubble"></div><div class="bubble"></div><div class="bubble"></div>
+    <div class="bubble"></div><div class="bubble"></div><div class="bubble"></div>
+  </div>
+
+  <div class="page-wrapper">
+    <div class="header">
+      <img class="logo-img" src="https://res.cloudinary.com/dccbsfte0/image/upload/v1774016253/logo2_swvqfe.jpg" alt="Buddy-Divers" />
+      <div class="tagline">Buddy-Divers</div>
+      <div class="trip-banner">
+        <div class="trip-name">🇮🇩 צפון סולאווסי — מחשבון טיול פרטי (ללא ליווי)</div>
+        <div class="trip-dates">Siladen Resort & Spa · Coral Eye Resort</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-title"><span class="icon">🏝️</span>שני הריזורטים הכי טובים בצפון סולאווסי</div>
+      <p class="intro-text">בחרנו שני ריזורטים שנחשבים לטובים מסוגם באסיה: Siladen — לוקסוס שקט בלב הפארק הימי בונאקן, קירות אלמוגים עצומים וצבי ים כמעט בכל צלילה. Coral Eye — ריזורט בוטיק באי בנקה שהחל כתחנת מחקר ימית, עם מאקרו עולמי ואווירה אינטימית.</p>
+      <p class="intro-text">ההמלצה החמה שלנו: לשלב בין שני הריזורטים ולחוות את שניהם באותו מסלול. המחשבון הזה בונה עבורכם הערכת מחיר לטיול פרטי, ללא ליווי מדריך.</p>
+    </div>
+
+    <div class="card">
+      <div class="section-title"><span class="icon">🗺️</span>1. באיזה ריזורט תרצו לשהות?</div>
+      <div id="tripTypeOptions">
+        <label class="option-item" data-value="combo">
+          <input type="radio" name="tripType" value="combo" checked />
+          <div class="option-label">
+            <span class="he">שילוב שני הריזורטים</span>
+            <span class="en">Both resorts — Siladen + Coral Eye</span>
+          </div>
+          <span class="badge">מומלץ</span>
+        </label>
+        <label class="option-item" data-value="siladen">
+          <input type="radio" name="tripType" value="siladen" />
+          <div class="option-label">
+            <span class="he">Siladen Resort & Spa בלבד</span>
+            <span class="en">Siladen only</span>
+          </div>
+        </label>
+        <label class="option-item" data-value="coraleye">
+          <input type="radio" name="tripType" value="coraleye" />
+          <div class="option-label">
+            <span class="he">Coral Eye Resort בלבד</span>
+            <span class="en">Coral Eye only</span>
+          </div>
+        </label>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-title"><span class="icon">👥</span>2. כמה אנשים חולקים את החדר?</div>
+      <div class="field">
+        <label>תפוסת חדר <span class="en">Room occupancy</span></label>
+        <select id="occupancy">
+          <option value="1">יחיד — Single</option>
+          <option value="2" selected>זוגי — Double</option>
+          <option value="3">משולש — Triple</option>
+          <option value="4">רביעייה — Quadruple</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="card" id="resortBlocksCard">
+      <div class="section-title"><span class="icon">🛏️</span>3. סוג וילה/חדר ומספר לילות</div>
+      <div id="resortBlocks"></div>
+      <div class="note">מינימום שהייה לפי מדיניות הריזורטים: 3 לילות בדרך כלל, 5 לילות באוגוסט ובין 20 בדצמבר ל-1 בינואר. זו הערה בלבד — המחשבון לא חוסם מספר לילות נמוך יותר.</div>
+    </div>
+
+    <div class="card" id="travelersCard">
+      <div class="section-title"><span class="icon">🤿</span>4. צוללן או לא-צוללן?</div>
+      <div id="travelersContainer"></div>
+      <div class="note">הזמנת צלילות מראש: €60 לצלילה. מזמינים מעל 12 צלילות למטייל — המחיר יורד ל-€54 לצלילה, כולל הצלילה הראשונה. (ברכישה ישירה בריזורט המחיר גבוה יותר.)</div>
+    </div>
+
+    <div class="card">
+      <button class="btn" id="calcBtn" type="button">חשבו מחיר משוער</button>
+      <div id="resultBox" style="display:none;"></div>
+    </div>
+
+    <div class="footer">
+      טיול פרטי, ללא ליווי — הערכת מחיר בלבד, ללא טיסות, ביטוח נסיעות וצלילה, אגרות שמורה וויזה.<br />
+      לתכנון טיסות, התאמה אישית והצעת מחיר סופית: 09-7967194 · WhatsApp 054-2323567 · info@buddy-divers.com<br />
+      <a href="https://www.buddy-divers.com">www.buddy-divers.com</a>
+    </div>
+  </div>
+
+  <script>
+    const RESORTS = {
+      siladen: {
+        label: 'Siladen Resort & Spa — בונאקן',
+        villas: [
+          { id:'siladen_garden', he:'וילה נוף לגינה', en:'Garden View Villa', rates:{1:260,2:365,3:510} },
+          { id:'siladen_beach', he:'וילה נוף לים', en:'Beach View Villa', rates:{1:350,2:500,3:700} },
+          { id:'siladen_luxury', he:'וילת יוקרה', en:'Luxury Villa', rates:{1:435,2:620,3:870} },
+          { id:'siladen_beach2br', he:'וילת 2 חדרי שינה — נוף לים', en:'Beach Double Bedroom Villa (2BR/2BA)', rates:{1:665,2:665,3:810,4:950} },
+          { id:'siladen_garden2br', he:'וילת 2 חדרי שינה — נוף לגינה', en:'Garden Double Bedroom Villa (2BR/2BA)', rates:{1:495,2:495,3:595,4:695} }
+        ]
+      },
+      coraleye: {
+        label: 'Coral Eye Resort — בנקה',
+        villas: [
+          { id:'coraleye_garden', he:'וילה נוף לגינה', en:'Garden View Villa', rates:{1:310,2:440,3:615} },
+          { id:'coraleye_beach', he:'וילה נוף לים', en:'Beach View Villa', rates:{1:360,2:515,3:720} },
+          { id:'coraleye_pool', he:'וילה עם בריכה בקו ראשון לים', en:'Beachfront Pool Villa', rates:{1:460,2:660,3:925} },
+          { id:'coraleye_superior', he:'חדר סופריור', en:'Superior Room', rates:{1:220,2:315,3:440} },
+          { id:'coraleye_garden2br', he:'וילת 2 חדרי שינה — נוף לגינה', en:'Double Bedroom Garden Villa (2BR/2BA)', rates:{1:440,2:440,3:535,4:630} }
+        ]
+      }
+    };
+
+    function activeResortKeys() {
+      const tripType = document.querySelector('[name="tripType"]:checked').value;
+      return tripType === 'combo' ? ['siladen','coraleye'] : [tripType];
+    }
+
+    function currentOccupancy() {
+      return parseInt(document.getElementById('occupancy').value, 10);
+    }
+
+    function renderResortBlocks() {
+      const occ = currentOccupancy();
+      const container = document.getElementById('resortBlocks');
+      const keys = activeResortKeys();
+      const prev = {};
+      keys.forEach(function(k) {
+        const villaSel = document.getElementById('villa_' + k);
+        const nightsInp = document.getElementById('nights_' + k);
+        if (villaSel) prev[k] = { villa: villaSel.value, nights: nightsInp ? nightsInp.value : 5 };
+      });
+      container.innerHTML = '';
+      keys.forEach(function(k) {
+        const resort = RESORTS[k];
+        const available = resort.villas.filter(function(v) { return v.rates[occ] !== undefined; });
+        const wrap = document.createElement('div');
+        wrap.style.marginBottom = '18px';
+        if (available.length === 0) {
+          wrap.innerHTML = '<div class="note">אין וילה זמינה ב' + resort.label + ' לתפוסה שנבחרה. בחרו תפוסת חדר אחרת.</div>';
+          container.appendChild(wrap);
+          return;
+        }
+        const prevVilla = prev[k] && available.some(function(v){ return v.id === prev[k].villa; }) ? prev[k].villa : available[0].id;
+        const prevNights = prev[k] ? prev[k].nights : 5;
+        let opts = available.map(function(v) {
+          const sel = v.id === prevVilla ? ' selected' : '';
+          return '<option value="' + v.id + '"' + sel + '>' + v.he + ' (€' + v.rates[occ] + ' / לילה לחדר)</option>';
+        }).join('');
+        wrap.innerHTML =
+          '<div class="field"><label>' + resort.label + ' — סוג וילה/חדר <span class="en">Villa type</span></label>' +
+          '<select id="villa_' + k + '">' + opts + '</select></div>' +
+          '<div class="field"><label>מספר לילות ב' + resort.label.split(' — ')[0] + ' <span class="en">Nights</span></label>' +
+          '<input type="number" id="nights_' + k + '" min="1" value="' + prevNights + '" /></div>';
+        container.appendChild(wrap);
+      });
+    }
+
+    function renderTravelers() {
+      const occ = currentOccupancy();
+      const container = document.getElementById('travelersContainer');
+      const prevDiver = {}, prevQty = {};
+      for (let i = 1; i <= 4; i++) {
+        const d = document.querySelector('[name="diver_' + i + '"]:checked');
+        const q = document.getElementById('diveqty_' + i);
+        if (d) prevDiver[i] = d.value;
+        if (q) prevQty[i] = q.value;
+      }
+      container.innerHTML = '';
+      for (let i = 1; i <= occ; i++) {
+        const isDiver = prevDiver[i] !== undefined ? prevDiver[i] === 'yes' : true;
+        const qty = prevQty[i] !== undefined ? prevQty[i] : 0;
+        const block = document.createElement('div');
+        block.className = 'traveler-block';
+        block.innerHTML =
+          '<div class="t-title">מטייל ' + i + ' <span style="font-weight:400;color:var(--muted);">Traveler ' + i + '</span></div>' +
+          '<div class="diver-toggle">' +
+            '<label><input type="radio" name="diver_' + i + '" value="yes"' + (isDiver ? ' checked' : '') + ' /><span>צוללן / Diver</span></label>' +
+            '<label><input type="radio" name="diver_' + i + '" value="no"' + (!isDiver ? ' checked' : '') + ' /><span>לא צולל / Non-diver</span></label>' +
+          '</div>' +
+          '<div class="diveqty-row" id="diveqtyRow_' + i + '" style="display:' + (isDiver ? 'flex' : 'none') + ';">' +
+            '<label>צלילות מראש <span style="font-weight:400;">/ pre-booked dives (optional):</span></label>' +
+            '<input type="number" id="diveqty_' + i + '" min="0" value="' + qty + '" />' +
+          '</div>';
+        container.appendChild(block);
+        block.querySelectorAll('[name="diver_' + i + '"]').forEach(function(radio) {
+          radio.addEventListener('change', function() {
+            document.getElementById('diveqtyRow_' + i).style.display = radio.value === 'yes' && radio.checked ? 'flex' : (document.querySelector('[name="diver_' + i + '"][value="yes"]').checked ? 'flex' : 'none');
+          });
+        });
+      }
+    }
+
+    function diveCost(qty) {
+      if (!qty || qty <= 0) return 0;
+      const rate = qty > 12 ? 54 : 60;
+      return qty * rate;
+    }
+
+    function calculate() {
+      const tripType = document.querySelector('[name="tripType"]:checked').value;
+      const occ = currentOccupancy();
+      const keys = activeResortKeys();
+
+      let accommodationPerPerson = 0;
+      const resortSummary = [];
+      for (const k of keys) {
+        const villaSel = document.getElementById('villa_' + k);
+        if (!villaSel) { accommodationPerPerson = null; break; }
+        const nights = parseInt(document.getElementById('nights_' + k).value, 10) || 0;
+        const villa = RESORTS[k].villas.find(function(v) { return v.id === villaSel.value; });
+        const nightly = villa.rates[occ];
+        accommodationPerPerson += (nightly / occ) * nights;
+        resortSummary.push(RESORTS[k].label + ': ' + villa.he + ', ' + nights + ' לילות');
+      }
+      if (accommodationPerPerson === null) {
+        alert('בחרו תפוסת חדר עם וילה זמינה בכל ריזורט לפני החישוב.');
+        return;
+      }
+
+      const resultBox = document.getElementById('resultBox');
+      let html = '';
+      let grandTotal = 0;
+      const waLines = [];
+
+      for (let i = 1; i <= occ; i++) {
+        const diver = document.querySelector('[name="diver_' + i + '"]:checked').value === 'yes';
+        const qty = diver ? (parseInt(document.getElementById('diveqty_' + i).value, 10) || 0) : 0;
+        const transfer = tripType === 'combo' ? (diver ? 335 : 295) : 100;
+        const dCost = diveCost(qty);
+        const travelerTotal = Math.round(accommodationPerPerson + transfer + dCost);
+        grandTotal += travelerTotal;
+
+        const subParts = [diver ? 'צוללן' : 'לא צולל'];
+        if (qty > 0) subParts.push(qty + ' צלילות מראש (€' + dCost + ')');
+        html +=
+          '<div class="traveler-result"><div><span class="tr-name">מטייל ' + i + '</span>' +
+          '<span class="tr-sub">' + subParts.join(' · ') + '</span></div>' +
+          '<span class="tr-price">€' + travelerTotal.toLocaleString() + '</span></div>';
+
+        waLines.push('מטייל ' + i + ': ' + subParts.join(', ') + ' — €' + travelerTotal);
+      }
+
+      html += '<div class="grand-total"><span class="gt-label">סה״כ לחדר (משוער)</span><span class="gt-price">€' + Math.round(grandTotal).toLocaleString() + '</span></div>';
+      html += '<div class="note" style="margin-top:12px;">הערכת מחיר בלבד, לא כולל טיסות, ביטוח נסיעות וצלילה (חובה), אגרות שמורה (סילאדן כ-€15) וויזה. מחירים כפופים לזמינות בעת ההזמנה.</div>';
+
+      const waMsg = encodeURIComponent(
+        'היי, חישבתי טיול פרטי לצפון סולאווסי במחשבון:\n' +
+        resortSummary.join('\n') + '\n' +
+        'תפוסת חדר: ' + occ + '\n' +
+        waLines.join('\n') + '\n' +
+        'סה״כ משוער לחדר: €' + Math.round(grandTotal) + '\n' +
+        'אשמח להצעת מחיר סופית ותכנון טיסות 🤿'
+      );
+      html += '<a href="https://wa.me/972542323567?text=' + waMsg + '" target="_blank" class="btn wa">בקשו הצעת מחיר סופית בוואטסאפ</a>';
+
+      resultBox.innerHTML = html;
+      resultBox.style.display = 'block';
+    }
+
+    document.getElementById('tripTypeOptions').querySelectorAll('.option-item').forEach(function(item) {
+      item.addEventListener('click', function() {
+        document.getElementById('tripTypeOptions').querySelectorAll('.option-item').forEach(function(i) { i.classList.remove('selected'); });
+        item.classList.add('selected');
+        renderResortBlocks();
+        document.getElementById('resultBox').style.display = 'none';
+      });
+    });
+    document.getElementById('occupancy').addEventListener('change', function() {
+      renderResortBlocks();
+      renderTravelers();
+      document.getElementById('resultBox').style.display = 'none';
+    });
+    document.getElementById('calcBtn').addEventListener('click', calculate);
+
+    // Init
+    document.querySelector('[data-value="combo"]').classList.add('selected');
+    renderResortBlocks();
+    renderTravelers();
+  </script>
+</body>
+</html>
