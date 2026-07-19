@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-SULACALC 2026-07-19l | Round-11 fix: trip-summary card renamed "פרטי הטיול" -> "פרטי ההזמנה", pre-booked dive counts per traveler moved into that card instead of the traveler price row -->
+<!-- BD-SULACALC 2026-07-19n | Round-13 fix: post-discount line wording "עלות" -> "מחיר" -->
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8" />
@@ -308,7 +308,7 @@
       container.innerHTML = '';
       keys.forEach(function(k) {
         const resort = RESORTS[k];
-        const available = resort.villas.filter(function(v) { return v.rates[occ] !== undefined; });
+        const available = resort.villas.filter(function(v) { return v.rates[occ] !== undefined; }).sort(function(a, b) { return a.rates[occ] - b.rates[occ]; });
         const wrap = document.createElement('div');
         wrap.style.marginBottom = '18px';
         if (available.length === 0) {
@@ -466,7 +466,7 @@
         if (returning) {
           travelerGroupsHtml += '<div class="discount-line">€' + discountAmount.toLocaleString() + ' הנחת לקוח חוזר</div>';
           travelerGroupsHtml +=
-            '<div class="traveler-result"><div><span class="tr-name">עלות לאחר הנחת לקוח חוזר</span></div>' +
+            '<div class="traveler-result"><div><span class="tr-name">מחיר ' + name + ' לאחר הנחת לקוח חוזר</span></div>' +
             '<span class="tr-price">€' + totalAfterDiscount.toLocaleString() + '</span></div>';
         }
         travelerGroupsHtml += '</div>';
