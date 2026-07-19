@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-SULACALC 2026-07-19k | Round-10 fix: previous name/toggle width balance overcorrected (name field too narrow, placeholder truncated) - doubled the name field width and shrank the returning-customer toggle to match -->
+<!-- BD-SULACALC 2026-07-19l | Round-11 fix: trip-summary card renamed "פרטי הטיול" -> "פרטי ההזמנה", pre-booked dive counts per traveler moved into that card instead of the traveler price row -->
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8" />
@@ -438,10 +438,9 @@
 
       const resultBox = document.getElementById('resultBox');
       const waLines = [];
+      const diveLines = [];
       let grandTotal = 0;
-      let resultsHtml = '<div class="trip-summary"><div class="ts-title">פרטי הטיול</div>';
-      resortSummary.forEach(function(line) { resultsHtml += '<div class="ts-line">' + line + '</div>'; });
-      resultsHtml += '<div class="ts-line">תפוסת חדר: ' + occ + ' אנשים</div></div>';
+      let travelerGroupsHtml = '';
 
       for (let i = 1; i <= occ; i++) {
         const nameInput = document.getElementById('travelerName_' + i);
@@ -457,19 +456,20 @@
         const totalAfterDiscount = Math.round(accAfterDiscount + transfer + dCost);
         const finalTotal = returning ? totalAfterDiscount : totalBeforeDiscount;
         grandTotal += finalTotal;
+        if (qty > 0) diveLines.push(name + ': ' + qty + ' צלילות מראש');
 
-        resultsHtml += '<div class="traveler-group">';
-        resultsHtml +=
+        travelerGroupsHtml += '<div class="traveler-group">';
+        travelerGroupsHtml +=
           '<div class="traveler-result"><div><span class="tr-name">' + name + '</span>' +
-          '<span class="tr-sub">' + (diver ? 'צולל' : 'לא צולל') + (qty > 0 ? ' · ' + qty + ' צלילות מראש' : '') + '</span></div>' +
+          '<span class="tr-sub">' + (diver ? 'צולל' : 'לא צולל') + '</span></div>' +
           '<span class="tr-price">€' + totalBeforeDiscount.toLocaleString() + '</span></div>';
         if (returning) {
-          resultsHtml += '<div class="discount-line">€' + discountAmount.toLocaleString() + ' הנחת לקוח חוזר</div>';
-          resultsHtml +=
+          travelerGroupsHtml += '<div class="discount-line">€' + discountAmount.toLocaleString() + ' הנחת לקוח חוזר</div>';
+          travelerGroupsHtml +=
             '<div class="traveler-result"><div><span class="tr-name">עלות לאחר הנחת לקוח חוזר</span></div>' +
             '<span class="tr-price">€' + totalAfterDiscount.toLocaleString() + '</span></div>';
         }
-        resultsHtml += '</div>';
+        travelerGroupsHtml += '</div>';
 
         const waSubParts = [diver ? 'צולל' : 'לא צולל'];
         if (qty > 0) waSubParts.push(qty + ' צלילות מראש');
@@ -477,7 +477,12 @@
         waLines.push(name + ': ' + waSubParts.join(', ') + ' - €' + finalTotal);
       }
 
-      let html = resultsHtml;
+      let html = '<div class="trip-summary"><div class="ts-title">פרטי ההזמנה</div>';
+      resortSummary.forEach(function(line) { html += '<div class="ts-line">' + line + '</div>'; });
+      html += '<div class="ts-line">תפוסת חדר: ' + occ + ' אנשים</div>';
+      diveLines.forEach(function(line) { html += '<div class="ts-line">' + line + '</div>'; });
+      html += '</div>';
+      html += travelerGroupsHtml;
       html += '<div class="note warn" style="margin-top:12px;">הערכת מחיר בלבד, לא כולל טיסות, ביטוח נסיעות וצלילה (חובה), אגרות שמורה (סילאדן כ-€15) וויזה. מחירים כפופים לזמינות בעת ההזמנה.</div>';
 
       const waMsg = encodeURIComponent(
