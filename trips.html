@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-TRIPS 2026-07-19a | Fixed shareWA('270525') syntax bug (stray backslash-escaped quotes silently broke the Share button on the North Sulawesi card) -->
+<!-- BD-TRIPS 2026-07-21c | Updated calculator promo subtitle to mention resort/nights/dives -->
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8" />
@@ -320,6 +320,8 @@
       .trip-actions { flex-direction: row; flex-wrap: wrap; width: 100%; }
       .btn-wa, .btn-copy { flex: 1; justify-content: center; }
       .logo-text { font-size: 26px; }
+      .calc-promo-inner { flex-wrap: wrap; gap: 12px; }
+      .btn-calc { width: 100%; }
     }
 
     .trip-note {
@@ -333,6 +335,47 @@
       font-weight: 700;
       font-size: 12px;
     }
+
+    /* Trip calculator promo card */
+    .calc-promo-inner {
+      display: flex;
+      align-items: center;
+      padding: 16px 20px;
+      gap: 14px;
+      border-right: 4px solid var(--orange);
+    }
+    .calc-promo-icon { font-size: 26px; flex-shrink: 0; }
+    .calc-promo-text { flex: 1; min-width: 0; }
+    .calc-promo-title {
+      font-family: 'Raleway', sans-serif;
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+    .calc-promo-sub {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+    .btn-calc {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      background: var(--orange);
+      color: white;
+      border-radius: 10px;
+      padding: 9px 14px;
+      font-family: 'Heebo', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      text-decoration: none;
+      white-space: nowrap;
+      flex-shrink: 0;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .btn-calc:hover { transform: scale(1.03); box-shadow: 0 4px 14px rgba(245,166,35,0.4); }
   </style>
 </head>
 <body>
@@ -811,6 +854,16 @@
       </div>
       <div class="trip-count-badge">3 trips</div>
     </div>
+  <div class="trip-card">
+    <div class="calc-promo-inner">
+      <div class="calc-promo-icon">🧮</div>
+      <div class="calc-promo-text">
+        <div class="calc-promo-title">לא מצאתם תאריכים מתאימים לאינדונזיה?</div>
+        <div class="calc-promo-sub">תכננו לעצמכם חופשת צלילה עצמאית לצפון סולאווסי עם מחשבון הטיול החכם שלנו. בחרו ריזורט, מספר לילות ומספר צלילות, וקבלו הצעת מחיר מיידית.</div>
+      </div>
+      <a class="btn-calc" href="https://register.buddy-divers.com/sulawesi-independent-diver-calculator.html" target="_blank">🧮 למחשבון הטיול</a>
+    </div>
+  </div>
   <div class="trip-card">
     <div class="trip-card-inner">
       <div class="trip-date-block">
