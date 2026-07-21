@@ -18,6 +18,11 @@ The full system history lives in **HANDOVER.md**, kept OFFLINE by Ian (deliberat
 in this public repo). If a task needs history, Airtable schema, Make scenario details, or
 past decisions, ask Ian to provide HANDOVER.md before proceeding. Do not guess.
 
+Email campaign builds (Active Trail promo emails) follow **BUDDY-DIVERS-EMAIL-CAMPAIGN-GUIDE.md**,
+also kept in the repo folder but git-ignored (colors, typography, section structure, bullet/dash
+rules, Cloudinary conventions, Active Trail known issues). Read it before building or editing any
+campaign email.
+
 ## Coding rules (always apply)
 
 1. **Version tags.** Every edited file gets a new tag: `<!-- BD-[FILE] YYYY-MM-DD[letter] | short change description -->`.
