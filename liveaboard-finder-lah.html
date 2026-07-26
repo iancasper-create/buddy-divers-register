@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-LBLAH 2026-07-26c | Supplier cost stripped from the public payload, booking request added per cabin -->
+<!-- BD-LBLAH 2026-07-26d | Card grid layout, contained width, filter bar on a real grid, RTL date order fixed -->
 <html lang="he" dir="rtl">
 <head>
 <meta charset="UTF-8" />
@@ -17,7 +17,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background:
  radial-gradient(ellipse at 20% 50%,rgba(0,148,149,.18) 0,transparent 60%),
  radial-gradient(ellipse at 80% 20%,rgba(27,79,138,.22) 0,transparent 50%),
  linear-gradient(160deg,#0a1f2e 0,#0d2d3e 40%,#0a2535 100%)}
-.wrap{position:relative;z-index:1;max-width:1400px;margin:0 auto;padding:24px 14px 70px}
+.wrap{position:relative;z-index:1;max-width:1180px;margin:0 auto;padding:24px 16px 70px}
 
 .banner{background:linear-gradient(135deg,#7a4b00,#b8860b);color:#fff;border-radius:14px;
  padding:14px 18px;margin-bottom:18px;font-size:14px;line-height:1.7}
@@ -40,14 +40,19 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background:
 .gain span{font-size:12.5px;color:#cfe3ea}
 .gain i{display:block;font-style:normal;font-size:11px;color:#8fb0bd;margin-top:3px}
 
-.panel{background:var(--card);border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:0 10px 34px rgba(0,0,0,.28)}
-.controls{display:flex;flex-wrap:wrap;gap:11px;align-items:flex-end}
-.fld{display:flex;flex-direction:column;gap:5px}
+.panel{background:var(--card);border-radius:16px;padding:18px;margin-bottom:14px;box-shadow:0 10px 34px rgba(0,0,0,.28)}
+/* Fixed tracks rather than flex-wrap: 12 controls free-flowing produced a ragged
+   bar with odd gaps. Row 1 = the four facets, row 2 = dates and search. */
+.controls{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;align-items:end}
+.controls .span2{grid-column:span 2}
+.controls .dates{grid-column:span 2;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.controls .actions{grid-column:1/-1;display:flex;gap:10px;align-items:center;
+  border-top:1px solid var(--border);padding-top:13px;margin-top:2px}
+.controls .actions .grow{margin-inline-start:auto}
+.fld{display:flex;flex-direction:column;gap:5px;min-width:0}
 .fld label{font-size:12px;font-weight:600;color:var(--muted)}
 .fld select,.fld input{font-family:inherit;font-size:14px;padding:9px 11px;border:1.5px solid var(--border);
- border-radius:9px;background:#fff;color:var(--text);min-width:150px}
-.fld.wide select{min-width:215px;font-weight:600}
-.fld.narrow select{min-width:112px}
+ border-radius:9px;background:#fff;color:var(--text);width:100%;min-width:0}
 .tog{display:flex;align-items:center;gap:7px;font-size:14px;font-weight:600;color:var(--text);
  cursor:pointer;padding-bottom:9px;white-space:nowrap}
 .tog input{width:17px;height:17px;accent-color:var(--teal);cursor:pointer}
@@ -57,7 +62,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background:
 /* multi-select with checkboxes */
 .ms{position:relative}
 .msbtn{font-family:inherit;font-size:14px;padding:9px 11px;border:1.5px solid var(--border);
-  border-radius:9px;background:#fff;color:var(--text);min-width:165px;width:100%;cursor:pointer;
+  border-radius:9px;background:#fff;color:var(--text);min-width:0;width:100%;cursor:pointer;
   text-align:right;display:flex;align-items:center;gap:6px}
 .msbtn:hover{border-color:var(--teal2)}
 .msbtn.on{border-color:var(--teal);background:#eaf7f9;font-weight:600}
@@ -108,25 +113,34 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background:
 .count{color:#cfe3ea;font-size:14px;margin:0 4px 12px;font-weight:500}
 .count b{color:var(--orange)}
 
-.lst{background:var(--card);border-radius:16px;overflow:hidden;box-shadow:0 10px 34px rgba(0,0,0,.28)}
-.row{display:grid;grid-template-columns:104px 1fr auto;gap:14px;padding:13px 15px;
- border-bottom:1px solid #e8f1f4;cursor:pointer;align-items:center}
-.row:hover{background:#f6fbfc}
-.row img{width:104px;height:72px;object-fit:cover;border-radius:9px;background:var(--light);display:block}
-.row .noimg{width:104px;height:72px;border-radius:9px;background:var(--light);display:flex;
- align-items:center;justify-content:center;color:var(--none);font-size:11px}
-.row h3{font-size:15.5px;font-weight:700;direction:ltr;text-align:right}
-.row .meta{font-size:12.5px;color:var(--muted);margin-top:3px}
+/* A card grid, not full-width rows: the photos are the point of this source,
+   and a 1180px row left a dead gap between the title and the price. */
+.lst{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.row{background:var(--card);border-radius:14px;overflow:hidden;cursor:pointer;
+ box-shadow:0 8px 24px rgba(0,0,0,.22);display:flex;flex-direction:column;
+ transition:transform .12s,box-shadow .12s}
+.row:hover{transform:translateY(-3px);box-shadow:0 14px 32px rgba(0,0,0,.3)}
+.row .ph{position:relative;aspect-ratio:16/10;background:var(--light)}
+.row .ph img{width:100%;height:100%;object-fit:cover;display:block}
+.row .noimg{width:100%;height:100%;display:flex;align-items:center;justify-content:center;
+ color:var(--none);font-size:12px}
+.row .badge{position:absolute;top:9px;inset-inline-start:9px;background:rgba(6,22,32,.82);
+ color:#fff;border-radius:7px;font-size:11.5px;font-weight:700;padding:3px 8px;backdrop-filter:blur(3px)}
+.row .body{padding:12px 14px;display:flex;flex-direction:column;gap:5px;flex:1}
+.row h3{font-size:16px;font-weight:700;direction:ltr;text-align:right;line-height:1.25}
+.row .meta{font-size:12.5px;color:var(--muted)}
 .row .rt{font-size:12.5px;color:var(--muted);direction:ltr;text-align:right;
  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.row .right{text-align:end;white-space:nowrap}
-.dt{direction:ltr;font-weight:700;color:var(--navy);font-size:14px}
-.pr{direction:ltr;font-weight:800;font-size:17px;display:block;margin-top:3px}
+.row .foot2{margin-top:auto;padding-top:10px;border-top:1px solid #e8f1f4;
+ display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.dt{direction:ltr;font-weight:700;color:var(--navy);font-size:13.5px;white-space:nowrap}
+.pr{direction:ltr;font-weight:800;font-size:19px;white-space:nowrap}
 .pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:700;color:#fff}
 .pill.ok{background:var(--ok)}.pill.mid{background:var(--mid)}.pill.low{background:var(--low)}.pill.none{background:var(--none)}
 .cabflag{display:inline-block;background:#fff3d6;color:#8a6100;border:1px solid #e8c98a;border-radius:6px;
  font-size:11px;font-weight:700;padding:1px 6px;margin-inline-start:5px}
-.more{padding:14px;text-align:center;font-size:13px;color:var(--muted);background:var(--light)}
+.more{grid-column:1/-1;padding:14px;text-align:center;font-size:13px;color:var(--muted);
+ background:var(--card);border-radius:12px}
 
 .ov{position:fixed;inset:0;background:rgba(6,22,32,.75);z-index:50;display:none;align-items:flex-start;
  justify-content:center;padding:22px 12px;overflow-y:auto}
@@ -195,12 +209,19 @@ table.cab tr.sold td{opacity:.45}
  box-shadow:0 6px 20px rgba(37,211,102,.35)}
 .wa svg{width:21px;height:21px;fill:currentColor}
 .foot{text-align:center;color:#8fb0bd;font-size:12.5px;margin-top:22px;line-height:1.9}
-@media(max-width:760px){
- .row{grid-template-columns:78px 1fr;gap:10px}
- .row img,.row .noimg{width:78px;height:56px}
- .row .right{grid-column:1/-1;text-align:start;display:flex;gap:10px;align-items:center}
+@media(max-width:1000px){
+ .lst{grid-template-columns:repeat(2,1fr)}
+ .controls{grid-template-columns:repeat(2,1fr)}
+ .controls .span2,.controls .dates{grid-column:span 2}
+}
+@media(max-width:620px){
+ .lst{grid-template-columns:1fr}
+ .controls{grid-template-columns:1fr}
+ .controls .span2,.controls .dates{grid-column:span 1}
+ .controls .actions{flex-wrap:wrap}
+ .controls .actions .grow{margin-inline-start:0}
  .kv{grid-template-columns:1fr 1fr}
- .fld{flex:1 1 140px}.fld select,.fld input{min-width:0;width:100%}
+ .gains{grid-template-columns:repeat(2,1fr)}
 }
 </style>
 </head>
@@ -229,11 +250,19 @@ table.cab tr.sold td{opacity:.45}
       <div class="fld" id="msBoat"></div>
       <div class="fld" id="msItin"></div>
       <div class="fld" id="msNights"></div>
-      <div class="fld narrow"><label for="fFromM">מחודש</label><select id="fFromM"></select></div>
-      <div class="fld narrow"><label for="fFromY">משנה</label><select id="fFromY"></select></div>
-      <div class="fld narrow"><label for="fToM">עד חודש</label><select id="fToM"></select></div>
-      <div class="fld narrow"><label for="fToY">עד שנה</label><select id="fToY"></select></div>
-      <div class="fld"><label for="fSort">מיון</label>
+
+      <div class="fld dates">
+        <div class="fld"><label for="fFromM">מחודש</label><select id="fFromM"></select></div>
+        <div class="fld"><label for="fFromY">שנה</label><select id="fFromY"></select></div>
+      </div>
+      <div class="fld dates">
+        <div class="fld"><label for="fToM">עד חודש</label><select id="fToM"></select></div>
+        <div class="fld"><label for="fToY">שנה</label><select id="fToY"></select></div>
+      </div>
+
+      <div class="fld span2"><label for="fText">חיפוש חופשי</label>
+        <input type="text" id="fText" placeholder="יעד, ספינה או מסלול" /></div>
+      <div class="fld span2"><label for="fSort">מיון</label>
         <select id="fSort">
           <option value="date">תאריך</option>
           <option value="price">מחיר, מהזול</option>
@@ -241,15 +270,14 @@ table.cab tr.sold td{opacity:.45}
           <option value="spots">מקומות פנויים</option>
         </select>
       </div>
-      <div class="fld" style="flex:0 0 auto">
-        <label for="fText">חיפוש חופשי</label>
-        <input type="text" id="fText" placeholder="יעד, ספינה או מסלול" style="min-width:0;width:285px" />
+
+      <div class="actions">
+        <button type="button" class="dealbtn" id="fDeal">
+          <span class="bx" id="dealBx"></span> רק מבצעים
+        </button>
+        <button class="btn" id="clr">נקה סינון</button>
+        <button class="btn link grow" id="cpy" title="העתקת קישור לתצוגה הנוכחית">העתק קישור</button>
       </div>
-      <button type="button" class="dealbtn" id="fDeal">
-        <span class="bx" id="dealBx"></span> רק מבצעים
-      </button>
-      <button class="btn" id="clr">נקה סינון</button>
-      <button class="btn link" id="cpy" title="העתקת קישור לתצוגה הנוכחית">העתק קישור</button>
     </div>
     <div class="tags" id="tags"></div>
   </div>
@@ -594,20 +622,25 @@ function render(){
     const withPhotos=t.cabins.filter(c=>{
       const bc=(b.cabins||[]).find(x=>x.id===c.id);return bc&&bc.photos.length;}).length;
     h+='<div class="row" data-i="'+TRIPS.indexOf(t)+'">'
+      +'<div class="ph">'
       +(img?'<img loading="lazy" src="'+esc(img)+'" alt="" />':'<div class="noimg">אין תמונה</div>')
-      +'<div><h3>'+esc(t.boat)+'</h3>'
-      +'<div class="meta">'+esc(heb(t.country))+' · '+(t.nights||'?')+' לילות · '
-      +esc(t.from_port)+(t.cabins.length?' · '+t.cabins.length+' סוגי תא':'')
+      +'<span class="badge">'+esc(heb(t.country))+'</span></div>'
+      +'<div class="body">'
+      +'<h3>'+esc(t.boat)+'</h3>'
+      +'<div class="meta">'+(t.nights||'?')+' לילות · '+esc(t.from_port)
+      +(t.cabins.length?' · '+t.cabins.length+' סוגי תא':'')
       +(withPhotos?'<span class="cabflag">'+withPhotos+' עם תמונות</span>':'')+'</div>'
-      +'<div class="rt">'+esc(t.route)+'</div></div>'
-      +'<div class="right"><span class="dt">'+d2(t.start)+'</span>'
-      +'<span class="pr">'+esc(money(lowest(t),t.currency))+'</span>'
-      +'<span class="pill '+tone(t)+'">'+(t.spots?t.spots+' מקומות':'מלא')+'</span></div>'
-      +'</div>';
+      +'<div class="rt">'+esc(t.route)+'</div>'
+      +'<div class="foot2">'
+      +'<span class="dt" dir="ltr">'+d2(t.start)+'</span>'
+      +'<span class="pr" dir="ltr">'+esc(money(lowest(t),t.currency))+'</span>'
+      +'</div>'
+      +'<div><span class="pill '+tone(t)+'">'+(t.spots?t.spots+' מקומות פנויים':'מלא')+'</span></div>'
+      +'</div></div>';
   });
-  h+='</div>';
   if(rows.length>CAP)h+='<div class="more">מוצגות '+CAP+' ההפלגות הראשונות מתוך '
     +rows.length+'. צמצמו את הסינון כדי לראות את השאר.</div>';
+  h+='</div>';
   $('view').innerHTML=rows.length?h:'<div class="lst"><div class="more">לא נמצאו הפלגות</div></div>';
 
   Object.keys(MS).forEach(k=>MS[k].refresh());
