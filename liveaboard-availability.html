@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-LBAVAIL 2026-07-26j | Shareable deep links for filters and single departures, copy-link button, accessibility fixes -->
+<!-- BD-LBAVAIL 2026-07-26k | Dead availability filter removed, month and year split into separate pickers -->
 <html lang="he" dir="rtl">
 <head>
 <meta charset="UTF-8" />
@@ -42,6 +42,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background:
   border:1.5px solid var(--border);border-radius:9px;background:#fff;color:var(--text);min-width:150px}
 .fld select:focus,.fld input:focus{outline:none;border-color:var(--teal2)}
 .fld.wide select{min-width:215px;font-weight:600}
+.fld.narrow select{min-width:112px}
 .tog{display:flex;align-items:center;gap:7px;font-size:14px;font-weight:600;color:var(--text);
   cursor:pointer;padding-bottom:9px;white-space:nowrap}
 .tog input{width:17px;height:17px;accent-color:var(--teal);cursor:pointer}
@@ -284,13 +285,21 @@ tbody tr:hover{background:#f6fbfc}
       <div class="fld" id="msBoat"></div>
       <div class="fld" id="msItin"></div>
       <div class="fld" id="msNights"></div>
-      <div class="fld">
-        <label for="fFrom">מחודש</label>
-        <select id="fFrom"></select>
+      <div class="fld narrow">
+        <label for="fFromM">מחודש</label>
+        <select id="fFromM"></select>
       </div>
-      <div class="fld">
-        <label for="fTo">עד חודש</label>
-        <select id="fTo"></select>
+      <div class="fld narrow">
+        <label for="fFromY">משנה</label>
+        <select id="fFromY"></select>
+      </div>
+      <div class="fld narrow">
+        <label for="fToM">עד חודש</label>
+        <select id="fToM"></select>
+      </div>
+      <div class="fld narrow">
+        <label for="fToY">עד שנה</label>
+        <select id="fToY"></select>
       </div>
       <div class="fld">
         <label for="fSort">מיון</label>
@@ -306,7 +315,6 @@ tbody tr:hover{background:#f6fbfc}
         <label for="fText">חיפוש חופשי</label>
         <input type="text" id="fText" placeholder="יעד, ספינה או מסלול" style="min-width:0;width:285px" />
       </div>
-      <label class="tog"><input type="checkbox" id="fAvail" checked /> רק עם מקום פנוי</label>
       <button type="button" class="dealbtn" id="fDeal">
         <span class="bx" id="dealBx"></span> רק מבצעים
       </button>
@@ -318,7 +326,6 @@ tbody tr:hover{background:#f6fbfc}
       <span><i style="background:var(--ok)"></i>זמינות טובה</span>
       <span><i style="background:var(--mid)"></i>מתמלא</span>
       <span><i style="background:var(--low)"></i>מקומות אחרונים</span>
-      <span><i style="background:var(--none)"></i>מלא</span>
       <span><i style="background:#eef3f6;border:1px solid var(--border)"></i>משוער, יציאה מעבר ל-18 חודשים</span>
       <span>לחצו על שורה לפרטים מלאים</span>
     </div>
@@ -419,7 +426,8 @@ ROWS.forEach((t, i) => t._i = i);
 
 const S = {
   dest: new Set(), boat: new Set(), itin: new Set(), nights: new Set(),
-  from: M0, to: M1, sort: 'date', text: '', avail: true, deal: false
+  from: M0, to: M1, sort: 'date', text: '', deal: false,
+  avail: false   // the feed only lists bookable departures; kept for ?all= and future-proofing
 };
 const CAP = 800;
 
@@ -455,7 +463,6 @@ function readUrl() {
   if (p.get('q')) S.text = p.get('q');
   if (p.get('sort')) S.sort = p.get('sort');
   if (p.get('deals') === '1') S.deal = true;
-  if (p.get('all') === '1') S.avail = false;
   return p.get('trip') || '';
 }
 
@@ -468,7 +475,6 @@ function writeUrl() {
   if (S.text.trim()) p.set('q', S.text.trim());
   if (S.sort !== 'date') p.set('sort', S.sort);
   if (S.deal) p.set('deals', '1');
-  if (!S.avail) p.set('all', '1');
   const qs = p.toString();
   history.replaceState(null, '', qs ? location.pathname + '?' + qs : location.pathname);
 }
@@ -619,20 +625,39 @@ function MultiSelect(mountId, opts) {
 document.addEventListener('click', () =>
   document.querySelectorAll('.mspanel.on').forEach(p => p.classList.remove('on')));
 
+/* Month and year are separate pickers: a single list of 64 entries is a long
+   scroll, and people think in "March" and "2028", not in one combined label. */
+const YEARS = [...new Set(MONTHS.map(mo => mo.y))];
+
 function buildMonths() {
-  const f = document.getElementById('fFrom'), t = document.getElementById('fTo');
-  /* 60+ entries once the far years are in, so group them by year. */
-  let gf = null, gt = null, year = null;
-  MONTHS.forEach(mo => {
-    if (mo.y !== year) {
-      year = mo.y;
-      gf = document.createElement('optgroup'); gf.label = year; f.appendChild(gf);
-      gt = document.createElement('optgroup'); gt.label = year; t.appendChild(gt);
-    }
-    gf.appendChild(new Option(HEB_MO[mo.m] + ' ' + mo.y, mo.k));
-    gt.appendChild(new Option(HEB_MO[mo.m] + ' ' + mo.y, mo.k));
+  [['fFromM', 'fFromY'], ['fToM', 'fToY']].forEach(([mi, yi]) => {
+    const m = document.getElementById(mi), y = document.getElementById(yi);
+    HEB_MO.forEach((name, i) => m.add(new Option(name, i)));
+    YEARS.forEach(yr => y.add(new Option(yr, yr)));
   });
-  f.value = S.from; t.value = S.to;
+  syncMonthUI();
+}
+
+function syncMonthUI() {
+  document.getElementById('fFromM').value = S.from % 12;
+  document.getElementById('fFromY').value = Math.floor(S.from / 12);
+  document.getElementById('fToM').value = S.to % 12;
+  document.getElementById('fToY').value = Math.floor(S.to / 12);
+}
+
+/* Clamp to the range the data actually covers, then write the result back to the
+   controls so they never show a month that is not really in effect. */
+function monthChanged(which) {
+  const val = id => +document.getElementById(id).value;
+  let from = val('fFromY') * 12 + val('fFromM');
+  let to   = val('fToY')   * 12 + val('fToM');
+  from = Math.min(Math.max(from, M0), M1);
+  to   = Math.min(Math.max(to,   M0), M1);
+  if (which === 'from' && to < from) to = from;
+  if (which === 'to'   && from > to) from = to;
+  S.from = from; S.to = to;
+  syncMonthUI();
+  render();
 }
 
 function renderList(rows) {
@@ -970,19 +995,17 @@ document.getElementById('sDest').textContent = new Set(ROWS.map(t => t.boat.dest
 
 buildMonths();
 const $ = id => document.getElementById(id);
-$('fFrom').onchange = e => { S.from = +e.target.value; if (S.to < S.from) { S.to = S.from; $('fTo').value = S.to; } render(); };
-$('fTo').onchange = e => { S.to = +e.target.value; if (S.from > S.to) { S.from = S.to; $('fFrom').value = S.from; } render(); };
+$('fFromM').onchange = $('fFromY').onchange = () => monthChanged('from');
+$('fToM').onchange = $('fToY').onchange = () => monthChanged('to');
 $('fSort').onchange = e => { S.sort = e.target.value; render(); };
-$('fAvail').onchange = e => { S.avail = e.target.checked; render(); };
 $('fDeal').onclick = () => { S.deal = !S.deal; render(); };
 let tmr; $('fText').oninput = e => { clearTimeout(tmr); tmr = setTimeout(() => { S.text = e.target.value; render(); }, 200); };
 $('clr').onclick = () => {
   S.dest.clear(); S.boat.clear(); S.itin.clear(); S.nights.clear();
   S.from = M0; S.to = M1; S.sort = 'date';
-  S.text = ''; S.avail = true; S.deal = false;
-  $('fFrom').value = M0; $('fTo').value = M1;
+  S.text = ''; S.deal = false;
+  syncMonthUI();
   $('fSort').value = 'date'; $('fText').value = '';
-  $('fAvail').checked = true;
   Object.keys(MS).forEach(k => MS[k].close());
   render();
 };
@@ -1009,9 +1032,8 @@ $('cpy').onclick = function () {
 
 /* apply an incoming link before the first paint of the list */
 const wantedTrip = readUrl();
-$('fFrom').value = S.from; $('fTo').value = S.to;
+syncMonthUI();
 $('fSort').value = S.sort; $('fText').value = S.text;
-$('fAvail').checked = S.avail;
 
 render();
 
