@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<!-- BD-SULANET 2026-07-26a | New file: internal NET-rate cost calculator for North Sulawesi independent-diver trips (Siladen + Coral Eye), admin-styled companion to sulawesi-independent-diver-calculator.html -->
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Buddy-Divers - North Sulawesi Net Rate Calculator</title>
+<link rel="icon" type="image/jpeg" href="https://res.cloudinary.com/dccbsfte0/image/upload/v1774016253/logo2_swvqfe.jpg" />
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+
+  :root {
+    --navy: #1a3a5c;
+    --teal: #007289;
+    --orange: #d4692a;
+    --bg: #f0f7f9;
+    --white: #ffffff;
+    --border: #c5dfe6;
+    --text: #1a3a4a;
+    --muted: #5a7a8a;
+    --card-shadow: 0 2px 16px rgba(0,114,137,0.10);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  .header {
+    background: linear-gradient(135deg, var(--teal), var(--navy));
+    padding: 14px 32px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+  }
+  .header img { height: 48px; }
+  .header-title { color: white; font-size: 18px; font-weight: 600; letter-spacing: 0.3px; }
+  .header-sub { color: rgba(255,255,255,0.7); font-size: 12px; margin-top: 2px; }
+
+  /* MAIN LAYOUT */
+  .container { max-width: 900px; margin: 0 auto; padding: 32px 24px 64px; }
+
+  /* CARD */
+  .card {
+    background: var(--white);
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    box-shadow: var(--card-shadow);
+    padding: 28px 32px;
+    margin-bottom: 20px;
+  }
+  .card-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--teal);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card-title .step-badge {
+    background: var(--teal);
+    color: white;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  /* FORM ELEMENTS */
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .field-row.full { grid-template-columns: 1fr; }
+  .field-row:last-child { margin-bottom: 0; }
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .field input, .field select {
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    color: var(--text);
+    background: white;
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+  }
+  .field input:focus, .field select:focus {
+    border-color: var(--teal);
+    box-shadow: 0 0 0 3px rgba(0,114,137,0.08);
+  }
+
+  .note {
+    font-size: 12px;
+    color: var(--muted);
+    background: var(--bg);
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-top: 6px;
+    line-height: 1.6;
+  }
+
+  .traveler-block { border: 1.5px solid var(--border); border-radius: 10px; padding: 16px; margin-bottom: 12px; }
+  .traveler-block:last-child { margin-bottom: 0; }
+  .traveler-block .t-title { font-size: 14px; font-weight: 700; color: var(--navy); margin-bottom: 10px; }
+
+  .btn {
+    border: none;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-primary {
+    background: var(--teal);
+    color: white;
+    width: 100%;
+    padding: 14px;
+    font-size: 16px;
+    border-radius: 10px;
+  }
+  .btn-primary:hover { background: #005f73; }
+
+  /* SUMMARY BOXES */
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .summary-box {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 12px;
+    text-align: center;
+  }
+  .summary-box .s-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+  }
+  .summary-box .s-value {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+  }
+  .summary-box.total .s-value { color: var(--orange); }
+
+  /* TRIP DETAILS */
+  .trip-summary { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; margin-bottom: 16px; }
+  .trip-summary .ts-title { font-size: 11px; font-weight: 700; color: var(--teal); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+  .trip-summary .ts-line { font-size: 13px; color: var(--text); line-height: 1.7; }
+
+  /* PER-TRAVELER RESULT ROWS */
+  .traveler-result { display: flex; justify-content: space-between; align-items: baseline; padding: 10px 0; border-bottom: 1px solid var(--bg); font-size: 14px; gap: 12px; }
+  .traveler-result .tr-name { font-weight: 700; color: var(--text); }
+  .traveler-result .tr-sub { display: block; font-size: 11px; color: var(--muted); font-weight: 400; margin-top: 2px; font-family: 'DM Mono', monospace; }
+  .traveler-result .tr-price { font-weight: 700; color: var(--navy); font-size: 16px; font-family: 'DM Mono', monospace; white-space: nowrap; }
+
+  #resultBox { margin-top: 4px; }
+
+  @media (max-width: 640px) {
+    .field-row { grid-template-columns: 1fr; }
+    .summary-grid { grid-template-columns: 1fr 1fr; }
+    .card { padding: 20px 16px; }
+  }
+</style>
+</head>
+<body>
+  <div class="header">
+    <img src="https://res.cloudinary.com/dccbsfte0/image/upload/v1774016253/logo2_swvqfe.jpg" alt="Buddy-Divers" />
+    <div>
+      <div class="header-title">North Sulawesi - Net Rate Calculator</div>
+      <div class="header-sub">Siladen Resort &amp; Spa | Coral Eye Resort - internal cost basis (NET rates), 2027/2028 contract</div>
+    </div>
+  </div>
+
+  <div class="container">
+
+    <div class="card">
+      <div class="card-title"><span class="step-badge">1</span>Resort Selection</div>
+      <div class="field-row full">
+        <div class="field">
+          <label>Trip type</label>
+          <select id="tripType">
+            <option value="combo" selected>Both resorts - Siladen + Coral Eye (includes 2 dives during the crossing)</option>
+            <option value="siladen">Siladen Resort &amp; Spa only</option>
+            <option value="coraleye">Coral Eye Resort only</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span class="step-badge">2</span>Occupancy &amp; Travelers</div>
+      <div class="field-row full">
+        <div class="field">
+          <label>Room occupancy</label>
+          <select id="occupancy">
+            <option value="1">Single</option>
+            <option value="2" selected>Double</option>
+            <option value="3">Triple</option>
+            <option value="4">Quadruple</option>
+          </select>
+        </div>
+      </div>
+      <div id="travelerNamesContainer"></div>
+    </div>
+
+    <div class="card" id="resortBlocksCard">
+      <div class="card-title"><span class="step-badge">3</span>Villa / Room &amp; Nights</div>
+      <div id="resortBlocks"></div>
+      <div class="note">Resort minimum-stay policy: 3 nights standard, 5 nights during August and 20 Dec - 1 Jan. Informational only, the calculator does not enforce it.</div>
+    </div>
+
+    <div class="card" id="travelersCard">
+      <div class="card-title"><span class="step-badge">4</span>Diving</div>
+      <div id="travelersContainer"></div>
+    </div>
+
+    <div class="card">
+      <button class="btn btn-primary" id="calcBtn" type="button">Calculate Net Cost</button>
+      <div id="resultBox" style="display:none;"></div>
+    </div>
+
+  </div>
+
+  <script>
+    const RESORTS = {
+      siladen: {
+        label: 'Siladen Resort & Spa',
+        villas: [
+          { id:'siladen_garden', label:'Garden View Villa', rates:{1:208,2:292,3:408} },
+          { id:'siladen_beach', label:'Beach View Villa', rates:{1:280,2:400,3:560} },
+          { id:'siladen_luxury', label:'Luxury Villa', rates:{1:348,2:496,3:696} },
+          { id:'siladen_beach2br', label:'Beach Double Bedroom Villa (2BR/2BA)', rates:{1:532,2:532,3:648,4:760} },
+          { id:'siladen_garden2br', label:'Garden Double Bedroom Villa (2BR/2BA)', rates:{1:396,2:396,3:476,4:556} }
+        ]
+      },
+      coraleye: {
+        label: 'Coral Eye Resort',
+        villas: [
+          { id:'coraleye_garden', label:'Garden View Villa', rates:{1:248,2:352,3:492} },
+          { id:'coraleye_beach', label:'Beach View Villa', rates:{1:288,2:412,3:576} },
+          { id:'coraleye_pool', label:'Beachfront Pool Villa', rates:{1:368,2:528,3:740} },
+          { id:'coraleye_superior', label:'Superior Room', rates:{1:176,2:252,3:352} },
+          { id:'coraleye_garden2br', label:'Double Bedroom Garden Villa (2BR/2BA)', rates:{1:352,2:352,3:428,4:504} }
+        ]
+      }
+    };
+
+    function activeResortKeys() {
+      const tripType = document.getElementById('tripType').value;
+      return tripType === 'combo' ? ['siladen','coraleye'] : [tripType];
+    }
+
+    function currentOccupancy() {
+      return parseInt(document.getElementById('occupancy').value, 10);
+    }
+
+    function diveCost(qty) {
+      if (!qty || qty <= 0) return 0;
+      const rate = qty >= 26 ? 45 : (qty >= 13 ? 46 : 48);
+      return qty * rate;
+    }
+
+    function renderResortBlocks() {
+      const occ = currentOccupancy();
+      const container = document.getElementById('resortBlocks');
+      const keys = activeResortKeys();
+      const prev = {};
+      keys.forEach(function(k) {
+        const villaSel = document.getElementById('villa_' + k);
+        const nightsInp = document.getElementById('nights_' + k);
+        if (villaSel) prev[k] = { villa: villaSel.value, nights: nightsInp ? nightsInp.value : 5 };
+      });
+      container.innerHTML = '';
+      keys.forEach(function(k) {
+        const resort = RESORTS[k];
+        const available = resort.villas.filter(function(v) { return v.rates[occ] !== undefined; }).sort(function(a, b) { return a.rates[occ] - b.rates[occ]; });
+        const wrap = document.createElement('div');
+        wrap.style.marginBottom = '16px';
+        if (available.length === 0) {
+          wrap.innerHTML = '<div class="note">No villa available at ' + resort.label + ' for the selected occupancy. Choose a different occupancy.</div>';
+          container.appendChild(wrap);
+          return;
+        }
+        const prevVilla = prev[k] && available.some(function(v){ return v.id === prev[k].villa; }) ? prev[k].villa : available[0].id;
+        const prevNights = prev[k] ? prev[k].nights : 5;
+        let opts = available.map(function(v) {
+          const sel = v.id === prevVilla ? ' selected' : '';
+          return '<option value="' + v.id + '"' + sel + '>' + v.label + ' (EUR ' + v.rates[occ] + ' net / night / room)</option>';
+        }).join('');
+        wrap.innerHTML =
+          '<div class="field-row">' +
+            '<div class="field"><label>' + resort.label + ' - Villa / room type</label>' +
+            '<select id="villa_' + k + '">' + opts + '</select></div>' +
+            '<div class="field"><label>Nights at this resort</label>' +
+            '<input type="number" id="nights_' + k + '" min="1" value="' + prevNights + '" /></div>' +
+          '</div>';
+        container.appendChild(wrap);
+      });
+    }
+
+    function travelerTitleHTML(i) {
+      const inp = document.getElementById('travelerName_' + i);
+      const name = inp && inp.value.trim();
+      return name || ('Traveler ' + i);
+    }
+
+    function updateTravelerTitle(i) {
+      const titleEl = document.querySelector('[data-traveler-title="' + i + '"]');
+      if (titleEl) titleEl.textContent = travelerTitleHTML(i);
+    }
+
+    function renderTravelerNames() {
+      const occ = currentOccupancy();
+      const container = document.getElementById('travelerNamesContainer');
+      const prevNames = {};
+      for (let i = 1; i <= 4; i++) {
+        const inp = document.getElementById('travelerName_' + i);
+        if (inp) prevNames[i] = inp.value;
+      }
+      container.innerHTML = '';
+      for (let i = 1; i <= occ; i++) {
+        const row = document.createElement('div');
+        row.className = 'field-row full';
+        row.innerHTML =
+          '<div class="field"><label>Traveler ' + i + ' name (optional)</label>' +
+          '<input type="text" class="traveler-name-input" id="travelerName_' + i + '" placeholder="Name (optional)" value="' + (prevNames[i] ? prevNames[i].replace(/"/g, '&quot;') : '') + '" /></div>';
+        container.appendChild(row);
+        const nameInput = row.querySelector('.traveler-name-input');
+        nameInput.addEventListener('input', function() { updateTravelerTitle(i); });
+      }
+    }
+
+    function renderTravelers() {
+      const occ = currentOccupancy();
+      const container = document.getElementById('travelersContainer');
+      const prevDiver = {}, prevQty = {};
+      for (let i = 1; i <= 4; i++) {
+        const d = document.getElementById('diver_' + i);
+        const q = document.getElementById('diveqty_' + i);
+        if (d) prevDiver[i] = d.value;
+        if (q) prevQty[i] = q.value;
+      }
+      container.innerHTML = '';
+      for (let i = 1; i <= occ; i++) {
+        const isDiver = prevDiver[i] !== undefined ? prevDiver[i] === 'yes' : true;
+        const qty = prevQty[i] !== undefined ? prevQty[i] : 0;
+        const block = document.createElement('div');
+        block.className = 'traveler-block';
+        block.innerHTML =
+          '<div class="t-title" data-traveler-title="' + i + '">' + travelerTitleHTML(i) + '</div>' +
+          '<div class="field-row">' +
+            '<div class="field"><label>Diver status</label>' +
+              '<select id="diver_' + i + '">' +
+                '<option value="yes"' + (isDiver ? ' selected' : '') + '>Diver</option>' +
+                '<option value="no"' + (!isDiver ? ' selected' : '') + '>Non-diver</option>' +
+              '</select></div>' +
+            '<div class="field" id="diveqtyField_' + i + '" style="display:' + (isDiver ? 'flex' : 'none') + ';">' +
+              '<label>Pre-booked dives</label>' +
+              '<input type="number" id="diveqty_' + i + '" min="0" value="' + qty + '" /></div>' +
+          '</div>';
+        container.appendChild(block);
+        block.querySelector('#diver_' + i).addEventListener('change', function() {
+          document.getElementById('diveqtyField_' + i).style.display = this.value === 'yes' ? 'flex' : 'none';
+        });
+      }
+    }
+
+    function calculate() {
+      const tripType = document.getElementById('tripType').value;
+      const occ = currentOccupancy();
+      const keys = activeResortKeys();
+
+      let accommodationPerPerson = 0;
+      const resortSummary = [];
+      for (const k of keys) {
+        const villaSel = document.getElementById('villa_' + k);
+        if (!villaSel) { accommodationPerPerson = null; break; }
+        const nights = parseInt(document.getElementById('nights_' + k).value, 10) || 0;
+        const villa = RESORTS[k].villas.find(function(v) { return v.id === villaSel.value; });
+        const nightly = villa.rates[occ];
+        accommodationPerPerson += (nightly / occ) * nights;
+        resortSummary.push(RESORTS[k].label + ': ' + villa.label + ', ' + nights + ' nights');
+      }
+      if (accommodationPerPerson === null) {
+        alert('Select a room occupancy with an available villa at each resort before calculating.');
+        return;
+      }
+
+      const resultBox = document.getElementById('resultBox');
+      const diveLines = [];
+      let grandTotal = 0;
+      let totalAccommodation = 0;
+      let totalDive = 0;
+      let totalTransfer = 0;
+      let travelerGroupsHtml = '';
+
+      for (let i = 1; i <= occ; i++) {
+        const nameInput = document.getElementById('travelerName_' + i);
+        const name = (nameInput && nameInput.value.trim()) ? nameInput.value.trim() : ('Traveler ' + i);
+        const diver = document.getElementById('diver_' + i).value === 'yes';
+        const qty = diver ? (parseInt(document.getElementById('diveqty_' + i).value, 10) || 0) : 0;
+        const dCost = diveCost(qty);
+        const transfer = tripType === 'combo' ? (diver ? 335 : 295) : 100;
+        const total = Math.round(accommodationPerPerson + transfer + dCost);
+        grandTotal += total;
+        totalAccommodation += accommodationPerPerson;
+        totalDive += dCost;
+        totalTransfer += transfer;
+
+        if (diver) {
+          const transferDives = tripType === 'combo' ? 2 : 0;
+          if (qty > 0 && transferDives > 0) {
+            diveLines.push(name + ': ' + qty + ' pre-booked dives + 2 dives during the crossing');
+          } else if (qty > 0) {
+            diveLines.push(name + ': ' + qty + ' pre-booked dives');
+          } else if (transferDives > 0) {
+            diveLines.push(name + ': 2 dives during the crossing (included in transfer)');
+          }
+        }
+
+        travelerGroupsHtml +=
+          '<div class="traveler-result"><div><span class="tr-name">' + name + '</span>' +
+          '<span class="tr-sub">' + (diver ? 'Diver' : 'Non-diver') + ' - Accom EUR ' + Math.round(accommodationPerPerson) + ' + Dives EUR ' + dCost + ' + Transfer EUR ' + transfer + '</span></div>' +
+          '<span class="tr-price">EUR ' + total.toLocaleString() + '</span></div>';
+      }
+
+      let html = '<div class="summary-grid">' +
+        '<div class="summary-box"><div class="s-label">Accommodation Net</div><div class="s-value">EUR ' + Math.round(totalAccommodation).toLocaleString() + '</div></div>' +
+        '<div class="summary-box"><div class="s-label">Diving Net</div><div class="s-value">EUR ' + Math.round(totalDive).toLocaleString() + '</div></div>' +
+        '<div class="summary-box"><div class="s-label">Transfer</div><div class="s-value">EUR ' + Math.round(totalTransfer).toLocaleString() + '</div></div>' +
+        '<div class="summary-box total"><div class="s-label">Grand Total Net</div><div class="s-value">EUR ' + Math.round(grandTotal).toLocaleString() + '</div></div>' +
+        '</div>';
+
+      html += '<div class="trip-summary"><div class="ts-title">Trip Details</div>';
+      resortSummary.forEach(function(line) { html += '<div class="ts-line">' + line + '</div>'; });
+      html += '<div class="ts-line">Room occupancy: ' + occ + ' people</div>';
+      diveLines.forEach(function(line) { html += '<div class="ts-line">' + line + '</div>'; });
+      html += '</div>';
+
+      html += travelerGroupsHtml;
+
+      html += '<div class="note" style="margin-top:12px;">Internal NET cost estimate only, excludes flights, dive/travel insurance, marine park fees (Siladen approx EUR 15), and visa. Transfer figures are non-commissionable per the resort contracts (published = net), so they match the customer-facing calculator. Subject to availability at time of booking.</div>';
+
+      resultBox.innerHTML = html;
+      resultBox.style.display = 'block';
+    }
+
+    document.getElementById('tripType').addEventListener('change', function() {
+      renderResortBlocks();
+      document.getElementById('resultBox').style.display = 'none';
+    });
+    document.getElementById('occupancy').addEventListener('change', function() {
+      renderResortBlocks();
+      renderTravelerNames();
+      renderTravelers();
+      document.getElementById('resultBox').style.display = 'none';
+    });
+    document.getElementById('calcBtn').addEventListener('click', calculate);
+
+    // Init
+    renderResortBlocks();
+    renderTravelerNames();
+    renderTravelers();
+  </script>
+</body>
+</html>

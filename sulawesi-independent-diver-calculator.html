@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-SULACALC 2026-07-19t | Round-19 fix: added orange-highlighted "האירוח על בסיס פנסיון מלא" after the opening intro sentence -->
+<!-- BD-SULACALC 2026-07-26a | Dive pricing corrected to actual contracted Published rates (60/58/56 tiers, was 58/54 estimate) -->
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8" />
@@ -412,7 +412,7 @@
 
     function diveCost(qty) {
       if (!qty || qty <= 0) return 0;
-      const rate = qty > 12 ? 54 : 58;
+      const rate = qty >= 26 ? 56 : (qty >= 13 ? 58 : 60);
       return qty * rate;
     }
 
