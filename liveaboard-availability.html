@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-LBAVAIL 2026-07-26i | Bigger logo, mobile card layout with no sideways scrolling, clearer price box, tidier booking form -->
+<!-- BD-LBAVAIL 2026-07-26j | Shareable deep links for filters and single departures, copy-link button, accessibility fixes -->
 <html lang="he" dir="rtl">
 <head>
 <meta charset="UTF-8" />
@@ -50,6 +50,9 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background:
 .btn{font-family:inherit;font-size:14px;font-weight:600;padding:9px 16px;border-radius:9px;
   cursor:pointer;border:1.5px solid var(--border);background:#fff;color:var(--muted)}
 .btn:hover{border-color:var(--low);color:var(--low)}
+.btn.link{color:var(--teal)}
+.btn.link:hover{border-color:var(--teal);color:var(--teal)}
+.btn.link.done{background:var(--teal);border-color:var(--teal);color:#fff}
 /* multi-select with checkboxes */
 .ms{position:relative}
 .msbtn{font-family:inherit;font-size:14px;padding:9px 11px;border:1.5px solid var(--border);
@@ -265,9 +268,9 @@ tbody tr:hover{background:#f6fbfc}
     <h1>Liveaboard <span>Finder</span></h1>
     <p>כל הפלגות הצלילה. כל היעדים. במקום אחד.</p>
     <div class="stamp">
-      <span>ספינות: <b id="sBoats">0</b></span>
-      <span>הפלגות: <b id="sTrips">0</b></span>
-      <span>יעדים: <b id="sDest">0</b></span>
+      <span>ספינות: <b id="sBoats">&nbsp;</b></span>
+      <span>הפלגות: <b id="sTrips">&nbsp;</b></span>
+      <span>יעדים: <b id="sDest">&nbsp;</b></span>
     </div>
     <div>
       <a class="wa" id="waTop" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.47 14.38c-.3-.15-1.75-.86-2.02-.96-.27-.1-.47-.15-.67.15-.2.3-.77.96-.94 1.16-.17.2-.35.22-.64.07-.3-.15-1.25-.46-2.38-1.47-.88-.78-1.47-1.75-1.65-2.05-.17-.3-.02-.46.13-.6.13-.14.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.6-.92-2.2-.24-.57-.49-.5-.67-.5l-.57-.01c-.2 0-.52.07-.79.37-.27.3-1.04 1.01-1.04 2.47s1.06 2.86 1.21 3.06c.15.2 2.1 3.2 5.08 4.49.71.3 1.26.49 1.69.63.71.22 1.36.19 1.87.12.57-.09 1.75-.72 2-1.41.25-.69.25-1.28.17-1.41-.07-.13-.27-.2-.57-.35zM12.04 21.5h-.01a9.4 9.4 0 0 1-4.79-1.31l-.34-.2-3.56.93.95-3.47-.22-.36a9.38 9.38 0 0 1-1.44-5c0-5.18 4.22-9.4 9.41-9.4a9.35 9.35 0 0 1 6.65 2.76 9.32 9.32 0 0 1 2.75 6.65c0 5.18-4.22 9.4-9.4 9.4zM20.5 3.49A11.8 11.8 0 0 0 12.04 0C5.49 0 .16 5.33.16 11.88c0 2.09.55 4.14 1.59 5.94L.06 24l6.34-1.66a11.86 11.86 0 0 0 5.64 1.44h.01c6.55 0 11.88-5.33 11.88-11.88 0-3.17-1.24-6.15-3.48-8.4z"/></svg>
@@ -308,6 +311,7 @@ tbody tr:hover{background:#f6fbfc}
         <span class="bx" id="dealBx"></span> רק מבצעים
       </button>
       <button class="btn" id="clr">נקה סינון</button>
+      <button class="btn link" id="cpy" title="העתקת קישור לתצוגה הנוכחית">העתק קישור</button>
     </div>
     <div class="tags" id="tags"></div>
     <div class="legend">
@@ -329,9 +333,10 @@ tbody tr:hover{background:#f6fbfc}
   </div>
 </div>
 
-<div class="ov" id="ov"><div class="dlg">
+<div class="ov" id="ov"><div class="dlg" role="dialog" aria-modal="true"
+     aria-labelledby="dTitle" tabindex="-1">
   <header>
-    <button class="x" id="xBtn" aria-label="סגור">&times;</button>
+    <button class="x" id="xBtn" aria-label="סגירת החלון">&times;</button>
     <h2 id="dTitle"></h2>
     <p id="dSub"></p>
   </header>
@@ -383,6 +388,7 @@ const TRIPS = [];
     const d = new Date(r[0] + 'T00:00:00');
     TRIPS.push({
       boat: boat, date: d, ts: d.getTime(),
+      uid: boat.slug + '_' + r[0],
       key: d.getFullYear() * 12 + d.getMonth(),
       endDate: new Date(d.getTime() + (r[1] || 0) * 864e5),
       nights: r[1] || null, days: r[2] || null,
@@ -416,6 +422,56 @@ const S = {
   from: M0, to: M1, sort: 'date', text: '', avail: true, deal: false
 };
 const CAP = 800;
+
+/* ---------- shareable links ----------
+   The address bar always describes exactly what is on screen, so any filtered
+   view can be copied and sent to a customer. ?trip= opens one departure. */
+const monthToStr = k => k == null ? '' :
+  Math.floor(k / 12) + '-' + String(k % 12 + 1).padStart(2, '0');
+function strToMonth(s) {
+  const m = /^(\d{4})-(\d{1,2})$/.exec(s || '');
+  if (!m) return null;
+  return (+m[1]) * 12 + (+m[2]) - 1;
+}
+
+function readUrl() {
+  const p = new URLSearchParams(location.search);
+  const setOf = (key, target, parse) => {
+    const v = p.get(key);
+    if (!v) return;
+    v.split(',').forEach(x => {
+      x = decodeURIComponent(x.trim());
+      if (x) target.add(parse ? parse(x) : x);
+    });
+  };
+  setOf('dest', S.dest);
+  setOf('boat', S.boat);
+  setOf('itin', S.itin);
+  setOf('nights', S.nights, Number);
+  const f = strToMonth(p.get('from')), to = strToMonth(p.get('to'));
+  if (f !== null && f >= M0 && f <= M1) S.from = f;
+  if (to !== null && to >= M0 && to <= M1) S.to = to;
+  if (S.to < S.from) S.to = S.from;
+  if (p.get('q')) S.text = p.get('q');
+  if (p.get('sort')) S.sort = p.get('sort');
+  if (p.get('deals') === '1') S.deal = true;
+  if (p.get('all') === '1') S.avail = false;
+  return p.get('trip') || '';
+}
+
+function writeUrl() {
+  const p = new URLSearchParams();
+  const put = (k, set) => { if (set.size) p.set(k, [...set].join(',')); };
+  put('dest', S.dest); put('boat', S.boat); put('itin', S.itin); put('nights', S.nights);
+  if (S.from !== M0) p.set('from', monthToStr(S.from));
+  if (S.to !== M1) p.set('to', monthToStr(S.to));
+  if (S.text.trim()) p.set('q', S.text.trim());
+  if (S.sort !== 'date') p.set('sort', S.sort);
+  if (S.deal) p.set('deals', '1');
+  if (!S.avail) p.set('all', '1');
+  const qs = p.toString();
+  history.replaceState(null, '', qs ? location.pathname + '?' + qs : location.pathname);
+}
 
 function tone(t) {
   if (!t.available || !t.spots) return 'none';
@@ -466,8 +522,11 @@ function tally(skip, keyFn) {
 function MultiSelect(mountId, opts) {
   const host = document.getElementById(mountId);
   host.classList.add('ms');
-  host.innerHTML = '<label>' + opts.label + '</label>'
-    + '<button type="button" class="msbtn"></button>'
+  const labId = mountId + '-lab', btnId = mountId + '-btn';
+  host.innerHTML = '<label id="' + labId + '">' + opts.label + '</label>'
+    + '<button type="button" class="msbtn" id="' + btnId + '"'
+    + ' aria-labelledby="' + labId + ' ' + btnId + '"'
+    + ' aria-haspopup="listbox" aria-expanded="false"></button>'
     + '<div class="mspanel">'
     + (opts.search ? '<input class="mssearch" placeholder="סינון ברשימה" />' : '')
     + '<div class="msopts"></div>'
@@ -523,8 +582,16 @@ function MultiSelect(mountId, opts) {
   btn.onclick = e => {
     e.stopPropagation();
     const wasOpen = panel.classList.contains('on');
-    document.querySelectorAll('.mspanel.on').forEach(p => p.classList.remove('on'));
-    if (!wasOpen) { paint(); panel.classList.add('on'); if (search) search.focus(); }
+    document.querySelectorAll('.mspanel.on').forEach(p => {
+      p.classList.remove('on');
+      const b = p.parentElement.querySelector('.msbtn');
+      if (b) b.setAttribute('aria-expanded', 'false');
+    });
+    if (!wasOpen) {
+      paint(); panel.classList.add('on');
+      btn.setAttribute('aria-expanded', 'true');
+      if (search) search.focus();
+    }
   };
   panel.onclick = e => e.stopPropagation();
   if (search) search.oninput = () => { q = search.value.trim().toLowerCase(); paint(); };
@@ -662,6 +729,10 @@ function openTrip(i) {
   h += bookingForm(t);
 
   document.getElementById('dBody').innerHTML = h;
+  const u = new URLSearchParams(location.search);
+  u.set('trip', t.uid);
+  history.replaceState(null, '', location.pathname + '?' + u.toString());
+  lastFocus = document.activeElement;
   const ib = document.getElementById('itBtn');
   if (ib) ib.onclick = () => {
     const w = document.getElementById('itWrap');
@@ -672,6 +743,7 @@ function openTrip(i) {
   wireBooking(t);
   document.getElementById('ov').classList.add('on');
   document.body.style.overflow = 'hidden';
+  document.querySelector('.dlg').focus();   // only focusable once it is shown
 }
 /* ---------- booking request, delivered over WhatsApp ---------- */
 const WA_NUM = '972542323567';
@@ -780,9 +852,13 @@ function showDesc(id) {
     });
 }
 
+let lastFocus = null;
 function closeDlg() {
   document.getElementById('ov').classList.remove('on');
   document.body.style.overflow = '';
+  writeUrl();                       // drop ?trip= again
+  if (lastFocus && lastFocus.focus) lastFocus.focus();
+  lastFocus = null;
 }
 
 /* ---------- the four facets ---------- */
@@ -877,6 +953,7 @@ function render() {
 
   Object.keys(MS).forEach(k => MS[k].refresh());
   renderTags();
+  writeUrl();
 
   const db = $('fDeal');
   db.classList.toggle('on', S.deal);
@@ -917,7 +994,31 @@ $('xBtn').onclick = closeDlg;
 $('ov').onclick = e => { if (e.target.id === 'ov') closeDlg(); };
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDlg(); });
 
+$('cpy').onclick = function () {
+  const btn = this, url = location.href;
+  const done = () => {
+    btn.classList.add('done'); btn.textContent = 'הקישור הועתק';
+    setTimeout(() => { btn.classList.remove('done'); btn.textContent = 'העתק קישור'; }, 1800);
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(url).then(done).catch(() => prompt('העתיקו את הקישור:', url));
+  } else {
+    prompt('העתיקו את הקישור:', url);
+  }
+};
+
+/* apply an incoming link before the first paint of the list */
+const wantedTrip = readUrl();
+$('fFrom').value = S.from; $('fTo').value = S.to;
+$('fSort').value = S.sort; $('fText').value = S.text;
+$('fAvail').checked = S.avail;
+
 render();
+
+if (wantedTrip) {
+  const hit = ROWS.find(r => r.uid === wantedTrip);
+  if (hit) openTrip(hit._i);
+}
 </script>
 </body>
 </html>
