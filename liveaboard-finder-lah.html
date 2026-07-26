@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-LBLAH 2026-07-26d | Card grid layout, contained width, filter bar on a real grid, RTL date order fixed -->
+<!-- BD-LBLAH 2026-07-26e | Deals detected from cabin full-vs-selling price; the feed never sends the special-offer flag -->
 <html lang="he" dir="rtl">
 <head>
 <meta charset="UTF-8" />
@@ -135,6 +135,10 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background:
  display:flex;align-items:baseline;justify-content:space-between;gap:8px}
 .dt{direction:ltr;font-weight:700;color:var(--navy);font-size:13.5px;white-space:nowrap}
 .pr{direction:ltr;font-weight:800;font-size:19px;white-space:nowrap}
+.pr s{font-size:13px;font-weight:400;color:var(--muted);margin-inline-start:6px}
+.off2{position:absolute;top:9px;inset-inline-end:9px;background:var(--orange);color:#fff;
+ border-radius:7px;font-size:13px;font-weight:800;padding:3px 9px;direction:ltr;
+ box-shadow:0 3px 10px rgba(0,0,0,.3)}
 .pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:700;color:#fff}
 .pill.ok{background:var(--ok)}.pill.mid{background:var(--mid)}.pill.low{background:var(--low)}.pill.none{background:var(--none)}
 .cabflag{display:inline-block;background:#fff3d6;color:#8a6100;border:1px solid #e8c98a;border-radius:6px;
@@ -267,6 +271,7 @@ table.cab tr.sold td{opacity:.45}
           <option value="date">תאריך</option>
           <option value="price">מחיר, מהזול</option>
           <option value="priced">מחיר, מהיקר</option>
+          <option value="disc">גובה ההנחה</option>
           <option value="spots">מקומות פנויים</option>
         </select>
       </div>
@@ -312,7 +317,16 @@ const CAP=400;
 TRIPS.forEach(t=>{t.destination=t.country;
   t.uid=t.boat_id+'_'+t.start;
   t.price=lowest(t);
-  t.key=(()=>{const d=new Date(t.start+'T00:00:00');return d.getFullYear()*12+d.getMonth();})();});
+  t.key=(()=>{const d=new Date(t.start+'T00:00:00');return d.getFullYear()*12+d.getMonth();})();
+  /* The feed never sends tripIsSpecialOffer, so a deal is a cabin whose full
+     price sits above its selling price. Take the deepest cut on the trip. */
+  let best=0,full=null;
+  t.cabins.forEach(c=>{
+    if(c.price&&c.price_full&&c.price_full>c.price){
+      const pct=Math.round(100*(c.price_full-c.price)/c.price_full);
+      if(pct>best){best=pct;full=c.price_full;}
+    }});
+  t.discount=best; t.priceFull=full;});
 
 const M0=Math.min.apply(null,TRIPS.map(t=>t.key));
 const M1=Math.max.apply(null,TRIPS.map(t=>t.key));
@@ -539,7 +553,7 @@ function filtered(skip){
     if(skip!=='nights'&&S.nights.size&&!S.nights.has(t.nights))return false;
     if(t.key<S.from||t.key>S.to)return false;
     if(S.avail&&!t.spots)return false;
-    if(S.deal&&!t.special_offer)return false;
+    if(S.deal&&!t.discount)return false;
     if(q&&t.boat.toLowerCase().indexOf(q)===-1
         &&(t.route||'').toLowerCase().indexOf(q)===-1
         &&(t.from_port||'').toLowerCase().indexOf(q)===-1
@@ -609,6 +623,7 @@ function render(){
   const rows=filtered();
   if(S.sort==='price')rows.sort((a,b)=>(a.price||9e9)-(b.price||9e9)||a.start.localeCompare(b.start));
   else if(S.sort==='priced')rows.sort((a,b)=>(b.price||0)-(a.price||0)||a.start.localeCompare(b.start));
+  else if(S.sort==='disc')rows.sort((a,b)=>(b.discount||0)-(a.discount||0)||a.start.localeCompare(b.start));
   else if(S.sort==='spots')rows.sort((a,b)=>(b.spots||0)-(a.spots||0)||a.start.localeCompare(b.start));
   else rows.sort((a,b)=>a.start.localeCompare(b.start));
 
@@ -624,7 +639,8 @@ function render(){
     h+='<div class="row" data-i="'+TRIPS.indexOf(t)+'">'
       +'<div class="ph">'
       +(img?'<img loading="lazy" src="'+esc(img)+'" alt="" />':'<div class="noimg">אין תמונה</div>')
-      +'<span class="badge">'+esc(heb(t.country))+'</span></div>'
+      +'<span class="badge">'+esc(heb(t.country))+'</span>'
+      +(t.discount?'<span class="off2">-'+t.discount+'%</span>':'')+'</div>'
       +'<div class="body">'
       +'<h3>'+esc(t.boat)+'</h3>'
       +'<div class="meta">'+(t.nights||'?')+' לילות · '+esc(t.from_port)
@@ -633,7 +649,8 @@ function render(){
       +'<div class="rt">'+esc(t.route)+'</div>'
       +'<div class="foot2">'
       +'<span class="dt" dir="ltr">'+d2(t.start)+'</span>'
-      +'<span class="pr" dir="ltr">'+esc(money(lowest(t),t.currency))+'</span>'
+      +'<span class="pr" dir="ltr">'+esc(money(t.price,t.currency))
+      +(t.discount?'<s>'+esc(money(t.priceFull,t.currency))+'</s>':'')+'</span>'
       +'</div>'
       +'<div><span class="pill '+tone(t)+'">'+(t.spots?t.spots+' מקומות פנויים':'מלא')+'</span></div>'
       +'</div></div>';
