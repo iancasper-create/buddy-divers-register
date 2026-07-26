@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-LBAVAIL 2026-07-26h | Logo added, date range extended to every departure the feed carries, far-out departures flagged as provisional -->
+<!-- BD-LBAVAIL 2026-07-26i | Bigger logo, mobile card layout with no sideways scrolling, clearer price box, tidier booking form -->
 <html lang="he" dir="rtl">
 <head>
 <meta charset="UTF-8" />
@@ -23,7 +23,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background:
 .wrap{position:relative;z-index:1;max-width:1400px;margin:0 auto;padding:26px 14px 70px}
 
 .header{text-align:center;padding:22px 16px 26px}
-.header .logo{display:block;margin:0 auto 18px;width:200px;max-width:62%;height:auto}
+.header .logo{display:block;margin:0 auto 14px;width:420px;max-width:86%;height:auto}
 .header h1{font-family:'Raleway',sans-serif;font-size:clamp(30px,5vw,52px);font-weight:800;
   color:#fff;letter-spacing:-1px;direction:ltr}
 .header h1 span{color:var(--orange)}
@@ -147,14 +147,22 @@ tbody tr:hover{background:#f6fbfc}
 .dlg{background:#fff;border-radius:16px;max-width:720px;width:100%;overflow:hidden;
   box-shadow:0 24px 60px rgba(0,0,0,.45)}
 .dlg header{background:linear-gradient(135deg,var(--navy),var(--teal));color:#fff;padding:18px 20px;position:relative}
-.dlg header h2{font-size:20px;font-weight:800;direction:ltr;text-align:right}
-.dlg header p{font-size:13px;opacity:.9;margin-top:3px}
+/* the close button sits at the physical right, and the title runs LTR, so the
+   clearance has to be an explicit right padding rather than a logical one */
+.dlg header h2{font-size:20px;font-weight:800;direction:ltr;text-align:right;
+  padding-right:44px}
+.dlg header p{font-size:13px;opacity:.9;margin-top:3px;padding-right:44px}
 .x{position:absolute;inset-inline-start:14px;top:14px;width:32px;height:32px;border-radius:50%;
   border:0;background:rgba(255,255,255,.2);color:#fff;font-size:19px;cursor:pointer;line-height:1}
 .x:hover{background:rgba(255,255,255,.34)}
 .dbody{padding:18px 20px 22px;max-height:calc(100vh - 190px);overflow-y:auto}
 .kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:6px}
 .kv div{background:var(--light);border-radius:9px;padding:9px 11px}
+.kv .full{grid-column:1 / -1}
+.pbox{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;font-size:22px;font-weight:800;
+  color:var(--text);direction:ltr;justify-content:flex-end}
+.pbox s{font-size:14px;font-weight:400;color:var(--muted)}
+.pbox .off{font-size:12px;margin:0}
 .kv span{display:block;font-size:11px;color:var(--muted);font-weight:600}
 .kv b{font-size:15px;color:var(--text)}
 .sec{margin-top:16px}
@@ -211,6 +219,35 @@ tbody tr:hover{background:#f6fbfc}
 .foot b{color:#bcd7e0}
 
 @media(max-width:760px){
+  /* A seven-column table cannot fit a phone, so each row becomes a card.
+     Pure CSS, so filtering, sorting and the click target stay untouched. */
+  .tscroll{overflow-x:visible}
+  table{min-width:0;display:block}
+  thead{display:none}
+  tbody{display:block}
+  tbody tr{
+    display:grid;
+    grid-template-columns:auto auto 1fr;
+    grid-template-areas:
+      "date   date   price"
+      "boat   boat   boat"
+      "dest   nights spots"
+      "itin   itin   itin";
+    gap:3px 9px;
+    padding:13px 14px;
+    border-bottom:1px solid #e8f1f4;
+  }
+  tbody td{display:block;padding:0;border:0}
+  tbody td:nth-child(1){grid-area:date}
+  tbody td:nth-child(2){grid-area:boat;font-size:15px}
+  tbody td:nth-child(3){grid-area:dest;color:var(--muted);font-size:12.5px}
+  tbody td:nth-child(4){grid-area:itin;color:var(--muted);font-size:12.5px;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  tbody td:nth-child(5){grid-area:nights;color:var(--muted);font-size:12.5px}
+  tbody td:nth-child(5)::after{content:' לילות'}
+  tbody td:nth-child(6){grid-area:price;justify-self:end;align-self:center}
+  tbody td:nth-child(7){grid-area:spots;justify-self:start}
+  .pr{font-size:16px}
   .fld{flex:1 1 145px}
   .fld select,.fld input[type=text]{min-width:0;width:100%}
   .fld.wide{flex:1 1 100%}
@@ -224,7 +261,7 @@ tbody tr:hover{background:#f6fbfc}
 
   <div class="header">
     <img class="logo" src="https://res.cloudinary.com/dccbsfte0/image/upload/logo_hnmilh"
-         width="200" alt="Buddy-Divers" />
+         width="420" alt="Buddy-Divers" />
     <h1>Liveaboard <span>Finder</span></h1>
     <p>כל הפלגות הצלילה. כל היעדים. במקום אחד.</p>
     <div class="stamp">
@@ -268,7 +305,7 @@ tbody tr:hover{background:#f6fbfc}
       </div>
       <label class="tog"><input type="checkbox" id="fAvail" checked /> רק עם מקום פנוי</label>
       <button type="button" class="dealbtn" id="fDeal">
-        <span class="bx" id="dealBx"></span> רק מבצעים <span class="dn" id="dealN"></span>
+        <span class="bx" id="dealBx"></span> רק מבצעים
       </button>
       <button class="btn" id="clr">נקה סינון</button>
     </div>
@@ -279,7 +316,7 @@ tbody tr:hover{background:#f6fbfc}
       <span><i style="background:var(--low)"></i>מקומות אחרונים</span>
       <span><i style="background:var(--none)"></i>מלא</span>
       <span><i style="background:#eef3f6;border:1px solid var(--border)"></i>משוער, יציאה מעבר ל-18 חודשים</span>
-      <span style="margin-inline-start:auto">לחצו על שורה לפרטים מלאים</span>
+      <span>לחצו על שורה לפרטים מלאים</span>
     </div>
   </div>
 
@@ -435,7 +472,7 @@ function MultiSelect(mountId, opts) {
     + (opts.search ? '<input class="mssearch" placeholder="סינון ברשימה" />' : '')
     + '<div class="msopts"></div>'
     + '<div class="msfoot"><button type="button" class="mclr">נקה</button>'
-    + '<button type="button" class="mcls">סגור</button></div></div>';
+    + '<button type="button" class="mcls">סנן</button></div></div>';
 
   const btn = host.querySelector('.msbtn');
   const panel = host.querySelector('.mspanel');
@@ -583,8 +620,11 @@ function openTrip(i) {
     + kv('חזרה', ltrDate(t.endDate), 1)
     + kv('משך', (t.nights || '?') + ' לילות' + (t.days ? ' / ' + t.days + ' ימים' : ''))
     + kv('מקומות', to === 'none' ? 'מלא' : t.spots + ' מתוך ' + (t.total_spots || '?'))
-    + kv('מחיר לאדם בחדר זוגי', usd(t.price_now), 1)
-    + (t.discount_pct ? kv('הנחה', t.discount_pct + '%, במקום ' + usd(t.price), 1) : '')
+    + '<div class="full"><span>מחיר לאדם בחדר זוגי</span>'
+      + '<b class="pbox" dir="ltr">' + esc(usd(t.price_now))
+      + (t.discount_pct ? '<s>' + esc(usd(t.price)) + '</s>'
+          + '<span class="off">-' + t.discount_pct + '%</span>' : '')
+      + '</b></div>'
     + (t.from_port ? kv('נמל יציאה', t.from_port, 1) : '')
     + (t.to_port && t.to_port !== t.from_port ? kv('נמל חזרה', t.to_port, 1) : '')
     + '</div>';
@@ -649,9 +689,10 @@ function bookingForm(t) {
     + '<input type="text" id="bkLast" placeholder="שם משפחה" />'
     + '<input type="email" id="bkMail" placeholder="כתובת אימייל" />'
     + '<input type="tel" id="bkPhone" placeholder="מספר טלפון" />'
-    + '<div class="full gen">הרכב האורחים:'
-    + '<span>גברים</span><select id="bkM">' + sel + '</select>'
-    + '<span>נשים</span><select id="bkF">' + sel + '</select></div>'
+    + '<div><label class="cablab" for="bkM">גברים</label>'
+    + '<select id="bkM">' + sel + '</select></div>'
+    + '<div><label class="cablab" for="bkF">נשים</label>'
+    + '<select id="bkF">' + sel + '</select></div>'
     + cabinPicker(t)
     + '<textarea class="full" id="bkNote" placeholder="העדפת מיטה או כל בקשה אחרת"></textarea>'
     + '</div>'
@@ -840,10 +881,7 @@ function render() {
   const db = $('fDeal');
   db.classList.toggle('on', S.deal);
   $('dealBx').textContent = S.deal ? '\u2713' : '';
-  const dealCount = S.deal ? rows.length
-    : ROWS.filter(t => t.discount_pct && t.key >= S.from && t.key <= S.to
-        && (!S.avail || (t.available && t.spots))).length;
-  $('dealN').textContent = dealCount;
+
 }
 
 document.getElementById('waTop').href = 'https://wa.me/' + WA_NUM + '?text='
