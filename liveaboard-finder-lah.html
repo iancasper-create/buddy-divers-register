@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-LBLAH 2026-07-26a | Parallel evaluation page on the licensed LiveaboardHub feed. Does not touch liveaboard-availability.html -->
+<!-- BD-LBLAH 2026-07-26b | Full filter system ported verbatim from the live page: multi-select facets, month/year pickers, free search, deals, tags, deep links -->
 <html lang="he" dir="rtl">
 <head>
 <meta charset="UTF-8" />
@@ -46,9 +46,65 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background:
 .fld label{font-size:12px;font-weight:600;color:var(--muted)}
 .fld select,.fld input{font-family:inherit;font-size:14px;padding:9px 11px;border:1.5px solid var(--border);
  border-radius:9px;background:#fff;color:var(--text);min-width:150px}
+.fld.wide select{min-width:215px;font-weight:600}
+.fld.narrow select{min-width:112px}
+.tog{display:flex;align-items:center;gap:7px;font-size:14px;font-weight:600;color:var(--text);
+ cursor:pointer;padding-bottom:9px;white-space:nowrap}
+.tog input{width:17px;height:17px;accent-color:var(--teal);cursor:pointer}
 .btn{font-family:inherit;font-size:14px;font-weight:600;padding:9px 15px;border-radius:9px;cursor:pointer;
  border:1.5px solid var(--border);background:#fff;color:var(--muted)}
 .btn:hover{border-color:var(--teal);color:var(--teal)}
+/* multi-select with checkboxes */
+.ms{position:relative}
+.msbtn{font-family:inherit;font-size:14px;padding:9px 11px;border:1.5px solid var(--border);
+  border-radius:9px;background:#fff;color:var(--text);min-width:165px;width:100%;cursor:pointer;
+  text-align:right;display:flex;align-items:center;gap:6px}
+.msbtn:hover{border-color:var(--teal2)}
+.msbtn.on{border-color:var(--teal);background:#eaf7f9;font-weight:600}
+.msbtn .cnt{background:var(--teal);color:#fff;border-radius:999px;font-size:11px;font-weight:700;
+  padding:1px 7px;margin-inline-start:auto}
+.msbtn .arw{margin-inline-start:auto;color:var(--muted);font-size:11px}
+.msbtn.on .arw{display:none}
+.mspanel{position:absolute;top:calc(100% + 5px);inset-inline-start:0;z-index:30;background:#fff;
+  border:1.5px solid var(--teal2);border-radius:11px;box-shadow:0 12px 34px rgba(0,0,0,.3);
+  width:max(280px,100%);display:none;overflow:hidden}
+.mspanel.on{display:block}
+.mssearch{width:100%;font-family:inherit;font-size:13.5px;padding:9px 11px;border:0;
+  border-bottom:1px solid var(--border);outline:none}
+.msopts{max-height:290px;overflow-y:auto;padding:4px 0}
+.msgrp{font-size:11px;font-weight:700;color:var(--muted);background:var(--light);
+  padding:5px 11px;position:sticky;top:0}
+.msopt{display:flex;align-items:center;gap:8px;padding:6px 11px;font-size:13.5px;cursor:pointer}
+.msopt:hover{background:var(--light)}
+.msopt input{width:16px;height:16px;accent-color:var(--teal);cursor:pointer;flex:0 0 auto}
+.msopt .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.msopt .n{color:var(--muted);font-size:11.5px}
+.msfoot{display:flex;gap:8px;padding:8px 10px;border-top:1px solid var(--border);background:#fafdfe}
+.msfoot button{flex:1;font-family:inherit;font-size:13px;font-weight:600;padding:6px;border-radius:7px;
+  border:1.5px solid var(--border);background:#fff;color:var(--muted);cursor:pointer}
+.msfoot button:hover{border-color:var(--teal2);color:var(--teal)}
+.msnone{padding:14px 11px;font-size:13px;color:var(--muted);text-align:center}
+.tags{display:flex;flex-wrap:wrap;gap:7px;margin-top:13px}
+.tag2{display:inline-flex;align-items:center;gap:6px;background:#eaf7f9;border:1.5px solid var(--teal2);
+  color:var(--teal);border-radius:999px;padding:4px 11px;font-size:13px;font-weight:600;max-width:290px}
+.tag2 .tx{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tag2 button{border:0;background:none;color:var(--teal);font-size:16px;line-height:1;cursor:pointer;padding:0}
+.tag2 button:hover{color:var(--low)}
+/* prominent deals toggle */
+.dealbtn{display:inline-flex;align-items:center;gap:7px;font-family:inherit;font-size:14px;
+  font-weight:700;padding:9px 14px;border-radius:9px;cursor:pointer;margin-bottom:0;
+  border:1.5px solid var(--orange);background:#fff8ee;color:#b26a00;white-space:nowrap;
+  transition:.14s}
+.dealbtn:hover{background:#ffeed6}
+.dealbtn.on{background:var(--orange);color:#fff;box-shadow:0 5px 18px rgba(245,166,35,.45)}
+.dealbtn .bx{width:16px;height:16px;border:2px solid currentColor;border-radius:4px;
+  display:inline-flex;align-items:center;justify-content:center;font-size:12px;line-height:1;flex:0 0 auto}
+.dealbtn .dn{background:rgba(178,106,0,.14);border-radius:999px;font-size:11.5px;
+  font-weight:700;padding:1px 7px}
+.dealbtn.on .dn{background:rgba(255,255,255,.28)}
+.btn.link{color:var(--teal)}
+.btn.link:hover{border-color:var(--teal);color:var(--teal)}
+.btn.link.done{background:var(--teal);border-color:var(--teal);color:#fff}
 .count{color:#cfe3ea;font-size:14px;margin:0 4px 12px;font-weight:500}
 .count b{color:var(--orange)}
 
@@ -145,21 +201,33 @@ table.cab tr.sold td{opacity:.45}
 
   <div class="panel">
     <div class="controls">
-      <div class="fld"><label for="fBoat">ספינה</label><select id="fBoat"></select></div>
-      <div class="fld"><label for="fCountry">יעד</label><select id="fCountry"></select></div>
+      <div class="fld" id="msDest"></div>
+      <div class="fld" id="msBoat"></div>
+      <div class="fld" id="msItin"></div>
+      <div class="fld" id="msNights"></div>
+      <div class="fld narrow"><label for="fFromM">מחודש</label><select id="fFromM"></select></div>
+      <div class="fld narrow"><label for="fFromY">משנה</label><select id="fFromY"></select></div>
+      <div class="fld narrow"><label for="fToM">עד חודש</label><select id="fToM"></select></div>
+      <div class="fld narrow"><label for="fToY">עד שנה</label><select id="fToY"></select></div>
       <div class="fld"><label for="fSort">מיון</label>
         <select id="fSort">
           <option value="date">תאריך</option>
           <option value="price">מחיר, מהזול</option>
+          <option value="priced">מחיר, מהיקר</option>
           <option value="spots">מקומות פנויים</option>
         </select>
       </div>
-      <label class="fld" style="flex-direction:row;align-items:center;gap:7px;padding-bottom:9px">
-        <input type="checkbox" id="fAvail" style="min-width:0;width:17px;height:17px;accent-color:var(--teal)" checked />
-        <span style="font-size:14px;font-weight:600">רק עם מקום פנוי</span>
-      </label>
+      <div class="fld" style="flex:0 0 auto">
+        <label for="fText">חיפוש חופשי</label>
+        <input type="text" id="fText" placeholder="יעד, ספינה או מסלול" style="min-width:0;width:285px" />
+      </div>
+      <button type="button" class="dealbtn" id="fDeal">
+        <span class="bx" id="dealBx"></span> רק מבצעים
+      </button>
       <button class="btn" id="clr">נקה סינון</button>
+      <button class="btn link" id="cpy" title="העתקת קישור לתצוגה הנוכחית">העתק קישור</button>
     </div>
+    <div class="tags" id="tags"></div>
   </div>
 
   <div class="count" id="count"></div>
@@ -183,8 +251,209 @@ const DATA = {"generated":"2026-07-26T14:02:35Z","trips":[{"boat_id":"100146","b
 const TRIPS = DATA.trips, BOATS = DATA.boats, HEB = DATA.heb;
 const SHORT_MO=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const $=id=>document.getElementById(id);
-const S={boat:'',country:'',sort:'date',avail:true};
+const S={dest:new Set(),boat:new Set(),itin:new Set(),nights:new Set(),
+         from:0,to:0,sort:'date',text:'',avail:true,deal:false};
 const CAP=400;
+
+/* Trips carry a country name; the live page filters on destination, so map the
+   feed's country onto the same destination vocabulary. */
+TRIPS.forEach(t=>{t.destination=t.country;
+  t.uid=t.boat_id+'_'+t.start;
+  t.price=lowest(t);
+  t.key=(()=>{const d=new Date(t.start+'T00:00:00');return d.getFullYear()*12+d.getMonth();})();});
+
+const M0=Math.min.apply(null,TRIPS.map(t=>t.key));
+const M1=Math.max.apply(null,TRIPS.map(t=>t.key));
+S.from=M0; S.to=M1;
+const MONTHS=[];for(let m=M0;m<=M1;m++)MONTHS.push({k:m,y:Math.floor(m/12),m:m%12});
+const HEB_MO=['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'];
+const YEARS=[...new Set(MONTHS.map(mo=>mo.y))];
+const BOAT_NAME={};TRIPS.forEach(t=>BOAT_NAME[t.boat_id]=t.boat);
+function heDest(d){return HEB[d]||d;}
+
+/* destination -> Hebrew, grouped by region for the dropdown */
+const REGIONS = [
+  ['אסיה', [
+    ['Indonesia','אינדונזיה'], ['Philippines','פיליפינים'], ['Thailand','תאילנד'],
+    ['Myanmar','מיאנמר'], ['Malaysia','מלזיה']]],
+  ['האוקיינוס ההודי', [
+    ['Maldives','מלדיביים'], ['Seychelles','סיישל'], ['Tanzania','טנזניה וזנזיבר'],
+    ['Sri Lanka','סרי לנקה']]],
+  ['ים סוף והמזרח התיכון', [
+    ['Red Sea','ים סוף'], ['Djibouti','ג׳יבוטי'], ['Oman & UAE','עומאן ואיחוד האמירויות'],
+    ['Turkey','תורכיה']]],
+  ['האוקיינוס השקט', [
+    ['Palau','פלאו'], ['Micronesia','מיקרונזיה וטרוק'], ['Papua New Guinea','פפואה גינאה החדשה'],
+    ['Solomon Islands','איי שלמה'], ['Fiji','פיג׳י'], ['French Polynesia','פולינזיה הצרפתית'],
+    ['Australia','אוסטרליה']]],
+  ['אמריקה והקריביים', [
+    ['Galapagos','גלפגוס'], ['Mexico','מקסיקו'], ['Costa Rica','קוסטה ריקה'],
+    ['Cuba','קובה'], ['Bahamas','בהאמה'], ['Belize','בליז'], ['Cayman Islands','איי קיימן'],
+    ['Honduras','הונדורס'], ['Turks & Caicos','טורקס וקייקוס'], ['Caribbean','הקריביים']]],
+  ['יעדים קרים', [
+    ['Norway','נורבגיה'], ['Azores','האיים האזוריים'], ['Polar','אנטארקטיקה והקוטב']]]
+];
+
+function tally(skip, keyFn) {
+  const m = new Map();
+  filtered(skip).forEach(t => {
+    const k = keyFn(t);
+    if (k === '' || k == null) return;
+    m.set(k, (m.get(k) || 0) + 1);
+  });
+  return m;
+}
+
+
+/* ---------- multi-select widget ---------- */
+function MultiSelect(mountId, opts) {
+  const host = document.getElementById(mountId);
+  host.classList.add('ms');
+  const labId = mountId + '-lab', btnId = mountId + '-btn';
+  host.innerHTML = '<label id="' + labId + '">' + opts.label + '</label>'
+    + '<button type="button" class="msbtn" id="' + btnId + '"'
+    + ' aria-labelledby="' + labId + ' ' + btnId + '"'
+    + ' aria-haspopup="listbox" aria-expanded="false"></button>'
+    + '<div class="mspanel">'
+    + (opts.search ? '<input class="mssearch" placeholder="סינון ברשימה" />' : '')
+    + '<div class="msopts"></div>'
+    + '<div class="msfoot"><button type="button" class="mclr">נקה</button>'
+    + '<button type="button" class="mcls">סנן</button></div></div>';
+
+  const btn = host.querySelector('.msbtn');
+  const panel = host.querySelector('.mspanel');
+  const box = host.querySelector('.msopts');
+  const search = host.querySelector('.mssearch');
+  let q = '';
+
+  function paint() {
+    const groups = opts.groups();      // [[groupLabel|null, [[value, label, count]]]]
+    let h = '', shown = 0;
+    groups.forEach(([g, items]) => {
+      const vis = items.filter(([v, lab]) =>
+        !q || String(lab).toLowerCase().indexOf(q) !== -1);
+      if (!vis.length) return;
+      if (g) h += '<div class="msgrp">' + esc(g) + '</div>';
+      vis.forEach(([v, lab, n]) => {
+        shown++;
+        h += '<label class="msopt"><input type="checkbox" value="' + esc(v) + '"'
+          + (opts.sel.has(v) ? ' checked' : '') + ' />'
+          + '<span class="nm"' + (opts.ltr ? ' dir="ltr"' : '') + '>' + esc(lab) + '</span>'
+          + '<span class="n">' + n + '</span></label>';
+      });
+    });
+    box.innerHTML = shown ? h : '<div class="msnone">אין תוצאות</div>';
+  }
+
+  /* Once the panel is open the rows stay put: ticking a box must not reorder or
+     drop the option under the cursor, or picking several in a row is impossible.
+     Only the counts are refreshed in place. */
+  function refreshCounts() {
+    const m = new Map();
+    opts.groups().forEach(([, items]) => items.forEach(([v, , n]) => m.set(String(v), n)));
+    box.querySelectorAll('.msopt').forEach(row => {
+      const cb = row.querySelector('input');
+      const n = row.querySelector('.n');
+      if (cb && n) n.textContent = m.get(cb.value) || 0;
+    });
+  }
+
+  function label() {
+    const n = opts.sel.size;
+    btn.classList.toggle('on', n > 0);
+    btn.innerHTML = n === 0
+      ? esc(opts.empty) + '<span class="arw">&#9662;</span>'
+      : esc(opts.label) + '<span class="cnt">' + n + '</span>';
+  }
+
+  btn.onclick = e => {
+    e.stopPropagation();
+    const wasOpen = panel.classList.contains('on');
+    document.querySelectorAll('.mspanel.on').forEach(p => {
+      p.classList.remove('on');
+      const b = p.parentElement.querySelector('.msbtn');
+      if (b) b.setAttribute('aria-expanded', 'false');
+    });
+    if (!wasOpen) {
+      paint(); panel.classList.add('on');
+      btn.setAttribute('aria-expanded', 'true');
+      if (search) search.focus();
+    }
+  };
+  panel.onclick = e => e.stopPropagation();
+  if (search) search.oninput = () => { q = search.value.trim().toLowerCase(); paint(); };
+  box.onchange = e => {
+    const cb = e.target;
+    if (cb.type !== 'checkbox') return;
+    const v = opts.parse ? opts.parse(cb.value) : cb.value;
+    cb.checked ? opts.sel.add(v) : opts.sel.delete(v);
+    opts.onChange();
+  };
+  host.querySelector('.mclr').onclick = () => {
+    opts.sel.clear(); opts.onChange(); paint(); label();
+  };
+  host.querySelector('.mcls').onclick = () => panel.classList.remove('on');
+
+  return {
+    refresh: () => {
+      label();
+      if (panel.classList.contains('on')) refreshCounts();
+    },
+    close: () => panel.classList.remove('on')
+  };
+}
+
+document.addEventListener('click', () =>
+  document.querySelectorAll('.mspanel.on').forEach(p => p.classList.remove('on')));
+
+/* ---------- shareable links ----------
+   The address bar always describes exactly what is on screen, so any filtered
+   view can be copied and sent to a customer. ?trip= opens one departure. */
+const monthToStr = k => k == null ? '' :
+  Math.floor(k / 12) + '-' + String(k % 12 + 1).padStart(2, '0');
+function strToMonth(s) {
+  const m = /^(\d{4})-(\d{1,2})$/.exec(s || '');
+  if (!m) return null;
+  return (+m[1]) * 12 + (+m[2]) - 1;
+}
+
+function readUrl() {
+  const p = new URLSearchParams(location.search);
+  const setOf = (key, target, parse) => {
+    const v = p.get(key);
+    if (!v) return;
+    v.split(',').forEach(x => {
+      x = decodeURIComponent(x.trim());
+      if (x) target.add(parse ? parse(x) : x);
+    });
+  };
+  setOf('dest', S.dest);
+  setOf('boat', S.boat);
+  setOf('itin', S.itin);
+  setOf('nights', S.nights, Number);
+  const f = strToMonth(p.get('from')), to = strToMonth(p.get('to'));
+  if (f !== null && f >= M0 && f <= M1) S.from = f;
+  if (to !== null && to >= M0 && to <= M1) S.to = to;
+  if (S.to < S.from) S.to = S.from;
+  if (p.get('q')) S.text = p.get('q');
+  if (p.get('sort')) S.sort = p.get('sort');
+  if (p.get('deals') === '1') S.deal = true;
+  return p.get('trip') || '';
+}
+
+function writeUrl() {
+  const p = new URLSearchParams();
+  const put = (k, set) => { if (set.size) p.set(k, [...set].join(',')); };
+  put('dest', S.dest); put('boat', S.boat); put('itin', S.itin); put('nights', S.nights);
+  if (S.from !== M0) p.set('from', monthToStr(S.from));
+  if (S.to !== M1) p.set('to', monthToStr(S.to));
+  if (S.text.trim()) p.set('q', S.text.trim());
+  if (S.sort !== 'date') p.set('sort', S.sort);
+  if (S.deal) p.set('deals', '1');
+  const qs = p.toString();
+  history.replaceState(null, '', qs ? location.pathname + '?' + qs : location.pathname);
+}
+
 
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function heb(c){return HEB[c]||c;}
@@ -208,27 +477,87 @@ function tone(t){if(!t.spots)return 'none';const r=t.spots/(t.capacity||t.spots)
     +'<span>'+c[1]+'</span><i>'+c[2]+'</i></div>').join('');
 })();
 
-function buildFilters(){
-  const bs=[...new Set(TRIPS.map(t=>t.boat))].sort();
-  $('fBoat').innerHTML='<option value="">כל הספינות</option>'+bs.map(b=>'<option>'+esc(b)+'</option>').join('');
-  const cs=[...new Set(TRIPS.map(t=>t.country))].sort();
-  $('fCountry').innerHTML='<option value="">כל היעדים</option>'
-    +cs.map(c=>'<option value="'+esc(c)+'">'+esc(heb(c))+'</option>').join('');
-}
 
-function filtered(){
+function filtered(skip){
+  const q=S.text.trim().toLowerCase();
   return TRIPS.filter(t=>{
-    if(S.boat&&t.boat!==S.boat)return false;
-    if(S.country&&t.country!==S.country)return false;
+    if(skip!=='dest'&&S.dest.size&&!S.dest.has(t.destination))return false;
+    if(skip!=='boat'&&S.boat.size&&!S.boat.has(t.boat_id))return false;
+    if(skip!=='itin'&&S.itin.size&&!S.itin.has(t.route))return false;
+    if(skip!=='nights'&&S.nights.size&&!S.nights.has(t.nights))return false;
+    if(t.key<S.from||t.key>S.to)return false;
     if(S.avail&&!t.spots)return false;
+    if(S.deal&&!t.special_offer)return false;
+    if(q&&t.boat.toLowerCase().indexOf(q)===-1
+        &&(t.route||'').toLowerCase().indexOf(q)===-1
+        &&(t.from_port||'').toLowerCase().indexOf(q)===-1
+        &&t.destination.toLowerCase().indexOf(q)===-1
+        &&heDest(t.destination).indexOf(q)===-1)return false;
     return true;
   });
 }
 
+/* ---------- the four facets, same widget as the live page ---------- */
+const MS={};
+MS.dest=MultiSelect('msDest',{label:'יעד',empty:'כל היעדים',sel:S.dest,search:true,onChange:render,
+  groups:()=>{const c=tally('dest',t=>t.destination),out=[],known={};
+    REGIONS.forEach(([region,pairs])=>{pairs.forEach(p=>known[p[0]]=1);
+      const live=pairs.filter(p=>c.get(p[0])).map(([en,he])=>[en,he,c.get(en)]);
+      if(live.length)out.push([region,live]);});
+    const rest=[...c.keys()].filter(d=>!known[d]).sort().map(d=>[d,heDest(d),c.get(d)]);
+    if(rest.length)out.push(['יעדים נוספים',rest]);
+    return out;}});
+MS.boat=MultiSelect('msBoat',{label:'ספינה',empty:'כל הספינות',sel:S.boat,search:true,ltr:true,onChange:render,
+  groups:()=>{const c=tally('boat',t=>t.boat_id);
+    return [[null,[...c.keys()].sort((a,b)=>BOAT_NAME[a].localeCompare(BOAT_NAME[b]))
+      .map(s=>[s,BOAT_NAME[s],c.get(s)])]];}});
+MS.itin=MultiSelect('msItin',{label:'מסלול',empty:'כל המסלולים',sel:S.itin,search:true,ltr:true,onChange:render,
+  groups:()=>{const c=tally('itin',t=>t.route);
+    return [[null,[...c.keys()].sort((a,b)=>c.get(b)-c.get(a)||a.localeCompare(b))
+      .map(i=>[i,i,c.get(i)])]];}});
+MS.nights=MultiSelect('msNights',{label:'לילות',empty:'מספר לילות',sel:S.nights,search:false,
+  parse:v=>+v,onChange:render,
+  groups:()=>{const c=tally('nights',t=>t.nights);
+    return [[null,[...c.keys()].sort((a,b)=>a-b).map(n=>[n,n+' לילות',c.get(n)])]];}});
+
+function renderTags(){
+  const bits=[];
+  S.dest.forEach(v=>bits.push(['dest',v,heDest(v)]));
+  S.boat.forEach(v=>bits.push(['boat',v,BOAT_NAME[v]||v]));
+  S.itin.forEach(v=>bits.push(['itin',v,v]));
+  [...S.nights].sort((a,b)=>a-b).forEach(v=>bits.push(['nights',v,v+' לילות']));
+  $('tags').innerHTML=bits.map(([k,v,lab])=>'<span class="tag2"><span class="tx">'+esc(lab)+'</span>'
+    +'<button type="button" data-k="'+k+'" data-v="'+esc(v)+'">&times;</button></span>').join('');
+}
+$('tags').onclick=e=>{const b=e.target.closest('button[data-k]');if(!b)return;
+  const k=b.getAttribute('data-k'),raw=b.getAttribute('data-v');
+  S[k].delete(k==='nights'?+raw:raw);render();};
+
+function buildMonths(){
+  [['fFromM','fFromY'],['fToM','fToY']].forEach(([mi,yi])=>{
+    const m=$(mi),y=$(yi);
+    HEB_MO.forEach((n,i)=>m.add(new Option(n,i)));
+    YEARS.forEach(yr=>y.add(new Option(yr,yr)));});
+  syncMonthUI();
+}
+function syncMonthUI(){
+  $('fFromM').value=S.from%12;$('fFromY').value=Math.floor(S.from/12);
+  $('fToM').value=S.to%12;$('fToY').value=Math.floor(S.to/12);
+}
+function monthChanged(which){
+  const v=id=>+$(id).value;
+  let from=v('fFromY')*12+v('fFromM'), to=v('fToY')*12+v('fToM');
+  from=Math.min(Math.max(from,M0),M1); to=Math.min(Math.max(to,M0),M1);
+  if(which==='from'&&to<from)to=from;
+  if(which==='to'&&from>to)from=to;
+  S.from=from;S.to=to;syncMonthUI();render();
+}
+
 function render(){
   const rows=filtered();
-  if(S.sort==='price')rows.sort((a,b)=>(lowest(a)||9e9)-(lowest(b)||9e9));
-  else if(S.sort==='spots')rows.sort((a,b)=>(b.spots||0)-(a.spots||0));
+  if(S.sort==='price')rows.sort((a,b)=>(a.price||9e9)-(b.price||9e9)||a.start.localeCompare(b.start));
+  else if(S.sort==='priced')rows.sort((a,b)=>(b.price||0)-(a.price||0)||a.start.localeCompare(b.start));
+  else if(S.sort==='spots')rows.sort((a,b)=>(b.spots||0)-(a.spots||0)||a.start.localeCompare(b.start));
   else rows.sort((a,b)=>a.start.localeCompare(b.start));
 
   $('count').innerHTML='<b>'+rows.length+'</b> הפלגות על <b>'
@@ -253,8 +582,15 @@ function render(){
       +'</div>';
   });
   h+='</div>';
-  if(rows.length>CAP)h=h.replace('</div>$','')+'<div class="more">מוצגות '+CAP+' מתוך '+rows.length+'</div>';
-  $('view').innerHTML=h;
+  if(rows.length>CAP)h+='<div class="more">מוצגות '+CAP+' ההפלגות הראשונות מתוך '
+    +rows.length+'. צמצמו את הסינון כדי לראות את השאר.</div>';
+  $('view').innerHTML=rows.length?h:'<div class="lst"><div class="more">לא נמצאו הפלגות</div></div>';
+
+  Object.keys(MS).forEach(k=>MS[k].refresh());
+  renderTags();
+  writeUrl();
+  $('fDeal').classList.toggle('on',S.deal);
+  $('dealBx').textContent=S.deal?'\u2713':'';
 }
 
 function open_(i){
@@ -333,20 +669,36 @@ function open_(i){
   if(b.detail) h+='<div class="sec"><h3>על הספינה</h3><div class="prose">'+esc(b.detail)+'</div></div>';
 
   $('dBody').innerHTML=h;
+  const u=new URLSearchParams(location.search);u.set('trip',t.uid);
+  history.replaceState(null,'',location.pathname+'?'+u.toString());
   $('ov').classList.add('on');
   document.body.style.overflow='hidden';
   document.querySelector('.dlg').focus();
 }
 function kv(k,v){return '<div><span>'+esc(k)+'</span><b>'+esc(v)+'</b></div>';}
-function close_(){$('ov').classList.remove('on');document.body.style.overflow='';}
+function close_(){$('ov').classList.remove('on');document.body.style.overflow='';writeUrl();}
 
-buildFilters();
-$('fBoat').onchange=e=>{S.boat=e.target.value;render();};
-$('fCountry').onchange=e=>{S.country=e.target.value;render();};
+buildMonths();
+$('fFromM').onchange=$('fFromY').onchange=()=>monthChanged('from');
+$('fToM').onchange=$('fToY').onchange=()=>monthChanged('to');
 $('fSort').onchange=e=>{S.sort=e.target.value;render();};
-$('fAvail').onchange=e=>{S.avail=e.target.checked;render();};
-$('clr').onclick=()=>{S.boat='';S.country='';S.sort='date';S.avail=true;
-  $('fBoat').value='';$('fCountry').value='';$('fSort').value='date';$('fAvail').checked=true;render();};
+$('fDeal').onclick=()=>{S.deal=!S.deal;render();};
+let tmr;$('fText').oninput=e=>{clearTimeout(tmr);tmr=setTimeout(()=>{S.text=e.target.value;render();},200);};
+$('clr').onclick=()=>{
+  S.dest.clear();S.boat.clear();S.itin.clear();S.nights.clear();
+  S.from=M0;S.to=M1;S.sort='date';S.text='';S.deal=false;
+  syncMonthUI();$('fSort').value='date';$('fText').value='';
+  Object.keys(MS).forEach(k=>MS[k].close());render();};
+$('cpy').onclick=function(){
+  const btn=this,url=location.href;
+  const done=()=>{btn.classList.add('done');btn.textContent='הקישור הועתק';
+    setTimeout(()=>{btn.classList.remove('done');btn.textContent='העתק קישור';},1800);};
+  if(navigator.clipboard&&navigator.clipboard.writeText)
+    navigator.clipboard.writeText(url).then(done).catch(()=>prompt('העתיקו את הקישור:',url));
+  else prompt('העתיקו את הקישור:',url);};
+
+const wantedTrip=readUrl();
+syncMonthUI();$('fSort').value=S.sort;$('fText').value=S.text;
 $('view').addEventListener('click',e=>{const r=e.target.closest('[data-i]');if(r)open_(+r.getAttribute('data-i'));});
 $('xBtn').onclick=close_;
 $('ov').onclick=e=>{if(e.target.id==='ov')close_();};
@@ -357,6 +709,7 @@ document.addEventListener('click',e=>{
     $('zoomImg').src=e.target.src;$('zoom').classList.add('on');}});
 $('zoom').onclick=()=>$('zoom').classList.remove('on');
 render();
+if(wantedTrip){const i=TRIPS.findIndex(t=>t.uid===wantedTrip);if(i>=0)open_(i);}
 </script>
 </body>
 </html>
