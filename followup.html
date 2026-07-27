@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<!-- BD-FOLLOWUP 2026-07-04a | Search by trip and/or first/last name (any combination of the 3 fields)
+<!-- BD-FOLLOWUP 2026-07-27a | Find the payment row by booking/diver, not by Trip ID, so moving a diver between trips updates the existing row instead of creating a duplicate
+     BD-FOLLOWUP 2026-07-04a | Search by trip and/or first/last name (any combination of the 3 fields)
      BD-FOLLOWUP 2026-05-28h | Fix orphaned brace from catch cleanup (SyntaxError resolved)
      BD-FOLLOWUP 2026-05-13a | Auto-log to Payment Requests table on WhatsApp send (both main and pro forma flows) -->
 <html lang="en" dir="ltr">
@@ -1195,6 +1196,24 @@ async function processBookings(records, showTripInLabel) {
   document.getElementById('diverSelectWrap').style.display = 'block';
 }
 
+// ── FETCH ALL PAYMENT ROWS ───────────────────────────────────────
+// The whole table, paginated. Needed because a diver's payment row may sit under a
+// trip they have since been moved off, so it cannot be found by filtering on trip.
+async function fetchAllPayments() {
+  const out = [];
+  let offset = '';
+  do {
+    const url = `https://api.airtable.com/v0/${BASE_ID}/${PAYMENTS_TABLE}?pageSize=100`
+              + (offset ? `&offset=${encodeURIComponent(offset)}` : '');
+    const res = await fetch(url, { headers: { Authorization: `Bearer ${AIRTABLE_API_KEY}` } });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error.message || 'Airtable error');
+    out.push(...(data.records || []));
+    offset = data.offset || '';
+  } while (offset);
+  return out;
+}
+
 // ── LOAD DIVER ───────────────────────────────────────────────────
 async function loadDiver() {
   const idx = document.getElementById('diverSelect').value;
@@ -1204,22 +1223,34 @@ async function loadDiver() {
   hideMsg('diverMsg');
   showMsg('diverMsg', 'info', 'Loading diver record...');
 
-  // Check if a Payment record already exists for this diver + trip
+  // Check if a Payment record already exists for this booking / diver.
+  // Deliberately NOT scoped to Trip ID: when a diver is moved to another trip the
+  // payment row keeps the old trip, and scoping the search by trip made this tool
+  // create a second row instead of updating the existing one.
   currentPaymentRecordId = null;
   try {
-    // Fetch all payment records for this Trip ID, filter by diverId in JS (avoids linked-record formula issues)
-    const formula = encodeURIComponent(`{Trip ID} = "${booking.tripId}"`);
-    const url = `https://api.airtable.com/v0/${BASE_ID}/${PAYMENTS_TABLE}?filterByFormula=${formula}`;
-    const res = await fetch(url, { headers: { Authorization: `Bearer ${AIRTABLE_API_KEY}` } });
-    const data = await res.json();
+    const all = await fetchAllPayments();
 
-    // Match by diverId in JS (Divers is a linked array field)
-    const matchedRec = (data.records || []).find(r => (r.fields['Diver ID'] || []).includes(booking.diverId));
+    // Prefer an exact booking match, then fall back to the diver across all trips
+    let matchedRec = all.find(r => (r.fields['Booking'] || []).includes(booking.bookingId));
+    if (!matchedRec && booking.diverId) {
+      const byDiver = all.filter(r => (r.fields['Diver ID'] || []).includes(booking.diverId));
+      // Same trip wins; otherwise take the newest row so we update rather than duplicate
+      matchedRec = byDiver.find(r => String(r.fields['Trip ID'] || '') === String(booking.tripId))
+                || byDiver.sort((a, b) => (b.createdTime || '').localeCompare(a.createdTime || ''))[0];
+    }
+
     if (matchedRec) {
       const rec = matchedRec;
       currentPaymentRecordId = rec.id;
       populateForm(rec.fields, booking);
-      showMsg('diverMsg', 'info', '✅ Existing record loaded — update and save.');
+      const staleTrip = String(rec.fields['Trip ID'] || '');
+      if (staleTrip && staleTrip !== String(booking.tripId)) {
+        showMsg('diverMsg', 'info',
+          `✅ Existing record loaded from trip ${staleTrip} — saving will move it to ${booking.tripId}.`);
+      } else {
+        showMsg('diverMsg', 'info', '✅ Existing record loaded — update and save.');
+      }
       document.getElementById('bannerBadge').textContent = 'Existing Record';
       document.getElementById('bannerBadge').className = 'badge existing';
     } else {
