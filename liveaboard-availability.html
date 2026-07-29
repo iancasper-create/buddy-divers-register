@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-LBLAH 2026-07-29f | Logo enlarged to sit just under the title width -->
+<!-- BD-LBLAH 2026-07-29g | Booking request moved above the spec and itinerary prose -->
 <html lang="he" dir="rtl">
 <head>
 <meta charset="UTF-8" />
@@ -699,6 +699,13 @@ function open_(i){
     h+='</div>';
   }
 
+  /* The booking request sits here, straight after price, availability and
+     extras, rather than at the foot of the dialog. Everything below this
+     point is reference reading: cabin spec, itinerary, boat spec, boat
+     description. Asking for the booking after all of that buried the call
+     to action under several screens of prose. */
+  h+=bookingForm(t);
+
   /* per-cabin descriptive spec */
   const withSpec=(b.cabins||[]).filter(c=>c.spec&&c.spec.length);
   if(withSpec.length){
@@ -735,8 +742,6 @@ function open_(i){
   }
 
   if(b.detail) h+='<div class="sec"><h3>על הספינה</h3><div class="prose">'+esc(b.detail)+'</div></div>';
-
-  h+=bookingForm(t);
 
   $('dBody').innerHTML=h;
   wireBooking(t);
