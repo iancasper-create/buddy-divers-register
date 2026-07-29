@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-LBLAH 2026-07-29g | Booking request moved above the spec and itinerary prose -->
+<!-- BD-LBLAH 2026-07-29h | Card date range, price beside availability, חסכו badge, padded LTR dialog dates -->
 <html lang="he" dir="rtl">
 <head>
 <meta charset="UTF-8" />
@@ -125,13 +125,14 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background:
 .row h3{font-size:13.5px;font-weight:700;direction:ltr;text-align:right;line-height:1.25;
  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .row .meta{font-size:11.5px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.row .foot2{margin-top:auto;padding-top:7px;border-top:1px solid #eef5f7;
- display:flex;align-items:baseline;justify-content:space-between;gap:6px;flex-wrap:wrap}
+.row .foot2{margin-top:auto;padding-top:7px;border-top:1px solid #eef5f7}
+.row .foot3{display:flex;align-items:center;justify-content:space-between;gap:6px;
+ flex-wrap:wrap;margin-top:4px}
 .dt{direction:ltr;font-weight:700;color:var(--navy);font-size:11.5px;white-space:nowrap}
 .pr{direction:ltr;font-weight:800;font-size:15px;white-space:nowrap}
 .pr s{font-size:11px;font-weight:400;color:var(--muted);margin-inline-start:4px}
 .off2{position:absolute;top:7px;inset-inline-end:7px;background:var(--orange);color:#fff;
- border-radius:6px;font-size:11.5px;font-weight:800;padding:2px 7px;direction:ltr;
+ border-radius:6px;font-size:11.5px;font-weight:800;padding:2px 8px;direction:rtl;
  box-shadow:0 2px 8px rgba(0,0,0,.3)}
 .pill{font-size:10.5px;padding:1px 7px}
 .pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:700;color:#fff}
@@ -514,6 +515,15 @@ function writeUrl() {
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function heb(c){return HEB[c]||c;}
 function d2(s){const d=new Date(s+'T00:00:00');return d.getDate()+' '+SHORT_MO[d.getMonth()]+' '+d.getFullYear();}
+/* Cards get the compact range, the dialog gets the padded full date. Both are
+   day/month/year and both must be rendered LTR: dropped into the RTL flow bare,
+   the browser reorders the parts and '1 Aug 2026' reads as 'Aug 2026 1'. */
+function dS(s){const d=new Date(s+'T00:00:00');
+  return d.getDate()+'/'+(d.getMonth()+1)+'/'+String(d.getFullYear()).slice(2);}
+function dRange(a,b){return dS(a)+'-'+dS(b);}
+const p2=n=>String(n).padStart(2,'0');
+function d3(s){const d=new Date(s+'T00:00:00');
+  return p2(d.getDate())+'/'+p2(d.getMonth()+1)+'/'+d.getFullYear();}
 function money(v,cur){if(!v)return '';const s={EUR:'€',USD:'$',GBP:'£'}[cur]||(cur+' ');
   return s+Math.round(v).toLocaleString('en-US');}
 function lowest(t){const p=t.cabins.map(c=>c.price).filter(x=>x>0);return p.length?Math.min.apply(null,p):null;}
@@ -624,16 +634,16 @@ function render(){
           +'onerror="this.parentNode.innerHTML=\'<div class=&quot;noimg&quot;>אין תמונה</div>\'" />'
         :'<div class="noimg">אין תמונה</div>')
       +'<span class="badge">'+esc(heb(t.country))+'</span>'
-      +(t.discount?'<span class="off2">-'+t.discount+'%</span>':'')+'</div>'
+      +(t.discount?'<span class="off2">חסכו '+t.discount+'%</span>':'')+'</div>'
       +'<div class="body">'
       +'<h3>'+esc(t.boat)+'</h3>'
       +'<div class="meta">'+(t.nights||'?')+' לילות · '+esc(t.from_port)+'</div>'
-      +'<div class="foot2">'
-      +'<span class="dt" dir="ltr">'+d2(t.start)+'</span>'
+      +'<div class="foot2"><span class="dt" dir="ltr">'+dRange(t.start,t.end)+'</span></div>'
+      +'<div class="foot3">'
       +'<span class="pr" dir="ltr">'+esc(money(t.price,t.currency))
       +(t.discount?'<s>'+esc(money(t.priceFull,t.currency))+'</s>':'')+'</span>'
+      +'<span class="pill '+tone(t)+'">'+(t.spots?t.spots+' מקומות':'מלא')+'</span>'
       +'</div>'
-      +'<div><span class="pill '+tone(t)+'">'+(t.spots?t.spots+' מקומות':'מלא')+'</span></div>'
       +'</div></div>';
   });
   if(rows.length>CAP)h+='<div class="more">מוצגות '+CAP+' ההפלגות הראשונות מתוך '
@@ -659,16 +669,16 @@ function open_(i){
     h+='<div class="gal">'+b.photos.map(p=>'<img loading="lazy" src="'+esc(p)+'" alt="" />').join('')+'</div>';
 
   h+='<div class="kv">'
-   +kv('יציאה',d2(t.start))+kv('חזרה',d2(t.end))
+   +kv('יציאה',d3(t.start),1)+kv('חזרה',d3(t.end),1)
    +kv('לילות',(t.nights||'?')+(t.dives?' · '+t.dives+' צלילות':''))
    +kv('מקומות',t.spots?t.spots+' מתוך '+(t.capacity||'?'):'מלא')
-   +kv('נמל',t.from_port)
+   +kv('נמל יציאה',t.from_port,1)
    +(t.required_cert||t.required_dives?kv('נדרש',(t.required_cert||'')+(t.required_dives?' · '+t.required_dives+' צלילות':'')):'')
    +'</div>';
 
   /* cabin table: the headline gain */
   if(t.cabins.length){
-    h+='<div class="sec"><h3>מחיר וזמינות לפי סוג תא<span class="new">חדש</span></h3>'
+    h+='<div class="sec"><h3>מחיר וזמינות לפי סוג תא</h3>'
      +'<table class="cab"><thead><tr><th>תא</th><th>מחיר</th><th>פנוי</th><th></th></tr></thead><tbody>';
     t.cabins.forEach(c=>{
       const bc=(b.cabins||[]).find(x=>x.id===c.id)||{};
@@ -709,7 +719,7 @@ function open_(i){
   /* per-cabin descriptive spec */
   const withSpec=(b.cabins||[]).filter(c=>c.spec&&c.spec.length);
   if(withSpec.length){
-    h+='<div class="sec"><h3>מפרט התאים<span class="new">חדש</span></h3>';
+    h+='<div class="sec"><h3>מפרט התאים</h3>';
     withSpec.forEach(c=>{
       h+='<div style="margin-bottom:12px"><b dir="ltr" style="display:block;text-align:right">'+esc(c.name)+'</b>'
        +(c.text?'<div class="prose" style="margin:6px 0">'+esc(c.text)+'</div>':'')
@@ -733,7 +743,7 @@ function open_(i){
   }
 
   if(b.spec&&Object.keys(b.spec).length){
-    h+='<div class="sec"><h3>מפרט הספינה<span class="new">חדש</span></h3>';
+    h+='<div class="sec"><h3>מפרט הספינה</h3>';
     Object.keys(b.spec).forEach(g=>{
       h+='<div style="margin-bottom:10px"><b style="font-size:13px;color:var(--teal)">'+esc(g)+'</b>'
        +'<div class="spectbl">'+b.spec[g].map(specRow).join('')+'</div></div>';
@@ -819,7 +829,8 @@ function wireBooking(t){
   };
 }
 
-function kv(k,v){return '<div><span>'+esc(k)+'</span><b>'+esc(v)+'</b></div>';}
+function kv(k,v,ltr){return '<div><span>'+esc(k)+'</span><b'+(ltr?' dir="ltr"':'')
+  +'>'+esc(v)+'</b></div>';}
 /* [hebrewLabel, value, isEnglish] - operator free text stays English, so it is
    rendered LTR while the translated vocabulary reads RTL like the rest. */
 function specRow(s){
