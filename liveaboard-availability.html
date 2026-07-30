@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-LBLAH 2026-07-30j | Return port shown when a trip is one-way; dive-area chips in the itinerary -->
+<!-- BD-LBLAH 2026-07-30k | Deals toggle relabelled הציגו לי רק מבצעים חמים -->
 <html lang="he" dir="rtl">
 <head>
 <meta charset="UTF-8" />
@@ -40,7 +40,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background:
 /* Row 3: search and sort on the start side, the three action controls on the end
    side. 2fr/2fr/auto keeps the buttons at their natural width so they never
    stretch, while the two inputs share what is left. */
-.controls .row5{grid-column:1/-1;display:grid;grid-template-columns:2fr 2fr auto;gap:10px;
+.controls .row5{grid-column:1/-1;display:grid;grid-template-columns:2fr 1fr auto;gap:10px;
   align-items:end;border-top:1px solid var(--border);padding-top:13px;margin-top:2px}
 .controls .row5 .acts{flex-direction:row;align-items:center;gap:8px;flex-wrap:wrap}
 .controls .row5 .acts .dealbtn{margin-bottom:0}
@@ -294,7 +294,7 @@ table.cab tr.sold td{opacity:.45}
         </div>
         <div class="fld acts">
           <button type="button" class="dealbtn" id="fDeal">
-            <span class="bx" id="dealBx"></span> רק מבצעים
+            <span class="bx" id="dealBx"></span> הציגו לי רק מבצעים חמים
           </button>
           <button class="btn" id="clr">נקה סינון</button>
           <button class="btn link" id="cpy" title="העתקת קישור לתצוגה הנוכחית">העתק קישור</button>
