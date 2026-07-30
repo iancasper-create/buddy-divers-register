@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-LBLAH 2026-07-30p | Extras split into paid and included headings, badges dropped -->
+<!-- BD-LBLAH 2026-07-30r | Extras price in a fixed column so item names align -->
 <html lang="he" dir="rtl">
 <head>
 <meta charset="UTF-8" />
@@ -197,7 +197,16 @@ table.cab tr.sold td{opacity:.45}
 .spectbl div span[dir=ltr]{direction:ltr}
 .prose{font-size:13.5px;line-height:1.75;white-space:pre-wrap;direction:ltr;text-align:left;
  background:var(--light);border-radius:10px;padding:12px}
-.exline{display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-bottom:1px dotted var(--border)}
+/* Price first, then a fixed gap, then the item name (Ian, 2026-07-30). No
+   space-between: the row packs to the start edge, which is the right in RTL. */
+.exline{display:flex;gap:14px;font-size:13px;padding:5px 0;border-bottom:1px dotted var(--border)}
+/* Fixed price column so every item name starts at the same offset (Ian, 2026-07-30).
+   3.8em holds "$10,000" / "€10,000", measured at 46.4px against 13px Heebo. Stated in
+   em, not px, so it still fits if the font size changes. min-width rather than a hard
+   width: the dearest extra in the feed today is $2,496, but a larger one widens its own
+   row instead of overflowing. text-align:right keeps the amount against the row's right
+   edge, which is the start edge in RTL, while the span itself stays dir="ltr". */
+.exline .amt{flex:0 0 auto;min-width:3.8em;text-align:right}
 
 .zoom{position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:80;display:none;align-items:center;justify-content:center;padding:20px}
 .zoom.on{display:flex}
@@ -811,8 +820,8 @@ function open_(i){
       /* 354 payable lines carry no price in the feed. A bare name beside an empty
          column reads as broken, so it gets a dash. Plain hyphen, not an em-dash. */
       const pr=money(x.price,t.extras_currency);
-      o+='<div class="exline"><span dir="ltr">'+esc(x.name)+'</span>'
-        +'<span dir="ltr">'+(pr?esc(pr):'-')+'</span></div>';
+      o+='<div class="exline"><span class="amt" dir="ltr">'+(pr?esc(pr):'-')+'</span>'
+        +'<span dir="ltr">'+esc(x.name)+'</span></div>';
     });
     return o+'</div>';
   };
