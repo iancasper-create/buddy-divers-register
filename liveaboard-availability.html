@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-LBLAH 2026-07-30r | Extras price in a fixed column so item names align -->
+<!-- BD-LBLAH 2026-07-30t | Share badge collapsed and relocated; availability was displaying reversed, now LTR and unwrapped -->
 <html lang="he" dir="rtl">
 <head>
 <meta charset="UTF-8" />
@@ -147,7 +147,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background:
 .pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:700;color:#fff}
 .pill.ok{background:var(--ok)}.pill.mid{background:var(--mid)}.pill.low{background:var(--low)}.pill.none{background:var(--none)}
 .cabflag{display:inline-block;background:#fff3d6;color:#8a6100;border:1px solid #e8c98a;border-radius:6px;
- font-size:11px;font-weight:700;padding:1px 6px;margin-inline-start:5px}
+ font-size:11px;font-weight:700;padding:1px 6px;margin-top:4px}
 .more{grid-column:1/-1;padding:14px;text-align:center;font-size:13px;color:var(--muted);
  background:var(--card);border-radius:12px}
 
@@ -168,6 +168,10 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background:
 .kv div{background:var(--light);border-radius:9px;padding:8px 11px}
 .kv span{display:block;font-size:11px;color:var(--muted);font-weight:600}
 .kv b{font-size:15px}
+/* Currency note above the extras lines. Amber like the one-way port row: a fact the
+   guest has to notice, not a warning. */
+.excur{font-size:11.5px;font-weight:600;color:#a35b00;background:#fff4e6;
+  border:1px solid #f0c48a;border-radius:7px;padding:4px 9px;margin-bottom:8px}
 .kv .oneway{background:#fff4e6;border:1px solid #f0c48a}
 .kv .oneway span{color:#a35b00}
 .areas{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:10px}
@@ -184,6 +188,9 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background:
 table.cab{width:100%;border-collapse:collapse;font-size:13px}
 table.cab th{background:var(--light);padding:7px 9px;text-align:right;font-size:11.5px;color:var(--muted);border-bottom:1px solid var(--border)}
 table.cab td{padding:8px 9px;border-bottom:1px solid #eef5f7;vertical-align:top}
+/* The share badge used to pad this column out. With it moved to the cabin column the
+   column shrank far enough that "3 / 16" broke across two lines at 375px. */
+table.cab td.av{white-space:nowrap;text-align:right}
 table.cab tr.sold td{opacity:.45}
 .cabname{font-weight:700;direction:ltr;display:block;text-align:right}
 .cabthumbs{display:flex;gap:4px;margin-top:5px}
@@ -787,17 +794,32 @@ function open_(i){
     t.cabins.forEach(c=>{
       const bc=(b.cabins||[]).find(x=>x.id===c.id)||{};
       const sold=!c.avail;
+      /* Same-gender share restriction on the last place in a shared cabin.
+         Both flags are set on 1,964 of the 2,289 flagged rows (86%), which means there
+         is no restriction at all, so that case collapses to one neutral badge and only a
+         genuine single-gender limit names a gender. Two stacked badges saying nothing was
+         the old behaviour, and they wrapped because they sat in the narrow פנוי column.
+         Now in the cabin-name column, which has real width, so it never wraps.
+         Suppressed on a sold-out cabin: 15 rows in the feed claim a last place while
+         showing zero availability, which is a contradiction in the source. */
+      const share=sold?''
+        :(c.last_male&&c.last_female)?'אפשר שיתוף'
+        :c.last_male?'שיתוף גבר'
+        :c.last_female?'שיתוף אישה':'';
       h+='<tr class="'+(sold?'sold':'')+'">'
        +'<td><span class="cabname">'+esc(c.name)+'</span>'
        +(bc.spec&&bc.spec.length?'<span class="marg">'+esc((bc.spec.find(s=>s[0]==='מיקום סיפון')||['',''])[1])+'</span>':'')
+       +(share?'<span class="cabflag">'+share+'</span>':'')
        +(bc.photos&&bc.photos.length?'<div class="cabthumbs">'
           +bc.photos.slice(0,3).map(p=>'<img loading="lazy" src="'+esc(p)+'" alt="" />').join('')+'</div>':'')
        +'</td>'
        +'<td><b dir="ltr">'+esc(money(c.price,t.currency))+'</b>'
        +(c.was&&c.was>c.price?'<span class="marg"><s>'+esc(money(c.was,t.currency))+'</s></span>':'')+'</td>'
-       +'<td>'+(c.avail?c.avail+' / '+(c.capacity||'?'):'מלא')
-       +(c.last_female?'<span class="cabflag">אישה</span>':'')
-       +(c.last_male?'<span class="cabflag">גבר</span>':'')+'</td>'
+       /* dir="ltr" is NOT cosmetic. "3 / 16" in an RTL cell is reordered by the bidi
+          algorithm and displays as "16 / 3", i.e. free and total swapped, so a cabin with
+          3 of 16 free read as 16 of 3. Wrong since the table was written; spotted on
+          mobile 2026-07-30. Same reason .cabname and .marg force LTR. */
+       +'<td class="av" dir="ltr">'+(c.avail?c.avail+' / '+(c.capacity||'?'):'מלא')+'</td>'
        +'<td>'+(sold?'':'<button type="button" class="bk1" data-cab="'+esc(c.name)
           +'" data-price="'+esc(money(c.price,t.currency))+'">הזמנת תא זה</button>')+'</td></tr>';
     });
@@ -813,9 +835,26 @@ function open_(i){
      כלול lines, so filing everything under `תוספות בתשלום` would bill the guest for costs
      the operator states are already in the fare - $65 of phantom Local Fees on every
      Snefro Pearl mini safari. Never merge these two blocks back together. */
+  /* Cabin prices follow the account's Primary Currency, USD. Additional costs arrive in
+     whatever the operator filed them in, unconverted, and the two disagree on 571
+     departures across six boats (Snefro Pearl, Silky, Longara, Amira, Seahorse, Red Sea
+     Blue Force 2). Without this line a guest sees cabins in dollars and fees in euros
+     with nothing to explain why, and cannot total the page.
+     DELIBERATELY NOT CONVERTED, and Ian confirmed this as the long-term answer on
+     2026-07-30: a build-time rate would go stale between daily runs and would state a
+     dollar figure the operator is not going to charge. Naming the currency is honest;
+     inventing the conversion is not. */
+  const CUR_HE={EUR:'ביורו',USD:'בדולר',GBP:'בליש"ט'};
+  const exNote=(t.extras_currency&&t.currency&&t.extras_currency!==t.currency)
+    ? '<div class="excur">התוספות נקובות '+(CUR_HE[t.extras_currency]||('ב'+esc(t.extras_currency)))+'</div>'
+    : '';
+  /* The currency applies to every extra on the departure, so the note is printed once,
+     under whichever of the two blocks renders first. */
+  let exNoteLeft=true;
   const exBlock=(rows,title)=>{
     if(!rows.length)return '';
     let o='<div class="sec"><h3>'+title+'</h3>';
+    if(exNoteLeft){o+=exNote;exNoteLeft=false;}
     rows.forEach(x=>{
       /* 354 payable lines carry no price in the feed. A bare name beside an empty
          column reads as broken, so it gets a dash. Plain hyphen, not an em-dash. */
