@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-LBLAH 2026-07-30i | routeTextDetailed now harvested: itinerary prose 6x richer -->
+<!-- BD-LBLAH 2026-07-30j | Return port shown when a trip is one-way; dive-area chips in the itinerary -->
 <html lang="he" dir="rtl">
 <head>
 <meta charset="UTF-8" />
@@ -168,6 +168,12 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background:
 .kv div{background:var(--light);border-radius:9px;padding:8px 11px}
 .kv span{display:block;font-size:11px;color:var(--muted);font-weight:600}
 .kv b{font-size:15px}
+.kv .oneway{background:#fff4e6;border:1px solid #f0c48a}
+.kv .oneway span{color:#a35b00}
+.areas{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:10px}
+.areas .lab{font-size:11.5px;font-weight:700;color:var(--muted)}
+.areas .chip{background:var(--light);border:1px solid var(--border);border-radius:999px;
+  padding:2px 9px;font-size:11.5px;color:var(--teal)}
 .sec{margin-top:16px}
 .sec h3{font-size:14.5px;font-weight:800;color:var(--navy);margin-bottom:9px;padding-bottom:5px;border-bottom:2px solid var(--light)}
 .new{background:var(--gold);color:#fff;border-radius:5px;font-size:10.5px;font-weight:700;padding:1px 6px;margin-inline-start:7px;vertical-align:2px}
@@ -754,6 +760,10 @@ function open_(i){
    +kv('לילות',(t.nights||'?')+(t.dives?' · '+t.dives+' צלילות':''))
    +kv('מקומות שנותרו',t.spots?t.spots+' מתוך '+(t.capacity||'?'):'מלא')
    +kv('נמל יציאה',t.from_port,1)
+   /* 13% of departures end somewhere else (Cabo San Lucas -> La Paz, Male ->
+      Dharavandhoo). Showing only the departure port hid a fact the guest has to
+      plan flights around, so the return port appears whenever it differs. */
+   +((t.to_port&&t.to_port!==t.from_port)?kv('נמל חזרה',t.to_port,1,'oneway'):'')
    +(t.required_cert||t.required_dives?kv('נדרש',(t.required_cert||'')+(t.required_dives?' · '+t.required_dives+' צלילות':'')):'')
    +'</div>';
 
@@ -768,7 +778,13 @@ function open_(i){
       h+='<div class="gal">'+R.photos.map(p=>'<img loading="lazy" src="'+esc(p)+'" alt="" />').join('')+'</div>';
     if(R.teaser) h+='<div class="prose" style="font-weight:700;margin-bottom:6px">'+esc(R.teaser)+'</div>';
     if(R.summary) h+='<div class="prose">'+esc(R.summary)+'</div>';
+    h+=areaChips(t);
     h+='</div>';
+  }
+  else if((t.areas||[]).length){
+    /* No prose for this route, but the areas are still worth showing: they are the
+       only structured answer to "where does this actually go". */
+    h+='<div class="sec"><h3>המסלול</h3>'+areaChips(t)+'</div>';
   }
 
   /* cabin table: the headline gain */
@@ -912,8 +928,16 @@ function wireBooking(t){
   };
 }
 
-function kv(k,v,ltr){return '<div><span>'+esc(k)+'</span><b'+(ltr?' dir="ltr"':'')
-  +'>'+esc(v)+'</b></div>';}
+/* The dive areas a departure touches - the equivalent of liveaboard.com's "Key
+   regions". English, like the rest of the area vocabulary. */
+function areaChips(t){
+  const a=t.areas||[];
+  if(!a.length)return '';
+  return '<div class="areas"><span class="lab">אזורי צלילה</span>'
+    +a.map(x=>'<span class="chip" dir="ltr">'+esc(x)+'</span>').join('')+'</div>';
+}
+function kv(k,v,ltr,cls){return '<div'+(cls?' class="'+cls+'"':'')+'><span>'+esc(k)
+  +'</span><b'+(ltr?' dir="ltr"':'')+'>'+esc(v)+'</b></div>';}
 /* [hebrewLabel, value, isEnglish] - operator free text stays English, so it is
    rendered LTR while the translated vocabulary reads RTL like the rest. */
 function specRow(s){
