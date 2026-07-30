@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-LBLAH 2026-07-30b | Desktop card grid 6 -> 4 across; dead filter CSS removed -->
+<!-- BD-LBLAH 2026-07-30c | Destination filter greys out zero-count entries instead of hiding them -->
 <html lang="he" dir="rtl">
 <head>
 <meta charset="UTF-8" />
@@ -79,6 +79,8 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background:
 .msopt input{width:16px;height:16px;accent-color:var(--teal);cursor:pointer;flex:0 0 auto}
 .msopt .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .msopt .n{color:var(--muted);font-size:11.5px}
+.msopt.off{opacity:.38;cursor:default}
+.msopt.off:hover{background:none}
 .msfoot{display:flex;gap:8px;padding:8px 10px;border-top:1px solid var(--border);background:#fafdfe}
 .msfoot button{flex:1;font-family:inherit;font-size:13px;font-weight:600;padding:6px;border-radius:7px;
   border:1.5px solid var(--border);background:#fff;color:var(--muted);cursor:pointer}
@@ -350,6 +352,11 @@ const MONTHS=[];{const a=+D0.slice(0,4)*12+ +D0.slice(5,7)-1,
 const HEB_MO=['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'];
 const YEARS=[...new Set(MONTHS.map(mo=>mo.y))];
 const BOAT_NAME={};TRIPS.forEach(t=>BOAT_NAME[t.boat_id]=t.boat);
+/* Every destination present in the feed, regardless of the current filters. The
+   destination list is built from this rather than from the live tally, so an
+   entry never disappears: it greys out at zero instead. Ian looked for סיני
+   with רק מבצעים on, found it gone, and reasonably read that as missing data. */
+const ALL_DEST=[...new Set(TRIPS.map(t=>t.destination))].filter(Boolean);
 function heDest(d){return HEB[d]||d;}
 
 /* destination -> Hebrew, grouped by region for the dropdown */
@@ -416,8 +423,13 @@ function MultiSelect(mountId, opts) {
       if (g) h += '<div class="msgrp">' + esc(g) + '</div>';
       vis.forEach(([v, lab, n]) => {
         shown++;
-        h += '<label class="msopt"><input type="checkbox" value="' + esc(v) + '"'
-          + (opts.sel.has(v) ? ' checked' : '') + ' />'
+        /* A zero-count option stays visible but inert, so the list never changes
+           shape under the cursor. Still tickable if already selected, or you could
+           not undo the selection that emptied it. */
+        const dead = !n && !opts.sel.has(v);
+        h += '<label class="msopt' + (dead ? ' off' : '') + '">'
+          + '<input type="checkbox" value="' + esc(v) + '"'
+          + (opts.sel.has(v) ? ' checked' : '') + (dead ? ' disabled' : '') + ' />'
           + '<span class="nm"' + (opts.ltr ? ' dir="ltr"' : '') + '>' + esc(lab) + '</span>'
           + '<span class="n">' + n + '</span></label>';
       });
@@ -434,7 +446,12 @@ function MultiSelect(mountId, opts) {
     box.querySelectorAll('.msopt').forEach(row => {
       const cb = row.querySelector('input');
       const n = row.querySelector('.n');
-      if (cb && n) n.textContent = m.get(cb.value) || 0;
+      if (!cb || !n) return;
+      const cnt = m.get(cb.value) || 0;
+      n.textContent = cnt;
+      const dead = !cnt && !cb.checked;
+      row.classList.toggle('off', dead);
+      cb.disabled = dead;
     });
   }
 
@@ -585,9 +602,9 @@ const MS={};
 MS.dest=MultiSelect('msDest',{label:'יעד',empty:'כל היעדים',sel:S.dest,search:true,onChange:render,
   groups:()=>{const c=tally('dest',t=>t.destination),out=[],known={};
     REGIONS.forEach(([region,keys])=>{keys.forEach(k=>known[k]=1);
-      const live=keys.filter(k=>c.get(k)).map(k=>[k,heDest(k),c.get(k)]);
+      const live=keys.filter(k=>ALL_DEST.includes(k)).map(k=>[k,heDest(k),c.get(k)||0]);
       if(live.length)out.push([region,live]);});
-    const rest=[...c.keys()].filter(d=>!known[d]).sort().map(d=>[d,heDest(d),c.get(d)]);
+    const rest=ALL_DEST.filter(d=>!known[d]).sort().map(d=>[d,heDest(d),c.get(d)||0]);
     if(rest.length)out.push(['יעדים נוספים',rest]);
     return out;}});
 MS.boat=MultiSelect('msBoat',{label:'ספינה',empty:'כל הספינות',sel:S.boat,search:true,ltr:true,onChange:render,
