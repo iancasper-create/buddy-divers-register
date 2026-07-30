@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-LBLAH 2026-07-30o | Dialog order: price, extras, route, booking request -->
+<!-- BD-LBLAH 2026-07-30p | Extras split into paid and included headings, badges dropped -->
 <html lang="he" dir="rtl">
 <head>
 <meta charset="UTF-8" />
@@ -198,8 +198,6 @@ table.cab tr.sold td{opacity:.45}
 .prose{font-size:13.5px;line-height:1.75;white-space:pre-wrap;direction:ltr;text-align:left;
  background:var(--light);border-radius:10px;padding:12px}
 .exline{display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-bottom:1px dotted var(--border)}
-.tag{display:inline-block;font-size:11px;font-weight:700;border-radius:5px;padding:1px 7px}
-.tag.i{background:#d9f2e5;color:#1c6e48}.tag.b{background:#ffe9cc;color:#9a5b00}
 
 .zoom{position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:80;display:none;align-items:center;justify-content:center;padding:20px}
 .zoom.on{display:flex}
@@ -798,13 +796,28 @@ function open_(i){
      +'</div>';
   }
 
-  if(t.extras.length){
-    h+='<div class="sec"><h3>תוספות</h3>';
-    t.extras.forEach(x=>{h+='<div class="exline"><span dir="ltr">'+esc(x.name)+'</span>'
-      +'<span>'+esc(money(x.price,t.extras_currency))+' '
-      +(x.included?'<span class="tag i">כלול</span>':'<span class="tag b">בתשלום</span>')+'</span></div>';});
-    h+='</div>';
-  }
+  /* Extras split by whether the operator already covers them. Until 2026-07-30 both
+     kinds shared one `תוספות` heading with a per-line כלול/בתשלום badge, and since 93%
+     of lines are בתשלום the badge was noise on nearly every row. The heading now carries
+     the meaning and there is no badge at all, on Ian's instruction.
+     THE SPLIT IS NOT COSMETIC. 177 departures mix both kinds and 139 carry nothing but
+     כלול lines, so filing everything under `תוספות בתשלום` would bill the guest for costs
+     the operator states are already in the fare - $65 of phantom Local Fees on every
+     Snefro Pearl mini safari. Never merge these two blocks back together. */
+  const exBlock=(rows,title)=>{
+    if(!rows.length)return '';
+    let o='<div class="sec"><h3>'+title+'</h3>';
+    rows.forEach(x=>{
+      /* 354 payable lines carry no price in the feed. A bare name beside an empty
+         column reads as broken, so it gets a dash. Plain hyphen, not an em-dash. */
+      const pr=money(x.price,t.extras_currency);
+      o+='<div class="exline"><span dir="ltr">'+esc(x.name)+'</span>'
+        +'<span dir="ltr">'+(pr?esc(pr):'-')+'</span></div>';
+    });
+    return o+'</div>';
+  };
+  h+=exBlock(t.extras.filter(x=>!x.included),'תוספות בתשלום')
+   + exBlock(t.extras.filter(x=>x.included),'כלול במחיר');
 
   /* itinerary prose and route photography, from the Gold-only route endpoint.
      Sits BELOW price, availability and extras and directly ABOVE the booking
