@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-LBLAH 2026-07-30t | Share badge collapsed and relocated; availability was displaying reversed, now LTR and unwrapped -->
+<!-- BD-LBLAH 2026-07-30u | Share badge only when a real single-gender limit exists -->
 <html lang="he" dir="rtl">
 <head>
 <meta charset="UTF-8" />
@@ -794,16 +794,16 @@ function open_(i){
     t.cabins.forEach(c=>{
       const bc=(b.cabins||[]).find(x=>x.id===c.id)||{};
       const sold=!c.avail;
-      /* Same-gender share restriction on the last place in a shared cabin.
-         Both flags are set on 1,964 of the 2,289 flagged rows (86%), which means there
-         is no restriction at all, so that case collapses to one neutral badge and only a
-         genuine single-gender limit names a gender. Two stacked badges saying nothing was
-         the old behaviour, and they wrapped because they sat in the narrow פנוי column.
-         Now in the cabin-name column, which has real width, so it never wraps.
-         Suppressed on a sold-out cabin: 15 rows in the feed claim a last place while
-         showing zero availability, which is a contradiction in the source. */
-      const share=sold?''
-        :(c.last_male&&c.last_female)?'אפשר שיתוף'
+      /* Same-gender share restriction on the last place in a shared cabin. Printed ONLY
+         when there is a real restriction, i.e. exactly one of the two flags is set:
+         192 rows male-only, 133 female-only, 325 of 15,188 (2%).
+         BOTH FLAGS SET MEANS NO RESTRICTION AND MUST PRINT NOTHING. That is 1,964 rows,
+         86% of the flagged ones. It first shipped as a neutral "אפשר שיתוף" badge, which
+         Ian rejected on sight: a badge on 86% of flagged rows to announce the absence of
+         a limit is just noise. Say nothing unless there is something to say.
+         Also silent on a sold-out cabin: 15 rows in the feed claim a last place while
+         showing zero availability, a contradiction in the source. */
+      const share=(sold||(c.last_male&&c.last_female))?''
         :c.last_male?'שיתוף גבר'
         :c.last_female?'שיתוף אישה':'';
       h+='<tr class="'+(sold?'sold':'')+'">'
