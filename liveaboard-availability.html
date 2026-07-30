@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-LBLAH 2026-07-30n | Itinerary prose no longer breaks mid-sentence -->
+<!-- BD-LBLAH 2026-07-30o | Dialog order: price, extras, route, booking request -->
 <html lang="he" dir="rtl">
 <head>
 <meta charset="UTF-8" />
@@ -773,27 +773,6 @@ function open_(i){
    +(t.required_cert||t.required_dives?kv('נדרש',(t.required_cert||'')+(t.required_dives?' · '+t.required_dives+' צלילות':'')):'')
    +'</div>';
 
-  /* itinerary prose and route photography, from the Gold-only route endpoint.
-     Sits after the cabin table so price stays highest, before the boat spec:
-     where the trip goes, then what it goes on. English text, so .prose flips
-     it back to LTR inside the RTL page. */
-  const R=ROUTES[t.route_id];
-  if(R){
-    h+='<div class="sec"><h3>המסלול</h3>';
-    if(R.photos&&R.photos.length)
-      h+='<div class="gal">'+R.photos.map(p=>'<img loading="lazy" src="'+esc(p)+'" alt="" />').join('')+'</div>';
-    if(R.teaser) h+='<div class="prose" style="font-weight:700;margin-bottom:6px">'+esc(R.teaser)+'</div>';
-    if(R.summary) h+='<div class="prose">'+esc(R.summary)+'</div>';
-    h+=areaChips(t);
-    h+=siteChips(t);
-    h+='</div>';
-  }
-  else if((t.areas||[]).length||(t.sites||[]).length){
-    /* No prose for this route, but the areas are still worth showing: they are the
-       only structured answer to "where does this actually go". */
-    h+='<div class="sec"><h3>המסלול</h3>'+areaChips(t)+siteChips(t)+'</div>';
-  }
-
   /* cabin table: the headline gain */
   if(t.cabins.length){
     h+='<div class="sec"><h3>מחיר וזמינות לפי סוג תא</h3>'
@@ -827,11 +806,33 @@ function open_(i){
     h+='</div>';
   }
 
-  /* The booking request sits here, straight after price, availability and
-     extras, rather than at the foot of the dialog. Everything below this
-     point is reference reading: cabin spec, itinerary, boat spec, boat
-     description. Asking for the booking after all of that buried the call
-     to action under several screens of prose. */
+  /* itinerary prose and route photography, from the Gold-only route endpoint.
+     Sits BELOW price, availability and extras and directly ABOVE the booking
+     request, on Ian's instruction 2026-07-30: price first, then where the trip
+     goes, then the ask. This reverses tag `a`, which had moved it above the
+     cabin table - the reversal is deliberate, do not "restore" it. English
+     text, so .prose flips it back to LTR inside the RTL page. */
+  const R=ROUTES[t.route_id];
+  if(R){
+    h+='<div class="sec"><h3>המסלול</h3>';
+    if(R.photos&&R.photos.length)
+      h+='<div class="gal">'+R.photos.map(p=>'<img loading="lazy" src="'+esc(p)+'" alt="" />').join('')+'</div>';
+    if(R.teaser) h+='<div class="prose" style="font-weight:700;margin-bottom:6px">'+esc(R.teaser)+'</div>';
+    if(R.summary) h+='<div class="prose">'+esc(R.summary)+'</div>';
+    h+=areaChips(t);
+    h+=siteChips(t);
+    h+='</div>';
+  }
+  else if((t.areas||[]).length||(t.sites||[]).length){
+    /* No prose for this route, but the areas are still worth showing: they are the
+       only structured answer to "where does this actually go". */
+    h+='<div class="sec"><h3>המסלול</h3>'+areaChips(t)+siteChips(t)+'</div>';
+  }
+
+  /* The booking request sits here, directly after the itinerary, rather than at
+     the foot of the dialog. Everything below this point is reference reading:
+     cabin spec, boat spec, boat description. Asking for the booking after all
+     of that buried the call to action under several screens of prose. */
   h+=bookingForm(t);
 
   /* per-cabin descriptive spec */
