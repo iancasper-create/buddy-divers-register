@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-LBLAH 2026-07-31e | unpriced-but-bookable cabins say לפי בקשה instead of rendering an empty price cell -->
+<!-- BD-LBLAH 2026-07-31f | on-request departures badged on the card and explained in the modal; schedule windows monthly for cap headroom -->
 <html lang="he" dir="rtl">
 <head>
 <meta charset="UTF-8" />
@@ -146,6 +146,9 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background:
  box-shadow:0 2px 8px rgba(0,0,0,.3)}
 .pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:700;color:#fff}
 .pill.ok{background:var(--ok)}.pill.mid{background:var(--mid)}.pill.low{background:var(--low)}.pill.none{background:var(--none)}
+.pill.req{background:#8a6100;font-weight:800}
+.note{font-size:12.5px;color:#8a6100;background:#fff3d6;border:1px solid #e8c98a;
+ border-radius:8px;padding:7px 10px;margin:0 0 10px}
 .cabflag{display:inline-block;background:#fff3d6;color:#8a6100;border:1px solid #e8c98a;border-radius:6px;
  font-size:11px;font-weight:700;padding:1px 6px;margin-top:4px}
 .more{grid-column:1/-1;padding:14px;text-align:center;font-size:13px;color:var(--muted);
@@ -800,6 +803,7 @@ function render(){
       +(t.price?esc(money(t.price,t.currency)):'לפי בקשה')
       +(t.discount?'<s>'+esc(money(t.priceFull,t.currency))+'</s>':'')+'</span>'
       +'<span class="pill '+tone(t)+'">'+(t.spots?t.spots+' מקומות':'מלא')+'</span>'
+      +(t.on_request?'<span class="pill req">בכפוף לאישור</span>':'')
       +'</div>'
       +'</div></div>';
   });
@@ -840,6 +844,8 @@ function open_(i){
   /* cabin table: the headline gain */
   if(t.cabins.length){
     h+='<div class="sec"><h3>מחיר וזמינות לפי סוג תא</h3>'
+      +(t.on_request?'<div class="note">ההפלגה הזו נמכרת בכפוף לאישור הספק. '
+        +'שליחת בקשה אינה מאשרת מקום עד לאישור.</div>':'')
      +'<table class="cab"><thead><tr><th>תא</th><th>מחיר</th><th>פנוי</th><th></th></tr></thead><tbody>';
     t.cabins.forEach(c=>{
       const bc=(b.cabins||[]).find(x=>x.id===c.id)||{};
