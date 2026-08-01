@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-LBLAH 2026-08-01l | results line now reads "הפלגות זמינות" instead of "הפלגות", so it no longer looks like it contradicts the 10,079 in the stats pill: it counts the 7,535 bookable departures, the other 2,544 being sold out and dropped by the always-on availability filter -->
+<!-- BD-LBLAH 2026-08-01m | interaction CLS fixed: the active-filter chip strip went 0 to 29 to 65px as filters were added, shoving the count line and the whole results list down each time (measured 0.0159 per change, scored). One chip row is now reserved permanently and the strip never wraps to a second -->
 <html lang="he" dir="rtl">
 <head>
 <meta charset="UTF-8" />
@@ -141,9 +141,29 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background:
   border:1.5px solid var(--border);background:#fff;color:var(--muted);cursor:pointer}
 .msfoot button:hover{border-color:var(--teal2);color:var(--teal)}
 .msnone{padding:14px 11px;font-size:13px;color:var(--muted);text-align:center}
-.tags{display:flex;flex-wrap:wrap;gap:7px;margin-top:13px}
+/* CLS on INTERACTION, Ian 2026-08-01. The load-time fixes in 08-01h left the page steady
+   until you touched a filter, and then it drifted again. Cause: this strip.
+   It was 0px with no filters, 29px once a chip appeared, and 65px as soon as the chips
+   wrapped to a second row, pushing #count and the whole #view list down by that much every
+   time. Measured on the live page as a real scored shift of 0.0159 per change with
+   hadRecentInput false, so it counts, and it accumulates across a filtering session.
+   Two parts, both needed:
+   - min-height reserves one chip row permanently, so no-filters to one-filter moves
+     nothing. The cost is a 29px blank strip in the default unfiltered state, which is the
+     deliberate trade: you cannot have both zero movement and zero reserved space.
+   - nowrap plus overflow-x stops a second row ever forming, which was the larger 36px
+     jump. Extra chips scroll sideways instead, the usual chip-row pattern.
+   .tag2 carries an explicit line-height so that 29px is exact and cannot drift if Heebo
+   fails to load and a fallback with different metrics takes over, and flex:0 0 auto so
+   chips keep their width in the nowrap row instead of squashing.
+   If you restyle .tag2 padding, font-size or line-height, re-measure and update the
+   min-height here to match, or the jump comes back. */
+.tags{display:flex;flex-wrap:nowrap;overflow-x:auto;gap:7px;margin-top:13px;
+  min-height:29px;align-items:center;scrollbar-width:none}
+.tags::-webkit-scrollbar{display:none}
 .tag2{display:inline-flex;align-items:center;gap:6px;background:#eaf7f9;border:1.5px solid var(--teal2);
-  color:var(--teal);border-radius:999px;padding:4px 11px;font-size:13px;font-weight:600;max-width:290px}
+  color:var(--teal);border-radius:999px;padding:4px 11px;font-size:13px;line-height:18px;font-weight:600;
+  max-width:290px;flex:0 0 auto}
 .tag2 .tx{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .tag2 button{border:0;background:none;color:var(--teal);font-size:16px;line-height:1;cursor:pointer;padding:0}
 .tag2 button:hover{color:var(--low)}
