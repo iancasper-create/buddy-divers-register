@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-LBLAH 2026-08-01n | detail-panel gallery images given a fixed 225px width: they are lazy, carried height but no width, and their natural widths differ, so each one popping in reflowed the boat detail panel on slow connections -->
+<!-- BD-LBLAH 2026-08-01o | detail-panel gallery images were loading="lazy" inside .dbody, which is its own scroll container, so they never loaded until the user dragged: lazy removed from all three detail galleries (card thumbnails in the results list keep it). Gallery images also given a fixed 225px width so the row reserves its space before the bytes arrive -->
 <html lang="he" dir="rtl">
 <head>
 <meta charset="UTF-8" />
@@ -239,7 +239,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background:
 
 .gal{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin-bottom:14px}
 /* CLS inside the departure detail panel, Ian 2026-08-01 ("still moves when i open a boat
-   page"). These 24-odd gallery images are loading="lazy" and carried a height but NO width,
+   page"). These 24-odd gallery images carried a height but NO width,
    and they are not uniform: their natural sizes come back 225x150, 157x150 and so on. So
    until each one decoded the browser could not know how wide it would be, laid it out at
    zero, then snapped the flex row open as it arrived. On a fast connection they all land
@@ -249,7 +249,22 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background:
    already here, so a photo that is not 3:2 crops rather than distorts, and the strip now
    reads as a uniform row instead of a ragged one. 225x150 is 3:2, matching the aspect-ratio
    already used on the card thumbnails.
-   .cabthumbs img next to this already sets both width and height and was never the problem. */
+   .cabthumbs img next to this already sets both width and height and was never the problem.
+
+   SECOND, SEPARATE BUG found while verifying the above, and the bigger one: the detail
+   panel's images also carried loading="lazy" and were NOT LOADING AT ALL. Measured on the
+   live page: gallery in the viewport, panel open, 12 images, zero complete after 7 seconds,
+   while the same URL fetched directly returned 800x533 instantly. The cause is .dbody a few
+   lines up, which is its own scroll container (max-height + overflow-y:auto). Lazy loading
+   resolves against the document viewport, so images inside a nested scroller can be deferred
+   and then never re-evaluated until something scrolls, which is why Ian only saw them appear
+   once he dragged. That is also why the panel looked like it was still moving: it was not
+   reflowing, the pictures were arriving late.
+   loading="lazy" is therefore removed from all three detail-panel galleries (boat photos,
+   cabin thumbs, route photos). They are ~24 images on a panel the user deliberately opened,
+   so eager is correct.
+   DO NOT remove lazy from the card thumbnails in the results list: that is a different
+   emission, roughly 400 images, and lazy is load-bearing there. */
 .gal img{height:150px;width:225px;border-radius:10px;flex:0 0 auto;object-fit:cover;cursor:zoom-in;background:var(--light)}
 .kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:9px;margin-bottom:8px}
 .kv div{background:var(--light);border-radius:9px;padding:8px 11px}
@@ -967,7 +982,7 @@ function open_(i){
 
   let h='';
   if(b.photos&&b.photos.length)
-    h+='<div class="gal">'+b.photos.map(p=>'<img loading="lazy" src="'+esc(p)+'" alt="" />').join('')+'</div>';
+    h+='<div class="gal">'+b.photos.map(p=>'<img decoding="async" src="'+esc(p)+'" alt="" />').join('')+'</div>';
 
   h+='<div class="kv">'
    +kv('יציאה',d3(t.start),1)+kv('חזרה',d3(t.end),1)
@@ -1007,7 +1022,7 @@ function open_(i){
        +(bc.spec&&bc.spec.length?'<span class="marg">'+esc((bc.spec.find(s=>s[0]==='מיקום סיפון')||['',''])[1])+'</span>':'')
        +(share?'<span class="cabflag">'+share+'</span>':'')
        +(bc.photos&&bc.photos.length?'<div class="cabthumbs">'
-          +bc.photos.slice(0,3).map(p=>'<img loading="lazy" src="'+esc(p)+'" alt="" />').join('')+'</div>':'')
+          +bc.photos.slice(0,3).map(p=>'<img decoding="async" src="'+esc(p)+'" alt="" />').join('')+'</div>':'')
        +'</td>'
        +'<td>'+(c.price?'<b dir="ltr">'+esc(money(c.price,t.currency))+'</b>'
                        :'<b class="onreq">לפי בקשה</b>')
@@ -1080,7 +1095,7 @@ function open_(i){
   if(R){
     h+='<div class="sec"><h3>המסלול</h3>';
     if(R.photos&&R.photos.length)
-      h+='<div class="gal">'+R.photos.map(p=>'<img loading="lazy" src="'+esc(p)+'" alt="" />').join('')+'</div>';
+      h+='<div class="gal">'+R.photos.map(p=>'<img decoding="async" src="'+esc(p)+'" alt="" />').join('')+'</div>';
     if(R.teaser) h+='<div class="prose" style="font-weight:700;margin-bottom:6px">'+esc(R.teaser)+'</div>';
     if(R.summary) h+='<div class="prose">'+esc(R.summary)+'</div>';
     h+=areaChips(t);
