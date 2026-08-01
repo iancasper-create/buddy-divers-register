@@ -1,11 +1,23 @@
 <!DOCTYPE html>
-<!-- BD-LBLAH 2026-08-01g | price sanity guard in build_lah.py drops departures priced outside 0.2x-5.0x their own boat's median, removing DAMAI I at $720,020 and two Aqua Tiki III rows at a tenth of the real fare -->
+<!-- BD-LBLAH 2026-08-01h | CLS fixes after Cloudflare Web Analytics showed it the worst of the three vitals: logo box reserved via intrinsic width/height plus aspect-ratio (it was pushing the whole page down 78px on load), h1 min-height reserved so the Raleway swap stops moving content, font preconnect added, stats counters given a min-width -->
 <html lang="he" dir="rtl">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Liveaboard Finder | Buddy-Divers</title>
 <link rel="icon" type="image/jpeg" href="https://res.cloudinary.com/dccbsfte0/image/upload/v1774016253/logo2_swvqfe.jpg" />
+<!-- CLS, cause 2 of 3 (2026-08-01, Cloudflare Web Analytics showed CLS clearly the worst of the
+     three vitals). display=swap literally instructs the browser to paint a fallback and then
+     re-paint in Heebo/Raleway, and the h1 is Raleway 800 at up to 74px, so that second paint
+     shoves the whole page down. Kept as swap on purpose - display=optional would stop the shift
+     but would show the fallback font to most first-time visitors, and the wordmark is brand.
+     Instead the fonts are made to ARRIVE sooner (preconnect saves a DNS + TLS round trip to a
+     second origin, gstatic, that is not discovered until the CSS above has already parsed) and
+     the space they will occupy is reserved in .header h1 below, so the swap no longer moves
+     anything. crossorigin on the gstatic hint is required: fonts are fetched in CORS mode and
+     without it the browser opens a second, unused connection. -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&family=Raleway:wght@600;700;800&display=swap" rel="stylesheet" />
 <style>
 :root{--teal:#007289;--teal2:#009495;--orange:#F5A623;--navy:#1B4F8A;--dark:#0d2a3a;
@@ -21,14 +33,30 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background:
 
 
 .header{text-align:center;padding:22px 16px 26px}
-.header .logo{display:block;margin:0 auto 12px;width:300px;max-width:78%;height:auto}
+/* CLS, cause 1 of 3 and the largest. The logo is 2216x576 and renders 78px tall at the 300px
+   width below, but nothing told the browser that until the PNG came back from Cloudinary, so it
+   reserved zero height and then pushed EVERY element on the page down 78px when the image
+   landed. aspect-ratio holds the box open from first paint. It has to be stated here as well as
+   in the width/height attributes on the tag, because this rule overrides width and the attribute
+   ratio alone stops applying cleanly once max-width kicks in on a narrow phone. */
+.header .logo{display:block;margin:0 auto 12px;width:300px;max-width:78%;height:auto;
+  aspect-ratio:2216/576}
+/* CLS, cause 2 of 3, the reservation half of the font fix at the top of this file. min-height is
+   the SAME clamp as font-size multiplied by the 1.05 line-height, so the heading block is the
+   right height before Raleway arrives and the swap repaints text inside a box that no longer
+   moves. Any change to font-size or line-height must be mirrored here or the shift returns. */
 .header h1{font-family:'Raleway',sans-serif;font-size:clamp(42px,7vw,74px);font-weight:800;
-  color:#fff;letter-spacing:-1.5px;direction:ltr;line-height:1.05}
+  color:#fff;letter-spacing:-1.5px;direction:ltr;line-height:1.05;
+  min-height:clamp(44.1px,7.35vw,77.7px)}
 .header h1 span{color:var(--orange)}
 .header p{color:#bcd7e0;margin-top:10px;font-size:clamp(15px,2vw,19px);font-weight:300}
 .stamp{margin-top:16px;display:inline-flex;gap:16px;flex-wrap:wrap;justify-content:center;
   background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);border-radius:999px;padding:8px 20px}
-.stamp b{color:var(--orange);font-weight:700}
+/* CLS, cause 3 of 3 and the smallest. The three counters ship as &nbsp; and are filled by JS on
+   load, so the pill was sized for three blank spaces and then resized when "100", "10,079" and
+   "22" appeared. min-width holds the widest of them (5 characters, 10,079) from first paint.
+   inline-block is what makes min-width apply to a <b> at all. */
+.stamp b{color:var(--orange);font-weight:700;display:inline-block;min-width:4.2em;text-align:center}
 .stamp span{color:#cfe3ea;font-size:13.5px}
 
 
@@ -289,7 +317,7 @@ table.cab tr.sold td{opacity:.45}
 
   <div class="header">
     <img class="logo" src="https://res.cloudinary.com/dccbsfte0/image/upload/logo_hnmilh"
-         width="420" alt="Buddy-Divers" />
+         width="2216" height="576" alt="Buddy-Divers" />
     <h1>Liveaboard <span>Finder</span></h1>
     <p>כל הפלגות הצלילה. כל היעדים. במקום אחד.</p>
     <div class="stamp">
