@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-LBLAH 2026-08-01j | מיון pinned to 150px instead of a 1.4fr track that took 298px and starved the search box, so the חיפוש חופשי placeholder now reads in full on every desktop width; desktop breakpoint raised 1050 to 1200, the measured point below which that row can no longer fit it -->
+<!-- BD-LBLAH 2026-08-01k | row 1 facets sized by real content (אזור צלילה 275->470px, its longest dive area was truncating; לילות 275->121px, it never holds more than "17 לילות"); on mobile search and נקה סינון are a flex row so the button takes only its natural width; search placeholder shortened, "(עברית או אנגלית)" dropped after יעד so it reads in full on a phone -->
 <html lang="he" dir="rtl">
 <head>
 <meta charset="UTF-8" />
@@ -65,7 +65,22 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background:
    bar with odd gaps. Two rows only, Ian 2026-08-01.
    Row 1 = the deals toggle on a narrow auto track, then the four facets.
    Row 2 = the six date fields, search, sort, and clear at the far end. */
-.controls{display:grid;grid-template-columns:auto repeat(4,1fr);gap:12px;align-items:end}
+/* The four facets are NOT equal widths, Ian 2026-08-01, because their contents are not
+   remotely equal. Every track below is sized from the widest value the control can
+   actually display, measured at 14px Heebo with 18px added for the arrow:
+
+     יעד          22 countries    "Turks and Caicos Islands"          157px -> needs 175
+     ספינה       100 boats        "Sea Serpent Glorious Miss Nouran"  214px -> needs 232
+     אזור צלילה   80 dive areas   "Maldives: Far Northern Atolls (..)" 424px -> needs 442
+     לילות        2 to 17 only    "מספר לילות" placeholder             69px -> needs  87
+
+   That is 936px of real need against 1142px of track at 1440px wide, so everything fits
+   comfortably once the space is split by need instead of equally. At 1fr each they all
+   got 275px, which truncated the Maldives area names while wasting 190px on a box that
+   never holds more than "17 לילות". The ratios below land on roughly 237 / 292 / 487 /
+   125, every one clearing its longest value with 38px or more to spare.
+   Re-measure these if the fleet gains a longer boat name or a longer dive area. */
+.controls{display:grid;grid-template-columns:auto .85fr 1.05fr 1.75fr .45fr;gap:12px;align-items:end}
 .controls>.dealbtn{margin-bottom:0}
 /* מיון is a fixed 150px, not a fraction, Ian 2026-08-01. Its widest option is
    "מקומות פנויים" at 83px of text, so 150px covers it with the arrow and padding and
@@ -78,6 +93,12 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background:
    select holds "1".."31", a year "2026".."2031". Sized to the text instead, which is
    what frees the width for search and sort to come up onto this row. */
 .controls .row2 .dates6{display:grid;grid-template-columns:repeat(2,58px 94px 74px);gap:8px}
+/* On desktop the search wrapper dissolves so its two children sit directly in the row 2
+   grid as before. DOM order is search then נקה סינון, but the desktop row wants מיון
+   between them, hence the order values. */
+.controls .row2 .searchrow{display:contents}
+.controls .row2 .sortfld{order:2}
+.controls .row2 #clr{order:3}
 .fld{display:flex;flex-direction:column;gap:5px;min-width:0}
 .fld label{font-size:12px;font-weight:600;color:var(--muted)}
 .fld select,.fld input{font-family:inherit;font-size:14px;padding:9px 11px;border:1.5px solid var(--border);
@@ -313,7 +334,7 @@ table.cab tr.sold td{opacity:.45}
  .controls>.dealbtn{grid-column:1/-1;justify-content:center}
  .controls .row2{grid-template-columns:1fr 1.4fr auto}
  .controls .row2>.dates6{grid-column:1/-1;grid-template-columns:repeat(6,1fr)}
- .controls .row2>#clr{align-self:end;white-space:nowrap}}
+ .controls .row2 #clr{align-self:end;white-space:nowrap}}
 @media(max-width:820px){.lst{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:620px){
  .lst{grid-template-columns:repeat(2,1fr);gap:10px}
@@ -334,9 +355,18 @@ table.cab tr.sold td{opacity:.45}
  .controls>#msNights{grid-column:span 2;order:5}
  .controls .row2>.sortfld{grid-column:span 2;order:6}
  .controls .row2>.dates6{grid-column:1/-1;order:7;grid-template-columns:repeat(3,1fr)}
- .controls .row2>.searchfld{grid-column:span 3;order:8}
- .controls .row2>#clr{grid-column:span 1;order:9;align-self:end;
-   padding:9px 4px;font-size:13px;white-space:nowrap}
+ /* Search and נקה סינון become a flex row rather than two grid cells, Ian 2026-08-01.
+    As grid cells the button held a whole 1/4 track (73px) when its text only needs 61px,
+    and the input could not claim the difference. In flex the button is flex:none at its
+    natural width and the input takes literally everything else.
+    On its own this is only a 12px win. What made the field actually readable on a phone
+    was Ian shortening the placeholder itself: dropping "(עברית או אנגלית)" after יעד took
+    it from 342px to well inside the row. יעד still accepts either language, the hint was
+    just costing more than it was worth on a 390px screen. */
+ .controls .row2>.searchrow{grid-column:1/-1;order:8;display:flex;gap:8px;align-items:flex-end}
+ .controls .row2>.searchrow>.searchfld{flex:1 1 auto;min-width:0}
+ .controls .row2>.searchrow>#clr{flex:0 0 auto;align-self:flex-end;
+   padding:9px 8px;font-size:13px;white-space:nowrap}
  .row h3{font-size:13.5px}
  .row .rt{font-size:11.5px}
  .pr{font-size:14px}
@@ -386,8 +416,15 @@ table.cab tr.sold td{opacity:.45}
           <div class="fld"><label for="fToM">חודש</label><select id="fToM"></select></div>
           <div class="fld"><label for="fToY">שנה</label><select id="fToY"></select></div>
         </div>
-        <div class="fld searchfld"><label for="fText">חיפוש חופשי</label>
-          <input type="text" id="fText" placeholder="יעד (עברית או אנגלית), ספינה (אנגלית), מסלול (אנגלית)" /></div>
+        <!-- search and נקה סינון are wrapped so that on mobile they can be a flex row where
+             the button takes its natural width and the input absorbs everything else. On
+             desktop the wrapper is display:contents and the two behave as independent grid
+             items again, with order putting מיון back between them. -->
+        <div class="searchrow">
+          <div class="fld searchfld"><label for="fText">חיפוש חופשי</label>
+            <input type="text" id="fText" placeholder="יעד, ספינה (אנגלית), מסלול (אנגלית)" /></div>
+          <button class="btn" id="clr">נקה סינון</button>
+        </div>
         <div class="fld sortfld"><label for="fSort">מיון</label>
           <select id="fSort">
             <option value="date">תאריך</option>
@@ -397,7 +434,6 @@ table.cab tr.sold td{opacity:.45}
             <option value="spots">מקומות פנויים</option>
           </select>
         </div>
-        <button class="btn" id="clr">נקה סינון</button>
       </div>
     </div>
     <div class="tags" id="tags"></div>
