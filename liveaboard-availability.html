@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-LBLAH 2026-08-01e | whole booking disclaimer bold, not only the flights line; Apple CSS stripped from 7 route descriptions -->
+<!-- BD-LBLAH 2026-08-01f | Cloudflare Web Analytics beacon added, so Finder traffic and referrers are measurable -->
 <html lang="he" dir="rtl">
 <head>
 <meta charset="UTF-8" />
@@ -1129,5 +1129,12 @@ $('zoom').onclick=()=>$('zoom').classList.remove('on');
 render();
 if(wantedTrip){const i=TRIPS.findIndex(t=>t.uid===wantedTrip);if(i>=0)open_(i);}
 </script>
+
+<!-- Cloudflare Web Analytics. Cookieless and collects no personal data, so the page needs
+     no consent banner. The token is not a secret: it ships in the page source to every
+     visitor. Lives HERE in the template, never in the built file, which the 07:00 cron
+     overwrites every morning. -->
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js"
+  data-cf-beacon='{"token": "5bf3aefa255a412e818499fae14f54d1"}'></script>
 </body>
 </html>
