@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-LBLAH 2026-08-01h | CLS fixes after Cloudflare Web Analytics showed it the worst of the three vitals: logo box reserved via intrinsic width/height plus aspect-ratio (it was pushing the whole page down 78px on load), h1 min-height reserved so the Raleway swap stops moving content, font preconnect added, stats counters given a min-width -->
+<!-- BD-LBLAH 2026-08-01i | filter panel reworked to Ian's spec, deals first. Desktop: toggle relabelled הצג רק מבצעים חמים and moved to the start of row 1, date fields sized to their contents so search and sort come up onto row 2, נקה סינון at the far end, two rows instead of three. Mobile: deals alone on top, לילות paired with מיון, חיפוש חופשי paired with a narrow נקה סינון, ten stacked blocks down to eight. העתק קישור button removed (deep links themselves still work) -->
 <html lang="he" dir="rtl">
 <head>
 <meta charset="UTF-8" />
@@ -62,16 +62,17 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background:
 
 .panel{background:var(--card);border-radius:16px;padding:18px;margin-bottom:14px;box-shadow:0 10px 34px rgba(0,0,0,.28)}
 /* Fixed tracks rather than flex-wrap: 12 controls free-flowing produced a ragged
-   bar with odd gaps. Row 1 = the four facets, row 2 = dates and search. */
-.controls{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;align-items:end}
-.controls .dates6{grid-column:1/-1;display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
-/* Row 3: search and sort on the start side, the three action controls on the end
-   side. 2fr/2fr/auto keeps the buttons at their natural width so they never
-   stretch, while the two inputs share what is left. */
-.controls .row5{grid-column:1/-1;display:grid;grid-template-columns:2fr 1.4fr auto;gap:10px;
+   bar with odd gaps. Two rows only, Ian 2026-08-01.
+   Row 1 = the deals toggle on a narrow auto track, then the four facets.
+   Row 2 = the six date fields, search, sort, and clear at the far end. */
+.controls{display:grid;grid-template-columns:auto repeat(4,1fr);gap:12px;align-items:end}
+.controls>.dealbtn{margin-bottom:0}
+.controls .row2{grid-column:1/-1;display:grid;grid-template-columns:auto 2fr 1.4fr auto;gap:10px;
   align-items:end;border-top:1px solid var(--border);padding-top:13px;margin-top:2px}
-.controls .row5 .acts{flex-direction:row;align-items:center;gap:8px;flex-wrap:wrap}
-.controls .row5 .acts .dealbtn{margin-bottom:0}
+/* The six date fields were 1fr each and enormously wider than their contents: a day
+   select holds "1".."31", a year "2026".."2031". Sized to the text instead, which is
+   what frees the width for search and sort to come up onto this row. */
+.controls .row2 .dates6{display:grid;grid-template-columns:repeat(2,58px 94px 74px);gap:8px}
 .fld{display:flex;flex-direction:column;gap:5px;min-width:0}
 .fld label{font-size:12px;font-weight:600;color:var(--muted)}
 .fld select,.fld input{font-family:inherit;font-size:14px;padding:9px 11px;border:1.5px solid var(--border);
@@ -132,9 +133,6 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background:
 .dealbtn .dn{background:rgba(178,106,0,.14);border-radius:999px;font-size:11.5px;
   font-weight:700;padding:1px 7px}
 .dealbtn.on .dn{background:rgba(255,255,255,.28)}
-.btn.link{color:var(--teal)}
-.btn.link:hover{border-color:var(--teal);color:var(--teal)}
-.btn.link.done{background:var(--teal);border-color:var(--teal);color:#fff}
 .count{color:#cfe3ea;font-size:14px;margin:0 4px 12px;font-weight:500}
 .count b{color:var(--orange)}
 
@@ -295,17 +293,38 @@ table.cab tr.sold td{opacity:.45}
  box-shadow:0 6px 20px rgba(37,211,102,.35)}
 .wa svg{width:18px;height:18px;fill:currentColor}
 .foot{text-align:center;color:#8fb0bd;font-size:12.5px;margin-top:22px;line-height:1.9}
+/* Tablet: two facets per row, the deals toggle spanning above them, and row 2 relaxed
+   back to flexible date tracks since the fixed desktop widths only need to be tight
+   enough to free space for search and sort, which no longer share the row here. */
 @media(max-width:1050px){
- .controls{grid-template-columns:repeat(2,1fr)}}
+ .controls{grid-template-columns:repeat(2,1fr)}
+ .controls>.dealbtn{grid-column:1/-1;justify-content:center}
+ .controls .row2{grid-template-columns:1fr 1.4fr auto}
+ .controls .row2>.dates6{grid-column:1/-1;grid-template-columns:repeat(6,1fr)}
+ .controls .row2>#clr{align-self:end;white-space:nowrap}}
 @media(max-width:820px){.lst{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:620px){
  .lst{grid-template-columns:repeat(2,1fr);gap:10px}
- .controls{grid-template-columns:1fr}
  .kv{grid-template-columns:1fr 1fr}
- .controls .dates6{grid-template-columns:repeat(3,1fr)}
- .controls .row5{grid-template-columns:1fr}
- .controls .row5 .acts{display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:stretch}
- .controls .row5 .acts .dealbtn{grid-column:1/-1;justify-content:center}
+ /* Mobile order, specified by Ian 2026-08-01: deals alone at the top, then the three
+    full-width facets, then לילות paired with מיון, then the dates, then חיפוש חופשי with
+    a deliberately small נקה סינון beside it. Ten stacked blocks become eight.
+    .row2 is flattened to display:contents so its children can be reordered into that
+    sequence; they are otherwise stuck below the dates and cannot pair with anything
+    above. Four tracks rather than two so the last row can be split 3:1 and give the
+    search box the width instead of halving it. */
+ .controls{grid-template-columns:repeat(4,1fr);gap:10px}
+ .controls .row2{display:contents}
+ .controls>.dealbtn{grid-column:1/-1;order:1;justify-content:center}
+ .controls>#msDest{grid-column:1/-1;order:2}
+ .controls>#msBoat{grid-column:1/-1;order:3}
+ .controls>#msItin{grid-column:1/-1;order:4}
+ .controls>#msNights{grid-column:span 2;order:5}
+ .controls .row2>.sortfld{grid-column:span 2;order:6}
+ .controls .row2>.dates6{grid-column:1/-1;order:7;grid-template-columns:repeat(3,1fr)}
+ .controls .row2>.searchfld{grid-column:span 3;order:8}
+ .controls .row2>#clr{grid-column:span 1;order:9;align-self:end;
+   padding:9px 4px;font-size:13px;white-space:nowrap}
  .row h3{font-size:13.5px}
  .row .rt{font-size:11.5px}
  .pr{font-size:14px}
@@ -330,24 +349,34 @@ table.cab tr.sold td{opacity:.45}
 
   <div class="panel">
     <div class="controls">
+      <!-- Deals first, Ian 2026-08-01: this market responds to deals, so the toggle leads the
+           panel instead of sitting last. On desktop it takes the narrow auto track at the start
+           of row 1; on mobile it gets a line of its own above everything. -->
+      <button type="button" class="dealbtn" id="fDeal">
+        <span class="bx" id="dealBx"></span> הצג רק מבצעים חמים
+      </button>
       <div class="fld" id="msDest"></div>
       <div class="fld" id="msBoat"></div>
       <div class="fld" id="msItin"></div>
       <div class="fld" id="msNights"></div>
 
-      <div class="fld dates6">
-        <div class="fld"><label for="fFromD">מיום</label><select id="fFromD"></select></div>
-        <div class="fld"><label for="fFromM">חודש</label><select id="fFromM"></select></div>
-        <div class="fld"><label for="fFromY">שנה</label><select id="fFromY"></select></div>
-        <div class="fld"><label for="fToD">עד יום</label><select id="fToD"></select></div>
-        <div class="fld"><label for="fToM">חודש</label><select id="fToM"></select></div>
-        <div class="fld"><label for="fToY">שנה</label><select id="fToY"></select></div>
-      </div>
-
-      <div class="row5">
-        <div class="fld"><label for="fText">חיפוש חופשי</label>
+      <!-- Row 2 holds the dates, search, sort and clear. On mobile this wrapper becomes
+           display:contents so its children can be reordered into Ian's mobile sequence -
+           without that, מיון and נקה סינון are trapped below the dates and cannot pair with
+           לילות and חיפוש חופשי. The classes on the two .fld children exist to be targeted
+           there; do not remove them. -->
+      <div class="row2">
+        <div class="fld dates6">
+          <div class="fld"><label for="fFromD">מיום</label><select id="fFromD"></select></div>
+          <div class="fld"><label for="fFromM">חודש</label><select id="fFromM"></select></div>
+          <div class="fld"><label for="fFromY">שנה</label><select id="fFromY"></select></div>
+          <div class="fld"><label for="fToD">עד יום</label><select id="fToD"></select></div>
+          <div class="fld"><label for="fToM">חודש</label><select id="fToM"></select></div>
+          <div class="fld"><label for="fToY">שנה</label><select id="fToY"></select></div>
+        </div>
+        <div class="fld searchfld"><label for="fText">חיפוש חופשי</label>
           <input type="text" id="fText" placeholder="יעד (עברית או אנגלית), ספינה (אנגלית), מסלול (אנגלית)" /></div>
-        <div class="fld"><label for="fSort">מיון</label>
+        <div class="fld sortfld"><label for="fSort">מיון</label>
           <select id="fSort">
             <option value="date">תאריך</option>
             <option value="price">מחיר, מהזול</option>
@@ -356,13 +385,7 @@ table.cab tr.sold td{opacity:.45}
             <option value="spots">מקומות פנויים</option>
           </select>
         </div>
-        <div class="fld acts">
-          <button type="button" class="dealbtn" id="fDeal">
-            <span class="bx" id="dealBx"></span> הציגו לי רק את המבצעים החמים
-          </button>
-          <button class="btn" id="clr">נקה סינון</button>
-          <button class="btn link" id="cpy" title="העתקת קישור לתצוגה הנוכחית">העתק קישור</button>
-        </div>
+        <button class="btn" id="clr">נקה סינון</button>
       </div>
     </div>
     <div class="tags" id="tags"></div>
@@ -1135,13 +1158,10 @@ $('clr').onclick=()=>{
   S.from=DEF_FROM;S.to=DEF_TO;S.sort='date';S.text='';S.deal=false;
   syncMonthUI();$('fSort').value='date';$('fText').value='';
   Object.keys(MS).forEach(k=>MS[k].close());render();};
-$('cpy').onclick=function(){
-  const btn=this,url=location.href;
-  const done=()=>{btn.classList.add('done');btn.textContent='הקישור הועתק';
-    setTimeout(()=>{btn.classList.remove('done');btn.textContent='העתק קישור';},1800);};
-  if(navigator.clipboard&&navigator.clipboard.writeText)
-    navigator.clipboard.writeText(url).then(done).catch(()=>prompt('העתיקו את הקישור:',url));
-  else prompt('העתיקו את הקישור:',url);};
+/* The copy-link button was removed 2026-08-01 at Ian's request, and its handler with it.
+   The shareable deep links themselves are NOT gone: readUrl() and the ?trip= / ?dest= /
+   ?deals=1 parameters still work, so every link already sent stays live. There is simply
+   no longer a control on the page that builds one for you. */
 
 const wantedTrip=readUrl();
 syncMonthUI();$('fSort').value=S.sort;$('fText').value=S.text;
