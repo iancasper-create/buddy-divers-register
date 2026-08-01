@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-REG 2026-07-27a | New trip 261111 added (North Sulawesi resorts: Coral Eye 11-16/11 + Siladen 16-21/11 2026), single flat EUR 3,429 per person, no room options or addons -->
+<!-- BD-REG 2026-08-01a | iOS auto-zoom fixed: form fields were 14px (date inputs 13px on small screens), under Safari's 16px threshold, so focusing any field zoomed the page in and left it there. Typable fields now 16px on touch devices and screens up to 1024px; desktop unchanged -->
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8" />
@@ -151,6 +151,29 @@
         padding: 11px 14px;
         line-height: normal;
       }
+    }
+    /* iOS auto-zoom, Ian 2026-08-01: "it moves after loading by pinching and sticks,
+       difficult to get back to full screen on mobile."
+       Not a layout bug and nothing to do with the CLS work on the Finder. Safari on iOS
+       zooms the page in whenever a form field is focused and its font-size is under 16px,
+       and it does NOT zoom back out when the field is left. 53 typable fields on this form
+       were at 14px, and the date inputs above were made 13px on small screens, so every tap
+       on a field zoomed the page and left it there. The user is then stuck pinching to get
+       back, which never quite restores the original fit.
+       16px is Safari's threshold, not a design choice: at 16px or above it does not zoom at
+       all. Applied on touch devices and small screens rather than globally so the desktop
+       form keeps its 14px look.
+       pointer:coarse is deliberate alongside the width query - a large phone in landscape is
+       over 900px wide and would slip past a width-only rule while still being iOS.
+       Checkboxes and radios are excluded: they never trigger the zoom and their size is not
+       driven by font-size.
+       DO NOT lower any of these back under 16px. */
+    @media (max-width:1024px), (pointer:coarse) {
+      .field input:not([type=checkbox]):not([type=radio]),
+      .field select,
+      .field textarea,
+      .field input[type=date],
+      .phone-number-input { font-size: 16px; }
     }    .field input::placeholder { color:#b0c4cc; }
     .field textarea { resize:vertical; min-height:80px; }
     .field select { appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23007289' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:left 12px center; padding-left:32px; }

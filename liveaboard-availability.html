@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-LBLAH 2026-08-01o | detail-panel gallery images were loading="lazy" inside .dbody, which is its own scroll container, so they never loaded until the user dragged: lazy removed from all three detail galleries (card thumbnails in the results list keep it). Gallery images also given a fixed 225px width so the row reserves its space before the bytes arrive -->
+<!-- BD-LBLAH 2026-08-01p | iOS auto-zoom: all eight filter controls were 14px, under Safari's 16px threshold, so tapping any of them zoomed the page in and left it there. Raised to 16px below the 1200px breakpoint only, since the desktop date tracks are measured against 14px text -->
 <html lang="he" dir="rtl">
 <head>
 <meta charset="UTF-8" />
@@ -103,6 +103,27 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background:
 .fld label{font-size:12px;font-weight:600;color:var(--muted)}
 .fld select,.fld input{font-family:inherit;font-size:14px;padding:9px 11px;border:1.5px solid var(--border);
  border-radius:9px;background:#fff;color:var(--text);width:100%;min-width:0}
+/* iOS auto-zoom. Found 2026-08-01 while diagnosing the same fault on the registration form,
+   where Ian described it as "moves after loading by pinching and sticks, difficult to get
+   back to full screen". Safari on iOS zooms the page in whenever a form field is focused and
+   its font-size is under 16px, and does NOT zoom back out when the field is left. All eight
+   controls here, the six date selects plus search and sort, were at 14px, so every tap on a
+   filter zoomed the page and stranded it there.
+   16px is Safari's threshold, not a design choice.
+   The cutoff is 1200px, matching the desktop breakpoint below, and that is deliberate: above
+   it the two-row desktop layout uses date tracks measured against 14px text (58/94/74px). At
+   16px "אוקטובר" needs about 100px and would overflow the 94px month box. So 16px applies
+   only where the flexible tablet/mobile layout is active and the tracks can absorb it.
+   A width query rather than pointer:coarse for the same reason: coarse would fire on a
+   touch-screen laptop at 1440px and break those measured tracks. 1200px still covers every
+   iPhone in both orientations, the largest being about 932px wide in landscape.
+   Known gap, accepted: an iPad Pro in landscape at 1366px is touch but sits above the
+   cutoff, so it will still zoom on tap. Fixing that means widening the desktop date tracks
+   for 16px text and re-deriving the 1200px breakpoint above.
+   DO NOT lower these back under 16px. */
+@media (max-width:1200px){
+ .fld select,.fld input{font-size:16px}
+}
 .tog{display:flex;align-items:center;gap:7px;font-size:14px;font-weight:600;color:var(--text);
  cursor:pointer;padding-bottom:9px;white-space:nowrap}
 .tog input{width:17px;height:17px;accent-color:var(--teal);cursor:pointer}
