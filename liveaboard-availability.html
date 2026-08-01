@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-LBLAH 2026-08-01b | free-search placeholder names the language each field accepts; search and sort widths swapped -->
+<!-- BD-LBLAH 2026-08-01c | end-date default follows the last departure in the data, so it tracks the harvest with no commit -->
 <html lang="he" dir="rtl">
 <head>
 <meta charset="UTF-8" />
@@ -420,10 +420,14 @@ const D0=ALLDATES[0], D1=ALLDATES[ALLDATES.length-1];
 const iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')
              +'-'+String(d.getDate()).padStart(2,'0');
 const clampD=d=>d<D0?D0:(d>D1?D1:d);
-/* Default view: today through the end of 2026 rather than to whenever the feed
-   happens to stop, which was 2030 and opened on four years at once. */
+/* Default view: today through D1, the last departure in the data. D1 is derived from
+   TRIPS in the browser on every page load, so the default follows the harvest by itself
+   and never needs a commit or a hard-coded year to be maintained. It was previously
+   pinned to 2026-12-31 to avoid opening on four years at once; that concern is handled
+   by CAP instead, which renders 400 cards and says how many more matched. Sorted by
+   date, so the nearest departures still come first. */
 const TODAY=iso(new Date());
-const DEF_FROM=clampD(TODAY), DEF_TO=clampD('2026-12-31');
+const DEF_FROM=clampD(TODAY), DEF_TO=D1;
 S.from=DEF_FROM; S.to=DEF_TO;
 const MONTHS=[];{const a=+D0.slice(0,4)*12+ +D0.slice(5,7)-1,
                        b=+D1.slice(0,4)*12+ +D1.slice(5,7)-1;
