@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-LBLAH 2026-08-01c | end-date default follows the last departure in the data, so it tracks the harvest with no commit -->
+<!-- BD-LBLAH 2026-08-01d | booking disclaimer promoted from a footnote beside the heading to a red callout, flights warning in bold -->
 <html lang="he" dir="rtl">
 <head>
 <meta charset="UTF-8" />
@@ -233,14 +233,12 @@ table.cab tr.sold td{opacity:.45}
  border:1.5px solid var(--teal);background:#fff;color:var(--teal);cursor:pointer;white-space:nowrap}
 .bk1:hover{background:var(--teal);color:#fff}
 .bk{margin-top:20px;border-top:2px solid var(--light);padding-top:16px}
-.bk h3 .disc{display:block;color:var(--low);font-weight:400;font-size:12.5px;
-  line-height:1.6;margin-top:5px}
-@media(min-width:760px){
-  /* Beside the header on a wide dialog, under it on a narrow one — the sentence is
-     too long to sit alongside on a phone. */
-  .bk h3{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
-  .bk h3 .disc{display:inline;margin-top:0;flex:1 1 320px}
-}
+.bk .disc{display:flex;gap:9px;align-items:flex-start;background:#fdecec;
+  border:1px solid var(--low);border-inline-start:4px solid var(--low);border-radius:9px;
+  padding:10px 12px;margin:8px 0 12px;color:#8c1d1d;font-size:13px;line-height:1.65}
+.bk .disc b{display:block;margin-top:3px;font-weight:800;color:#7a1010}
+.bk .disc .disc-i{flex:0 0 20px;height:20px;border-radius:50%;background:var(--low);color:#fff;
+  font-weight:800;font-size:13px;line-height:20px;text-align:center}
 .bk h3{font-size:15px;font-weight:800;color:var(--navy);margin-bottom:4px}
 .bk .sub{font-size:12.5px;color:var(--muted);margin-bottom:12px}
 .bkgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -1013,9 +1011,11 @@ function bookingForm(t){
   let sel='';for(let i=0;i<=12;i++)sel+=g(i);
   const cabs=t.cabins.filter(c=>c.avail);
   return '<div class="bk" id="bkBlock">'
-   +'<h3>בקשת הזמנה להפלגה הזו'
-   +'<span class="disc">המידע המוצג הוא באחריות הספינה. אישור סופי להזמנה יתקבל '
-   +'בתוך 72 שעות. אין להזמין טיסות לפני קבלת האישור הסופי.</span></h3>'
+   +'<h3>בקשת הזמנה להפלגה הזו</h3>'
+   +'<div class="disc"><span class="disc-i">!</span><div>'
+   +'המידע המוצג הוא באחריות הספינה. אישור סופי להזמנה יתקבל בתוך 72 שעות.'
+   +'<b>אין להזמין טיסות לפני קבלת האישור הסופי.</b>'
+   +'</div></div>'
    +'<div class="sub">מלאו מה שנוח לכם. הפרטים ייארזו להודעת ווטסאפ מוכנה, יחד עם פרטי ההפלגה.</div>'
    +'<div class="bkgrid">'
    +'<input type="text" id="bkFirst" placeholder="שם פרטי" />'
