@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-LBLAH 2026-08-01m | interaction CLS fixed: the active-filter chip strip went 0 to 29 to 65px as filters were added, shoving the count line and the whole results list down each time (measured 0.0159 per change, scored). One chip row is now reserved permanently and the strip never wraps to a second -->
+<!-- BD-LBLAH 2026-08-01n | detail-panel gallery images given a fixed 225px width: they are lazy, carried height but no width, and their natural widths differ, so each one popping in reflowed the boat detail panel on slow connections -->
 <html lang="he" dir="rtl">
 <head>
 <meta charset="UTF-8" />
@@ -238,7 +238,19 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background:
 .dbody{padding:16px 20px 22px;max-height:calc(100vh - 170px);overflow-y:auto}
 
 .gal{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin-bottom:14px}
-.gal img{height:150px;border-radius:10px;flex:0 0 auto;object-fit:cover;cursor:zoom-in;background:var(--light)}
+/* CLS inside the departure detail panel, Ian 2026-08-01 ("still moves when i open a boat
+   page"). These 24-odd gallery images are loading="lazy" and carried a height but NO width,
+   and they are not uniform: their natural sizes come back 225x150, 157x150 and so on. So
+   until each one decoded the browser could not know how wide it would be, laid it out at
+   zero, then snapped the flex row open as it arrived. On a fast connection they all land
+   before you notice; on phone data they pop in one at a time and the panel reflows under
+   your thumb with every one.
+   A fixed 225px width reserves the box before the bytes arrive. object-fit:cover was
+   already here, so a photo that is not 3:2 crops rather than distorts, and the strip now
+   reads as a uniform row instead of a ragged one. 225x150 is 3:2, matching the aspect-ratio
+   already used on the card thumbnails.
+   .cabthumbs img next to this already sets both width and height and was never the problem. */
+.gal img{height:150px;width:225px;border-radius:10px;flex:0 0 auto;object-fit:cover;cursor:zoom-in;background:var(--light)}
 .kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:9px;margin-bottom:8px}
 .kv div{background:var(--light);border-radius:9px;padding:8px 11px}
 .kv span{display:block;font-size:11px;color:var(--muted);font-weight:600}
