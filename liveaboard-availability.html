@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-LBLAH 2026-08-01i | filter panel reworked to Ian's spec, deals first. Desktop: toggle relabelled הצג רק מבצעים חמים and moved to the start of row 1, date fields sized to their contents so search and sort come up onto row 2, נקה סינון at the far end, two rows instead of three. Mobile: deals alone on top, לילות paired with מיון, חיפוש חופשי paired with a narrow נקה סינון, ten stacked blocks down to eight. העתק קישור button removed (deep links themselves still work) -->
+<!-- BD-LBLAH 2026-08-01j | מיון pinned to 150px instead of a 1.4fr track that took 298px and starved the search box, so the חיפוש חופשי placeholder now reads in full on every desktop width; desktop breakpoint raised 1050 to 1200, the measured point below which that row can no longer fit it -->
 <html lang="he" dir="rtl">
 <head>
 <meta charset="UTF-8" />
@@ -67,7 +67,12 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background:
    Row 2 = the six date fields, search, sort, and clear at the far end. */
 .controls{display:grid;grid-template-columns:auto repeat(4,1fr);gap:12px;align-items:end}
 .controls>.dealbtn{margin-bottom:0}
-.controls .row2{grid-column:1/-1;display:grid;grid-template-columns:auto 2fr 1.4fr auto;gap:10px;
+/* מיון is a fixed 150px, not a fraction, Ian 2026-08-01. Its widest option is
+   "מקומות פנויים" at 83px of text, so 150px covers it with the arrow and padding and
+   leaves nothing spare. As a 1.4fr track it took 298px at 1440px wide and starved the
+   search box, whose placeholder needs 342px to read in full. Search takes 1fr so every
+   pixel freed anywhere on this row goes to it. */
+.controls .row2{grid-column:1/-1;display:grid;grid-template-columns:auto 1fr 150px auto;gap:10px;
   align-items:end;border-top:1px solid var(--border);padding-top:13px;margin-top:2px}
 /* The six date fields were 1fr each and enormously wider than their contents: a day
    select holds "1".."31", a year "2026".."2031". Sized to the text instead, which is
@@ -293,10 +298,17 @@ table.cab tr.sold td{opacity:.45}
  box-shadow:0 6px 20px rgba(37,211,102,.35)}
 .wa svg{width:18px;height:18px;fill:currentColor}
 .foot{text-align:center;color:#8fb0bd;font-size:12.5px;margin-top:22px;line-height:1.9}
-/* Tablet: two facets per row, the deals toggle spanning above them, and row 2 relaxed
-   back to flexible date tracks since the fixed desktop widths only need to be tight
-   enough to free space for search and sort, which no longer share the row here. */
-@media(max-width:1050px){
+/* Breakpoint raised from 1050 to 1200 (Ian 2026-08-01) and the number is measured, not
+   picked. On this row the search box comes out at viewport minus 841px, so the 342px its
+   placeholder needs is met from 1183px up. 1200 is that floor plus ~18px of headroom,
+   deliberately: at 1183 the margin is 2px, which would not survive Heebo failing to load
+   and a fallback with wider glyphs taking over. Below the breakpoint these widths drop to
+   the layout under here, where the dates take a line of their own and search gets far
+   more room, so nothing truncates on either side of the boundary.
+   The cost is that 1050-1200px windows now show two facets per row instead of five. That
+   is the right way round: a readable placeholder beats a fifth facet on one line.
+   Recompute if the placeholder text, the date widths or the 150px מיון track change. */
+@media(max-width:1200px){
  .controls{grid-template-columns:repeat(2,1fr)}
  .controls>.dealbtn{grid-column:1/-1;justify-content:center}
  .controls .row2{grid-template-columns:1fr 1.4fr auto}
