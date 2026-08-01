@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-REG 2026-08-01a | iOS auto-zoom fixed: form fields were 14px (date inputs 13px on small screens), under Safari's 16px threshold, so focusing any field zoomed the page in and left it there. Typable fields now 16px on touch devices and screens up to 1024px; desktop unchanged -->
+<!-- BD-REG 2026-08-01b | one-finger sideways panning stopped: the document was 1px wider than the viewport (sub-pixel rounding on .bubbles and .logo-img), which is enough for iOS to allow horizontal drag. overflow-x:hidden on html and body. Also 08-01a: form fields raised to 16px so tapping one no longer triggers Safari's auto-zoom -->
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8" />
@@ -23,12 +23,29 @@
       --white: #ffffff;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
+    /* Sideways panning, Ian 2026-08-01: "placing one finger on the screen i am free to
+       move the form left and right". Measured on the live page at 390px: the document
+       scrolls to 391px, one single pixel wider than the viewport, and one pixel is all iOS
+       needs to treat the page as horizontally scrollable and let a one-finger drag slide
+       the whole form about.
+       The two culprits are both sub-pixel rounding, not real layout: .bubbles is
+       position:fixed at width:100% and lands on 391, and .logo-img sits one pixel left of
+       zero from centring. Neither is worth chasing individually, and either would come
+       back the next time a rounding boundary moved.
+       overflow-x:hidden on both html and body clamps it at the root instead. On html
+       specifically because body alone does not reliably stop the pan in iOS Safari.
+       Checked before doing this: the file contains no position:sticky, which is the one
+       thing overflow-x:hidden on an ancestor would break. If sticky is ever added here,
+       revisit this rule. Vertical scrolling is untouched. */
+    html { overflow-x: hidden; }
     body {
       font-family: 'Heebo', sans-serif;
       background: var(--dark);
       color: var(--text);
       min-height: 100vh;
       direction: rtl;
+      overflow-x: hidden;
+      max-width: 100%;
     }
     body::before {
       content: '';
