@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-LBLAH 2026-08-01k | row 1 facets sized by real content (אזור צלילה 275->470px, its longest dive area was truncating; לילות 275->121px, it never holds more than "17 לילות"); on mobile search and נקה סינון are a flex row so the button takes only its natural width; search placeholder shortened, "(עברית או אנגלית)" dropped after יעד so it reads in full on a phone -->
+<!-- BD-LBLAH 2026-08-01l | results line now reads "הפלגות זמינות" instead of "הפלגות", so it no longer looks like it contradicts the 10,079 in the stats pill: it counts the 7,535 bookable departures, the other 2,544 being sold out and dropped by the always-on availability filter -->
 <html lang="he" dir="rtl">
 <head>
 <meta charset="UTF-8" />
@@ -879,7 +879,13 @@ function render(){
   else if(S.sort==='spots')rows.sort((a,b)=>(b.spots||0)-(a.spots||0)||a.start.localeCompare(b.start));
   else rows.sort((a,b)=>a.start.localeCompare(b.start));
 
-  $('count').innerHTML='<b>'+rows.length+'</b> הפלגות על <b>'
+  /* "זמינות" is load-bearing, not decoration. filtered() drops every sold-out departure
+     via the always-on S.avail flag, which has no control in the UI, so this line counts
+     7,535 while the stats pill above counts all 10,079 in the catalogue. The 2,544
+     difference is sold-out departures. Naming this figure as the AVAILABLE one is what
+     makes the two numbers agree instead of looking like a contradiction. If S.avail ever
+     becomes a real toggle, this wording has to follow its state. */
+  $('count').innerHTML='<b>'+rows.length+'</b> הפלגות זמינות על <b>'
     +new Set(rows.map(r=>r.boat)).size+'</b> ספינות';
 
   let h='<div class="lst">';
