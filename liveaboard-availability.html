@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-LBLAH 2026-08-01q | search placeholder shortened to "יעד, ספינה או מסלול (אנגלית)": the 16px iOS zoom fix in p pushed the previous wording to 264px in a 246px mobile box and it truncated again -->
+<!-- BD-LBLAH 2026-08-01r | boat description (על הספינה) moved from last in the detail panel to directly under the WhatsApp booking request and above the cabin spec: it is the only persuasive, fully-Hebrew section and was buried under two reference tables -->
 <html lang="he" dir="rtl">
 <head>
 <meta charset="UTF-8" />
@@ -1138,9 +1138,20 @@ function open_(i){
 
   /* The booking request sits here, directly after the itinerary, rather than at
      the foot of the dialog. Everything below this point is reference reading:
-     cabin spec, boat spec, boat description. Asking for the booking after all
+     boat description, cabin spec, boat spec. Asking for the booking after all
      of that buried the call to action under several screens of prose. */
   h+=bookingForm(t);
+
+  /* על הספינה moved directly under the booking request, Ian 2026-08-01. It used to be
+     dead last, below the cabin spec and the boat spec, which are both reference tables.
+     It is the only piece of persuasive writing in the panel and the only part fully
+     translated to Hebrew, so burying it under two spec tables meant nobody reached it.
+     Now it reads: book, then why this ship, then the detail tables for anyone still
+     checking. Order below is deliberate, do not shuffle it back.
+     .prose forces LTR because this is normally the operator's English. A translated
+     description has to read RTL, so the build flags it with he_detail and the class
+     follows. */
+  if(b.detail) h+='<div class="sec"><h3>על הספינה</h3><div class="prose'+(b.he_detail?' he':'')+'">'+esc(b.detail)+'</div></div>';
 
   /* per-cabin descriptive spec */
   const withSpec=(b.cabins||[]).filter(c=>c.spec&&c.spec.length);
@@ -1162,10 +1173,6 @@ function open_(i){
     });
     h+='</div>';
   }
-
-  /* .prose forces LTR because this is normally the operator's English. A translated
-   description has to read RTL, so the build flags it and the class follows. */
-  if(b.detail) h+='<div class="sec"><h3>על הספינה</h3><div class="prose'+(b.he_detail?' he':'')+'">'+esc(b.detail)+'</div></div>';
 
   $('dBody').innerHTML=h;
   wireBooking(t);
