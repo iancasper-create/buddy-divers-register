@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-LBLAH 2026-08-01a | Princess Maani description translated after the Horizon III swap, so all 95 boats are Hebrew again -->
+<!-- BD-LBLAH 2026-08-01b | free-search placeholder names the language each field accepts; search and sort widths swapped -->
 <html lang="he" dir="rtl">
 <head>
 <meta charset="UTF-8" />
@@ -40,7 +40,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background:
 /* Row 3: search and sort on the start side, the three action controls on the end
    side. 2fr/2fr/auto keeps the buttons at their natural width so they never
    stretch, while the two inputs share what is left. */
-.controls .row5{grid-column:1/-1;display:grid;grid-template-columns:1.4fr 2fr auto;gap:10px;
+.controls .row5{grid-column:1/-1;display:grid;grid-template-columns:2fr 1.4fr auto;gap:10px;
   align-items:end;border-top:1px solid var(--border);padding-top:13px;margin-top:2px}
 .controls .row5 .acts{flex-direction:row;align-items:center;gap:8px;flex-wrap:wrap}
 .controls .row5 .acts .dealbtn{margin-bottom:0}
@@ -319,7 +319,7 @@ table.cab tr.sold td{opacity:.45}
 
       <div class="row5">
         <div class="fld"><label for="fText">חיפוש חופשי</label>
-          <input type="text" id="fText" placeholder="יעד, ספינה או מסלול" /></div>
+          <input type="text" id="fText" placeholder="יעד (עברית או אנגלית), ספינה (אנגלית), מסלול (אנגלית)" /></div>
         <div class="fld"><label for="fSort">מיון</label>
           <select id="fSort">
             <option value="date">תאריך</option>
