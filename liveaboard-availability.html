@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-LBLAH 2026-08-01p | iOS auto-zoom: all eight filter controls were 14px, under Safari's 16px threshold, so tapping any of them zoomed the page in and left it there. Raised to 16px below the 1200px breakpoint only, since the desktop date tracks are measured against 14px text -->
+<!-- BD-LBLAH 2026-08-01q | search placeholder shortened to "יעד, ספינה או מסלול (אנגלית)": the 16px iOS zoom fix in p pushed the previous wording to 264px in a 246px mobile box and it truncated again -->
 <html lang="he" dir="rtl">
 <head>
 <meta charset="UTF-8" />
@@ -488,9 +488,16 @@ table.cab tr.sold td{opacity:.45}
              the button takes its natural width and the input absorbs everything else. On
              desktop the wrapper is display:contents and the two behave as independent grid
              items again, with order putting מיון back between them. -->
+        <!-- Placeholder length is load-bearing on mobile and has now moved twice. At the 16px
+             the iOS zoom fix forces below 1200px, the search box is 246px on a 390px phone and
+             this string needs 219px. The previous wording needed 264px and truncated.
+             "או" before מסלול rather than a comma is deliberate: it attaches "(אנגלית)" to
+             ספינה and מסלול, the two that really are English-only, instead of implying it
+             covers יעד as well, which accepts Hebrew too.
+             Re-measure against the 246px box before lengthening this. -->
         <div class="searchrow">
           <div class="fld searchfld"><label for="fText">חיפוש חופשי</label>
-            <input type="text" id="fText" placeholder="יעד, ספינה (אנגלית), מסלול (אנגלית)" /></div>
+            <input type="text" id="fText" placeholder="יעד, ספינה או מסלול (אנגלית)" /></div>
           <button class="btn" id="clr">נקה סינון</button>
         </div>
         <div class="fld sortfld"><label for="fSort">מיון</label>
