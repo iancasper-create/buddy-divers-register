@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<!-- BD-FOLLOWUP 2026-08-05a | Third tab: Booking Confirmation letter (A4, logo, confirmation number = Trip ID + guest initials, trip/booking data auto-filled, free-text purchase description, PDF/JPG/WhatsApp output)
+<!-- BD-FOLLOWUP 2026-08-05b | Confirmation letters logged to the Airtable Confirmations table on WhatsApp send, same pattern as Payment Requests
+     BD-FOLLOWUP 2026-08-05a | Third tab: Booking Confirmation letter (A4, logo, confirmation number = Trip ID + guest initials, trip/booking data auto-filled, free-text purchase description, PDF/JPG/WhatsApp output)
      BD-FOLLOWUP 2026-07-28b | Itemized costs block now renders whenever any cost line is non-zero (previously required Safari Price > 0)
      BD-FOLLOWUP 2026-07-28a | Pro forma: ILS currency option added, exchange rate fixed at 1
      BD-FOLLOWUP 2026-07-27a | Find the payment row by booking/diver, not by Trip ID, so moving a diver between trips updates the existing row instead of creating a duplicate
@@ -1311,6 +1312,8 @@ const BOOKINGS_TABLE = 'tblMCB8nCSoRuiTKI';
 const PAYMENTS_TABLE = 'tbl0oLEDoa4PCQOOp';
 const WA_MESSAGES_TABLE = 'tblxcQFC35tOSH8l6';
 const PAYMENT_REQUESTS_TABLE = 'tblqqgpdp5BOhSAH9';
+// Addressed by name because the table was created after this file. Swap in its tbl... id if it is ever renamed.
+const CONFIRMATIONS_TABLE = 'Confirmations';
 const DIVERS_TABLE = 'tblE9d3rE4uDv2uxO';
 
 let currentBookings = []; // [{bookingId, diverId, diverName, tripId, totalPrice}]
@@ -3217,6 +3220,34 @@ async function cfSendWhatsApp() {
 
     btn.textContent = 'Sent';
     btn.style.background = '#22a06b';
+
+    // Log to Confirmations table
+    try {
+      const cfFields = {
+        'Confirmation Number': cfV('cfConfNumber'),
+        'Date Sent':           new Date().toISOString().split('T')[0],
+        'Guest Names':         cfLines('cfGuests').join(', '),
+        'Number of Guests':    cfV('cfGuestCount'),
+        'Trip ID':             cfV('cfTripId'),
+        'Trip Name':           cfV('cfTripName'),
+        'Vessel':              cfV('cfVessel'),
+        'Arrival':             cfV('cfArrival'),
+        'Departure':           cfV('cfDeparture'),
+        'Cabin / Package':     cfV('cfCabin'),
+        'Total Charges':       cfNum('cfTotal') || undefined,
+        'Currency':            cfNum('cfTotal') ? cfV('cfCurrency') : undefined,
+        'Phone':               phone,
+        'Letter URL':          clData.secure_url
+      };
+      // Airtable rejects the whole row on an empty or unknown value, so send only what is filled
+      Object.keys(cfFields).forEach(k => { if (!cfFields[k]) delete cfFields[k]; });
+      await fetch('https://api.airtable.com/v0/' + BASE_ID + '/' + encodeURIComponent(CONFIRMATIONS_TABLE), {
+        method: 'POST',
+        headers: { Authorization: 'Bearer ' + AIRTABLE_API_KEY, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fields: cfFields })
+      });
+    } catch (logErr) { console.warn('Confirmations log failed (non-critical):', logErr); }
+
     setTimeout(() => { btn.textContent = 'Send on WhatsApp'; btn.style.background = '#25D366'; btn.disabled = false; }, 3000);
   } catch (e) {
     console.error('Confirmation WhatsApp error:', e);
