@@ -6,7 +6,7 @@ Customer-facing and admin HTML for Buddy-Divers, an Israeli liveaboard dive trav
 Served via GitHub Pages + Cloudflare at **register.buddy-divers.com**. Every file is a
 self-contained HTML page (inline CSS + JS, no build step, no framework).
 
-Owner: Ian Caspi. Ian is non-technical: explain platform actions step by step, deliver
+Owner: Ian Casper. Ian is non-technical: explain platform actions step by step, deliver
 complete files (never partial snippets), and confirm before destructive changes.
 
 Backend stack (not in this repo): Airtable (CRM), Make.com (automation, EU1),
