@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<!-- BD-FOLLOWUP 2026-08-05i | Email PDF button: uploads the PDF to Cloudinary as raw and posts to a Make scenario that sends it from ian@ as an attachment. Webhook URL still to be filled in
+<!-- BD-FOLLOWUP 2026-08-05j | Confirmation email webhook URL wired in
+     BD-FOLLOWUP 2026-08-05i | Email PDF button: uploads the PDF to Cloudinary as raw and posts to a Make scenario that sends it from ian@ as an attachment
      BD-FOLLOWUP 2026-08-05h | Included/Not-included lists are real prefilled defaults now, not grey placeholder examples that printed nothing
      BD-FOLLOWUP 2026-08-05g | Arrival/Departure relabelled Embarkation/Disembarkation on the form and the letter
      BD-FOLLOWUP 2026-08-05f | Confirmation tab searches for the diver itself instead of borrowing the Payment Manager's selection; search core shared by both tabs
@@ -1345,9 +1346,9 @@ const WA_MESSAGES_TABLE = 'tblxcQFC35tOSH8l6';
 const PAYMENT_REQUESTS_TABLE = 'tblqqgpdp5BOhSAH9';
 // Addressed by name because the table was created after this file. Swap in its tbl... id if it is ever renamed.
 const CONFIRMATIONS_TABLE = 'Confirmations';
-// Make scenario that emails the confirmation PDF from ian@buddy-divers.com.
-// PASTE THE WEBHOOK URL HERE once the scenario exists; until then the Email button says so.
-const CONFIRMATION_EMAIL_WEBHOOK = '';
+// Make scenario "Buddy-Divers - Confirmation Letter Email", which attaches the PDF and
+// sends it from ian@buddy-divers.com. Webhook created 2026-08-05.
+const CONFIRMATION_EMAIL_WEBHOOK = 'https://hook.eu1.make.com/vge83dkvv7ze6x8roitdg12ifc8inrak';
 const DIVERS_TABLE = 'tblE9d3rE4uDv2uxO';
 
 let currentBookings = []; // [{bookingId, diverId, diverName, tripId, totalPrice}]
