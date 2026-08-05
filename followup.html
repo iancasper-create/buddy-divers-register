@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<!-- BD-FOLLOWUP 2026-08-05p | Confirmations filed flat under booking_confirmations, no per-trip subfolders
+<!-- BD-FOLLOWUP 2026-08-05q | Confirmation number printed blank: html2canvas drops text inside display:inline-block, so the box drew empty. Switched to display:table
+     BD-FOLLOWUP 2026-08-05p | Confirmations filed flat under booking_confirmations, no per-trip subfolders
      BD-FOLLOWUP 2026-08-05o | Cloudinary copies are filed as booking_confirmations/<tripId>/<confNumber>-<timestamp> instead of a random id
      BD-FOLLOWUP 2026-08-05n | Hebrew half of the email now signs in Hebrew: איאן כספר / באדי-דייברס בע״מ
      BD-FOLLOWUP 2026-08-05m | Hebrew date labels changed to תחילת ספארי / סיום ספארי, which work for resort trips as well as liveaboards
@@ -3082,7 +3083,7 @@ function cfBuildParts() {
       + '<div style="text-align:right;">'
         + '<div style="font-size:11px;font-weight:700;color:#007289;letter-spacing:2.2px;text-transform:uppercase;">Booking Confirmation</div>'
         + (cfV('cfConfNumber')
-            ? '<div style="display:inline-block;margin-top:7px;background:#fff4ec;border:1.5px solid #d4692a;border-radius:8px;padding:7px 15px;">'
+            ? '<div style="display:table;margin:7px 0 0 auto;background:#fff4ec;border:1.5px solid #d4692a;border-radius:8px;padding:7px 15px;">'
               + '<div style="font-size:9.5px;color:#a8551f;letter-spacing:1.2px;text-transform:uppercase;">Confirmation number</div>'
               + '<div style="font-family:\'DM Mono\',monospace;font-size:19px;font-weight:700;color:#d4692a;letter-spacing:0.5px;">' + cfEsc(cfV('cfConfNumber')) + '</div>'
             + '</div>'
