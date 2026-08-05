@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<!-- BD-FOLLOWUP 2026-08-05l | Email covering note is now Hebrew first then English, values kept LTR inside the RTL block
+<!-- BD-FOLLOWUP 2026-08-05m | Hebrew date labels changed to תחילת ספארי / סיום ספארי, which work for resort trips as well as liveaboards
+     BD-FOLLOWUP 2026-08-05l | Email covering note is now Hebrew first then English, values kept LTR inside the RTL block
      BD-FOLLOWUP 2026-08-05k | Confirmation number could print as an empty box after the field had been touched once; rebuilt on generate when blank, and the box is omitted if there is genuinely nothing to show
      BD-FOLLOWUP 2026-08-05j | Confirmation email webhook URL wired in
      BD-FOLLOWUP 2026-08-05i | Email PDF button: uploads the PDF to Cloudinary as raw and posts to a Make scenario that sends it from ian@ as an attachment
@@ -3420,8 +3421,8 @@ function cfEmailBody() {
   const rowsHe = [
     ['מספר אישור', cfV('cfConfNumber')],
     ['הטיול', trip],
-    ['עלייה לספינה', cfV('cfArrival')],
-    ['ירידה מהספינה', cfV('cfDeparture')]
+    ['תחילת ספארי', cfV('cfArrival')],
+    ['סיום ספארי', cfV('cfDeparture')]
   ].filter(r => r[1]);
 
   const rowsEn = [
