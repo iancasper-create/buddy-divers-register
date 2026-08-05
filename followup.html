@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<!-- BD-FOLLOWUP 2026-08-05c | Confirmations log trimmed to the six fields Ian asked for
+<!-- BD-FOLLOWUP 2026-08-05d | PDF download also archives the letter and logs it; one row per letter whichever way it goes out
+     BD-FOLLOWUP 2026-08-05c | Confirmations log trimmed to the six fields Ian asked for
      BD-FOLLOWUP 2026-08-05b | Confirmation letters logged to the Airtable Confirmations table on WhatsApp send, same pattern as Payment Requests
      BD-FOLLOWUP 2026-08-05a | Third tab: Booking Confirmation letter (A4, logo, confirmation number = Trip ID + guest initials, trip/booking data auto-filled, free-text purchase description, PDF/JPG/WhatsApp output)
      BD-FOLLOWUP 2026-07-28b | Itemized costs block now renders whenever any cost line is non-zero (previously required Safari Price > 0)
@@ -2777,11 +2778,11 @@ function cfAddRow(label, value) {
   div.innerHTML = '<input type="text" class="cf-row-label" placeholder="Label, for example Dive guide" dir="ltr"/>'
     + '<input type="text" class="cf-row-value" placeholder="Value" dir="ltr"/>'
     + '<button type="button" class="cf-row-del" title="Remove this row" '
-    + 'onclick="this.parentNode.remove(); _cfDataUrl = null;">&times;</button>';
+    + 'onclick="this.parentNode.remove(); _cfDataUrl = null; _cfLetterUrl = null;">&times;</button>';
   document.getElementById('cfExtraRows').appendChild(div);
   if (label) div.querySelector('.cf-row-label').value = label;
   if (value) div.querySelector('.cf-row-value').value = value;
-  div.querySelectorAll('input').forEach(i => i.addEventListener('input', () => { _cfDataUrl = null; }));
+  div.querySelectorAll('input').forEach(i => i.addEventListener('input', () => { _cfDataUrl = null; _cfLetterUrl = null; }));
   return div;
 }
 
@@ -3115,6 +3116,8 @@ async function cfGenerate() {
   if (!_logoBase64) await preloadLogo();
 
   _cfDataUrl = null;
+  _cfLetterUrl = null;
+  _cfLogged = false;
   document.getElementById('cfPreviewOverlay').style.display = 'block';
   cfRenderPages();
 }
@@ -3139,6 +3142,47 @@ async function cfRenderCanvases() {
 }
 
 let _cfImgW = 0, _cfImgH = 0;
+let _cfLetterUrl = null;   // Cloudinary copy of the current letter
+let _cfLogged = false;     // one Airtable row per letter, whichever way it goes out
+
+// Archive the letter on Cloudinary. Cached, so sending after downloading does not upload twice.
+async function cfUploadLetter() {
+  if (_cfLetterUrl) return _cfLetterUrl;
+  const dataUrl = await cfGetDataUrl();
+  const blob = await (await fetch(dataUrl)).blob();
+  const fd = new FormData();
+  fd.append('file', blob, 'booking-confirmation.jpg');
+  fd.append('upload_preset', 'buddy_divers_uploads');
+  fd.append('folder', 'booking_confirmations/' + (cfV('cfTripId') || 'unknown_trip'));
+  const res = await fetch('https://api.cloudinary.com/v1_1/dccbsfte0/image/upload', { method: 'POST', body: fd });
+  const data = await res.json();
+  if (!data.secure_url) throw new Error('Cloudinary upload failed');
+  _cfLetterUrl = data.secure_url;
+  return _cfLetterUrl;
+}
+
+// Log to Confirmations table. Called by both the WhatsApp send and the PDF download,
+// and guarded so doing both for the same letter still leaves a single row.
+async function cfLogConfirmation(letterUrl) {
+  if (_cfLogged) return;
+  const fields = {
+    'Confirmation Number': cfV('cfConfNumber'),
+    'Date Sent':           new Date().toISOString().split('T')[0],
+    'Guest Names':         cfLines('cfGuests').join(', '),
+    'Number of Guests':    cfV('cfGuestCount'),
+    'Trip ID':             cfV('cfTripId'),
+    'Letter URL':          letterUrl
+  };
+  // Airtable rejects the whole row on an empty or unknown value, so send only what is filled
+  Object.keys(fields).forEach(k => { if (!fields[k]) delete fields[k]; });
+  const res = await fetch('https://api.airtable.com/v0/' + BASE_ID + '/' + encodeURIComponent(CONFIRMATIONS_TABLE), {
+    method: 'POST',
+    headers: { Authorization: 'Bearer ' + AIRTABLE_API_KEY, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ fields: fields })
+  });
+  if (!res.ok) throw new Error('Airtable responded ' + res.status);
+  _cfLogged = true;
+}
 
 // One tall JPG of all pages stacked, used for the download and for WhatsApp
 async function cfGetDataUrl() {
@@ -3188,6 +3232,11 @@ async function cfDownloadPdf() {
       pdf.addImage(c.toDataURL('image/jpeg', 0.94), 'JPEG', 0, 0, 210, 297);
     });
     pdf.save(cfFileName('pdf'));
+
+    // Logged after the file is saved, and never allowed to fail the download
+    try {
+      await cfLogConfirmation(await cfUploadLetter());
+    } catch (logErr) { console.warn('Confirmations log failed (non-critical):', logErr); }
   } catch (e) {
     console.error('Confirmation PDF error:', e);
     alert('Could not create the PDF. Please try again.');
@@ -3202,43 +3251,20 @@ async function cfSendWhatsApp() {
 
   btn.disabled = true; btn.textContent = 'Uploading...';
   try {
-    const url = await cfGetDataUrl();
-    const blob = await (await fetch(url)).blob();
-    const fd = new FormData();
-    fd.append('file', blob, 'booking-confirmation.jpg');
-    fd.append('upload_preset', 'buddy_divers_uploads');
-    fd.append('folder', 'booking_confirmations/' + (cfV('cfTripId') || 'unknown_trip'));
-    const clRes = await fetch('https://api.cloudinary.com/v1_1/dccbsfte0/image/upload', { method: 'POST', body: fd });
-    const clData = await clRes.json();
-    if (!clData.secure_url) throw new Error('Cloudinary upload failed');
+    const letterUrl = await cfUploadLetter();
 
     btn.textContent = 'Sending...';
     const makeRes = await fetch('https://hook.eu1.make.com/yabs6aeja0bz6eoxw29p8t9tpgqi7tio', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ phone: phone, imageUrl: clData.secure_url, caption: '' })
+      body: JSON.stringify({ phone: phone, imageUrl: letterUrl, caption: '' })
     });
     if (!makeRes.ok) throw new Error('Make webhook failed');
 
     btn.textContent = 'Sent';
     btn.style.background = '#22a06b';
 
-    // Log to Confirmations table
     try {
-      const cfFields = {
-        'Confirmation Number': cfV('cfConfNumber'),
-        'Date Sent':           new Date().toISOString().split('T')[0],
-        'Guest Names':         cfLines('cfGuests').join(', '),
-        'Number of Guests':    cfV('cfGuestCount'),
-        'Trip ID':             cfV('cfTripId'),
-        'Letter URL':          clData.secure_url
-      };
-      // Airtable rejects the whole row on an empty or unknown value, so send only what is filled
-      Object.keys(cfFields).forEach(k => { if (!cfFields[k]) delete cfFields[k]; });
-      await fetch('https://api.airtable.com/v0/' + BASE_ID + '/' + encodeURIComponent(CONFIRMATIONS_TABLE), {
-        method: 'POST',
-        headers: { Authorization: 'Bearer ' + AIRTABLE_API_KEY, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ fields: cfFields })
-      });
+      await cfLogConfirmation(letterUrl);
     } catch (logErr) { console.warn('Confirmations log failed (non-critical):', logErr); }
 
     setTimeout(() => { btn.textContent = 'Send on WhatsApp'; btn.style.background = '#25D366'; btn.disabled = false; }, 3000);
@@ -3258,7 +3284,7 @@ async function cfSendWhatsApp() {
  'cfRegards','cfSigner','cfSignerTitle','cfChargesMode','cfCurrency','cfTotal','cfPaid',
  'cfPaymentNote','cfShowSignature'].forEach(id => {
   const el = document.getElementById(id);
-  if (el) el.addEventListener('input', () => { _cfDataUrl = null; });
+  if (el) el.addEventListener('input', () => { _cfDataUrl = null; _cfLetterUrl = null; });
 });
 
 // Defaults on load, so a letter written without the Payment Manager is still complete.
