@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<!-- BD-FOLLOWUP 2026-08-05j | Confirmation email webhook URL wired in
+<!-- BD-FOLLOWUP 2026-08-05k | Confirmation number could print as an empty box after the field had been touched once; rebuilt on generate when blank, and the box is omitted if there is genuinely nothing to show
+     BD-FOLLOWUP 2026-08-05j | Confirmation email webhook URL wired in
      BD-FOLLOWUP 2026-08-05i | Email PDF button: uploads the PDF to Cloudinary as raw and posts to a Make scenario that sends it from ian@ as an attachment
      BD-FOLLOWUP 2026-08-05h | Included/Not-included lists are real prefilled defaults now, not grey placeholder examples that printed nothing
      BD-FOLLOWUP 2026-08-05g | Arrival/Departure relabelled Embarkation/Disembarkation on the form and the letter
@@ -2803,9 +2804,9 @@ function cfSyncGuests() {
   cfSyncNumber();
 }
 
-function cfSyncNumber() {
+function cfSyncNumber(force) {
   const el = document.getElementById('cfConfNumber');
-  if (el.dataset.manual) return;
+  if (el.dataset.manual && !force) return;
   el.value = [cfV('cfTripId'), cfInitials(cfLines('cfGuests')[0] || '')].filter(Boolean).join('-');
 }
 
@@ -3075,10 +3076,12 @@ function cfBuildParts() {
       + '<div>' + logoHTML + '</div>'
       + '<div style="text-align:right;">'
         + '<div style="font-size:11px;font-weight:700;color:#007289;letter-spacing:2.2px;text-transform:uppercase;">Booking Confirmation</div>'
-        + '<div style="display:inline-block;margin-top:7px;background:#fff4ec;border:1.5px solid #d4692a;border-radius:8px;padding:7px 15px;">'
-          + '<div style="font-size:9.5px;color:#a8551f;letter-spacing:1.2px;text-transform:uppercase;">Confirmation number</div>'
-          + '<div style="font-family:\'DM Mono\',monospace;font-size:19px;font-weight:700;color:#d4692a;letter-spacing:0.5px;">' + cfEsc(cfV('cfConfNumber') || '-') + '</div>'
-        + '</div>'
+        + (cfV('cfConfNumber')
+            ? '<div style="display:inline-block;margin-top:7px;background:#fff4ec;border:1.5px solid #d4692a;border-radius:8px;padding:7px 15px;">'
+              + '<div style="font-size:9.5px;color:#a8551f;letter-spacing:1.2px;text-transform:uppercase;">Confirmation number</div>'
+              + '<div style="font-family:\'DM Mono\',monospace;font-size:19px;font-weight:700;color:#d4692a;letter-spacing:0.5px;">' + cfEsc(cfV('cfConfNumber')) + '</div>'
+            + '</div>'
+            : '')
         + '<div style="font-size:12px;color:#8ba4b0;margin-top:7px;">' + cfEsc(dateStr) + '</div>'
       + '</div>'
     + '</div>'
@@ -3088,7 +3091,7 @@ function cfBuildParts() {
   const slimHeader = ''
     + '<div style="display:flex;align-items:center;justify-content:space-between;font-size:11px;color:#8ba4b0;letter-spacing:1px;text-transform:uppercase;">'
       + '<span style="font-weight:700;color:#007289;">Buddy-Divers booking confirmation</span>'
-      + '<span style="font-family:\'DM Mono\',monospace;color:#d4692a;font-weight:700;">' + cfEsc(cfV('cfConfNumber') || '-') + '</span>'
+      + '<span style="font-family:\'DM Mono\',monospace;color:#d4692a;font-weight:700;">' + cfEsc(cfV('cfConfNumber')) + '</span>'
     + '</div>'
     + '<div style="height:2px;background:linear-gradient(90deg,#007289,#1B4F8A);border-radius:2px;margin:12px 0 20px;"></div>';
 
@@ -3260,6 +3263,10 @@ async function cfGenerate() {
     return;
   }
   msgEl.style.display = 'none';
+
+  // Touching the confirmation number field once and clearing it used to leave it blank for good,
+  // and the letter printed an empty box. Rebuild it whenever it is empty, edited or not.
+  if (!cfV('cfConfNumber')) cfSyncNumber(true);
 
   if (!_logoBase64) await preloadLogo();
 
