@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<!-- BD-FOLLOWUP 2026-08-05k | Confirmation number could print as an empty box after the field had been touched once; rebuilt on generate when blank, and the box is omitted if there is genuinely nothing to show
+<!-- BD-FOLLOWUP 2026-08-05l | Email covering note is now Hebrew first then English, values kept LTR inside the RTL block
+     BD-FOLLOWUP 2026-08-05k | Confirmation number could print as an empty box after the field had been touched once; rebuilt on generate when blank, and the box is omitted if there is genuinely nothing to show
      BD-FOLLOWUP 2026-08-05j | Confirmation email webhook URL wired in
      BD-FOLLOWUP 2026-08-05i | Email PDF button: uploads the PDF to Cloudinary as raw and posts to a Make scenario that sends it from ian@ as an attachment
      BD-FOLLOWUP 2026-08-05h | Included/Not-included lists are real prefilled defaults now, not grey placeholder examples that printed nothing
@@ -3408,26 +3409,60 @@ async function cfUploadPdf() {
   return _cfPdfUrl;
 }
 
-// Plain English covering note. Written here rather than in Make so the wording
-// can be changed in this file without touching the scenario.
+// Covering note, Hebrew first then English. Written here rather than in Make so the
+// wording can change in this file without touching the scenario.
+// Values (trip name, dates) stay LTR inside the RTL block, per the house rule for
+// dates and Latin text in Hebrew context.
 function cfEmailBody() {
-  const first = (cfLines('cfGuests')[0] || '').split(/\s+/)[0] || 'there';
-  const rows = [
+  const first = (cfLines('cfGuests')[0] || '').split(/\s+/)[0] || '';
+  const trip  = [cfV('cfTripName'), cfV('cfDestination')].filter(Boolean).join(', ');
+
+  const rowsHe = [
+    ['מספר אישור', cfV('cfConfNumber')],
+    ['הטיול', trip],
+    ['עלייה לספינה', cfV('cfArrival')],
+    ['ירידה מהספינה', cfV('cfDeparture')]
+  ].filter(r => r[1]);
+
+  const rowsEn = [
     ['Confirmation number', cfV('cfConfNumber')],
-    ['Trip', [cfV('cfTripName'), cfV('cfDestination')].filter(Boolean).join(', ')],
+    ['Trip', trip],
     ['Embarkation', cfV('cfArrival')],
     ['Disembarkation', cfV('cfDeparture')]
   ].filter(r => r[1]);
-  return '<p>Dear ' + cfEsc(first) + ',</p>'
+
+  const table = (rows, rtl) =>
+    '<table style="border-collapse:collapse;font-family:Arial,sans-serif;font-size:14px;" dir="' + (rtl ? 'rtl' : 'ltr') + '">'
+    + rows.map(r =>
+        '<tr><td style="padding:3px ' + (rtl ? '0 3px 18px' : '18px 3px 0') + ';color:#5a7a8a;white-space:nowrap;">' + r[0] + '</td>'
+      + '<td style="padding:3px 0;font-weight:bold;" dir="ltr">' + cfEsc(r[1]) + '</td></tr>').join('')
+    + '</table>';
+
+  const signLines = cfEsc(cfV('cfSigner') || 'Ian Casper') + '<br/>'
+                  + cfEsc(cfV('cfSignerTitle') || 'Buddy-Divers Ltd.') + '<br/>www.buddy-divers.com';
+  const sign   = signLines;
+  const signHe = '<span dir="ltr" style="display:inline-block;text-align:right;">' + signLines + '</span>';
+
+  const he = '<div dir="rtl" style="font-family:Arial,sans-serif;font-size:14px;color:#1a3a5c;text-align:right;">'
+    + '<p>שלום ' + cfEsc(first) + ',</p>'
+    + '<p>אישור ההזמנה שלך מצורף למייל זה.</p>'
+    + table(rowsHe, true)
+    + '<p>אם יש פרט שאינו נכון, אפשר להשיב למייל הזה ונתקן.</p>'
+    + '<p>נתראה מתחת למים,<br/>' + signHe + '</p>'
+    + '</div>';
+
+  const en = '<div dir="ltr" style="font-family:Arial,sans-serif;font-size:14px;color:#1a3a5c;">'
+    + '<p>Dear ' + cfEsc(first) + ',</p>'
     + '<p>Your booking confirmation is attached to this email.</p>'
-    + '<table style="border-collapse:collapse;font-family:Arial,sans-serif;font-size:14px;">'
-    + rows.map(r => '<tr><td style="padding:3px 18px 3px 0;color:#5a7a8a;">' + r[0] + '</td>'
-        + '<td style="padding:3px 0;font-weight:bold;">' + cfEsc(r[1]) + '</td></tr>').join('')
-    + '</table>'
+    + table(rowsEn, false)
     + '<p>If any detail looks wrong, reply to this email and we will put it right.</p>'
     + '<p>We look forward to diving with you.</p>'
-    + '<p>Warm regards,<br/>' + cfEsc(cfV('cfSigner') || 'Ian Casper') + '<br/>'
-    + cfEsc(cfV('cfSignerTitle') || 'Buddy-Divers Ltd.') + '<br/>www.buddy-divers.com</p>';
+    + '<p>Warm regards,<br/>' + sign + '</p>'
+    + '</div>';
+
+  return he
+    + '<div style="border-top:1px solid #d5e9ee;margin:22px 0;"></div>'
+    + en;
 }
 
 async function cfSendEmail() {
