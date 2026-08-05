@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<!-- BD-FOLLOWUP 2026-08-05m | Hebrew date labels changed to תחילת ספארי / סיום ספארי, which work for resort trips as well as liveaboards
+<!-- BD-FOLLOWUP 2026-08-05n | Hebrew half of the email now signs in Hebrew: איאן כספר / באדי-דייברס בע״מ
+     BD-FOLLOWUP 2026-08-05m | Hebrew date labels changed to תחילת ספארי / סיום ספארי, which work for resort trips as well as liveaboards
      BD-FOLLOWUP 2026-08-05l | Email covering note is now Hebrew first then English, values kept LTR inside the RTL block
      BD-FOLLOWUP 2026-08-05k | Confirmation number could print as an empty box after the field had been touched once; rebuilt on generate when blank, and the box is omitted if there is genuinely nothing to show
      BD-FOLLOWUP 2026-08-05j | Confirmation email webhook URL wired in
@@ -3410,6 +3411,11 @@ async function cfUploadPdf() {
   return _cfPdfUrl;
 }
 
+// Hebrew forms of the sign-off. A signer who is not listed here signs in Latin instead,
+// so changing "Signed By" never puts the wrong name on the Hebrew half.
+const CF_SIGNER_HE = { 'Ian Casper': 'איאן כספר' };
+const CF_TITLE_HE  = { 'Buddy-Divers Ltd.': 'באדי-דייברס בע״מ', 'Buddy-Divers': 'באדי-דייברס בע״מ' };
+
 // Covering note, Hebrew first then English. Written here rather than in Make so the
 // wording can change in this file without touching the scenario.
 // Values (trip name, dates) stay LTR inside the RTL block, per the house rule for
@@ -3439,10 +3445,16 @@ function cfEmailBody() {
       + '<td style="padding:3px 0;font-weight:bold;" dir="ltr">' + cfEsc(r[1]) + '</td></tr>').join('')
     + '</table>';
 
-  const signLines = cfEsc(cfV('cfSigner') || 'Ian Casper') + '<br/>'
-                  + cfEsc(cfV('cfSignerTitle') || 'Buddy-Divers Ltd.') + '<br/>www.buddy-divers.com';
-  const sign   = signLines;
-  const signHe = '<span dir="ltr" style="display:inline-block;text-align:right;">' + signLines + '</span>';
+  const signerEn = cfV('cfSigner') || 'Ian Casper';
+  const titleEn  = cfV('cfSignerTitle') || 'Buddy-Divers Ltd.';
+  const sign = cfEsc(signerEn) + '<br/>' + cfEsc(titleEn) + '<br/>www.buddy-divers.com';
+
+  // The Hebrew half signs in Hebrew. Anyone not in these maps signs in Latin, wrapped LTR so
+  // trailing punctuation does not flip inside the RTL block.
+  const ltr = s => '<span dir="ltr" style="display:inline-block;">' + cfEsc(s) + '</span>';
+  const signerHe = CF_SIGNER_HE[signerEn] ? cfEsc(CF_SIGNER_HE[signerEn]) : ltr(signerEn);
+  const titleHe  = CF_TITLE_HE[titleEn]   ? cfEsc(CF_TITLE_HE[titleEn])   : ltr(titleEn);
+  const signHe = signerHe + '<br/>' + titleHe + '<br/><span dir="ltr" style="display:inline-block;">www.buddy-divers.com</span>';
 
   const he = '<div dir="rtl" style="font-family:Arial,sans-serif;font-size:14px;color:#1a3a5c;text-align:right;">'
     + '<p>שלום ' + cfEsc(first) + ',</p>'
