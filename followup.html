@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<!-- BD-FOLLOWUP 2026-08-05o | Cloudinary copies are filed as booking_confirmations/<tripId>/<confNumber>-<timestamp> instead of a random id
+<!-- BD-FOLLOWUP 2026-08-05p | Confirmations filed flat under booking_confirmations, no per-trip subfolders
+     BD-FOLLOWUP 2026-08-05o | Cloudinary copies are filed as booking_confirmations/<tripId>/<confNumber>-<timestamp> instead of a random id
      BD-FOLLOWUP 2026-08-05n | Hebrew half of the email now signs in Hebrew: איאן כספר / באדי-דייברס בע״מ
      BD-FOLLOWUP 2026-08-05m | Hebrew date labels changed to תחילת ספארי / סיום ספארי, which work for resort trips as well as liveaboards
      BD-FOLLOWUP 2026-08-05l | Email covering note is now Hebrew first then English, values kept LTR inside the RTL block
@@ -3318,8 +3319,10 @@ function cfPublicId() {
   return num + '-' + stamp;
 }
 
+// Flat folder by Ian's choice. The file name starts with the confirmation number, which
+// starts with the trip id, so an alphabetical listing still groups a trip together.
 function cfFolder() {
-  return 'booking_confirmations/' + (cfV('cfTripId') || 'unknown_trip').replace(/[^A-Za-z0-9_-]/g, '');
+  return 'booking_confirmations';
 }
 
 // Archive the letter on Cloudinary. Cached, so sending after downloading does not upload twice.
