@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<!-- BD-FOLLOWUP 2026-08-05n | Hebrew half of the email now signs in Hebrew: איאן כספר / באדי-דייברס בע״מ
+<!-- BD-FOLLOWUP 2026-08-05o | Cloudinary copies are filed as booking_confirmations/<tripId>/<confNumber>-<timestamp> instead of a random id
+     BD-FOLLOWUP 2026-08-05n | Hebrew half of the email now signs in Hebrew: איאן כספר / באדי-דייברס בע״מ
      BD-FOLLOWUP 2026-08-05m | Hebrew date labels changed to תחילת ספארי / סיום ספארי, which work for resort trips as well as liveaboards
      BD-FOLLOWUP 2026-08-05l | Email covering note is now Hebrew first then English, values kept LTR inside the RTL block
      BD-FOLLOWUP 2026-08-05k | Confirmation number could print as an empty box after the field had been touched once; rebuilt on generate when blank, and the box is omitted if there is genuinely nothing to show
@@ -3305,6 +3306,22 @@ let _cfLetterUrl = null;   // Cloudinary copy of the current letter (JPG, for Wh
 let _cfPdfUrl = null;      // Cloudinary copy of the current letter (PDF, for email)
 let _cfLogged = false;     // one Airtable row per letter, whichever way it goes out
 
+// Cloudinary names unsigned uploads with a random id, which leaves a trip folder full of
+// anonymous files. Name them by confirmation number instead, with a timestamp: re-uploading
+// an existing public_id under an unsigned preset returns the OLD asset rather than replacing
+// it, so a corrected letter would otherwise keep serving the superseded PDF.
+function cfPublicId() {
+  const d = new Date(), z = n => String(n).padStart(2, '0');
+  const stamp = d.getFullYear() + z(d.getMonth() + 1) + z(d.getDate())
+              + '-' + z(d.getHours()) + z(d.getMinutes()) + z(d.getSeconds());
+  const num = (cfV('cfConfNumber') || 'letter').replace(/[^A-Za-z0-9_-]/g, '');
+  return num + '-' + stamp;
+}
+
+function cfFolder() {
+  return 'booking_confirmations/' + (cfV('cfTripId') || 'unknown_trip').replace(/[^A-Za-z0-9_-]/g, '');
+}
+
 // Archive the letter on Cloudinary. Cached, so sending after downloading does not upload twice.
 async function cfUploadLetter() {
   if (_cfLetterUrl) return _cfLetterUrl;
@@ -3313,7 +3330,8 @@ async function cfUploadLetter() {
   const fd = new FormData();
   fd.append('file', blob, 'booking-confirmation.jpg');
   fd.append('upload_preset', 'buddy_divers_uploads');
-  fd.append('folder', 'booking_confirmations/' + (cfV('cfTripId') || 'unknown_trip'));
+  fd.append('public_id', cfPublicId());
+  fd.append('folder', cfFolder());
   const res = await fetch('https://api.cloudinary.com/v1_1/dccbsfte0/image/upload', { method: 'POST', body: fd });
   const data = await res.json();
   if (!data.secure_url) throw new Error('Cloudinary upload failed');
@@ -3403,7 +3421,8 @@ async function cfUploadPdf() {
   const fd = new FormData();
   fd.append('file', blob, cfFileName('pdf'));
   fd.append('upload_preset', 'buddy_divers_uploads');
-  fd.append('folder', 'booking_confirmations/' + (cfV('cfTripId') || 'unknown_trip'));
+  fd.append('public_id', cfPublicId());
+  fd.append('folder', cfFolder());
   const res = await fetch('https://api.cloudinary.com/v1_1/dccbsfte0/raw/upload', { method: 'POST', body: fd });
   const data = await res.json();
   if (!data.secure_url) throw new Error('Cloudinary PDF upload failed');
