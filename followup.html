@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<!-- BD-FOLLOWUP 2026-07-28b | Itemized costs block now renders whenever any cost line is non-zero (previously required Safari Price > 0)
+<!-- BD-FOLLOWUP 2026-08-05a | Third tab: Booking Confirmation letter (A4, logo, confirmation number = Trip ID + guest initials, trip/booking data auto-filled, free-text purchase description, PDF/JPG/WhatsApp output)
+     BD-FOLLOWUP 2026-07-28b | Itemized costs block now renders whenever any cost line is non-zero (previously required Safari Price > 0)
      BD-FOLLOWUP 2026-07-28a | Pro forma: ILS currency option added, exchange rate fixed at 1
      BD-FOLLOWUP 2026-07-27a | Find the payment row by booking/diver, not by Trip ID, so moving a diver between trips updates the existing row instead of creating a duplicate
      BD-FOLLOWUP 2026-07-04a | Search by trip and/or first/last name (any combination of the 3 fields)
@@ -448,8 +449,62 @@
     color: white;
   }
 
+  /* CONFIRMATION LETTER: extra detail rows */
+  .cf-extra-row {
+    display: grid;
+    grid-template-columns: 220px 1fr 38px;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  .cf-extra-row input {
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 9px 13px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    color: var(--text);
+    background: white;
+    outline: none;
+    width: 100%;
+  }
+  .cf-extra-row input:focus {
+    border-color: var(--teal);
+    box-shadow: 0 0 0 3px rgba(0,114,137,0.08);
+  }
+  .cf-row-del {
+    border: 1.5px solid var(--border);
+    background: white;
+    color: var(--muted);
+    border-radius: 8px;
+    height: 38px;
+    font-size: 17px;
+    line-height: 1;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .cf-row-del:hover { border-color: var(--red); color: var(--red); }
+  .cf-add-row {
+    background: white;
+    border: 1.5px dashed var(--border);
+    color: var(--teal);
+    border-radius: 8px;
+    padding: 9px 16px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .cf-add-row:hover { border-color: var(--teal); background: #f2f9fa; }
+  @media (max-width: 640px) {
+    .cf-extra-row { grid-template-columns: 1fr 38px; }
+    .cf-extra-row input:first-child { grid-column: 1 / -1; }
+  }
+
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
 
@@ -476,6 +531,7 @@
 <div class="tab-bar">
   <button class="tab-btn active" id="tabBtnManager" onclick="switchTab('manager')">📋 Payment Manager</button>
   <button class="tab-btn" id="tabBtnProforma" onclick="switchTab('proforma')">🧾 Pro Forma</button>
+  <button class="tab-btn" id="tabBtnConfirm" onclick="switchTab('confirm')">📄 Confirmation Letter</button>
 </div>
 
 <div id="tabManager">
@@ -978,6 +1034,258 @@
 </div><!-- end container -->
 </div><!-- end tabProforma -->
 
+<!-- ===== BOOKING CONFIRMATION LETTER TAB ===== -->
+<div id="tabConfirm" style="display:none;">
+<div class="container">
+
+  <!-- CARD 1: GUESTS -->
+  <div class="card">
+    <div class="card-title"><span class="step-badge">1</span> Guests</div>
+    <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:12px;">
+      <button class="btn btn-primary" onclick="cfLoadFromManager()">Load from Payment Manager</button>
+      <div style="font-size:12.5px;color:var(--muted);max-width:520px;">Find the diver in the Payment Manager tab first, then click here. Trip, dates, package, flights, hotel and charges all fill in automatically. Every field below stays editable.</div>
+    </div>
+    <div class="msg info" id="cfLoadMsg"></div>
+
+    <div class="field-row">
+      <div class="field">
+        <label>Guest Names <span style="font-size:11px;color:var(--muted);font-weight:400;">(one per line)</span></label>
+        <textarea id="cfGuests" placeholder="Ido Sever&#10;Reuven Arbel" oninput="cfSyncGuests()" style="min-height:76px;" dir="ltr"></textarea>
+      </div>
+      <div class="field">
+        <label>Number of Guests</label>
+        <input type="text" id="cfGuestCount" placeholder="2 adults" dir="ltr" oninput="this.dataset.manual='1'"/>
+        <label style="margin-top:14px;">WhatsApp Phone</label>
+        <input type="text" id="cfPhone" placeholder="0521234567" dir="ltr"/>
+      </div>
+    </div>
+
+    <div class="field-row">
+      <div class="field">
+        <label>Confirmation Number <span style="font-size:11px;color:var(--muted);font-weight:400;">(Trip ID + guest initials)</span></label>
+        <input type="text" id="cfConfNumber" placeholder="261022-IS" dir="ltr" oninput="this.dataset.manual='1'" style="font-family:'DM Mono',monospace;font-weight:700;color:var(--navy);"/>
+      </div>
+      <div class="field">
+        <label>Letter Date</label>
+        <input type="date" id="cfDate"/>
+      </div>
+    </div>
+  </div>
+
+  <!-- CARD 2: TRIP -->
+  <div class="card">
+    <div class="card-title"><span class="step-badge">2</span> Trip Details</div>
+    <div class="field-row">
+      <div class="field">
+        <label>Trip ID</label>
+        <input type="text" id="cfTripId" placeholder="261022" dir="ltr" oninput="cfSyncNumber()"/>
+      </div>
+      <div class="field">
+        <label>Trip Name</label>
+        <input type="text" id="cfTripName" placeholder="Galapagos Safari" dir="ltr" oninput="cfSyncHeadline()"/>
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>Destination</label>
+        <input type="text" id="cfDestination" placeholder="the Galapagos Islands" dir="ltr" oninput="cfSyncIntro()"/>
+      </div>
+      <div class="field">
+        <label>Vessel / Resort</label>
+        <input type="text" id="cfVessel" placeholder="DUNE Aurora" dir="ltr" oninput="cfSyncHeadline()"/>
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>Arrival</label>
+        <input type="text" id="cfArrival" placeholder="22 October 2026" dir="ltr"/>
+      </div>
+      <div class="field">
+        <label>Departure</label>
+        <input type="text" id="cfDeparture" placeholder="29 October 2026" dir="ltr"/>
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>Cabin Type / Package</label>
+        <input type="text" id="cfCabin" placeholder="Standard cabin, main deck" dir="ltr"/>
+      </div>
+      <div class="field">
+        <label>Type of Transfer</label>
+        <input type="text" id="cfTransfer" placeholder="Airport pick-up arranged by the operator" dir="ltr"/>
+      </div>
+    </div>
+
+    <hr class="section-divider"/>
+
+    <div class="section-label">Flight &amp; Hotel (optional, shown only when filled)</div>
+    <div class="field-row">
+      <div class="field">
+        <label>Flight Booking Reference (PNR)</label>
+        <input type="text" id="cfPnr" placeholder="ABC123" dir="ltr" style="text-transform:uppercase;"/>
+      </div>
+      <div class="field">
+        <label>Hotel</label>
+        <input type="text" id="cfHotel" placeholder="Hilton Galapagos, 20 to 22 October 2026" dir="ltr"/>
+      </div>
+    </div>
+
+    <hr class="section-divider"/>
+
+    <div class="section-label">Additional Rows</div>
+    <div style="font-size:12.5px;color:var(--muted);margin-bottom:10px;">Anything else that belongs in the detail table. Added to the bottom of it, in the order below. Empty rows are ignored.</div>
+    <div id="cfExtraRows"></div>
+    <button type="button" class="cf-add-row" onclick="cfAddRow()">+ Add row</button>
+  </div>
+
+  <!-- CARD 3: FREE TEXT -->
+  <div class="card">
+    <div class="card-title"><span class="step-badge">3</span> Letter Text</div>
+    <div style="font-size:12.5px;color:var(--muted);margin-bottom:16px;">Every line below is a suggestion you can rewrite. Clear a box completely and that piece is left off the letter.</div>
+
+    <div class="field-row full">
+      <div class="field">
+        <label>Opening Paragraph</label>
+        <textarea id="cfIntro" style="min-height:70px;" dir="ltr" oninput="this.dataset.manual='1'" placeholder="Left off the letter when blank"></textarea>
+      </div>
+    </div>
+
+    <div class="field-row">
+      <div class="field">
+        <label>Banner, Small Line</label>
+        <input type="text" id="cfBannerLabel" value="We are pleased to confirm" dir="ltr" placeholder="Left off the letter when blank"/>
+      </div>
+      <div class="field">
+        <label>Banner, Main Line</label>
+        <input type="text" id="cfHeadline" dir="ltr" oninput="this.dataset.manual='1'" placeholder="Whole banner is left off when blank"/>
+      </div>
+    </div>
+
+    <div class="field-row full">
+      <div class="field">
+        <label>Included Section Heading</label>
+        <input type="text" id="cfIncludedTitle" value="Included in your booking" dir="ltr"/>
+        <label style="margin-top:14px;">What This Booking Includes <span style="font-size:11px;color:var(--muted);font-weight:400;">(one item per line, shown as a checklist)</span></label>
+        <textarea id="cfIncluded" style="min-height:130px;" dir="ltr" placeholder="7 nights on board in a standard twin cabin&#10;Full board, all meals and soft drinks&#10;3 to 4 guided dives per day, tanks and weights&#10;Airport transfers on arrival and departure"></textarea>
+      </div>
+    </div>
+
+    <div class="field-row full">
+      <div class="field">
+        <label>Not Included Section Heading</label>
+        <input type="text" id="cfExcludedTitle" value="Not included" dir="ltr"/>
+        <label style="margin-top:14px;">Not Included <span style="font-size:11px;color:var(--muted);font-weight:400;">(one item per line, leave blank to hide)</span></label>
+        <textarea id="cfExcluded" style="min-height:80px;" dir="ltr" placeholder="International flights&#10;Dive insurance&#10;Marine park fees payable locally&#10;Personal expenses and crew gratuities"></textarea>
+      </div>
+    </div>
+
+    <div class="field-row full">
+      <div class="field">
+        <label>Before You Travel / On Arrival</label>
+        <textarea id="cfNotes" style="min-height:90px;" dir="ltr" placeholder="Left off the letter when blank"></textarea>
+      </div>
+    </div>
+
+    <div class="field-row">
+      <div class="field">
+        <label>Closing Line</label>
+        <input type="text" id="cfClosing" value="We look forward to diving with you." dir="ltr" placeholder="Left off the letter when blank"/>
+      </div>
+      <div class="field">
+        <label>Sign-off</label>
+        <input type="text" id="cfRegards" value="Warm regards," dir="ltr" placeholder="Left off the letter when blank"/>
+      </div>
+    </div>
+
+    <div class="field-row">
+      <div class="field">
+        <label>Signed By</label>
+        <input type="text" id="cfSigner" value="Ian Casper" dir="ltr"/>
+      </div>
+      <div class="field">
+        <label>Title</label>
+        <input type="text" id="cfSignerTitle" value="Buddy-Divers Ltd." dir="ltr"/>
+      </div>
+    </div>
+    <div class="field-row full">
+      <div class="field">
+        <label style="display:flex;align-items:center;gap:9px;cursor:pointer;text-transform:none;letter-spacing:0;font-size:13px;">
+          <input type="checkbox" id="cfShowSignature" checked style="width:16px;height:16px;accent-color:var(--teal);cursor:pointer;"/>
+          Print the scanned signature above the name
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <!-- CARD 4: CHARGES -->
+  <div class="card">
+    <div class="card-title"><span class="step-badge">4</span> Charges</div>
+    <div class="field-row three">
+      <div class="field">
+        <label>Show On Letter</label>
+        <select id="cfChargesMode" onchange="cfSyncCharges()">
+          <option value="hide" selected>Do not show charges</option>
+          <option value="summary">Full summary (total, paid, balance)</option>
+          <option value="total">Total only</option>
+          <option value="prepaid">Fully prepaid</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Currency</label>
+        <select id="cfCurrency" onchange="cfSyncCharges()">
+          <option value="USD">$ USD</option>
+          <option value="EUR">&euro; EUR</option>
+          <option value="ILS">&#8362; ILS</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Balance Due <span style="font-size:11px;color:var(--muted);font-weight:400;">(auto)</span></label>
+        <input type="text" id="cfBalance" readonly dir="ltr" style="background:var(--bg);font-weight:700;color:var(--navy);"/>
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>Total Charges</label>
+        <div class="currency-wrap cf-cw" data-symbol="$">
+          <input type="number" id="cfTotal" placeholder="0" oninput="cfSyncCharges()"/>
+        </div>
+      </div>
+      <div class="field">
+        <label>Paid To Date</label>
+        <div class="currency-wrap cf-cw" data-symbol="$">
+          <input type="number" id="cfPaid" placeholder="0" oninput="cfSyncCharges()"/>
+        </div>
+      </div>
+    </div>
+    <div class="field-row full">
+      <div class="field">
+        <label>Payment Note <span style="font-size:11px;color:var(--muted);font-weight:400;">(optional, e.g. balance due 90 days before departure)</span></label>
+        <input type="text" id="cfPaymentNote" placeholder="The balance is due no later than 90 days before departure." dir="ltr"/>
+      </div>
+    </div>
+
+    <button class="btn btn-generate" onclick="cfGenerate()">Create Confirmation Letter</button>
+    <div class="msg error" id="cfValidationMsg" style="margin-top:12px;"></div>
+  </div>
+
+</div><!-- end container -->
+</div><!-- end tabConfirm -->
+
+<!-- CONFIRMATION LETTER PREVIEW OVERLAY -->
+<div id="cfPreviewOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:2000;overflow-y:auto;padding:24px 16px;">
+  <div style="background:white;border-radius:16px;max-width:880px;margin:0 auto;box-shadow:0 8px 40px rgba(0,0,0,0.3);overflow:hidden;">
+    <div style="background:#f0f7f9;padding:16px 20px;display:flex;gap:10px;align-items:center;border-bottom:1px solid #c5dfe6;flex-wrap:wrap;">
+      <button id="cfPdfBtn" onclick="cfDownloadPdf()" style="background:#007289;color:white;border:none;border-radius:8px;padding:10px 18px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;">Download PDF</button>
+      <button id="cfJpgBtn" onclick="cfDownloadJpg()" style="background:#1B4F8A;color:white;border:none;border-radius:8px;padding:10px 18px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;">Download JPG</button>
+      <button id="cfWaBtn" onclick="cfSendWhatsApp()" style="background:#25D366;color:white;border:none;border-radius:8px;padding:10px 18px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;">Send on WhatsApp</button>
+      <button onclick="document.getElementById('cfPreviewOverlay').style.display='none'" style="background:white;color:#1a3a4a;border:1.5px solid #c5dfe6;border-radius:8px;padding:10px 16px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;margin-left:auto;">Close</button>
+    </div>
+    <div style="padding:20px;background:#f8f8f8;overflow-x:auto;">
+      <div id="cfLetterHost" style="width:794px;margin:0 auto;box-shadow:0 2px 14px rgba(0,0,0,0.14);"></div>
+    </div>
+  </div>
+</div>
+
 <!-- JPG PREVIEW OVERLAY -->
 <div id="jpgPreviewOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:2000;overflow-y:auto;padding:24px 16px;">
   <div style="background:white;border-radius:16px;max-width:520px;margin:0 auto;box-shadow:0 8px 40px rgba(0,0,0,0.3);overflow:hidden;">
@@ -1113,7 +1421,7 @@ async function searchTrip() {
     let allBookings = [];
     let offset = null;
     do {
-      const pageUrl = `https://api.airtable.com/v0/${BASE_ID}/${BOOKINGS_TABLE}?fields[]=Trip&fields[]=Total+Price&fields[]=Diver+ID&fields[]=First+Name+%28from+Divers%29&fields[]=Last+Name+%28from+Divers%29&fields[]=Returning+Customer` + (offset ? `&offset=${offset}` : '');
+      const pageUrl = `https://api.airtable.com/v0/${BASE_ID}/${BOOKINGS_TABLE}?fields[]=Trip&fields[]=Total+Price&fields[]=Diver+ID&fields[]=First+Name+%28from+Divers%29&fields[]=Last+Name+%28from+Divers%29&fields[]=Returning+Customer&fields[]=Pricing` + (offset ? `&offset=${offset}` : '');
       const pageRes = await fetch(pageUrl, { headers: { Authorization: `Bearer ${AIRTABLE_API_KEY}` } });
       const pageData = await pageRes.json();
       if (pageData.error) {
@@ -1178,6 +1486,7 @@ async function processBookings(records, showTripInLabel) {
       tripRecordId: tripRecId,
       currency: tripInfo.currency || 'USD',
       totalPrice: (Array.isArray(rec.fields['Total Price']) ? rec.fields['Total Price'][0] : rec.fields['Total Price']) || 0,
+      pricing: (Array.isArray(rec.fields['Pricing']) ? rec.fields['Pricing'][0] : rec.fields['Pricing']) || '',
       returningCustomer: (rec.fields['Returning Customer'] || '').toString().trim().toLowerCase() === 'yes'
     });
   }
@@ -2049,8 +2358,10 @@ fetchBoiRate();
 function switchTab(tab) {
   document.getElementById('tabManager').style.display   = tab === 'manager'  ? '' : 'none';
   document.getElementById('tabProforma').style.display  = tab === 'proforma' ? '' : 'none';
+  document.getElementById('tabConfirm').style.display   = tab === 'confirm'  ? '' : 'none';
   document.getElementById('tabBtnManager').classList.toggle('active',  tab === 'manager');
   document.getElementById('tabBtnProforma').classList.toggle('active', tab === 'proforma');
+  document.getElementById('tabBtnConfirm').classList.toggle('active',  tab === 'confirm');
   if (tab === 'proforma') pfSyncRates();
 }
 
@@ -2331,6 +2642,608 @@ async function openProFormaWhatsApp() {
     }, 3000);
   }
 }
+
+
+// ── BOOKING CONFIRMATION LETTER ───────────────────────────────────
+// Trip facts below are generated from the TRIPS config in buddy-divers-registration.html
+// (name, dates, currency and the pricing option labels). When a trip is added there, or
+// its dates or pricing options change, regenerate this map so the letter stays accurate.
+// Everything it fills in is editable on the form before the letter is created.
+const CF_TRIPS = {
+  "260328": { name:"Madagascar Safari", dest:"Madagascar", vessel:"DUNE Madagascar", arrive:"28 March 2026", depart:"5 April 2026", currency:"EUR",
+    opts:{"twin_2890": "Single occupancy in twin room", "twin_2690": "Non-diver sharing twin room", "single_supplement": "Single room supplement (add-on)"} },
+  "260615": { name:"Lembeh, Halmahera & Raja Ampat Safari", dest:"Indonesia (Lembeh, Halmahera & Raja Ampat)", vessel:"", arrive:"15 June 2026", depart:"26 June 2026", currency:"USD",
+    opts:{"cabin_4000": "Per person (shared cabin)", "superior_upgrade_400": "Superior Cabin Main Deck (subject to availability at time of booking)"} },
+  "260620": { name:"Madagascar Safari", dest:"Madagascar", vessel:"DUNE Madagascar", arrive:"20 June 2026", depart:"30 June 2026", currency:"EUR",
+    opts:{"twin_2890": "Single occupancy in twin room", "twin_2690": "Non-diver sharing twin room", "single_supplement": "Single room supplement (add-on)"} },
+  "260708": { name:"Sinai 5-Star Dive Safari", dest:"Sinai, Egypt", vessel:"Renaissance Sharm El Sheikh Golden View Beach Resort", arrive:"8 July 2026", depart:"12 July 2026", currency:"ILS",
+    opts:{"certified_3980": "Certified diver package", "ow_course_3980": "Package incl. Open Water course", "advanced_course_4580": "Package incl. Advanced Open Water course", "nondiver_2730": "Non-diver accommodation package", "single_supp_760": "Single use of double room supplement", "sea_view_double_175": "Sea view room, double occupancy (per person)", "sea_view_single_350": "Sea view room, single occupancy", "suite_double_395": "Suite with garden exit or sea view, double occupancy (per person)", "suite_single_790": "Suite with garden exit or sea view, single occupancy"} },
+  "260725": { name:"Black Manta Maldives Safari", dest:"the Maldives", vessel:"DUNE Black Manta", arrive:"25 July 2026", depart:"1 August 2026", currency:"USD",
+    opts:{"standard_lower_3110": "Standard cabin, twin beds, lower deck", "superior_upper_3320": "Superior cabin, twin beds, upper deck", "deluxe_upper_3360": "Deluxe Sea View cabin, twin beds, upper deck", "premium_main_3380": "Premium cabin, double bed, main deck", "standard_single_3520": "Standard cabin (lower deck), single use", "superior_single_3690": "Superior cabin (upper deck), single use"} },
+  "260729": { name:"Sinai 5-Star Dive Safari", dest:"Sinai, Egypt", vessel:"Renaissance Sharm El Sheikh Golden View Beach Resort", arrive:"29 July 2026", depart:"2 August 2026", currency:"ILS",
+    opts:{"certified_3980": "Certified diver package", "ow_course_3980": "Package incl. Open Water course", "advanced_course_4580": "Package incl. Advanced Open Water course", "nondiver_2730": "Non-diver accommodation package", "single_supp_760": "Single use of double room supplement", "sea_view_double_175": "Sea view room, double occupancy (per person)", "sea_view_single_350": "Sea view room, single occupancy", "suite_double_395": "Suite with garden exit or sea view, double occupancy (per person)", "suite_single_790": "Suite with garden exit or sea view, single occupancy"} },
+  "260730": { name:"Madagascar Safari", dest:"Madagascar", vessel:"DUNE Madagascar", arrive:"30 July 2026", depart:"8 August 2026", currency:"EUR",
+    opts:{"twin_2890": "Single occupancy in twin room", "twin_2690": "Non-diver sharing twin room", "single_supplement": "Single room supplement (add-on)"} },
+  "260801": { name:"Black Manta Maldives Safari", dest:"the Maldives", vessel:"DUNE Black Manta", arrive:"1 August 2026", depart:"8 August 2026", currency:"USD",
+    opts:{"standard_lower_3740": "Standard cabin, twin beds, lower deck", "superior_upper_3980": "Superior cabin, twin beds, upper deck", "deluxe_upper_4020": "Deluxe Sea View cabin, twin beds, upper deck", "premium_main_4050": "Premium cabin, double bed, main deck", "standard_single_4160": "Standard cabin (lower deck), single use", "superior_single_4640": "Superior cabin (upper deck), single use"} },
+  "260815": { name:"Madagascar Safari", dest:"Madagascar", vessel:"DUNE Madagascar", arrive:"15 August 2026", depart:"24 August 2026", currency:"EUR",
+    opts:{"twin_2890": "Single occupancy in twin room", "twin_2690": "Non-diver sharing twin room", "single_supplement": "Single room supplement (add-on)"} },
+  "260828": { name:"Fiji & Tonga Safari", dest:"Fiji & Tonga", vessel:"", arrive:"28 August 2026", depart:"12 September 2026", currency:"USD",
+    opts:{"single_9790": "Price per person"} },
+  "260906": { name:"Flagship Journey - Komodo & North Sulawesi", dest:"Indonesia (Komodo & North Sulawesi)", vessel:"Solitude Adventurer, Coral Eye Resort and Siladen Resort & Spa", arrive:"6 September 2026", depart:"21 September 2026", currency:"USD",
+    opts:{"full_trip_5970": "Base price, 6 nights liveaboard, 4 nights Coral Eye Resort (incl. Garden Villa upgrade), 4 nights Siladen Resort & Spa, and 12 resort dives"} },
+  "260915": { name:"Madagascar Safari", dest:"Madagascar", vessel:"DUNE Madagascar", arrive:"15 September 2026", depart:"24 September 2026", currency:"EUR",
+    opts:{"twin_2890": "Single occupancy in twin room", "twin_2690": "Non-diver sharing twin room", "single_supplement": "Single room supplement (add-on)"} },
+  "260925": { name:"Madagascar Safari", dest:"Madagascar", vessel:"DUNE Madagascar", arrive:"25 September 2026", depart:"4 October 2026", currency:"EUR",
+    opts:{"twin_2890": "Single occupancy in twin room", "twin_2690": "Non-diver sharing twin room", "single_supplement": "Single room supplement (add-on)"} },
+  "260927": { name:"Sinai 5-Star Dive Safari", dest:"Sinai, Egypt", vessel:"Renaissance Sharm El Sheikh Golden View Beach Resort", arrive:"27 September 2026", depart:"1 October 2026", currency:"ILS",
+    opts:{"certified_3980": "Certified diver package", "ow_course_3980": "Package incl. Open Water course", "advanced_course_4580": "Package incl. Advanced Open Water course", "nondiver_2730": "Non-diver accommodation package", "single_supp_760": "Single use of double room supplement", "sea_view_double_175": "Sea view room, double occupancy (per person)", "sea_view_single_350": "Sea view room, single occupancy", "suite_double_395": "Suite with garden exit or sea view, double occupancy (per person)", "suite_single_790": "Suite with garden exit or sea view, single occupancy"} },
+  "261009": { name:"Madagascar Safari", dest:"Madagascar", vessel:"DUNE Madagascar", arrive:"9 October 2026", depart:"18 October 2026", currency:"EUR",
+    opts:{"twin_2890": "Single occupancy in twin room", "twin_2690": "Non-diver sharing twin room", "single_supplement": "Single room supplement (add-on)"} },
+  "261022": { name:"Galapagos Safari", dest:"the Galapagos Islands", vessel:"", arrive:"22 October 2026", depart:"29 October 2026", currency:"USD",
+    opts:{"single_7300": "Price per person"} },
+  "261111": { name:"Flagship Journey - North Sulawesi", dest:"Indonesia (North Sulawesi)", vessel:"Coral Eye Resort and Siladen Resort & Spa", arrive:"11 November 2026", depart:"21 November 2026", currency:"EUR",
+    opts:{"full_trip_3429": "Base price, 5 nights Coral Eye Resort, 5 nights Siladen Resort & Spa (Double Bedroom Garden Villa, twin share), 14 resort dives and 2 dives on the sea crossing between the resorts"} },
+  "261122": { name:"Thailand Safari", dest:"Thailand", vessel:"", arrive:"22 November 2026", depart:"29 November 2026", currency:"USD",
+    opts:{"upper_standard_2360": "Single in twin room, upper deck standard (shared bathroom)", "main_deluxe_2427": "Single in twin room, main deck deluxe", "main_master_2528": "Single in twin room, main deck master (double bed only)"} },
+  "261211": { name:"Myanmar Safari", dest:"Myanmar", vessel:"", arrive:"11 December 2026", depart:"18 December 2026", currency:"USD",
+    opts:{"upper_standard_2350": "Single in twin room, upper deck standard (shared bathroom)", "main_deluxe_2470": "Single in twin room, main deck deluxe", "main_master_2550": "Single in twin room, main deck master (double bed only)"} },
+  "261219": { name:"Philippines Combo", dest:"the Philippines", vessel:"", arrive:"19 December 2026", depart:"30 December 2026", currency:"USD",
+    opts:{"full_package_5990": "Full package, sea + land, 11 nights (flights not included)", "boat_only_2990": "Boat only, 7 nights (flights not included)", "lower_twin_0": "Lower deck, twin room (Bunk Bed)", "lower_triple_90": "Lower deck, triple room for Double Occupancy Only", "main_front_140": "Main deck, front premium cabin", "main_premium_205": "Main deck, premium cabin", "upper_premium_275": "Upper deck, premium cabin", "garden_suite_185": "Resort Garden Suite upgrade", "nitrox_boat_180": "Nitrox Boat", "nitrox_boat_resort_240": "Nitrox Boat & Resort"} },
+  "270104": { name:"Mexico Combo", dest:"Mexico", vessel:"Quino Del Mar", arrive:"4 January 2027", depart:"16 January 2027", currency:"USD",
+    opts:{"quino_4295": "Quino Del Mar, 07/01/27–16/01/27", "land_only_1190": "La Paz, land only (optional) 04/01/27–07/01/27"} },
+  "270106": { name:"Myanmar Safari", dest:"Myanmar", vessel:"", arrive:"6 January 2027", depart:"13 January 2027", currency:"USD",
+    opts:{"upper_standard_2350": "Single in twin room, upper deck standard (shared bathroom)", "main_deluxe_2470": "Single in twin room, main deck deluxe", "main_master_2550": "Single in twin room, main deck master (double bed only)"} },
+  "270118": { name:"Raja Ampat", dest:"Indonesia (Raja Ampat)", vessel:"DUNE Aurora", arrive:"16 January 2027", depart:"28 January 2027", currency:"USD",
+    opts:{"full_package_6980": "Full package incl. flights, transfers & transit hotel, 9 nights liveaboard", "superior_upgrade_330": "Upgrade to Main Deck Superior Cabin", "credit_1750": "Cash Credit for Self-Arranged Flights"} },
+  "270203": { name:"Myanmar Safari", dest:"Myanmar", vessel:"", arrive:"3 February 2027", depart:"10 February 2027", currency:"USD",
+    opts:{"upper_standard_2350": "Single in twin room, upper deck standard (shared bathroom)", "main_deluxe_2470": "Single in twin room, main deck deluxe", "main_master_2550": "Single in twin room, main deck master (double bed only)"} },
+  "270422": { name:"Tubbataha", dest:"the Philippines (Tubbataha Reef)", vessel:"Stella Maris Explorer", arrive:"22 April 2027", depart:"28 April 2027", currency:"USD",
+    opts:{"tubbataha_3630": "Safari price, Main Deck Deluxe cabin (double bed), incl. nitrox"} },
+  "270525": { name:"Flagship Journey - North Sulawesi", dest:"Indonesia (North Sulawesi)", vessel:"Siladen Resort & Spa and Coral Eye Resort", arrive:"23 May 2027", depart:"5 June 2027", currency:"EUR",
+    opts:{"diver_2990": "Diver package", "nondiver_1990": "Non-diver package", "siladen_seaview_338": "Siladen Resort & Spa: Sea View Villa upgrade", "siladen_luxury_638": "Siladen Resort & Spa: Luxury Villa upgrade", "coraleye_garden_313": "Coral Eye Resort: Garden View Villa upgrade", "coraleye_seaview_500": "Coral Eye Resort: Sea View Villa upgrade", "coraleye_pool_863": "Coral Eye Resort: Beachfront Pool Villa upgrade", "extra_dives_50": "Additional pre-booked dives (day/night), €50/dive instead of €60 if purchased directly at the resort"} },
+  "270814": { name:"Flagship Journey - Komodo & North Sulawesi", dest:"Indonesia (Komodo & North Sulawesi)", vessel:"Solitude Adventurer, Coral Eye Resort and Siladen Resort & Spa", arrive:"14 August 2027", depart:"28 August 2027", currency:"USD",
+    opts:{"full_trip_5980": "Base price, twin share throughout all segments", "boat_twin_0": "Standard twin cabin, upper deck", "boat_quad_neg500": "Four-person cabin, $500 credit", "boat_stateroom_490": "Stateroom upgrade, $490 supplement", "coral_garden_290": "Coral Eye Resort: Garden View upgrade", "coral_beach_470": "Coral Eye Resort: Beach View upgrade", "coral_beachpool_820": "Coral Eye Resort: Beach Front Pool upgrade", "siladen_beach_usd320": "Siladen Resort & Spa: Beach View upgrade", "siladen_villa_usd590": "Siladen Resort & Spa: Luxury Villa upgrade", "private_guide_750": "Private dive guide, Solitude Adventurer", "private_guide_resort_110": "Private dive guide, Resorts ($110 per diving day)"} },
+  "271014": { name:"Galapagos Safari", dest:"the Galapagos Islands", vessel:"", arrive:"14 October 2027", depart:"21 October 2027", currency:"USD",
+    opts:{"single_7350": "Price per person"} },
+};
+
+let _cfDataUrl = null;
+
+// ── SMALL HELPERS ────────────────────────────────────────────────
+function cfV(id) { const el = document.getElementById(id); return el ? (el.value || '').trim() : ''; }
+function cfNum(id) { return parseFloat((document.getElementById(id) || {}).value) || 0; }
+function cfLines(id) { return cfV(id).split('\n').map(s => s.trim()).filter(Boolean); }
+function cfEsc(s) {
+  return (s == null ? '' : String(s))
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+function cfSym(cur) { return cur === 'EUR' ? '€' : cur === 'ILS' ? '₪' : '$'; }
+
+// First + last letter of the guest's name, used to build the confirmation number
+function cfInitials(name) {
+  const parts = (name || '').trim().split(/\s+/).filter(Boolean);
+  if (!parts.length) return '';
+  const a = parts[0].charAt(0);
+  const b = parts.length > 1 ? parts[parts.length - 1].charAt(0) : '';
+  return (a + b).toUpperCase();
+}
+
+// Turn a stored Bookings "Pricing" string (value keys joined by +) into readable labels
+function cfPricingList(tripId, pricing) {
+  const trip = CF_TRIPS[tripId];
+  return (pricing || '').split('+').map(s => s.trim()).filter(Boolean)
+    .map(key => (trip && trip.opts && trip.opts[key]) || key.replace(/_/g, ' '));
+}
+
+// ── FORM SYNC ────────────────────────────────────────────────────
+function cfSyncGuests() {
+  const names = cfLines('cfGuests');
+  const countEl = document.getElementById('cfGuestCount');
+  if (!countEl.dataset.manual) {
+    countEl.value = names.length ? names.length + (names.length === 1 ? ' adult' : ' adults') : '';
+  }
+  cfSyncNumber();
+}
+
+function cfSyncNumber() {
+  const el = document.getElementById('cfConfNumber');
+  if (el.dataset.manual) return;
+  el.value = [cfV('cfTripId'), cfInitials(cfLines('cfGuests')[0] || '')].filter(Boolean).join('-');
+}
+
+// The opening paragraph and the banner headline follow the trip fields until Ian edits
+// them by hand. Clearing a box counts as editing it, so a cleared box stays cleared.
+function cfSyncIntro() {
+  const el = document.getElementById('cfIntro');
+  if (el.dataset.manual) return;
+  el.value = cfDefaultIntro(cfV('cfDestination'));
+}
+
+function cfSyncHeadline() {
+  const el = document.getElementById('cfHeadline');
+  if (el.dataset.manual) return;
+  el.value = cfV('cfVessel') ? 'Diving safari on board ' + cfV('cfVessel') : cfV('cfTripName');
+}
+
+// ── ADDITIONAL DETAIL ROWS ───────────────────────────────────────
+function cfAddRow(label, value) {
+  const div = document.createElement('div');
+  div.className = 'cf-extra-row';
+  div.innerHTML = '<input type="text" class="cf-row-label" placeholder="Label, for example Dive guide" dir="ltr"/>'
+    + '<input type="text" class="cf-row-value" placeholder="Value" dir="ltr"/>'
+    + '<button type="button" class="cf-row-del" title="Remove this row" '
+    + 'onclick="this.parentNode.remove(); _cfDataUrl = null;">&times;</button>';
+  document.getElementById('cfExtraRows').appendChild(div);
+  if (label) div.querySelector('.cf-row-label').value = label;
+  if (value) div.querySelector('.cf-row-value').value = value;
+  div.querySelectorAll('input').forEach(i => i.addEventListener('input', () => { _cfDataUrl = null; }));
+  return div;
+}
+
+function cfExtraRows() {
+  return Array.prototype.map.call(
+    document.querySelectorAll('#cfExtraRows .cf-extra-row'),
+    r => ({ label: r.querySelector('.cf-row-label').value.trim(),
+            value: r.querySelector('.cf-row-value').value.trim() })
+  ).filter(r => r.label || r.value);
+}
+
+function cfSyncCharges() {
+  const sym = cfSym(cfV('cfCurrency'));
+  document.querySelectorAll('.cf-cw').forEach(el => el.dataset.symbol = sym);
+  const balance = cfNum('cfTotal') - cfNum('cfPaid');
+  document.getElementById('cfBalance').value = sym + balance.toLocaleString('en-US');
+}
+
+// ── LOAD FROM THE PAYMENT MANAGER TAB ────────────────────────────
+async function cfLoadFromManager() {
+  const idx = document.getElementById('diverSelect').value;
+  if (idx === '') {
+    showMsg('cfLoadMsg', 'error', 'No diver is loaded. Open the Payment Manager tab, search for the diver, then come back and click again.');
+    return;
+  }
+  const booking = currentBookings[idx];
+  const trip = CF_TRIPS[booking.tripId] || {};
+
+  // Guests, confirmation number, date
+  document.getElementById('cfGuestCount').dataset.manual = '';
+  document.getElementById('cfConfNumber').dataset.manual = '';
+  setVal('cfGuests', booking.diverName);
+  setVal('cfDate', new Date().toISOString().split('T')[0]);
+
+  // Trip
+  setVal('cfTripId', booking.tripId);
+  setVal('cfTripName', trip.name || '');
+  setVal('cfDestination', trip.dest || '');
+  setVal('cfVessel', trip.vessel || '');
+  setVal('cfArrival', trip.arrive || '');
+  setVal('cfDeparture', trip.depart || '');
+
+  const packages = cfPricingList(booking.tripId, booking.pricing);
+  setVal('cfCabin', packages.join(', '));
+  if (!cfV('cfTransfer')) setVal('cfTransfer', 'Airport transfers on arrival and departure, arranged by the operator');
+  document.getElementById('cfHeadline').dataset.manual = '';
+  cfSyncHeadline();
+
+  // Flight and hotel, from the Payment Manager form
+  setVal('cfPnr', cfV('pnr'));
+  const hotelParts = [cfV('hotelName')];
+  if (cfV('hotelConfirmation')) hotelParts.push('confirmation ' + cfV('hotelConfirmation'));
+  if (cfV('hotelCheckin') && cfV('hotelCheckout')) hotelParts.push(cfV('hotelCheckin') + ' to ' + cfV('hotelCheckout'));
+  setVal('cfHotel', cfV('hotelName') ? hotelParts.filter(Boolean).join(', ') : '');
+
+  // Charges, mirroring the Financial Summary on the Payment Manager tab
+  const existing = window._existingPayments || {};
+  const total = cfNum('safariPrice') + cfNum('flightCost') + cfNum('hotelCost') + cfNum('extrasAmount') + cfNum('returningDiscount');
+  const paid = (existing.tripPayment || 0) + (existing.flightPayment || 0) + (existing.hotelPayment || 0) + (existing.extrasPayment || 0)
+             + cfNum('tripPayment') + cfNum('flightPayment') + cfNum('hotelPayment') + cfNum('extrasPayment');
+  // Amounts are filled in ready for use, but the charges block stays off unless Ian turns it on
+  setVal('cfCurrency', booking.currency || trip.currency || 'USD');
+  setVal('cfTotal', total || '');
+  setVal('cfPaid', paid || '');
+
+  // Letter text
+  document.getElementById('cfIntro').dataset.manual = '';
+  cfSyncIntro();
+  setVal('cfIncluded', cfDefaultIncluded(booking, packages).join('\n'));
+  if (!cfV('cfNotes')) setVal('cfNotes', cfDefaultArrival());
+
+  // Phone, from the Divers table
+  setVal('cfPhone', 'loading...');
+  if (booking.diverId) {
+    const details = await fetchDiverDetails(booking.diverId);
+    setVal('cfPhone', details.phone || '');
+  } else {
+    setVal('cfPhone', '');
+  }
+
+  cfSyncGuests();
+  cfSyncCharges();
+  showMsg('cfLoadMsg', 'info', 'Loaded ' + booking.diverName + ' on trip ' + booking.tripId + '. Review the fields below, then create the letter.');
+}
+
+function cfDefaultIntro(dest) {
+  const where = dest || 'your chosen destination';
+  return 'Thank you for choosing Buddy-Divers Ltd. for your upcoming dive holiday in ' + where + '. '
+       + 'We are committed to giving our guests an unforgettable experience above and below the water, '
+       + 'and it is our pleasure to confirm the details of your booking below.';
+}
+
+function cfDefaultArrival() {
+  return 'On arrival, once you have cleared immigration and collected your luggage, you will be met in the '
+       + 'arrivals hall by our local representative, who will be holding a sign with your name and will take '
+       + 'you to your transfer. Please keep a copy of this confirmation with you while you travel.';
+}
+
+// Seed the included list from the booking, so Ian edits rather than types from scratch
+function cfDefaultIncluded(booking, packages) {
+  const lines = packages.slice();
+  if (cfNum('flightCost') > 0) lines.push('International flights as detailed in your itinerary');
+  if (cfNum('hotelCost') > 0 && cfV('hotelName')) lines.push('Hotel accommodation at ' + cfV('hotelName'));
+  if (cfNum('extrasAmount') > 0 && cfV('extrasNotes')) lines.push(cfV('extrasNotes'));
+  return lines;
+}
+
+// Ian's scanned signature, inlined so html2canvas can draw it without a CORS fetch.
+// Trimmed and rescaled from the signature block of the original Word confirmation letter.
+const CF_SIGNATURE = 'data:image/jpeg;base64,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';
+
+// ── LETTER ───────────────────────────────────────────────────────
+// A4 page geometry, in CSS pixels at 96dpi
+const CF_PAGE_W = 794, CF_PAGE_H = 1123;
+const CF_PAD_X = 52, CF_PAD_TOP = 38, CF_PAD_BOTTOM = 26;
+const CF_CONTENT_W = CF_PAGE_W - CF_PAD_X * 2;
+
+// The letter is built as a list of independent blocks, then packed into A4 pages,
+// so a long letter breaks between blocks instead of through a line of text.
+function cfBuildParts() {
+  const guests = cfLines('cfGuests');
+  const firstNames = guests.map(n => n.split(/\s+/)[0]).filter(Boolean);
+  const greeting = firstNames.length > 1
+    ? firstNames.slice(0, -1).join(', ') + ' and ' + firstNames[firstNames.length - 1]
+    : (firstNames[0] || '');
+
+  const dateVal = cfV('cfDate');
+  const dateStr = (dateVal ? new Date(dateVal + 'T00:00:00') : new Date())
+    .toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+
+  const cur = cfV('cfCurrency');
+  const sym = cfSym(cur);
+  const money = v => sym + (parseFloat(v) || 0).toLocaleString('en-US');
+
+  const logoHTML = _logoBase64
+    ? '<img src="' + _logoBase64 + '" style="height:66px;" alt="Buddy-Divers"/>'
+    : '<div><div style="font-size:26px;font-weight:800;color:#007289;letter-spacing:-0.5px;">BUDDY</div>'
+      + '<div style="font-size:12px;font-weight:600;color:#1B4F8A;letter-spacing:2px;margin-top:-3px;">DIVERS</div></div>';
+
+  const header = ''
+    + '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:24px;">'
+      + '<div>' + logoHTML + '</div>'
+      + '<div style="text-align:right;">'
+        + '<div style="font-size:11px;font-weight:700;color:#007289;letter-spacing:2.2px;text-transform:uppercase;">Booking Confirmation</div>'
+        + '<div style="display:inline-block;margin-top:7px;background:#fff4ec;border:1.5px solid #d4692a;border-radius:8px;padding:7px 15px;">'
+          + '<div style="font-size:9.5px;color:#a8551f;letter-spacing:1.2px;text-transform:uppercase;">Confirmation number</div>'
+          + '<div style="font-family:\'DM Mono\',monospace;font-size:19px;font-weight:700;color:#d4692a;letter-spacing:0.5px;">' + cfEsc(cfV('cfConfNumber') || '-') + '</div>'
+        + '</div>'
+        + '<div style="font-size:12px;color:#8ba4b0;margin-top:7px;">' + cfEsc(dateStr) + '</div>'
+      + '</div>'
+    + '</div>'
+    + '<div style="height:2px;background:linear-gradient(90deg,#007289,#1B4F8A);border-radius:2px;margin:12px 0 16px;"></div>';
+
+  // Continuation pages carry a slim identifying strip instead of the full letterhead
+  const slimHeader = ''
+    + '<div style="display:flex;align-items:center;justify-content:space-between;font-size:11px;color:#8ba4b0;letter-spacing:1px;text-transform:uppercase;">'
+      + '<span style="font-weight:700;color:#007289;">Buddy-Divers booking confirmation</span>'
+      + '<span style="font-family:\'DM Mono\',monospace;color:#d4692a;font-weight:700;">' + cfEsc(cfV('cfConfNumber') || '-') + '</span>'
+    + '</div>'
+    + '<div style="height:2px;background:linear-gradient(90deg,#007289,#1B4F8A);border-radius:2px;margin:12px 0 20px;"></div>';
+
+  const footer = (pageNo, pageCount) => ''
+    + '<div style="border-top:1px solid #e8f0f3;margin-top:14px;padding-top:11px;display:flex;justify-content:space-between;font-size:11.5px;color:#a8bcc4;">'
+      + '<span>Buddy-Divers</span>'
+      + '<span>www.buddy-divers.com</span>'
+      + '<span>info@buddy-divers.com'
+        + (pageCount > 1 ? '&nbsp;&nbsp;&middot;&nbsp;&nbsp;Page ' + pageNo + ' of ' + pageCount : '')
+      + '</span>'
+    + '</div>';
+
+  // ── blocks ──
+  const blocks = [];
+  const push = (html, gap) => blocks.push({ html: html, gap: gap === undefined ? 12 : gap });
+  const para = txt => '<p style="font-size:13.5px;line-height:1.65;color:#33505f;margin:0;">' + cfEsc(txt) + '</p>';
+
+  if (greeting) push('<div style="font-size:16px;font-weight:700;color:#1a3a4a;">Dear ' + cfEsc(greeting) + ',</div>', 9);
+  if (cfV('cfIntro')) push(para(cfV('cfIntro')), 14);
+
+  // The banner needs a main line; without one it is left off entirely
+  if (cfV('cfHeadline')) {
+    push('<div style="background:linear-gradient(135deg,#007289,#1B4F8A);border-radius:12px;padding:14px 22px;color:white;">'
+      + (cfV('cfBannerLabel')
+          ? '<div style="font-size:10.5px;letter-spacing:2px;text-transform:uppercase;opacity:0.75;margin-bottom:3px;">' + cfEsc(cfV('cfBannerLabel')) + '</div>'
+          : '')
+      + '<div style="font-size:19px;font-weight:700;line-height:1.25;">' + cfEsc(cfV('cfHeadline')) + '</div>'
+      + '</div>', 16);
+  }
+
+  const rowHTML = (label, val) => '<tr>'
+    + '<td style="padding:7px 16px 7px 0;border-bottom:1px solid #e8f0f3;font-size:12.5px;color:#5a7a8a;font-weight:500;vertical-align:top;width:200px;">' + label + '</td>'
+    + '<td style="padding:7px 0;border-bottom:1px solid #e8f0f3;font-size:14px;color:#1a3a4a;font-weight:600;">' + val + '</td>'
+    + '</tr>';
+  const row    = (label, val) => val ? rowHTML(label, val) : '';
+  const addedRow = (label, val) => (label || val) ? rowHTML(label, val) : '';
+  let rows = '';
+  rows += row('Guest names', guests.map(cfEsc).join('<br/>'));
+  rows += row('Number of guests', cfEsc(cfV('cfGuestCount')));
+  rows += row('Trip', cfEsc([cfV('cfTripName'), cfV('cfDestination')].filter(Boolean).join(', ')));
+  rows += row('Arrival', cfEsc(cfV('cfArrival')));
+  rows += row('Departure', cfEsc(cfV('cfDeparture')));
+  rows += row('Cabin type / package', cfEsc(cfV('cfCabin')));
+  rows += row('Transfers', cfEsc(cfV('cfTransfer')));
+  rows += row('Flight booking reference', cfEsc(cfV('cfPnr')));
+  rows += row('Hotel', cfEsc(cfV('cfHotel')));
+  cfExtraRows().forEach(r => { rows += addedRow(cfEsc(r.label), cfEsc(r.value)); });
+  if (rows) push('<table style="width:100%;border-collapse:collapse;">' + rows + '</table>', 16);
+
+  const tick = '<span style="color:#22a06b;font-weight:700;margin-right:8px;">&#10003;</span>';
+  const dot  = '<span style="color:#b0c4cc;font-weight:700;margin-right:8px;">&bull;</span>';
+  const listBlock = (title, items, marker, bg, border) =>
+    '<div style="background:' + bg + ';border:1px solid ' + border + ';border-radius:10px;padding:13px 18px;">'
+    + (title ? '<div style="font-size:12px;font-weight:700;color:#007289;letter-spacing:1px;text-transform:uppercase;margin-bottom:7px;">' + cfEsc(title) + '</div>' : '')
+    + items.map(i => '<div style="font-size:13.5px;color:#1a3a4a;line-height:1.5;padding:1px 0;">' + marker + cfEsc(i) + '</div>').join('')
+    + '</div>';
+
+  const inc = cfLines('cfIncluded');
+  const exc = cfLines('cfExcluded');
+  if (inc.length) push(listBlock(cfV('cfIncludedTitle'), inc, tick, '#f2f9fa', '#d5e9ee'), 11);
+  if (exc.length) push(listBlock(cfV('cfExcludedTitle'), exc, dot, '#fbfcfc', '#e8f0f3'), 14);
+
+  const mode = cfV('cfChargesMode');
+  const total = cfNum('cfTotal'), paid = cfNum('cfPaid'), balance = total - paid;
+  const chargeBox = (label, value, color) =>
+    '<div style="flex:1;text-align:center;padding:9px 8px;">'
+    + '<div style="font-size:11px;color:#5a7a8a;font-weight:600;letter-spacing:0.6px;text-transform:uppercase;margin-bottom:3px;">' + label + '</div>'
+    + '<div style="font-size:19px;font-weight:700;color:' + color + ';">' + value + '</div>'
+    + '</div>';
+  const bar = (label, value) =>
+    '<div style="background:linear-gradient(135deg,#007289,#1B4F8A);border-radius:12px;padding:15px 22px;color:white;display:flex;align-items:center;justify-content:space-between;">'
+    + '<div style="font-size:12px;letter-spacing:1px;text-transform:uppercase;opacity:0.8;">' + label + '</div>'
+    + '<div style="font-size:20px;font-weight:700;">' + value + '</div></div>';
+
+  // Never print a row of zeroes: with no amounts entered the block is simply left out
+  const hasAmounts = total !== 0 || paid !== 0;
+  let chargesHTML = '';
+  if (mode === 'prepaid')                    chargesHTML = bar('Total charges', 'Fully prepaid');
+  else if (mode === 'total' && hasAmounts)   chargesHTML = bar('Total charges', money(total));
+  else if (mode === 'summary' && hasAmounts) chargesHTML = '<div style="border:1px solid #d5e9ee;border-radius:12px;background:#f2f9fa;display:flex;">'
+    + chargeBox('Total charges', money(total), '#1a3a4a')
+    + '<div style="width:1px;background:#d5e9ee;"></div>'
+    + chargeBox('Paid to date', money(paid), '#22a06b')
+    + '<div style="width:1px;background:#d5e9ee;"></div>'
+    + chargeBox('Balance due', balance < 0 ? '(' + money(Math.abs(balance)) + ')' : money(balance), balance > 0 ? '#c47d00' : '#22a06b')
+    + '</div>';
+  if (chargesHTML) {
+    const payNote = cfV('cfPaymentNote');
+    if (payNote) chargesHTML += '<div style="font-size:12px;color:#5a7a8a;margin-top:6px;">' + cfEsc(payNote) + '</div>';
+    push(chargesHTML, 14);
+  }
+
+  if (cfV('cfNotes')) push(para(cfV('cfNotes')), 14);
+
+  const signed = document.getElementById('cfShowSignature').checked
+    ? '<img src="' + CF_SIGNATURE + '" style="height:46px;display:block;margin:3px 0 -5px -4px;" alt=""/>'
+    : '<div style="height:20px;"></div>';
+  const signOff = ''
+    + (cfV('cfClosing') ? '<div style="font-size:13.5px;color:#33505f;margin-bottom:12px;">' + cfEsc(cfV('cfClosing')) + '</div>' : '')
+    + (cfV('cfRegards') ? '<div style="font-size:13.5px;color:#33505f;">' + cfEsc(cfV('cfRegards')) + '</div>' : '')
+    + (cfV('cfSigner') || cfV('cfSignerTitle') ? signed : '')
+    + (cfV('cfSigner') ? '<div style="font-size:15px;font-weight:700;color:#1a3a4a;margin-top:4px;">' + cfEsc(cfV('cfSigner')) + '</div>' : '')
+    + (cfV('cfSignerTitle') ? '<div style="font-size:12.5px;color:#5a7a8a;">' + cfEsc(cfV('cfSignerTitle')) + '</div>' : '');
+  if (signOff) push(signOff, 0);
+
+  return { header: header, slimHeader: slimHeader, footer: footer, blocks: blocks };
+}
+
+// Measure a piece of letter HTML at the letter's real content width
+function cfMeasure(host, html) {
+  host.innerHTML = html;
+  return host.getBoundingClientRect().height;
+}
+
+// Pack the blocks into A4 pages and write them into #cfLetterHost
+function cfRenderPages() {
+  const parts = cfBuildParts();
+
+  const gauge = document.createElement('div');
+  gauge.style.cssText = 'position:fixed;left:-99999px;top:0;width:' + CF_CONTENT_W + 'px;'
+    + "font-family:'DM Sans',Arial,Helvetica,sans-serif;color:#1a3a4a;";
+  gauge.dir = 'ltr';
+  document.body.appendChild(gauge);
+
+  const headerH = cfMeasure(gauge, parts.header);
+  const slimH   = cfMeasure(gauge, parts.slimHeader);
+  const footerH = cfMeasure(gauge, parts.footer(1, 2));
+  parts.blocks.forEach(b => { b.h = cfMeasure(gauge, b.html) + b.gap; });
+
+  const avail = isFirst => CF_PAGE_H - CF_PAD_TOP - CF_PAD_BOTTOM - footerH - (isFirst ? headerH : slimH);
+
+  const pages = [];
+  let current = [], used = 0;
+  parts.blocks.forEach(b => {
+    const room = avail(pages.length === 0);
+    if (current.length && used + b.h > room) {
+      pages.push(current); current = []; used = 0;
+    }
+    current.push(b);
+    used += b.h;
+  });
+  if (current.length) pages.push(current);
+
+  gauge.remove();
+
+  const html = pages.map((blocks, i) => {
+    const isFirst = i === 0;
+    // Blocks stack from the top, the way a letter reads; the footer holds the page foot
+    const body = blocks.map(b => '<div style="margin-bottom:' + b.gap + 'px;">' + b.html + '</div>').join('');
+    return '<div class="cf-page" style="width:' + CF_PAGE_W + 'px;height:' + CF_PAGE_H + 'px;box-sizing:border-box;'
+      + 'background:#ffffff;padding:' + CF_PAD_TOP + 'px ' + CF_PAD_X + 'px ' + CF_PAD_BOTTOM + 'px;'
+      + "font-family:'DM Sans',Arial,Helvetica,sans-serif;color:#1a3a4a;display:flex;flex-direction:column;"
+      + (isFirst ? '' : 'margin-top:20px;') + '" dir="ltr">'
+      + (isFirst ? parts.header : parts.slimHeader)
+      + '<div style="flex:1;display:flex;flex-direction:column;min-height:0;">' + body + '</div>'
+      + parts.footer(i + 1, pages.length)
+      + '</div>';
+  }).join('');
+
+  document.getElementById('cfLetterHost').innerHTML = html;
+  return pages.length;
+}
+
+async function cfGenerate() {
+  const msgEl = document.getElementById('cfValidationMsg');
+  if (!cfLines('cfGuests').length) {
+    msgEl.textContent = 'Enter at least one guest name.';
+    msgEl.style.display = 'block';
+    return;
+  }
+  msgEl.style.display = 'none';
+
+  if (!_logoBase64) await preloadLogo();
+
+  _cfDataUrl = null;
+  document.getElementById('cfPreviewOverlay').style.display = 'block';
+  cfRenderPages();
+}
+
+function cfFileName(ext) {
+  const num = cfV('cfConfNumber') || 'confirmation';
+  const who = (cfLines('cfGuests')[0] || '').replace(/\s+/g, '-');
+  return ['booking-confirmation', num, who].filter(Boolean).join('-') + '.' + ext;
+}
+
+// Render every A4 page to its own canvas
+async function cfRenderCanvases() {
+  const nodes = document.querySelectorAll('#cfLetterHost .cf-page');
+  if (!nodes.length) throw new Error('letter not rendered');
+  const out = [];
+  for (const node of nodes) {
+    out.push(await html2canvas(node, {
+      scale: 2, useCORS: true, allowTaint: false, backgroundColor: '#ffffff', logging: false
+    }));
+  }
+  return out;
+}
+
+let _cfImgW = 0, _cfImgH = 0;
+
+// One tall JPG of all pages stacked, used for the download and for WhatsApp
+async function cfGetDataUrl() {
+  if (_cfDataUrl) return _cfDataUrl;
+  const canvases = await cfRenderCanvases();
+  const gap = canvases.length > 1 ? 24 : 0;
+  const w = Math.max.apply(null, canvases.map(c => c.width));
+  const h = canvases.reduce((sum, c) => sum + c.height, 0) + gap * (canvases.length - 1);
+  const out = document.createElement('canvas');
+  out.width = w; out.height = h;
+  const ctx = out.getContext('2d');
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, w, h);
+  let y = 0;
+  canvases.forEach(c => { ctx.drawImage(c, 0, y); y += c.height + gap; });
+  _cfImgW = w; _cfImgH = h;
+  _cfDataUrl = out.toDataURL('image/jpeg', 0.94);
+  return _cfDataUrl;
+}
+
+async function cfDownloadJpg() {
+  const btn = document.getElementById('cfJpgBtn');
+  const label = btn.textContent;
+  btn.disabled = true; btn.textContent = 'Rendering...';
+  try {
+    const url = await cfGetDataUrl();
+    const a = document.createElement('a');
+    a.href = url; a.download = cfFileName('jpg'); a.click();
+  } catch (e) {
+    console.error('Confirmation JPG error:', e);
+    alert('Could not create the image. Please try again.');
+  }
+  btn.disabled = false; btn.textContent = label;
+}
+
+// One PDF page per A4 page, no image slicing, so nothing breaks mid-sentence
+async function cfDownloadPdf() {
+  const btn = document.getElementById('cfPdfBtn');
+  const label = btn.textContent;
+  btn.disabled = true; btn.textContent = 'Rendering...';
+  try {
+    const canvases = await cfRenderCanvases();
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
+    canvases.forEach((c, i) => {
+      if (i > 0) pdf.addPage();
+      pdf.addImage(c.toDataURL('image/jpeg', 0.94), 'JPEG', 0, 0, 210, 297);
+    });
+    pdf.save(cfFileName('pdf'));
+  } catch (e) {
+    console.error('Confirmation PDF error:', e);
+    alert('Could not create the PDF. Please try again.');
+  }
+  btn.disabled = false; btn.textContent = label;
+}
+
+async function cfSendWhatsApp() {
+  const btn = document.getElementById('cfWaBtn');
+  const phone = cfV('cfPhone').replace(/\D/g, '');
+  if (!phone) { alert('Enter a WhatsApp phone number first.'); return; }
+
+  btn.disabled = true; btn.textContent = 'Uploading...';
+  try {
+    const url = await cfGetDataUrl();
+    const blob = await (await fetch(url)).blob();
+    const fd = new FormData();
+    fd.append('file', blob, 'booking-confirmation.jpg');
+    fd.append('upload_preset', 'buddy_divers_uploads');
+    fd.append('folder', 'booking_confirmations/' + (cfV('cfTripId') || 'unknown_trip'));
+    const clRes = await fetch('https://api.cloudinary.com/v1_1/dccbsfte0/image/upload', { method: 'POST', body: fd });
+    const clData = await clRes.json();
+    if (!clData.secure_url) throw new Error('Cloudinary upload failed');
+
+    btn.textContent = 'Sending...';
+    const makeRes = await fetch('https://hook.eu1.make.com/yabs6aeja0bz6eoxw29p8t9tpgqi7tio', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phone: phone, imageUrl: clData.secure_url, caption: '' })
+    });
+    if (!makeRes.ok) throw new Error('Make webhook failed');
+
+    btn.textContent = 'Sent';
+    btn.style.background = '#22a06b';
+    setTimeout(() => { btn.textContent = 'Send on WhatsApp'; btn.style.background = '#25D366'; btn.disabled = false; }, 3000);
+  } catch (e) {
+    console.error('Confirmation WhatsApp error:', e);
+    btn.textContent = 'Error, try again';
+    btn.style.background = '#d93f3f';
+    btn.disabled = false;
+    setTimeout(() => { btn.textContent = 'Send on WhatsApp'; btn.style.background = '#25D366'; }, 3000);
+  }
+}
+
+// Any edit invalidates the cached render
+['cfGuests','cfGuestCount','cfPhone','cfConfNumber','cfDate','cfTripId','cfTripName','cfDestination',
+ 'cfVessel','cfArrival','cfDeparture','cfCabin','cfTransfer','cfPnr','cfHotel','cfIntro','cfBannerLabel',
+ 'cfHeadline','cfIncludedTitle','cfIncluded','cfExcludedTitle','cfExcluded','cfNotes','cfClosing',
+ 'cfRegards','cfSigner','cfSignerTitle','cfChargesMode','cfCurrency','cfTotal','cfPaid',
+ 'cfPaymentNote','cfShowSignature'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('input', () => { _cfDataUrl = null; });
+});
+
+// Defaults on load, so a letter written without the Payment Manager is still complete.
+// All of them sit in editable boxes, and clearing a box keeps it off the letter.
+document.getElementById('cfDate').value = new Date().toISOString().split('T')[0];
+setVal('cfNotes', cfDefaultArrival());
+setVal('cfTransfer', 'Airport transfers on arrival and departure, arranged by the operator');
+cfAddRow();
+cfSyncCharges();
 
 </script>
 </body>
