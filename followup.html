@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<!-- BD-FOLLOWUP 2026-08-05q | Confirmation number printed blank: html2canvas drops text inside display:inline-block, so the box drew empty. Switched to display:table
+<!-- BD-FOLLOWUP 2026-08-05r | Trips are read live from buddy-divers-registration.html instead of a baked snapshot, so adding a trip there is enough; the snapshot stays as a fallback and supplies destination and vessel
+     BD-FOLLOWUP 2026-08-05q | Confirmation number printed blank: html2canvas drops text inside display:inline-block, so the box drew empty. Switched to display:table
      BD-FOLLOWUP 2026-08-05p | Confirmations filed flat under booking_confirmations, no per-trip subfolders
      BD-FOLLOWUP 2026-08-05o | Cloudinary copies are filed as booking_confirmations/<tripId>/<confNumber>-<timestamp> instead of a random id
      BD-FOLLOWUP 2026-08-05n | Hebrew half of the email now signs in Hebrew: איאן כספר / באדי-דייברס בע״מ
@@ -2427,6 +2428,7 @@ function switchTab(tab) {
   document.getElementById('tabBtnProforma').classList.toggle('active', tab === 'proforma');
   document.getElementById('tabBtnConfirm').classList.toggle('active',  tab === 'confirm');
   if (tab === 'proforma') pfSyncRates();
+  if (tab === 'confirm') cfLoadTrips();
 }
 
 // ── PRO FORMA ─────────────────────────────────────────────────────
@@ -2709,11 +2711,12 @@ async function openProFormaWhatsApp() {
 
 
 // ── BOOKING CONFIRMATION LETTER ───────────────────────────────────
-// Trip facts below are generated from the TRIPS config in buddy-divers-registration.html
-// (name, dates, currency and the pricing option labels). When a trip is added there, or
-// its dates or pricing options change, regenerate this map so the letter stays accurate.
-// Everything it fills in is editable on the form before the letter is created.
-const CF_TRIPS = {
+// FALLBACK ONLY. The live trip facts are read straight out of the TRIPS config in
+// buddy-divers-registration.html at runtime (see cfLoadTrips), so adding a trip there is
+// enough and nothing here needs regenerating. This snapshot is what the letter falls back
+// to if that fetch or parse ever fails, and it is also where `dest` and `vessel` come from,
+// since the registration config does not carry them.
+const CF_TRIPS_FALLBACK = {
   "260328": { name:"Madagascar Safari", dest:"Madagascar", vessel:"DUNE Madagascar", arrive:"28 March 2026", depart:"5 April 2026", currency:"EUR",
     opts:{"twin_2890": "Single occupancy in twin room", "twin_2690": "Non-diver sharing twin room", "single_supplement": "Single room supplement (add-on)"} },
   "260615": { name:"Lembeh, Halmahera & Raja Ampat Safari", dest:"Indonesia (Lembeh, Halmahera & Raja Ampat)", vessel:"", arrive:"15 June 2026", depart:"26 June 2026", currency:"USD",
@@ -2771,6 +2774,115 @@ const CF_TRIPS = {
   "271014": { name:"Galapagos Safari", dest:"the Galapagos Islands", vessel:"", arrive:"14 October 2027", depart:"21 October 2027", currency:"USD",
     opts:{"single_7350": "Price per person"} },
 };
+
+
+// ── LIVE TRIP CONFIG ─────────────────────────────────────────────
+// The trips live in buddy-divers-registration.html, same origin, so the letter reads them
+// from there instead of carrying a copy that goes stale every time a trip is added.
+// Name, dates, currency and the package labels come from that file. Destination and vessel
+// are not in it, so those still come from the fallback snapshot; a brand new trip simply
+// arrives with those two blank for Ian to type once.
+let CF_TRIPS = CF_TRIPS_FALLBACK;
+let _cfTripsPromise = null;
+
+const CF_MONTHS = ['January','February','March','April','May','June',
+                   'July','August','September','October','November','December'];
+
+// Brace matching that steps over quoted strings, so a brace inside a label cannot end it early
+function cfExtractObjectLiteral(src, marker) {
+  const i = src.indexOf(marker);
+  if (i === -1) return null;
+  const start = src.indexOf('{', i);
+  if (start === -1) return null;
+  let depth = 0, quote = null;
+  for (let j = start; j < src.length; j++) {
+    const c = src[j];
+    if (quote) {
+      if (c === '\\') { j++; continue; }
+      if (c === quote) quote = null;
+      continue;
+    }
+    if (c === '"' || c === "'" || c === '`') { quote = c; continue; }
+    if (c === '{') depth++;
+    else if (c === '}') { depth--; if (depth === 0) return src.slice(start, j + 1); }
+  }
+  return null;
+}
+
+// "\ud83e\udd3f ספארי גלאפגוס — Galapagos Safari" -> "Galapagos Safari". Empty if the name is Hebrew only.
+function cfEnglishName(name) {
+  const s = String(name || '');
+  const tail = s.lastIndexOf('—') !== -1 ? s.slice(s.lastIndexOf('—') + 1) : s;
+  return tail.replace(/^[^A-Za-z(]+/, '').replace(/[^\x20-\x7E]+$/, '').trim();
+}
+
+// "22/10/2026 – 29/10/2026" -> ["22 October 2026", "29 October 2026"]. Empty for Hebrew date prose.
+function cfParseDates(dates) {
+  const parts = String(dates || '').split(/\s*[\u2013-]\s*/);
+  const fmt = s => {
+    const m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec((s || '').trim());
+    return m ? parseInt(m[1], 10) + ' ' + CF_MONTHS[parseInt(m[2], 10) - 1] + ' ' + m[3] : '';
+  };
+  return [fmt(parts[0]), fmt(parts[parts.length - 1])];
+}
+
+// Every priced option, wherever it lives: pricing, addons, roomOptions, or anything added later
+function cfCollectOpts(trip) {
+  const out = {};
+  Object.keys(trip || {}).forEach(key => {
+    const arr = trip[key];
+    if (!Array.isArray(arr)) return;
+    arr.forEach(o => {
+      if (!o || typeof o !== 'object' || !o.value) return;
+      const label = o.en || o.he || '';
+      // house rule: no em-dashes in customer-facing text
+      if (label) out[o.value] = String(label).split(' — ').join(', ').split('—').join('-');
+    });
+  });
+  return out;
+}
+
+// Fetched once, lazily, the first time the Confirmation Letter tab is used.
+function cfLoadTrips() {
+  if (_cfTripsPromise) return _cfTripsPromise;
+  _cfTripsPromise = (async function() {
+    try {
+      const res = await fetch('buddy-divers-registration.html', { cache: 'no-cache' });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const lit = cfExtractObjectLiteral(await res.text(), 'const TRIPS = {');
+      if (!lit) throw new Error('TRIPS block not found');
+      const raw = new Function('return ' + lit)();
+
+      const built = {};
+      Object.keys(raw).forEach(id => {
+        if (!/^\d{6}$/.test(id)) return;          // skip "default"
+        const src  = raw[id] || {};
+        const back = CF_TRIPS_FALLBACK[id] || {};
+        const dates = cfParseDates(src.dates);
+        built[id] = {
+          name:     cfEnglishName(src.name) || back.name || '',
+          dest:     back.dest || '',            // not carried in the registration config
+          vessel:   back.vessel || '',          // not carried in the registration config
+          arrive:   dates[0] || back.arrive || '',
+          depart:   dates[1] || back.depart || '',
+          currency: src.currency || back.currency || 'USD',
+          opts:     cfCollectOpts(src)
+        };
+      });
+
+      if (!Object.keys(built).length) throw new Error('no trips parsed');
+      CF_TRIPS = built;
+      console.log('Trips loaded live from buddy-divers-registration.html:', Object.keys(built).length);
+    } catch (e) {
+      // Restore explicitly rather than relying on nothing having overwritten it,
+      // so the letter is guaranteed to keep working whatever state we were in
+      CF_TRIPS = CF_TRIPS_FALLBACK;
+      console.warn('Live trip config unavailable, using the built-in snapshot:', e.message);
+    }
+    return CF_TRIPS;
+  })();
+  return _cfTripsPromise;
+}
 
 let _cfDataUrl = null;
 
@@ -2864,6 +2976,7 @@ function cfSyncCharges() {
 let cfBookings = [];
 
 async function cfSearch() {
+  await cfLoadTrips();
   const tripId  = cfV('cfTripSelect');
   const fnQuery = cfV('cfFirstName').toLowerCase();
   const lnQuery = cfV('cfLastName').toLowerCase();
@@ -2905,6 +3018,7 @@ async function cfSearch() {
 }
 
 async function cfLoadDiver() {
+  await cfLoadTrips();
   const idx = document.getElementById('cfDiverSelect').value;
   if (idx === '') return;
   const booking = cfBookings[idx];
