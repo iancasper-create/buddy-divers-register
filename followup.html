@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<!-- BD-FOLLOWUP 2026-08-05d | PDF download also archives the letter and logs it; one row per letter whichever way it goes out
+<!-- BD-FOLLOWUP 2026-08-05e | JPG download logs too, so every way a letter leaves is recorded
+     BD-FOLLOWUP 2026-08-05d | PDF download also archives the letter and logs it; one row per letter whichever way it goes out
      BD-FOLLOWUP 2026-08-05c | Confirmations log trimmed to the six fields Ian asked for
      BD-FOLLOWUP 2026-08-05b | Confirmation letters logged to the Airtable Confirmations table on WhatsApp send, same pattern as Payment Requests
      BD-FOLLOWUP 2026-08-05a | Third tab: Booking Confirmation letter (A4, logo, confirmation number = Trip ID + guest initials, trip/booking data auto-filled, free-text purchase description, PDF/JPG/WhatsApp output)
@@ -3211,6 +3212,11 @@ async function cfDownloadJpg() {
     const url = await cfGetDataUrl();
     const a = document.createElement('a');
     a.href = url; a.download = cfFileName('jpg'); a.click();
+
+    // Logged after the file is saved, and never allowed to fail the download
+    try {
+      await cfLogConfirmation(await cfUploadLetter());
+    } catch (logErr) { console.warn('Confirmations log failed (non-critical):', logErr); }
   } catch (e) {
     console.error('Confirmation JPG error:', e);
     alert('Could not create the image. Please try again.');
