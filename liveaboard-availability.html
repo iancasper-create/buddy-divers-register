@@ -1,4 +1,7 @@
 <!DOCTYPE html>
+<!-- BD-LBLAH 2026-08-05a | date pickers reordered to year, month, day reading right to left (Ian 2026-08-05: coarse to fine, it helps when narrowing down). Desktop track widths follow the new
+     order (74/94/58 rather than 58/94/74); mobile inherits it from the DOM. The from/to marker moved onto the YEAR, now the first field of each group, since with it left on the day both
+     groups would have opened with a bare שנה and been indistinguishable: מיום/עד יום became משנה/עד שנה, and the day fields became plain יום. -->
 <!-- BD-LBLAH 2026-08-01r | boat description (על הספינה) moved from last in the detail panel to directly under the WhatsApp booking request and above the cabin spec: it is the only persuasive, fully-Hebrew section and was buried under two reference tables -->
 <html lang="he" dir="rtl">
 <head>
@@ -91,8 +94,13 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background:
   align-items:end;border-top:1px solid var(--border);padding-top:13px;margin-top:2px}
 /* The six date fields were 1fr each and enormously wider than their contents: a day
    select holds "1".."31", a year "2026".."2031". Sized to the text instead, which is
-   what frees the width for search and sort to come up onto this row. */
-.controls .row2 .dates6{display:grid;grid-template-columns:repeat(2,58px 94px 74px);gap:8px}
+   what frees the width for search and sort to come up onto this row.
+   Order is year, month, day reading right to left (Ian 2026-08-05, coarse to fine, it
+   helps when narrowing down); the track widths below follow that order, so swapping the
+   fields back means swapping 74px and 58px back too. The from/to marker sits on the YEAR
+   because that is now the first field of each group; with it on the day, both groups
+   would open with a bare "שנה" and you could not tell them apart. */
+.controls .row2 .dates6{display:grid;grid-template-columns:repeat(2,74px 94px 58px);gap:8px}
 /* On desktop the search wrapper dissolves so its two children sit directly in the row 2
    grid as before. DOM order is search then נקה סינון, but the desktop row wants מיון
    between them, hence the order values. */
@@ -477,12 +485,12 @@ table.cab tr.sold td{opacity:.45}
            there; do not remove them. -->
       <div class="row2">
         <div class="fld dates6">
-          <div class="fld"><label for="fFromD">מיום</label><select id="fFromD"></select></div>
+          <div class="fld"><label for="fFromY">משנה</label><select id="fFromY"></select></div>
           <div class="fld"><label for="fFromM">חודש</label><select id="fFromM"></select></div>
-          <div class="fld"><label for="fFromY">שנה</label><select id="fFromY"></select></div>
-          <div class="fld"><label for="fToD">עד יום</label><select id="fToD"></select></div>
+          <div class="fld"><label for="fFromD">יום</label><select id="fFromD"></select></div>
+          <div class="fld"><label for="fToY">עד שנה</label><select id="fToY"></select></div>
           <div class="fld"><label for="fToM">חודש</label><select id="fToM"></select></div>
-          <div class="fld"><label for="fToY">שנה</label><select id="fToY"></select></div>
+          <div class="fld"><label for="fToD">יום</label><select id="fToD"></select></div>
         </div>
         <!-- search and נקה סינון are wrapped so that on mobile they can be a flex row where
              the button takes its natural width and the input absorbs everything else. On
