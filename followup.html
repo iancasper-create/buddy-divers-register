@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<!-- BD-FOLLOWUP 2026-08-05g | Arrival/Departure relabelled Embarkation/Disembarkation on the form and the letter
+<!-- BD-FOLLOWUP 2026-08-05h | Included/Not-included lists are real prefilled defaults now, not grey placeholder examples that printed nothing
+     BD-FOLLOWUP 2026-08-05g | Arrival/Departure relabelled Embarkation/Disembarkation on the form and the letter
      BD-FOLLOWUP 2026-08-05f | Confirmation tab searches for the diver itself instead of borrowing the Payment Manager's selection; search core shared by both tabs
      BD-FOLLOWUP 2026-08-05e | JPG download logs too, so every way a letter leaves is recorded
      BD-FOLLOWUP 2026-08-05d | PDF download also archives the letter and logs it; one row per letter whichever way it goes out
@@ -1193,7 +1194,7 @@
         <label>Included Section Heading</label>
         <input type="text" id="cfIncludedTitle" value="Included in your booking" dir="ltr"/>
         <label style="margin-top:14px;">What This Booking Includes <span style="font-size:11px;color:var(--muted);font-weight:400;">(one item per line, shown as a checklist)</span></label>
-        <textarea id="cfIncluded" style="min-height:130px;" dir="ltr" placeholder="7 nights on board in a standard twin cabin&#10;Full board, all meals and soft drinks&#10;3 to 4 guided dives per day, tanks and weights&#10;Airport transfers on arrival and departure"></textarea>
+        <textarea id="cfIncluded" style="min-height:130px;" dir="ltr" placeholder="Left off the letter when blank"></textarea>
       </div>
     </div>
 
@@ -1202,7 +1203,7 @@
         <label>Not Included Section Heading</label>
         <input type="text" id="cfExcludedTitle" value="Not included" dir="ltr"/>
         <label style="margin-top:14px;">Not Included <span style="font-size:11px;color:var(--muted);font-weight:400;">(one item per line, leave blank to hide)</span></label>
-        <textarea id="cfExcluded" style="min-height:80px;" dir="ltr" placeholder="International flights&#10;Dive insurance&#10;Marine park fees payable locally&#10;Personal expenses and crew gratuities"></textarea>
+        <textarea id="cfExcluded" style="min-height:100px;" dir="ltr" placeholder="Left off the letter when blank"></textarea>
       </div>
     </div>
 
@@ -2965,6 +2966,15 @@ async function cfLoadDiver() {
   if (costs.hotel > 0 && hotelName) included.push('Hotel accommodation at ' + hotelName);
   if (costs.extras > 0 && extrasNotes) included.push(extrasNotes);
   setVal('cfIncluded', included.join('\n'));
+
+  // Trips like 270118 sell flights inside the package, and the default excludes list says
+  // "International flights". Printing both would contradict itself, so drop that line, but
+  // only while the excludes list is still the untouched default: never edit Ian's own wording.
+  const flightsIncluded = costs.flight > 0 || packages.some(p => /flight/i.test(p));
+  if (flightsIncluded && cfV('cfExcluded') === CF_DEFAULT_EXCLUDED.join('\n')) {
+    setVal('cfExcluded', CF_DEFAULT_EXCLUDED.filter(l => !/^international flights$/i.test(l)).join('\n'));
+  }
+
   if (!cfV('cfNotes')) setVal('cfNotes', cfDefaultArrival());
 
   // Phone, from the Divers table
@@ -2986,6 +2996,21 @@ function cfDefaultIntro(dest) {
        + 'We are committed to giving our guests an unforgettable experience above and below the water, '
        + 'and it is our pleasure to confirm the details of your booking below.';
 }
+
+// Starting points, printed as written unless edited. Clearing a box drops that section.
+// The includes list is REPLACED by the real package when a diver is loaded; the excludes list is not.
+const CF_DEFAULT_INCLUDED = [
+  '7 nights on board in a standard twin cabin',
+  'Full board, all meals and soft drinks',
+  '3 to 4 guided dives per day, tanks and weights',
+  'Airport transfers on arrival and departure'
+];
+const CF_DEFAULT_EXCLUDED = [
+  'International flights',
+  'Dive insurance',
+  'Marine park fees payable locally',
+  'Personal expenses and crew gratuities'
+];
 
 function cfDefaultArrival() {
   return 'On arrival, once you have cleared immigration and collected your luggage, you will be met in the '
@@ -3409,6 +3434,8 @@ async function cfSendWhatsApp() {
 document.getElementById('cfDate').value = new Date().toISOString().split('T')[0];
 setVal('cfNotes', cfDefaultArrival());
 setVal('cfTransfer', 'Airport transfers on arrival and departure, arranged by the operator');
+setVal('cfIncluded', CF_DEFAULT_INCLUDED.join('\n'));
+setVal('cfExcluded', CF_DEFAULT_EXCLUDED.join('\n'));
 cfAddRow();
 cfSyncCharges();
 
