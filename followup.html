@@ -1,5 +1,7 @@
 <!DOCTYPE html>
-<!-- BD-FOLLOWUP 2026-08-05e | JPG download logs too, so every way a letter leaves is recorded
+<!-- BD-FOLLOWUP 2026-08-05g | Arrival/Departure relabelled Embarkation/Disembarkation on the form and the letter
+     BD-FOLLOWUP 2026-08-05f | Confirmation tab searches for the diver itself instead of borrowing the Payment Manager's selection; search core shared by both tabs
+     BD-FOLLOWUP 2026-08-05e | JPG download logs too, so every way a letter leaves is recorded
      BD-FOLLOWUP 2026-08-05d | PDF download also archives the letter and logs it; one row per letter whichever way it goes out
      BD-FOLLOWUP 2026-08-05c | Confirmations log trimmed to the six fields Ian asked for
      BD-FOLLOWUP 2026-08-05b | Confirmation letters logged to the Airtable Confirmations table on WhatsApp send, same pattern as Payment Requests
@@ -1045,11 +1047,32 @@
   <!-- CARD 1: GUESTS -->
   <div class="card">
     <div class="card-title"><span class="step-badge">1</span> Guests</div>
-    <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:12px;">
-      <button class="btn btn-primary" onclick="cfLoadFromManager()">Load from Payment Manager</button>
-      <div style="font-size:12.5px;color:var(--muted);max-width:520px;">Find the diver in the Payment Manager tab first, then click here. Trip, dates, package, flights, hotel and charges all fill in automatically. Every field below stays editable.</div>
+    <div class="search-row">
+      <div class="field">
+        <label>Trip</label>
+        <select id="cfTripSelect" style="width:100%;padding:10px 14px;border:1.5px solid #c5dfe6;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:15px;color:#1a3a4a;outline:none;background:#fff;">
+          <option value="">Loading trips...</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>First Name</label>
+        <input type="text" id="cfFirstName" placeholder="Optional" autocomplete="off" dir="ltr">
+      </div>
+      <div class="field">
+        <label>Last Name</label>
+        <input type="text" id="cfLastName" placeholder="Optional" autocomplete="off" dir="ltr">
+      </div>
+      <button class="btn btn-primary" id="cfSearchBtn" onclick="cfSearch()">Search</button>
     </div>
+    <div style="font-size:12.5px;color:#5a7a8a;margin-top:8px;">Use any combination: trip only, name only (searches all trips), or trip + name. Picking a diver fills in the trip, dates, package, flights, hotel and charges. Every field stays editable.</div>
     <div class="msg info" id="cfLoadMsg"></div>
+
+    <div class="field" id="cfDiverWrap" style="display:none;margin-top:14px;">
+      <label>Diver</label>
+      <select id="cfDiverSelect" onchange="cfLoadDiver()">
+        <option value="">- Select a diver -</option>
+      </select>
+    </div>
 
     <div class="field-row">
       <div class="field">
@@ -1101,11 +1124,11 @@
     </div>
     <div class="field-row">
       <div class="field">
-        <label>Arrival</label>
+        <label>Embarkation</label>
         <input type="text" id="cfArrival" placeholder="22 October 2026" dir="ltr"/>
       </div>
       <div class="field">
-        <label>Departure</label>
+        <label>Disembarkation</label>
         <input type="text" id="cfDeparture" placeholder="29 October 2026" dir="ltr"/>
       </div>
     </div>
@@ -1347,33 +1370,39 @@ function submitToken() {
 }
 
 async function loadTripDropdown() {
-  const sel = document.getElementById('tripIdInput');
-  sel.innerHTML = '<option value="">Loading trips...</option>';
+  // Both the Payment Manager and the Confirmation Letter tab have a trip picker
+  const sels = ['tripIdInput', 'cfTripSelect'].map(id => document.getElementById(id)).filter(Boolean);
+  const sel = sels[0];
+  const setAll = html => sels.forEach(s => s.innerHTML = html);
+  setAll('<option value="">Loading trips...</option>');
   try {
     const url = `https://api.airtable.com/v0/${BASE_ID}/tbl8KGVwkIHi26plq?maxRecords=100`;
     const res = await fetch(url, { headers: { Authorization: `Bearer ${AIRTABLE_API_KEY}` } });
     const data = await res.json();
     if (!data.records || data.records.length === 0) {
-      sel.innerHTML = '<option value="">No trips found</option>';
+      setAll('<option value="">No trips found</option>');
       return;
     }
     // Sort by Trip Id descending (most future first)
     data.records.sort((a, b) =>
       (b.fields['Trip Id'] || '').localeCompare(a.fields['Trip Id'] || ''));
-    sel.innerHTML = '<option value="">— Select a trip —</option>';
+    setAll('<option value="">— Select a trip —</option>');
     tripsCache = {};
     data.records.forEach(function(rec) {
       const tid  = rec.fields['Trip Id']   || '';
       const name = rec.fields['Trip Name'] || '';
       if (!tid) return;
       tripsCache[rec.id] = { tripId: tid, currency: rec.fields['Currency'] || 'USD' };
-      const opt = document.createElement('option');
-      opt.value = tid;
-      opt.textContent = (name && name !== tid) ? name + ' (' + tid + ')' : tid;
-      sel.appendChild(opt);
+      const label = (name && name !== tid) ? name + ' (' + tid + ')' : tid;
+      sels.forEach(function(s) {
+        const opt = document.createElement('option');
+        opt.value = tid;
+        opt.textContent = label;
+        s.appendChild(opt);
+      });
     });
   } catch(e) {
-    sel.innerHTML = '<option value="">Error loading trips</option>';
+    setAll('<option value="">Error loading trips</option>');
     console.error('loadTripDropdown error:', e);
   }
 }
@@ -1383,6 +1412,95 @@ document.getElementById('tokenInput').addEventListener('keydown', e => { if (e.k
 
 // Run on load
 checkToken();
+
+// ── SHARED BOOKING SEARCH ────────────────────────────────────────
+// Used by the Payment Manager tab and the Confirmation Letter tab so both behave identically.
+// Returns { records } on success or { error } with a message ready to show.
+async function findBookings(tripId, fnQuery, lnQuery) {
+  // Step 1: If a trip was selected, resolve its Airtable record ID (from cache, with API fallback)
+  let tripRecordId = null;
+  if (tripId) {
+    tripRecordId = Object.keys(tripsCache).find(id => tripsCache[id].tripId === tripId) || null;
+    if (!tripRecordId) {
+      const tripFormula = encodeURIComponent(`{Trip Id} = "${tripId}"`);
+      const tripUrl = `https://api.airtable.com/v0/${BASE_ID}/tbl8KGVwkIHi26plq?filterByFormula=${tripFormula}&fields[]=Trip+Id&fields[]=Currency`;
+      const tripRes = await fetch(tripUrl, { headers: { Authorization: `Bearer ${AIRTABLE_API_KEY}` } });
+      const tripData = await tripRes.json();
+      if (tripData.records && tripData.records.length > 0) {
+        tripRecordId = tripData.records[0].id;
+        tripsCache[tripRecordId] = { tripId, currency: tripData.records[0].fields['Currency'] || 'USD' };
+      }
+    }
+    if (!tripRecordId) return { error: `Trip "${tripId}" not found in Trips table.` };
+  }
+
+  // Step 2: Fetch ALL bookings and filter in JS (avoids Airtable linked-record formula issues)
+  let allBookings = [];
+  let offset = null;
+  do {
+    const pageUrl = `https://api.airtable.com/v0/${BASE_ID}/${BOOKINGS_TABLE}?fields[]=Trip&fields[]=Total+Price&fields[]=Diver+ID&fields[]=First+Name+%28from+Divers%29&fields[]=Last+Name+%28from+Divers%29&fields[]=Returning+Customer&fields[]=Pricing` + (offset ? `&offset=${offset}` : '');
+    const pageRes = await fetch(pageUrl, { headers: { Authorization: `Bearer ${AIRTABLE_API_KEY}` } });
+    const pageData = await pageRes.json();
+    if (pageData.error) return { error: 'Airtable error: ' + pageData.error.message };
+    allBookings = allBookings.concat(pageData.records || []);
+    offset = pageData.offset || null;
+  } while (offset);
+
+  // Step 3: Filter by any combination of trip / first name / last name
+  const records = allBookings.filter(r => {
+    if (tripRecordId && !(r.fields['Trip'] || []).includes(tripRecordId)) return false;
+    if (fnQuery || lnQuery) {
+      const fnArr = r.fields['First Name (from Divers)'] || [];
+      const lnArr = r.fields['Last Name (from Divers)'] || [];
+      const fn = ((Array.isArray(fnArr) ? fnArr[0] : fnArr) || '').toLowerCase();
+      const ln = ((Array.isArray(lnArr) ? lnArr[0] : lnArr) || '').toLowerCase();
+      if (fnQuery && !fn.includes(fnQuery)) return false;
+      if (lnQuery && !ln.includes(lnQuery)) return false;
+    }
+    return true;
+  });
+  return { records };
+}
+
+// Turn raw booking records into the shape both tabs use
+function toBookings(records) {
+  const out = records.map(rec => {
+    const diverIds = rec.fields['Diver ID'] || [];
+    const fnArr = rec.fields['First Name (from Divers)'] || [];
+    const lnArr = rec.fields['Last Name (from Divers)'] || [];
+    const fn = Array.isArray(fnArr) ? fnArr[0] : fnArr;
+    const ln = Array.isArray(lnArr) ? lnArr[0] : lnArr;
+    const tripLinks = rec.fields['Trip'] || [];
+    const tripRecId = tripLinks[0] || null;
+    const tripInfo = (tripRecId && tripsCache[tripRecId]) || {};
+    return {
+      bookingId: rec.id,
+      diverId: diverIds[0] || null,
+      diverName: `${fn || ''} ${ln || ''}`.trim() || 'Unknown Diver',
+      tripId: tripInfo.tripId || '',
+      tripRecordId: tripRecId,
+      currency: tripInfo.currency || 'USD',
+      totalPrice: (Array.isArray(rec.fields['Total Price']) ? rec.fields['Total Price'][0] : rec.fields['Total Price']) || 0,
+      pricing: (Array.isArray(rec.fields['Pricing']) ? rec.fields['Pricing'][0] : rec.fields['Pricing']) || '',
+      returningCustomer: (rec.fields['Returning Customer'] || '').toString().trim().toLowerCase() === 'yes'
+    };
+  });
+  // Sort by trip (newest first) then by name, so multi-trip results group nicely
+  out.sort((a, b) => (b.tripId || '').localeCompare(a.tripId || '') || a.diverName.localeCompare(b.diverName));
+  return out;
+}
+
+// Find the payment row for a booking. Deliberately NOT scoped to Trip ID: when a diver is
+// moved to another trip the payment row keeps the old trip.
+function findPaymentRecord(all, booking) {
+  let matched = all.find(r => (r.fields['Booking'] || []).includes(booking.bookingId));
+  if (!matched && booking.diverId) {
+    const byDiver = all.filter(r => (r.fields['Diver ID'] || []).includes(booking.diverId));
+    matched = byDiver.find(r => String(r.fields['Trip ID'] || '') === String(booking.tripId))
+           || byDiver.sort((a, b) => (b.createdTime || '').localeCompare(a.createdTime || ''))[0];
+  }
+  return matched || null;
+}
 
 // ── SEARCH TRIP ──────────────────────────────────────────────────
 async function searchTrip() {
@@ -1403,64 +1521,20 @@ async function searchTrip() {
   document.getElementById('formWrap').style.display = 'none';
 
   try {
-    // Step 1: If a trip was selected, resolve its Airtable record ID (from cache, with API fallback)
-    let tripRecordId = null;
-    if (tripId) {
-      tripRecordId = Object.keys(tripsCache).find(id => tripsCache[id].tripId === tripId) || null;
-      if (!tripRecordId) {
-        const tripFormula = encodeURIComponent(`{Trip Id} = "${tripId}"`);
-        const tripUrl = `https://api.airtable.com/v0/${BASE_ID}/tbl8KGVwkIHi26plq?filterByFormula=${tripFormula}&fields[]=Trip+Id&fields[]=Currency`;
-        const tripRes = await fetch(tripUrl, { headers: { Authorization: `Bearer ${AIRTABLE_API_KEY}` } });
-        const tripData = await tripRes.json();
-        if (tripData.records && tripData.records.length > 0) {
-          tripRecordId = tripData.records[0].id;
-          tripsCache[tripRecordId] = { tripId, currency: tripData.records[0].fields['Currency'] || 'USD' };
-        }
-      }
-      if (!tripRecordId) {
-        showMsg('searchMsg', 'error', `Trip "${tripId}" not found in Trips table.`);
-        btn.disabled = false; btn.innerHTML = 'Search'; return;
-      }
+    const { records, error } = await findBookings(tripId, fnQuery, lnQuery);
+    if (error) {
+      showMsg('searchMsg', 'error', error);
+      btn.disabled = false; btn.innerHTML = 'Search'; return;
     }
-
-    // Step 2: Fetch ALL bookings and filter in JS (avoids Airtable linked-record formula issues)
-    let allBookings = [];
-    let offset = null;
-    do {
-      const pageUrl = `https://api.airtable.com/v0/${BASE_ID}/${BOOKINGS_TABLE}?fields[]=Trip&fields[]=Total+Price&fields[]=Diver+ID&fields[]=First+Name+%28from+Divers%29&fields[]=Last+Name+%28from+Divers%29&fields[]=Returning+Customer&fields[]=Pricing` + (offset ? `&offset=${offset}` : '');
-      const pageRes = await fetch(pageUrl, { headers: { Authorization: `Bearer ${AIRTABLE_API_KEY}` } });
-      const pageData = await pageRes.json();
-      if (pageData.error) {
-        showMsg('searchMsg', 'error', 'Airtable error: ' + pageData.error.message);
-        btn.disabled = false; btn.innerHTML = 'Search'; return;
-      }
-      allBookings = allBookings.concat(pageData.records || []);
-      offset = pageData.offset || null;
-    } while (offset);
-
-    // Step 3: Filter by any combination of trip / first name / last name
-    const matched = allBookings.filter(r => {
-      if (tripRecordId && !(r.fields['Trip'] || []).includes(tripRecordId)) return false;
-      if (fnQuery || lnQuery) {
-        const fnArr = r.fields['First Name (from Divers)'] || [];
-        const lnArr = r.fields['Last Name (from Divers)'] || [];
-        const fn = ((Array.isArray(fnArr) ? fnArr[0] : fnArr) || '').toLowerCase();
-        const ln = ((Array.isArray(lnArr) ? lnArr[0] : lnArr) || '').toLowerCase();
-        if (fnQuery && !fn.includes(fnQuery)) return false;
-        if (lnQuery && !ln.includes(lnQuery)) return false;
-      }
-      return true;
-    });
-
-    if (matched.length === 0) {
+    if (records.length === 0) {
       showMsg('searchMsg', 'error', 'No divers found matching your search.');
       btn.disabled = false; btn.innerHTML = 'Search'; return;
     }
 
     // Show trip name next to each diver when searching without a trip filter
-    await processBookings(matched, !tripId);
+    await processBookings(records, !tripId);
     const where = tripId ? ` on trip ${tripId}` : ' across all trips';
-    showMsg('searchMsg', 'info', `Found ${matched.length} diver(s)${where}.`);
+    showMsg('searchMsg', 'info', `Found ${records.length} diver(s)${where}.`);
 
   } catch(e) {
     showMsg('searchMsg', 'error', 'Error connecting to Airtable. Check your connection.');
@@ -1471,35 +1545,7 @@ async function searchTrip() {
 }
 
 async function processBookings(records, showTripInLabel) {
-  currentBookings = [];
-  for (const rec of records) {
-    const diverIds = rec.fields['Diver ID'] || [];
-    const diverId = diverIds[0] || null;
-    const fnArr = rec.fields['First Name (from Divers)'] || [];
-    const lnArr = rec.fields['Last Name (from Divers)'] || [];
-    const fn = Array.isArray(fnArr) ? fnArr[0] : fnArr;
-    const ln = Array.isArray(lnArr) ? lnArr[0] : lnArr;
-    const diverName = `${fn || ''} ${ln || ''}`.trim() || 'Unknown Diver';
-    // Per-booking trip info (a name-only search can return divers from different trips)
-    const tripLinks = rec.fields['Trip'] || [];
-    const tripRecId = tripLinks[0] || null;
-    const tripInfo = (tripRecId && tripsCache[tripRecId]) || {};
-    currentBookings.push({
-      bookingId: rec.id,
-      diverId,
-      diverName,
-      tripId: tripInfo.tripId || '',
-      tripRecordId: tripRecId,
-      currency: tripInfo.currency || 'USD',
-      totalPrice: (Array.isArray(rec.fields['Total Price']) ? rec.fields['Total Price'][0] : rec.fields['Total Price']) || 0,
-      pricing: (Array.isArray(rec.fields['Pricing']) ? rec.fields['Pricing'][0] : rec.fields['Pricing']) || '',
-      returningCustomer: (rec.fields['Returning Customer'] || '').toString().trim().toLowerCase() === 'yes'
-    });
-  }
-
-  // Sort by trip (newest first) then by name, so multi-trip results group nicely
-  currentBookings.sort((a, b) =>
-    (b.tripId || '').localeCompare(a.tripId || '') || a.diverName.localeCompare(b.diverName));
+  currentBookings = toBookings(records);
 
   // Populate diver dropdown
   const sel = document.getElementById('diverSelect');
@@ -1548,15 +1594,7 @@ async function loadDiver() {
   currentPaymentRecordId = null;
   try {
     const all = await fetchAllPayments();
-
-    // Prefer an exact booking match, then fall back to the diver across all trips
-    let matchedRec = all.find(r => (r.fields['Booking'] || []).includes(booking.bookingId));
-    if (!matchedRec && booking.diverId) {
-      const byDiver = all.filter(r => (r.fields['Diver ID'] || []).includes(booking.diverId));
-      // Same trip wins; otherwise take the newest row so we update rather than duplicate
-      matchedRec = byDiver.find(r => String(r.fields['Trip ID'] || '') === String(booking.tripId))
-                || byDiver.sort((a, b) => (b.createdTime || '').localeCompare(a.createdTime || ''))[0];
-    }
+    const matchedRec = findPaymentRecord(all, booking);
 
     if (matchedRec) {
       const rec = matchedRec;
@@ -2356,6 +2394,9 @@ async function openWhatsApp() {
 ['tripIdInput', 'firstNameInput', 'lastNameInput'].forEach(id => {
   document.getElementById(id).addEventListener('keydown', e => { if (e.key === 'Enter') searchTrip(); });
 });
+['cfTripSelect', 'cfFirstName', 'cfLastName'].forEach(id => {
+  document.getElementById(id).addEventListener('keydown', e => { if (e.key === 'Enter') cfSearch(); });
+});
 
 // Fetch BOI rate on page load
 fetchBoiRate();
@@ -2802,15 +2843,57 @@ function cfSyncCharges() {
   document.getElementById('cfBalance').value = sym + balance.toLocaleString('en-US');
 }
 
-// ── LOAD FROM THE PAYMENT MANAGER TAB ────────────────────────────
-async function cfLoadFromManager() {
-  const idx = document.getElementById('diverSelect').value;
-  if (idx === '') {
-    showMsg('cfLoadMsg', 'error', 'No diver is loaded. Open the Payment Manager tab, search for the diver, then come back and click again.');
+// ── FIND AND LOAD A DIVER ────────────────────────────────────────
+let cfBookings = [];
+
+async function cfSearch() {
+  const tripId  = cfV('cfTripSelect');
+  const fnQuery = cfV('cfFirstName').toLowerCase();
+  const lnQuery = cfV('cfLastName').toLowerCase();
+
+  if (!tripId && !fnQuery && !lnQuery) {
+    showMsg('cfLoadMsg', 'info', 'Select a trip and/or enter a first or last name.');
     return;
   }
-  const booking = currentBookings[idx];
+
+  const btn = document.getElementById('cfSearchBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Searching...';
+  document.getElementById('cfDiverWrap').style.display = 'none';
+
+  try {
+    const { records, error } = await findBookings(tripId, fnQuery, lnQuery);
+    if (error) { showMsg('cfLoadMsg', 'error', error); }
+    else if (records.length === 0) { showMsg('cfLoadMsg', 'error', 'No divers found matching your search.'); }
+    else {
+      cfBookings = toBookings(records);
+      const sel = document.getElementById('cfDiverSelect');
+      sel.innerHTML = '<option value="">- Select a diver -</option>';
+      cfBookings.forEach((b, i) => {
+        const opt = document.createElement('option');
+        opt.value = i;
+        opt.textContent = (!tripId && b.tripId) ? b.diverName + ' - ' + b.tripId : b.diverName;
+        sel.appendChild(opt);
+      });
+      document.getElementById('cfDiverWrap').style.display = '';
+      const where = tripId ? ' on trip ' + tripId : ' across all trips';
+      showMsg('cfLoadMsg', 'info', 'Found ' + records.length + ' diver(s)' + where + '. Pick one to fill the letter.');
+    }
+  } catch (e) {
+    showMsg('cfLoadMsg', 'error', 'Error connecting to Airtable. Check your connection.');
+    console.error(e);
+  }
+
+  btn.disabled = false; btn.innerHTML = 'Search';
+}
+
+async function cfLoadDiver() {
+  const idx = document.getElementById('cfDiverSelect').value;
+  if (idx === '') return;
+  const booking = cfBookings[idx];
   const trip = CF_TRIPS[booking.tripId] || {};
+
+  showMsg('cfLoadMsg', 'info', 'Loading ' + booking.diverName + '...');
 
   // Guests, confirmation number, date
   document.getElementById('cfGuestCount').dataset.manual = '';
@@ -2828,45 +2911,73 @@ async function cfLoadFromManager() {
 
   const packages = cfPricingList(booking.tripId, booking.pricing);
   setVal('cfCabin', packages.join(', '));
-  if (!cfV('cfTransfer')) setVal('cfTransfer', 'Airport transfers on arrival and departure, arranged by the operator');
-  document.getElementById('cfHeadline').dataset.manual = '';
-  cfSyncHeadline();
-
-  // Flight and hotel, from the Payment Manager form
-  setVal('cfPnr', cfV('pnr'));
-  const hotelParts = [cfV('hotelName')];
-  if (cfV('hotelConfirmation')) hotelParts.push('confirmation ' + cfV('hotelConfirmation'));
-  if (cfV('hotelCheckin') && cfV('hotelCheckout')) hotelParts.push(cfV('hotelCheckin') + ' to ' + cfV('hotelCheckout'));
-  setVal('cfHotel', cfV('hotelName') ? hotelParts.filter(Boolean).join(', ') : '');
-
-  // Charges, mirroring the Financial Summary on the Payment Manager tab
-  const existing = window._existingPayments || {};
-  const total = cfNum('safariPrice') + cfNum('flightCost') + cfNum('hotelCost') + cfNum('extrasAmount') + cfNum('returningDiscount');
-  const paid = (existing.tripPayment || 0) + (existing.flightPayment || 0) + (existing.hotelPayment || 0) + (existing.extrasPayment || 0)
-             + cfNum('tripPayment') + cfNum('flightPayment') + cfNum('hotelPayment') + cfNum('extrasPayment');
-  // Amounts are filled in ready for use, but the charges block stays off unless Ian turns it on
   setVal('cfCurrency', booking.currency || trip.currency || 'USD');
+
+  // Everything below comes from this diver's row in the Payments table
+  let costs = { safari: booking.totalPrice || 0, flight: 0, hotel: 0, extras: 0, discount: 0, paid: 0 };
+  let extrasNotes = '', pnr = '', hotelName = '', hotelConf = '', checkin = '', checkout = '';
+  try {
+    const rec = findPaymentRecord(await fetchAllPayments(), booking);
+    if (rec) {
+      const f = (key, fallback = 0) => {
+        const v = rec.fields[key];
+        if (v === undefined || v === null || v === '') return fallback;
+        return Array.isArray(v) ? (v[0] ?? fallback) : v;
+      };
+      costs = {
+        safari:   parseFloat(f('Safari Price Override') || f('Safari Price', booking.totalPrice || 0)) || 0,
+        flight:   parseFloat(f('Flight Cost')) || 0,
+        hotel:    parseFloat(f('Hotel Cost')) || 0,
+        extras:   parseFloat(f('Extras Amount')) || 0,
+        discount: parseFloat(f('Returning Customer Discount')) || 0,
+        paid:     (parseFloat(f('Trip Payment')) || 0) + (parseFloat(f('Flight Payment')) || 0)
+                + (parseFloat(f('Hotel Payment')) || 0) + (parseFloat(f('Extras Payment')) || 0)
+      };
+      extrasNotes = f('Extras Notes', '');
+      pnr         = f('PNR', '');
+      hotelName   = f('Hotel Name', '');
+      hotelConf   = f('Hotel Confirmation', '');
+      checkin     = f('Hotel Check-in', '');
+      checkout    = f('Hotel Check-out', '');
+    }
+  } catch (e) {
+    console.warn('Payment row lookup failed, using the booking total only:', e);
+  }
+
+  setVal('cfPnr', pnr);
+  const hotelParts = [hotelName];
+  if (hotelConf) hotelParts.push('confirmation ' + hotelConf);
+  if (checkin && checkout) hotelParts.push(checkin + ' to ' + checkout);
+  setVal('cfHotel', hotelName ? hotelParts.filter(Boolean).join(', ') : '');
+
+  // Amounts are filled in ready for use, but the charges block stays off unless Ian turns it on
+  const total = costs.safari + costs.flight + costs.hotel + costs.extras + costs.discount;
   setVal('cfTotal', total || '');
-  setVal('cfPaid', paid || '');
+  setVal('cfPaid', costs.paid || '');
 
   // Letter text
   document.getElementById('cfIntro').dataset.manual = '';
+  document.getElementById('cfHeadline').dataset.manual = '';
   cfSyncIntro();
-  setVal('cfIncluded', cfDefaultIncluded(booking, packages).join('\n'));
+  cfSyncHeadline();
+  const included = packages.slice();
+  if (costs.flight > 0) included.push('International flights as detailed in your itinerary');
+  if (costs.hotel > 0 && hotelName) included.push('Hotel accommodation at ' + hotelName);
+  if (costs.extras > 0 && extrasNotes) included.push(extrasNotes);
+  setVal('cfIncluded', included.join('\n'));
   if (!cfV('cfNotes')) setVal('cfNotes', cfDefaultArrival());
 
   // Phone, from the Divers table
-  setVal('cfPhone', 'loading...');
+  setVal('cfPhone', '');
   if (booking.diverId) {
     const details = await fetchDiverDetails(booking.diverId);
     setVal('cfPhone', details.phone || '');
-  } else {
-    setVal('cfPhone', '');
   }
 
   cfSyncGuests();
   cfSyncCharges();
-  showMsg('cfLoadMsg', 'info', 'Loaded ' + booking.diverName + ' on trip ' + booking.tripId + '. Review the fields below, then create the letter.');
+  _cfDataUrl = null; _cfLetterUrl = null;
+  showMsg('cfLoadMsg', 'info', 'Loaded ' + booking.diverName + ' on trip ' + booking.tripId + '. Review below, then create the letter.');
 }
 
 function cfDefaultIntro(dest) {
@@ -2982,8 +3093,8 @@ function cfBuildParts() {
   rows += row('Guest names', guests.map(cfEsc).join('<br/>'));
   rows += row('Number of guests', cfEsc(cfV('cfGuestCount')));
   rows += row('Trip', cfEsc([cfV('cfTripName'), cfV('cfDestination')].filter(Boolean).join(', ')));
-  rows += row('Arrival', cfEsc(cfV('cfArrival')));
-  rows += row('Departure', cfEsc(cfV('cfDeparture')));
+  rows += row('Embarkation', cfEsc(cfV('cfArrival')));
+  rows += row('Disembarkation', cfEsc(cfV('cfDeparture')));
   rows += row('Cabin type / package', cfEsc(cfV('cfCabin')));
   rows += row('Transfers', cfEsc(cfV('cfTransfer')));
   rows += row('Flight booking reference', cfEsc(cfV('cfPnr')));
