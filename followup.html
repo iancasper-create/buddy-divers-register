@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<!-- BD-FOLLOWUP 2026-08-05b | Confirmation letters logged to the Airtable Confirmations table on WhatsApp send, same pattern as Payment Requests
+<!-- BD-FOLLOWUP 2026-08-05c | Confirmations log trimmed to the six fields Ian asked for
+     BD-FOLLOWUP 2026-08-05b | Confirmation letters logged to the Airtable Confirmations table on WhatsApp send, same pattern as Payment Requests
      BD-FOLLOWUP 2026-08-05a | Third tab: Booking Confirmation letter (A4, logo, confirmation number = Trip ID + guest initials, trip/booking data auto-filled, free-text purchase description, PDF/JPG/WhatsApp output)
      BD-FOLLOWUP 2026-07-28b | Itemized costs block now renders whenever any cost line is non-zero (previously required Safari Price > 0)
      BD-FOLLOWUP 2026-07-28a | Pro forma: ILS currency option added, exchange rate fixed at 1
@@ -3229,14 +3230,6 @@ async function cfSendWhatsApp() {
         'Guest Names':         cfLines('cfGuests').join(', '),
         'Number of Guests':    cfV('cfGuestCount'),
         'Trip ID':             cfV('cfTripId'),
-        'Trip Name':           cfV('cfTripName'),
-        'Vessel':              cfV('cfVessel'),
-        'Arrival':             cfV('cfArrival'),
-        'Departure':           cfV('cfDeparture'),
-        'Cabin / Package':     cfV('cfCabin'),
-        'Total Charges':       cfNum('cfTotal') || undefined,
-        'Currency':            cfNum('cfTotal') ? cfV('cfCurrency') : undefined,
-        'Phone':               phone,
         'Letter URL':          clData.secure_url
       };
       // Airtable rejects the whole row on an empty or unknown value, so send only what is filled
