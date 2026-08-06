@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<!-- BD-FOLLOWUP 2026-08-05r | Trips are read live from buddy-divers-registration.html instead of a baked snapshot, so adding a trip there is enough; the snapshot stays as a fallback and supplies destination and vessel
+<!-- BD-FOLLOWUP 2026-08-06a | Payment request survives a Make outage: the WhatsApp send is allowed to fail on its own, the Airtable rows are still written (Status "Not sent"), and the Cloudinary link is offered so the request can be sent by hand
+     BD-FOLLOWUP 2026-08-05r | Trips are read live from buddy-divers-registration.html instead of a baked snapshot, so adding a trip there is enough; the snapshot stays as a fallback and supplies destination and vessel
      BD-FOLLOWUP 2026-08-05q | Confirmation number printed blank: html2canvas drops text inside display:inline-block, so the box drew empty. Switched to display:table
      BD-FOLLOWUP 2026-08-05p | Confirmations filed flat under booking_confirmations, no per-trip subfolders
      BD-FOLLOWUP 2026-08-05o | Cloudinary copies are filed as booking_confirmations/<tripId>/<confNumber>-<timestamp> instead of a random id
@@ -1337,6 +1338,15 @@
     </div>
     <div style="padding:16px;background:#f8f8f8;text-align:center;">
       <div id="jpgRenderMsg" style="font-size:13px;color:#5a7a8a;margin-bottom:8px;">מייצר תמונה...</div>
+      <!-- Shown only when the WhatsApp send failed: the image is already on Cloudinary, so
+           the request can still be sent by hand instead of being lost. -->
+      <div id="jpgManualLink" style="display:none;background:#fff8ee;border:1.5px solid #c47d00;border-radius:8px;padding:10px 12px;margin-bottom:10px;text-align:right;" dir="rtl">
+        <div style="font-size:13px;font-weight:600;color:#8a5a00;margin-bottom:6px;">הוואטסאפ לא נשלח. הבקשה נרשמה והתמונה נשמרה.</div>
+        <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;">
+          <button onclick="copyPaymentImageLink(this)" style="background:#c47d00;color:white;border:none;border-radius:7px;padding:7px 13px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;">העתק קישור לתמונה</button>
+          <a id="jpgManualHref" href="#" target="_blank" rel="noopener" style="background:white;color:#8a5a00;border:1.5px solid #c47d00;border-radius:7px;padding:7px 13px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;text-decoration:none;">פתח את התמונה</a>
+        </div>
+      </div>
       <img id="jpgOutput" style="max-width:100%;border-radius:8px;box-shadow:0 2px 12px rgba(0,0,0,0.15);display:none;" alt="Payment Request"/>
     </div>
   </div>
@@ -1972,6 +1982,7 @@ function updateNisPreview() {
 }
 
 let _jpgDataUrl = null;
+let _lastPaymentImageUrl = null;   // Cloudinary copy of the last payment request rendered
 let _diverPhone = null;
 let _diverPaymentMethod = null;
 let _diverIsraelId = null;
@@ -2214,6 +2225,8 @@ async function generatePaymentImage() {
   document.getElementById('jpgOutput').style.display = 'none';
   document.getElementById('jpgRenderMsg').textContent = 'מייצר תמונה...';
   document.getElementById('jpgPreviewOverlay').style.display = 'block';
+  document.getElementById('jpgManualLink').style.display = 'none';
+  _lastPaymentImageUrl = null;
   document.getElementById('downloadJpgBtn').disabled = true;
   document.getElementById('whatsappBtn').textContent = '💬 טוען מספר...';
   document.getElementById('whatsappBtn').disabled = true;
@@ -2267,6 +2280,25 @@ async function generatePaymentImage() {
   }
 }
 
+// Surface the uploaded image when WhatsApp could not deliver it
+function showPaymentImageLink(url) {
+  const wrap = document.getElementById('jpgManualLink');
+  const href = document.getElementById('jpgManualHref');
+  if (!wrap || !href) return;
+  href.href = url;
+  wrap.style.display = 'block';
+}
+
+function copyPaymentImageLink(btn) {
+  if (!_lastPaymentImageUrl) return;
+  const done = () => { const t0 = btn.textContent; btn.textContent = 'הועתק'; setTimeout(() => { btn.textContent = t0; }, 2000); };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(_lastPaymentImageUrl).then(done, () => window.prompt('העתק את הקישור', _lastPaymentImageUrl));
+  } else {
+    window.prompt('העתק את הקישור', _lastPaymentImageUrl);
+  }
+}
+
 function downloadJpg() {
   if (!_jpgDataUrl) return;
   const a = document.createElement('a');
@@ -2314,36 +2346,47 @@ async function openWhatsApp() {
     if (!cloudData.secure_url) throw new Error('Cloudinary upload failed');
 
     const imageUrl = cloudData.secure_url;
+    _lastPaymentImageUrl = imageUrl;
     btn.textContent = '💬 שולח וואטסאפ...';
 
-    // Step 2: Send image to Make webhook → WhatsApp API (no caption)
-
-    const makeRes = await fetch('https://hook.eu1.make.com/yabs6aeja0bz6eoxw29p8t9tpgqi7tio', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        phone: _diverPhone,
-        imageUrl: imageUrl,
-        caption: ''
-      })
-    });
-
-    if (!makeRes.ok) throw new Error('Make webhook failed');
-
-    // Step 3: If payment method is Credit Card — send payment link as second message
-    if ((_diverPaymentMethod || '').toLowerCase().includes('credit')) {
-      btn.textContent = '💬 שולח קישור תשלום...';
-      await fetch('https://hook.eu1.make.com/yabs6aeja0bz6eoxw29p8t9tpgqi7tio', {
+    // Step 2: Send image to Make webhook → WhatsApp API (no caption).
+    // A Make outage used to abort here and take the Airtable logging with it, so a request
+    // that had already been rendered and uploaded left no trace at all. The send is allowed
+    // to fail on its own now: the row is still written, marked honestly, and the Cloudinary
+    // link is shown so it can be sent by hand.
+    let sent = false;
+    try {
+      const makeRes = await fetch('https://hook.eu1.make.com/yabs6aeja0bz6eoxw29p8t9tpgqi7tio', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           phone: _diverPhone,
-          textMessage: 'קישור לתשלום באשראי: https://bit.ly/3lisAOd'
+          imageUrl: imageUrl,
+          caption: ''
         })
       });
+      if (!makeRes.ok) throw new Error('Make webhook responded ' + makeRes.status);
+      sent = true;
+
+      // Step 3: If payment method is Credit Card — send payment link as second message
+      if ((_diverPaymentMethod || '').toLowerCase().includes('credit')) {
+        btn.textContent = '💬 שולח קישור תשלום...';
+        await fetch('https://hook.eu1.make.com/yabs6aeja0bz6eoxw29p8t9tpgqi7tio', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            phone: _diverPhone,
+            textMessage: 'קישור לתשלום באשראי: https://bit.ly/3lisAOd'
+          })
+        });
+      }
+    } catch (sendErr) {
+      console.warn('WhatsApp send failed, logging the request anyway:', sendErr);
     }
-    btn.textContent = '✅ נשלח!';
-    btn.style.background = '#22a06b';
+
+    btn.textContent = sent ? '✅ נשלח!' : '⚠️ לא נשלח, נרשם';
+    btn.style.background = sent ? '#22a06b' : '#c47d00';
+    if (!sent) showPaymentImageLink(imageUrl);
 
     // Step 4: Log send to WA Messages table
     if (currentPaymentRecordId) {
@@ -2357,7 +2400,7 @@ async function openWhatsApp() {
           'Payment Type': _selectedPaymentType === 'custom'
             ? (document.getElementById('customPaymentLabel').value.trim() || 'Custom')
             : _selectedPaymentType,
-          'Status': 'Sent',
+          'Status': sent ? 'Sent' : 'Not sent',
           'Israel ID': _diverIsraelId || undefined,
           'First Name': _diverFirstName || undefined,
           'Last Name': _diverLastName || undefined
