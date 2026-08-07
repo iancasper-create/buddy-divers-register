@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-LBLAH 2026-08-07a | Nautilus prices shown tax-exclusive to match the operator and the market, with the 5 percent stated beside the cabin table -->
+<!-- BD-LBLAH 2026-08-07b | 5 percent VAT shown as its own line in תוספות בתשלום, beside the operator's other not-included fees -->
 <!-- BD-LBLAH 2026-08-01r | boat description (על הספינה) moved from last in the detail panel to directly under the WhatsApp booking request and above the cabin spec: it is the only persuasive, fully-Hebrew section and was buried under two reference tables -->
 <html lang="he" dir="rtl">
 <head>
@@ -365,6 +365,9 @@ table.cab tr.sold td{opacity:.45}
   font-weight:700}
 .bk .disc b{display:block;margin-top:3px;font-weight:800;color:#7a1010}
 .note.taxn{background:#eef3f7;border-color:#c3d3e0;color:#33506b;font-weight:600}
+.taxchip{display:inline-block;margin-inline-start:6px;font-size:11px;font-weight:700;
+ color:#33506b;background:#eef3f7;border:1px solid #c3d3e0;border-radius:5px;padding:1px 5px;
+ vertical-align:middle;direction:rtl}
 .bk .disc .disc-i{flex:0 0 20px;height:20px;border-radius:50%;background:var(--low);color:#fff;
   font-weight:800;font-size:13px;line-height:20px;text-align:center}
 .bk h3{font-size:15px;font-weight:800;color:var(--navy);margin-bottom:4px}
@@ -1107,7 +1110,7 @@ function open_(i){
     rows.forEach(x=>{
       /* 354 payable lines carry no price in the feed. A bare name beside an empty
          column reads as broken, so it gets a dash. Plain hyphen, not an em-dash. */
-      const pr=money(x.price,t.extras_currency);
+      const pr=x.raw?x.raw:money(x.price,t.extras_currency);
       /* A rate, not a total. The supplier states the unit inside its own English name,
          which a Hebrew reader may not parse, so it is repeated under the figure: $35
          "ללילה" is $245 on a seven-night trip. Sits INSIDE the fixed amount column - the
@@ -1119,7 +1122,13 @@ function open_(i){
     });
     return o+'</div>';
   };
-  h+=exBlock(t.extras.filter(x=>!x.included),'תוספות בתשלום')
+  /* Nautilus file their rates tax-inclusive while their own site and the market quote
+     net, so build_lah.py strips the tax back out and flags the departure. The tax then
+     belongs exactly here, beside the operator's other not-included costs, rather than
+     buried in prose. Percentage, not an amount, because it scales with the cabin. */
+  const payable=t.extras.filter(x=>!x.included);
+  if(t.tax)payable.unshift({name:'VAT',raw:t.tax+'%'});
+  h+=exBlock(payable,'תוספות בתשלום')
    + exBlock(t.extras.filter(x=>x.included),'כלול במחיר');
 
   /* itinerary prose and route photography, from the Gold-only route endpoint.
@@ -1250,6 +1259,7 @@ function wireBooking(t){
     if(cab){const c=t.cabins.find(x=>x.name===cab);
       L.push('תא מבוקש: '+cab+(c?' - '+money(c.price,t.currency):''));}
     else{const lo=lowest(t);if(lo)L.push('מחיר מוצג מ: '+money(lo,t.currency));}
+    if(t.tax)L.push('המחיר אינו כולל מס מקומי בשיעור '+t.tax+'%');
     const who=[];
     if(v('bkFirst')||v('bkLast'))who.push('שם: '+(v('bkFirst')+' '+v('bkLast')).trim());
     if(v('bkMail'))who.push('אימייל: '+v('bkMail'));
