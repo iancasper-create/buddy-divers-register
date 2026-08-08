@@ -1,4 +1,6 @@
 <!DOCTYPE html>
+<!-- BD-LBLAH 2026-08-08c | tagline on both pages is now "The perfect way to choose your next liveaboard" / "הדרך המושלמת לבחור את ההפלגה הבאה שלכם". The old one claimed every departure and every destination, overstating a hand-picked 100 ship fleet across 22 destinations; the stats bubble already carries the real numbers -->
+<!-- BD-LBLAH 2026-08-08b | English edition: the same template and payload also build liveaboard-finder-en.html (LTR, feed content untranslated), with a language switch on both pages -->
 <!-- BD-LBLAH 2026-08-08a | date filter fix: the two ends of the range are independent now, so opening the עד שנה picker no longer snaps both dates back to today -->
 <!-- BD-LBLAH 2026-08-07b | 5 percent VAT shown as its own line in תוספות בתשלום, beside the operator's other not-included fees -->
 <!-- BD-LBLAH 2026-08-01r | boat description (על הספינה) moved from last in the detail panel to directly under the WhatsApp booking request and above the cabin spec: it is the only persuasive, fully-Hebrew section and was buried under two reference tables -->
@@ -450,16 +452,53 @@ table.cab tr.sold td{opacity:.45}
  .row .rt{font-size:11.5px}
  .pr{font-size:14px}
 }
+
+/* .header is the positioning context. Without this the picker escapes to the viewport
+   corner and sits on top of the logo. The control carries dir="ltr" so the label and the
+   menu keep their order and their side on the RTL page too, which also puts it in the
+   same physical corner on both pages. */
+.header{position:relative}
+.langpick{position:absolute;top:12px;inset-inline-end:14px;z-index:20}
+/* Orange pill, Ian 2026-08-08. Same treatment as the deals button in its on state
+   (var(--orange) with a matching glow), so the control reads as part of the page rather
+   than as something bolted onto the header. */
+.langbtn{display:flex;align-items:center;gap:7px;cursor:pointer;font-family:inherit;
+  background:var(--orange);border:0;border-radius:999px;padding:6px 13px;
+  box-shadow:0 4px 14px rgba(245,166,35,.35)}
+.langbtn:hover{filter:brightness(1.06)}
+.langlab{font-size:12.5px;font-weight:700;letter-spacing:.2px;color:#fff;
+  white-space:nowrap}
+.langcar{width:0;height:0;border-inline:4.5px solid transparent;
+  border-top:5.5px solid #fff;transition:transform .15s}
+.langbtn[aria-expanded="true"] .langcar{transform:rotate(180deg)}
+.langmenu{display:none;position:absolute;top:calc(100% + 4px);inset-inline-end:0;
+  background:#fff;border-radius:10px;padding:5px;
+  box-shadow:0 10px 26px rgba(0,0,0,.35)}
+.langmenu.open{display:block}
+.langmenu a{display:block;padding:5px 7px;border-radius:7px;line-height:0}
+.langmenu a:hover{background:#eaf7f9}
+.langmenu a.on{background:#dff0f4}
+.flg{width:26px;height:18px;border-radius:2px;display:block;
+  box-shadow:0 0 0 1px rgba(0,0,0,.18)}
+/* Below about 600px the centred logo grows into the corner the picker sits in, and the
+   two overlap. Measured at 375px: logo 66-309, picker 191-345. So the picker stops being
+   absolute and takes a line of its own above the logo, still right-aligned. It keeps
+   position:relative so its menu still anchors to it rather than to the header. */
+@media(max-width:620px){
+  .langpick{position:relative;top:auto;inset-inline-end:auto;
+    width:max-content;margin-inline-start:auto;margin-bottom:2px}
+}
 </style>
 </head>
 <body>
 <div class="wrap">
 
   <div class="header">
+    <div class="langpick" id="langPick" dir="ltr"><button type="button" class="langbtn" id="langBtn" aria-haspopup="listbox" aria-expanded="false"><span class="langlab">Choose Language</span><span class="langcar" aria-hidden="true"></span></button><div class="langmenu" id="langMenu" role="listbox" aria-label="Choose Language"><a role="option" href="liveaboard-availability.html" hreflang="he" lang="he" title="Hebrew" aria-label="Hebrew" aria-selected="true" class="on"><svg class="flg" viewBox="0 0 66 48" aria-hidden="true"><rect width="66" height="48" fill="#fff"/><rect y="5" width="66" height="6" fill="#0038b8"/><rect y="37" width="66" height="6" fill="#0038b8"/><path d="M33 15 26.07 27h13.86Z" fill="none" stroke="#0038b8" stroke-width="1.7"/><path d="M33 33 26.07 21h13.86Z" fill="none" stroke="#0038b8" stroke-width="1.7"/></svg></a><a role="option" href="liveaboard-finder-en.html" hreflang="en" lang="en" title="English" aria-label="English" aria-selected="false"><svg class="flg" viewBox="0 0 60 30" aria-hidden="true"><clipPath id="ukc"><path d="M0 0h60v30H0z"/></clipPath><g clip-path="url(#ukc)"><path d="M0 0h60v30H0z" fill="#012169"/><path d="M0 0 60 30M60 0 0 30" stroke="#fff" stroke-width="6"/><path d="M0 0 60 30M60 0 0 30" stroke="#c8102e" stroke-width="4"/><path d="M30 0v30M0 15h60" stroke="#fff" stroke-width="10"/><path d="M30 0v30M0 15h60" stroke="#c8102e" stroke-width="6"/></g></svg></a></div></div>
     <img class="logo" src="https://res.cloudinary.com/dccbsfte0/image/upload/logo_hnmilh"
          width="2216" height="576" alt="Buddy-Divers" />
     <h1>Liveaboard <span>Finder</span></h1>
-    <p>כל הפלגות הצלילה. כל היעדים. במקום אחד.</p>
+    <p>הדרך המושלמת לבחור את ההפלגה הבאה שלכם.</p>
     <div class="stamp">
       <span>ספינות: <b id="sBoats">&nbsp;</b></span>
       <span>הפלגות: <b id="sTrips">&nbsp;</b></span>
@@ -1358,5 +1397,23 @@ if(wantedTrip){const i=TRIPS.findIndex(t=>t.uid===wantedTrip);if(i>=0)open_(i);}
      overwrites every morning. -->
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js"
   data-cf-beacon='{"token": "5bf3aefa255a412e818499fae14f54d1"}'></script>
+
+<script>
+/* The language picker. Kept out of the main script block so it is unaffected by, and
+   cannot affect, the page's data rendering. */
+(function(){
+  var b=document.getElementById('langBtn'), m=document.getElementById('langMenu'),
+      p=document.getElementById('langPick');
+  if(!b||!m||!p)return;
+  function close(){m.classList.remove('open');b.setAttribute('aria-expanded','false');}
+  b.addEventListener('click',function(e){
+    e.stopPropagation();
+    var open=m.classList.toggle('open');
+    b.setAttribute('aria-expanded',open?'true':'false');
+  });
+  document.addEventListener('click',function(e){if(!p.contains(e.target))close();});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')close();});
+})();
+</script>
 </body>
 </html>
