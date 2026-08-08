@@ -1,6 +1,5 @@
 HANDOVER.md
 BUDDY-DIVERS-EMAIL-CAMPAIGN-GUIDE.md
-*-campaign-email-v*.html
 tools/
 AIRTABLE-PAYMENTS-AUTOMATION.md
 
@@ -8,3 +7,20 @@ AIRTABLE-PAYMENTS-AUTOMATION.md
 # and the review sheet must never be committed.
 fleet-manager.html
 Buddy-Divers-fleet-review-*.xlsx
+
+# Campaign emails and other working files. This repo is PUBLIC, so nothing below
+# may ever be committed. The old single pattern was "*-campaign-email-v*.html",
+# which only matched all-trips-campaign-email-v1.html and silently missed every
+# other campaign file (madagascar-email-v1, liveaboard-finder-email-v1,
+# fiji-tonga-lastminute-email-v1, liveaboard-finder-email-block). Widened 2026-08-07.
+# Note: registration-copy-email.html IS tracked and must stay tracked - it is the
+# Make template, not a campaign. None of the patterns below match it.
+*-email-v*.html
+*-email-block.html
+flight-changes-*.html
+
+# Working spreadsheets: fleet comparisons, subscriber and candidate lists, and
+# hotel booking sheets that carry guest names. None is tracked today.
+*.xlsx
+
+.DS_Store
