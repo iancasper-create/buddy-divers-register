@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- BD-LBLAH 2026-08-08a | date filter fix: the two ends of the range are independent now, so opening the עד שנה picker no longer snaps both dates back to today -->
 <!-- BD-LBLAH 2026-08-07b | 5 percent VAT shown as its own line in תוספות בתשלום, beside the operator's other not-included fees -->
 <!-- BD-LBLAH 2026-08-01r | boat description (על הספינה) moved from last in the detail panel to directly under the WhatsApp booking request and above the cabin spec: it is the only persuasive, fully-Hebrew section and was buried under two reference tables -->
 <html lang="he" dir="rtl">
@@ -859,12 +860,16 @@ $('sDest').textContent  = new Set(TRIPS.map(t=>t.country)).size;
 
 function filtered(skip){
   const q=S.text.trim().toLowerCase();
+  /* The two date ends move independently (see monthChanged), so mid-pick the "to" end
+     can sit before the "from" end. Read the pair as a range in either direction
+     instead of returning an empty page. */
+  const lo=S.from<=S.to?S.from:S.to, hi=S.from<=S.to?S.to:S.from;
   return TRIPS.filter(t=>{
     if(skip!=='dest'&&S.dest.size&&!S.dest.has(t.destination))return false;
     if(skip!=='boat'&&S.boat.size&&!S.boat.has(t.boat_id))return false;
     if(skip!=='itin'&&S.itin.size&&!(t.areas||[]).some(a=>S.itin.has(a)))return false;
     if(skip!=='nights'&&S.nights.size&&!S.nights.has(t.nights))return false;
-    if(t.start<S.from||t.start>S.to)return false;
+    if(t.start<lo||t.start>hi)return false;
     if(S.avail&&!t.spots)return false;
     if(S.deal&&!t.discount)return false;
     if(q&&t.boat.toLowerCase().indexOf(q)===-1
@@ -930,8 +935,12 @@ function fitDays(di,y,m,keep){
     sel.innerHTML='';
     for(let d=1;d<=n;d++)sel.add(new Option(d,d));
   }
-  sel.value=Math.min(keep,n);
-  return +sel.value;
+  const v=Math.min(keep,n);
+  /* Only touch the control when the value really changes. Assigning to a select the
+     user is holding open resets the iOS picker wheel under their finger, and iOS
+     fires a change event on every wheel step, so this runs mid-gesture. */
+  if(+sel.value!==v)sel.value=v;
+  return v;
 }
 
 function syncMonthUI(){
@@ -941,19 +950,29 @@ function syncMonthUI(){
   });
 }
 
+/* Each end of the range owns its own value. Nothing here writes into the other end,
+   and nothing is clamped into [D0,D1].
+
+   It used to do both, and the two together destroyed the user's input. iOS Safari
+   fires a change event for every step of a select wheel rather than once when the
+   picker is dismissed, so merely spinning the עד שנה wheel committed each year it
+   passed. Landing on 2026 while the month select still read July, left over from the
+   last departure in the data, composed 2026-07-29. That is before the first
+   departure, so the clamp snapped it to today, and the ordering rule then dragged
+   the "from" date the user had just picked down to today as well. Both rows read as
+   reset to default, and the selection was gone.
+
+   An out of order range is normal while a range is being picked. It is resolved
+   where the dates are read, in filtered(), never by overwriting a picked value. */
+let dateTmr;
 function monthChanged(which){
-  const pick=(di,mi,yi)=>{
-    const y=+$(yi).value, m=+$(mi).value;
-    const d=fitDays(di,y,m,+$(di).value||1);
-    return y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
-  };
-  let from=clampD(pick('fFromD','fFromM','fFromY'));
-  let to=clampD(pick('fToD','fToM','fToY'));
-  /* Whichever end the user just moved wins; the other yields so the range can
-     never invert. */
-  if(which==='from'&&to<from)to=from;
-  if(which==='to'&&from>to)from=to;
-  S.from=from;S.to=to;syncMonthUI();render();
+  const [di,mi,yi]=which==='from'?['fFromD','fFromM','fFromY']:['fToD','fToM','fToY'];
+  const y=+$(yi).value, m=+$(mi).value;
+  const d=fitDays(di,y,m,+$(di).value||1);
+  S[which]=y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+  /* One render per wheel, not one per step: spinning through five years used to
+     rebuild up to 400 cards five times on a phone. */
+  clearTimeout(dateTmr);dateTmr=setTimeout(render,180);
 }
 
 function render(){
