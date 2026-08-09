@@ -1,4 +1,6 @@
 <!DOCTYPE html>
+<!-- BD-REG 2026-08-09b | 261219 upper_premium_275 note reads "בשיתוף לאישה" (singular), not "לנשים" -->
+<!-- BD-REG 2026-08-09a | Cabin options support soldOut (strike-through + FULL badge, still selectable) and a per-option availability note. Applied to 261219: main_front_140 and main_premium_205 marked full, upper_premium_275 notes the remaining female share -->
 <!-- BD-REG 2026-08-07a | Cloudinary public_id for uploaded documents no longer carries the diver's national ID number, and the trailing Date.now() timestamp is replaced by a 128-bit random token. The old pattern <idNumber>_<last>_<first>_<docType>_<Date.now()> put a full ID number in a publicly fetchable URL and left the upload millisecond as the only unguessable part. Surname and docType are kept so the Media Library stays scannable. New uploads only - no existing asset or emailed link is affected -->
 <!-- BD-REG 2026-08-01b | one-finger sideways panning stopped: the document was 1px wider than the viewport (sub-pixel rounding on .bubbles and .logo-img), which is enough for iOS to allow horizontal drag. overflow-x:hidden on html and body. Also 08-01a: form fields raised to 16px so tapping one no longer triggers Safari's auto-zoom -->
 <html lang="he" dir="rtl">
@@ -240,6 +242,20 @@
     .option-label .he { font-size:14px; font-weight:500; color:var(--text); display:block; }
     .option-label .en { font-size:12px; color:var(--muted); display:block; margin-top:1px; }
     .option-label .price { font-size:15px; font-weight:700; color:var(--teal); display:block; margin-top:2px; }
+    /* Sold-out cabins: struck through but still selectable. The badge is inline-block so the
+       parent's line-through does not paint across it. */
+    .option-item.sold-out .option-label .he,
+    .option-item.sold-out .option-label .en,
+    .option-item.sold-out .option-label .price { text-decoration:line-through; color:var(--muted); }
+    .option-label .full-badge {
+      display:inline-block; margin-right:7px;
+      background:#d4692a; color:#fff;
+      font-size:11px; font-weight:700; letter-spacing:0.3px;
+      padding:1px 8px; border-radius:9px;
+      vertical-align:middle;
+    }
+    .option-label .option-note { display:block; margin-top:5px; font-size:12px; font-weight:600; color:#d4692a; }
+    .option-label .option-note .en { display:block; font-size:11px; font-weight:500; color:#d4692a; opacity:0.85; margin-top:0; }
 
     /* FILE UPLOAD */
     .file-upload-area {
@@ -2187,21 +2203,27 @@ const TRIPS = {
         he: "מפלס ראשי, חדר פרמיום קידמי",
         en: "Main deck, front premium cabin",
         price: "$140",
-        priceNum: 140
+        priceNum: 140,
+        soldOut: true
       },
       {
         value: "main_premium_205",
         he: "מפלס ראשי, חדר פרמיום",
         en: "Main deck, premium cabin",
         price: "$205",
-        priceNum: 205
+        priceNum: 205,
+        soldOut: true
       },
       {
         value: "upper_premium_275",
         he: "מפלס עליון, חדר פרמיום",
         en: "Upper deck, premium cabin",
         price: "$275",
-        priceNum: 275
+        priceNum: 275,
+        note: {
+          he: "נותר מקום אחד בשיתוף לאישה",
+          en: "One female share place remaining"
+        }
       }
     ],
     addons: [
@@ -2660,13 +2682,18 @@ function init() {
     roomContainer.innerHTML = '';
     tripConfig.roomOptions.forEach(function(opt, i) {
       const label = document.createElement('label');
-      label.className = 'option-item';
+      label.className = 'option-item' + (opt.soldOut ? ' sold-out' : '');
+      const fullBadge = opt.soldOut ? '<span class="full-badge">FULL</span>' : '';
+      const noteHTML = opt.note
+        ? '<span class="option-note">' + opt.note.he + '<span class="en">' + opt.note.en + '</span></span>'
+        : '';
       label.innerHTML =
         '<input type="radio" name="room_option" value="' + opt.value + '" />' +
         '<div class="option-label">' +
-          '<span class="he">' + opt.he + '</span>' +
+          '<span class="he">' + opt.he + fullBadge + '</span>' +
           '<span class="en">' + opt.en + '</span>' +
           '<span class="price">' + opt.price + '</span>' +
+          noteHTML +
         '</div>';
       label.addEventListener('click', function() {
         roomContainer.querySelectorAll('input[type="radio"]').forEach(function(r) {
