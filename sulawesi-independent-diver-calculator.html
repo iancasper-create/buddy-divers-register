@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BD-SULACALC 2026-07-26a | Dive pricing corrected to actual contracted Published rates (60/58/56 tiers, was 58/54 estimate) -->
+<!-- BD-SULACALC 2026-08-10a | Siladen + Coral Eye villa tables rebuilt on the 2027/2028 (August 2026) Published rate sheets -->
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8" />
@@ -268,21 +268,23 @@
       siladen: {
         label: 'Siladen Resort & Spa - בונאקן',
         villas: [
-          { id:'siladen_garden', he:'וילה נוף לגינה', en:'Garden View Villa', rates:{1:260,2:365,3:510} },
-          { id:'siladen_beach', he:'וילה נוף לים', en:'Beach View Villa', rates:{1:350,2:500,3:700} },
-          { id:'siladen_luxury', he:'וילת יוקרה', en:'Luxury Villa', rates:{1:435,2:620,3:870} },
-          { id:'siladen_beach2br', he:'וילת 2 חדרי שינה - נוף לים', en:'Beach Double Bedroom Villa (2BR/2BA)', rates:{1:665,2:665,3:810,4:950} },
-          { id:'siladen_garden2br', he:'וילת 2 חדרי שינה - נוף לגינה', en:'Garden Double Bedroom Villa (2BR/2BA)', rates:{1:495,2:495,3:595,4:695} }
+          { id:'siladen_garden', he:'חדר גן', en:'Garden Room', rates:{1:235,2:330,3:460} },
+          { id:'siladen_beach', he:'וילה מול הים', en:'Beach Villa', rates:{1:360,2:515,3:720} },
+          { id:'siladen_gardenpool', he:'וילה עם בריכה פרטית בגינה', en:'Garden Pool Villa', rates:{1:360,2:515,3:720,4:925} },
+          { id:'siladen_beachpool', he:'וילה עם בריכה פרטית מול הים', en:'Beach Pool Villa', rates:{1:595,2:850,3:1190} },
+          { id:'siladen_beach2br', he:'וילת 2 חדרי שינה - מול הים', en:'Two Bedroom Beach Villa (2BR/2BA)', rates:{1:685,2:685,3:830,4:975} },
+          { id:'siladen_gardenpool2br', he:'וילת 2 חדרי שינה - עם בריכה בגינה', en:'Two Bedroom Garden Pool Villa (2BR/2BA)', rates:{1:685,2:685,3:830,4:975} },
+          { id:'siladen_beachpool2br', he:'וילת 2 חדרי שינה - עם בריכה מול הים', en:'Two Bedroom Beach Pool Villa (2BR/2BA)', rates:{1:1130,2:1130,3:1370,4:1615} }
         ]
       },
       coraleye: {
         label: 'Coral Eye Resort - בנקה',
         villas: [
-          { id:'coraleye_garden', he:'וילה נוף לגינה', en:'Garden View Villa', rates:{1:310,2:440,3:615} },
-          { id:'coraleye_beach', he:'וילה נוף לים', en:'Beach View Villa', rates:{1:360,2:515,3:720} },
-          { id:'coraleye_pool', he:'וילה עם בריכה בקו ראשון לים', en:'Beachfront Pool Villa', rates:{1:460,2:660,3:925} },
-          { id:'coraleye_superior', he:'חדר סופריור', en:'Superior Room', rates:{1:220,2:315,3:440} },
-          { id:'coraleye_garden2br', he:'וילת 2 חדרי שינה - נוף לגינה', en:'Double Bedroom Garden Villa (2BR/2BA)', rates:{1:440,2:440,3:535,4:630} }
+          { id:'coraleye_superior', he:'חדר סופריור', en:'Superior Room', rates:{1:220,2:310,3:435} },
+          { id:'coraleye_garden', he:'וילה בגינה', en:'Garden Villa', rates:{1:310,2:440,3:615} },
+          { id:'coraleye_beach', he:'וילה מול הים', en:'Beach Villa', rates:{1:360,2:515,3:720} },
+          { id:'coraleye_pool', he:'וילה עם בריכה פרטית מול הים', en:'Beach Pool Villa', rates:{1:595,2:850,3:1190,4:1530} },
+          { id:'coraleye_garden2br', he:'וילת 2 חדרי שינה - בגינה', en:'Two Bedroom Garden Villa (2BR/2BA)', rates:{1:590,2:590,3:715,4:835} }
         ]
       }
     };
