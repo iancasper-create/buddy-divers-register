@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<!-- BD-FOLLOWUP 2026-08-06a | Payment request survives a Make outage: the WhatsApp send is allowed to fail on its own, the Airtable rows are still written (Status "Not sent"), and the Cloudinary link is offered so the request can be sent by hand
+<!-- BD-FOLLOWUP 2026-08-11a | Payment Requests table merged into WA Messages: the duplicate second write is gone, and Currency and Trip ID are now logged on the WA Messages row itself
+     BD-FOLLOWUP 2026-08-06a | Payment request survives a Make outage: the WhatsApp send is allowed to fail on its own, the Airtable rows are still written (Status "Not sent"), and the Cloudinary link is offered so the request can be sent by hand
      BD-FOLLOWUP 2026-08-05r | Trips are read live from buddy-divers-registration.html instead of a baked snapshot, so adding a trip there is enough; the snapshot stays as a fallback and supplies destination and vessel
      BD-FOLLOWUP 2026-08-05q | Confirmation number printed blank: html2canvas drops text inside display:inline-block, so the box drew empty. Switched to display:table
      BD-FOLLOWUP 2026-08-05p | Confirmations filed flat under booking_confirmations, no per-trip subfolders
@@ -1361,7 +1362,6 @@ const BASE_ID = 'app2RAeuaXaWrHOan';
 const BOOKINGS_TABLE = 'tblMCB8nCSoRuiTKI';
 const PAYMENTS_TABLE = 'tbl0oLEDoa4PCQOOp';
 const WA_MESSAGES_TABLE = 'tblxcQFC35tOSH8l6';
-const PAYMENT_REQUESTS_TABLE = 'tblqqgpdp5BOhSAH9';
 // Addressed by name because the table was created after this file. Swap in its tbl... id if it is ever renamed.
 const CONFIRMATIONS_TABLE = 'Confirmations';
 // Make scenario "Buddy-Divers - Confirmation Letter Email", which attaches the PDF and
@@ -2401,6 +2401,8 @@ async function openWhatsApp() {
             ? (document.getElementById('customPaymentLabel').value.trim() || 'Custom')
             : _selectedPaymentType,
           'Status': sent ? 'Sent' : 'Not sent',
+          'Currency': booking.currency || 'USD',
+          'Trip ID': booking.tripId,
           'Israel ID': _diverIsraelId || undefined,
           'First Name': _diverFirstName || undefined,
           'Last Name': _diverLastName || undefined
@@ -2414,24 +2416,6 @@ async function openWhatsApp() {
         console.warn('WA logging failed (non-critical):', logErr);
       }
     }
-
-    // Step 5: Log to Payment Requests table
-    try {
-      const prAmount = parseFloat(document.getElementById('paymentRequestAmount').value) || 0;
-      const prRate   = parseFloat(document.getElementById('exchangeRate').value) || 0;
-      await fetch(`https://api.airtable.com/v0/${BASE_ID}/${PAYMENT_REQUESTS_TABLE}`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${AIRTABLE_API_KEY}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ fields: {
-          'Date Sent':      new Date().toISOString().split('T')[0],
-          'Diver Name':     booking.diverName,
-          'Trip ID':        booking.tripId,
-          'Foreign Amount': prAmount,
-          'Currency':       booking.currency || 'USD',
-          'ILS Amount':     Math.round(prAmount * prRate)
-        }})
-      });
-    } catch(prErr) { console.warn('Payment Requests log failed (non-critical):', prErr); }
 
     setTimeout(() => {
       btn.textContent = '💬 שלח וואטסאפ';
@@ -2702,6 +2686,8 @@ async function openProFormaWhatsApp() {
           ? (document.getElementById('pfCustomPaymentLabel').value.trim() || 'Custom')
           : _pfSelectedPaymentType,
         'Status': 'Sent',
+        'Currency': _pfCurrency,
+        'Trip ID': document.getElementById('pfTripDesc').value.trim() || undefined,
         'First Name': document.getElementById('pfFirstName').value.trim() || undefined,
         'Last Name':  document.getElementById('pfLastName').value.trim()  || undefined
       };
@@ -2711,26 +2697,6 @@ async function openProFormaWhatsApp() {
         body: JSON.stringify({ fields: waFields })
       });
     } catch(logErr) { console.warn('WA logging failed (non-critical):', logErr); }
-
-    // Log to Payment Requests table
-    try {
-      const prAmount  = parseFloat(document.getElementById('pfAmount').value) || 0;
-      const prRate    = parseFloat(document.getElementById('pfExchangeRate').value) || 0;
-      const pfFirst   = document.getElementById('pfFirstName').value.trim();
-      const pfLast    = document.getElementById('pfLastName').value.trim();
-      await fetch('https://api.airtable.com/v0/' + BASE_ID + '/' + PAYMENT_REQUESTS_TABLE, {
-        method: 'POST',
-        headers: { Authorization: 'Bearer ' + AIRTABLE_API_KEY, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ fields: {
-          'Date Sent':      new Date().toISOString().split('T')[0],
-          'Diver Name':     [pfFirst, pfLast].filter(Boolean).join(' ') || 'Pro Forma',
-          'Trip ID':        document.getElementById('pfTripDesc').value.trim() || '',
-          'Foreign Amount': prAmount,
-          'Currency':       _pfCurrency,
-          'ILS Amount':     Math.round(prAmount * prRate)
-        }})
-      });
-    } catch(prErr) { console.warn('Payment Requests log failed (non-critical):', prErr); }
 
     setTimeout(() => {
       btn.textContent = '💬 שלח וואטסאפ';
