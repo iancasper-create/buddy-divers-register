@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<!-- BD-FOLLOWUP 2026-08-11a | Payment Requests table merged into WA Messages: the duplicate second write is gone, and Currency and Trip ID are now logged on the WA Messages row itself
+<!-- BD-FOLLOWUP 2026-08-11b | Pro forma payment request gains a Trip ID field, so an ad hoc request can be tied to a real trip instead of only a free text description
+     BD-FOLLOWUP 2026-08-11a | Payment Requests table merged into WA Messages: the duplicate second write is gone, and Currency and Trip ID are now logged on the WA Messages row itself
      BD-FOLLOWUP 2026-08-06a | Payment request survives a Make outage: the WhatsApp send is allowed to fail on its own, the Airtable rows are still written (Status "Not sent"), and the Cloudinary link is offered so the request can be sent by hand
      BD-FOLLOWUP 2026-08-05r | Trips are read live from buddy-divers-registration.html instead of a baked snapshot, so adding a trip there is enough; the snapshot stays as a fallback and supplies destination and vessel
      BD-FOLLOWUP 2026-08-05q | Confirmation number printed blank: html2canvas drops text inside display:inline-block, so the box drew empty. Switched to display:table
@@ -868,7 +869,10 @@
           <option value="standing order">הוראת קבע — Standing Order</option>
         </select>
       </div>
-      <div class="field"></div>
+      <div class="field">
+        <label>Trip ID / מספר טיול</label>
+        <input type="text" id="pfTripId" placeholder="e.g. 270104" />
+      </div>
     </div>
   </div>
 
@@ -2687,7 +2691,9 @@ async function openProFormaWhatsApp() {
           : _pfSelectedPaymentType,
         'Status': 'Sent',
         'Currency': _pfCurrency,
-        'Trip ID': document.getElementById('pfTripDesc').value.trim() || undefined,
+        'Trip ID': document.getElementById('pfTripId').value.trim()
+                || document.getElementById('pfTripDesc').value.trim()
+                || undefined,
         'First Name': document.getElementById('pfFirstName').value.trim() || undefined,
         'Last Name':  document.getElementById('pfLastName').value.trim()  || undefined
       };
