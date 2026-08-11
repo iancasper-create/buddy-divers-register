@@ -23,4 +23,11 @@ flight-changes-*.html
 # hotel booking sheets that carry guest names. None is tracked today.
 *.xlsx
 
+# Local backups taken before risky edits (HANDOVER copies, deleted-record dumps).
+# This repo is PUBLIC, and these carry customer names, amounts and national ID
+# numbers, so the whole folder is ignored rather than individual filenames.
+# Note line 1 is the exact string "HANDOVER.md" and does NOT match "HANDOVER.md.bak-*",
+# which is why those copies live in here instead of the repo root.
+local-backups/
+
 .DS_Store
