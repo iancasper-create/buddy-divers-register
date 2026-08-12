@@ -42,6 +42,7 @@
 </script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>WhaleSwim Adventures - Guest Forms</title>
+<!-- BD-WHALESWIM 2026-08-12b | Ian's proofread round: participant signature added to the Aqua Abilities page, tour dates hardcoded for the 5 to 12 Sep 2026 departure, witness name and signature made optional -->
 <!-- BD-WHALESWIM 2026-08-12a | New file: WhaleSwim Adventures guest forms, Aqua Abilities & Medical plus the Affirmation & Liability Waiver, built on the dune/naia pattern (shared Make webhook, Cloudinary raw upload, PDFBolt) -->
 <link rel="icon" type="image/jpeg" href="https://res.cloudinary.com/dccbsfte0/image/upload/v1774016253/logo2_swvqfe.jpg" />
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Source+Sans+3:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -135,6 +136,9 @@ canvas.sig{display:block;width:100%;height:110px;cursor:crosshair;touch-action:n
   #panel-0 .chk-row{padding:4px 0!important;break-inside:avoid;}
   #panel-0 .chk-row label{font-size:11.5px!important;}
   #panel-0 .caps{font-size:10.5px!important;padding:8px 12px!important;break-inside:avoid;}
+  #panel-0 .sig-area{padding:12px;break-inside:avoid;}
+  #panel-0 .sig-wrap{margin-bottom:6px;}
+  #panel-0 .sig-wrap canvas{height:80px !important;}
   #panel-1{page-break-before:always;}
   #panel-1 .card{box-shadow:none;border:1px solid #ccc;}
   #panel-1 .ch{padding:8px 20px;}
@@ -205,7 +209,7 @@ canvas.sig{display:block;width:100%;height:110px;cursor:crosshair;touch-action:n
       </div>
       <div class="fr">
         <div class="field"><label>Date of Birth (dd/mm/yyyy)</label><input type="date" id="aq-dob"></div>
-        <div class="field"><label>Tour Start Date (dd/mm/yyyy)</label><input type="date" id="aq-tour"></div>
+        <div class="field"><label>Tour Start Date (dd/mm/yyyy)</label><input type="date" id="aq-tour" value="2026-09-05"></div>
       </div>
 
       <hr class="divider">
@@ -346,6 +350,13 @@ canvas.sig{display:block;width:100%;height:110px;cursor:crosshair;touch-action:n
         <p>You have not accepted the declaration above. WhaleSwim Adventures cannot accept this form without it. Please contact Buddy-Divers so we can help.</p>
       </div>
 
+      <div class="sig-area" style="margin-top:18px;">
+        <label style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:9px;">Signature of Participant</label>
+        <div class="sig-wrap"><canvas class="sig" id="sig-aqua" width="800" height="110"></canvas><div class="sig-ph" id="sig-aqua-ph">Sign here</div></div>
+        <div class="sig-acts"><button type="button" class="btn-clr" data-canvas="sig-aqua" data-ph="sig-aqua-ph">Clear</button></div>
+        <div class="field" style="margin-top:14px;max-width:260px;"><label>Date (dd/mm/yyyy)</label><input type="date" id="aq-sig-date"></div>
+      </div>
+
       <hr class="divider">
       <div class="sec-title">Dietary Requirements</div>
       <div class="notice">Please keep in mind that Tonga is a developing island nation and that we are a remote island. What is not grown there (a limited selection of vegetables and seasonal tropical fruit) is shipped in, therefore strict dietary needs are not always possible. If you have strict vegan, GF or dairy-free dietary requirements please advise us beforehand. We can provide a limited range of gluten-free items (bread and cakes) but we recommend that you bring your own GF snacks if required. For more dietary information see our Trip Preparation Bulletin.</div>
@@ -412,7 +423,7 @@ canvas.sig{display:block;width:100%;height:110px;cursor:crosshair;touch-action:n
         <div class="field"><label>Dated at (City, Country)</label><input type="text" id="w-city" placeholder="City, Country"></div>
         <div class="field"><label>Date (dd/mm/yyyy)</label><input type="date" id="w-date"></div>
       </div>
-      <div class="field" style="margin-bottom:18px;"><label>Tour Date / No.</label><input type="text" id="w-tour" placeholder="e.g. 5 to 12 September 2026"></div>
+      <div class="field" style="margin-bottom:18px;"><label>Tour Date / No.</label><input type="text" id="w-tour" value="05/09/2026 - T726D"></div>
 
       <div class="sig-area" style="margin-bottom:18px;">
         <label style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:9px;">Signature of Participant</label>
@@ -586,6 +597,9 @@ function validatePanel(panel, idx) {
     if(anyCond && (!det || !det.value.trim())) {
       errors.push("You have checked a medical condition, please list the details and any current medication");
     }
+    if(sigBlank("sig-aqua")) errors.push("Participant signature is required");
+    var sd = document.getElementById("aq-sig-date");
+    if(!sd || !sd.value) errors.push("Signature date is required");
   } else if(idx === 1) {
     var wn = document.getElementById("w-name");
     if(!wn || !wn.value.trim()) errors.push("Name is required");
@@ -600,9 +614,7 @@ function validatePanel(panel, idx) {
     var wt = document.getElementById("w-tour");
     if(!wt || !wt.value.trim()) errors.push("Tour date is required");
     if(sigBlank("sig-waiver")) errors.push("Participant signature is required");
-    var ww = document.getElementById("w-witness");
-    if(!ww || !ww.value.trim()) errors.push("Witness name is required");
-    if(sigBlank("sig-witness")) errors.push("Witness signature is required");
+    // Witness name and signature are deliberately optional (Ian, 2026-08-12).
     if(isMinor() && sigBlank("sig-guardian")) {
       errors.push("The participant is under 19, so a parent or guardian signature is required");
     }
@@ -638,6 +650,7 @@ function initSig(cid,pid) {
   cnv.addEventListener("pointerup",function(){ drawing=false; });
   cnv.addEventListener("pointercancel",function(){ drawing=false; });
 }
+initSig("sig-aqua","sig-aqua-ph");
 initSig("sig-waiver","sig-waiver-ph");
 initSig("sig-guardian","sig-guardian-ph");
 initSig("sig-witness","sig-witness-ph");
@@ -650,17 +663,12 @@ document.getElementById("aq-dob").addEventListener("change", function() {
   var w = document.getElementById("w-dob"); if(w) w.value = this.value;
   updateGuardian();
 });
-document.getElementById("aq-tour").addEventListener("change", function() {
-  var w = document.getElementById("w-tour");
-  if(w && !w.value.trim() && this.value) {
-    var d = new Date(this.value);
-    if(!isNaN(d.getTime())) w.value = d.toLocaleDateString("en-GB", {day:"numeric", month:"long", year:"numeric"});
-  }
-  updateGuardian();
-});
+// The waiver's Tour Date / No. is prefilled with the tour number and must never be
+// overwritten by a reformatted date, so this listener only re-checks the under-19 rule.
+document.getElementById("aq-tour").addEventListener("change", updateGuardian);
 
 var today = new Date().toISOString().split("T")[0];
-["w-date"].forEach(function(id){ var el=document.getElementById(id); if(el)el.value=today; });
+["w-date","aq-sig-date"].forEach(function(id){ var el=document.getElementById(id); if(el)el.value=today; });
 
 // ── Email PDF ─────────────────────────────────────────────────────
 var MAKE_WEBHOOK_URL = "https://hook.eu1.make.com/ugucimbs6p6tbac9sjmrr4as1l6pconu";
@@ -811,6 +819,8 @@ function buildSnapshotHTML() {
     "#panel-0 .field label{font-size:11px!important;}" +
     "#panel-0 .field input,#panel-0 .field textarea{font-size:11px!important;padding:5px 9px!important;}" +
     "#panel-0 .cb > p{font-size:11px!important;line-height:1.45!important;margin-bottom:6px!important;}" +
+    "#panel-0 .sig-area{padding:10px!important;break-inside:avoid;}" +
+    "#panel-0 .sig-wrap{margin-bottom:4px!important;}" +
     "/* --- compact waiver (panel-1) --- */" +
     "#panel-1 .ch{padding:8px 20px!important;}" +
     "#panel-1 .ch h2{font-size:14px!important;}" +
