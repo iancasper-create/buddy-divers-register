@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="en" translate="no" class="notranslate">
+<head>
+<meta charset="UTF-8">
+<meta name="google" content="notranslate">
+<meta http-equiv="Content-Language" content="en">
+<script>
+// Aggressively block browser translation.
+// If Chrome translates the page anyway, detect it and reload with translation killed.
+(function(){
+  // 1. Add notranslate to <html> immediately (belt-and-suspenders with the attribute)
+  document.documentElement.setAttribute('translate','no');
+  document.documentElement.classList.add('notranslate');
+  // 2. Watch for Chrome inserting font[_mstmutation] or changing xml:lang — the tell-tale of an active translation
+  var observer = new MutationObserver(function(mutations){
+    for(var i=0;i<mutations.length;i++){
+      var t = mutations[i].target;
+      if(t && t.tagName && (t.tagName==='FONT' || (t.getAttribute && t.getAttribute('_mstmutation')))){
+        observer.disconnect();
+        // Force a clean reload that suppresses translation
+        if(location.search.indexOf('notranslate')===-1){
+          location.replace(location.href + (location.search?'&':'?') + 'notranslate=1');
+        }
+        return;
+      }
+    }
+  });
+  observer.observe(document.documentElement,{subtree:true,childList:true,attributes:true,attributeFilter:['_mstmutation','class','lang']});
+  // 3. Also check on DOMContentLoaded — catches Firefox and Safari translate
+  document.addEventListener('DOMContentLoaded',function(){
+    if(document.documentElement.lang && document.documentElement.lang !== 'en'){
+      document.documentElement.lang = 'en';
+    }
+    // If any element has been wrapped in <font> tags (Chrome translate signature), reload
+    if(document.querySelector('font[_mstmutation],font[style*="vertical-align"]')){
+      if(location.search.indexOf('notranslate')===-1){
+        location.replace(location.href + (location.search?'&':'?') + 'notranslate=1');
+      }
+    }
+  });
+})();
+</script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WhaleSwim Adventures - Guest Forms</title>
+<!-- BD-WHALESWIM 2026-08-12a | New file: WhaleSwim Adventures guest forms, Aqua Abilities & Medical plus the Affirmation & Liability Waiver, built on the dune/naia pattern (shared Make webhook, Cloudinary raw upload, PDFBolt) -->
+<link rel="icon" type="image/jpeg" href="https://res.cloudinary.com/dccbsfte0/image/upload/v1774016253/logo2_swvqfe.jpg" />
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Source+Sans+3:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#1a3a5c;--teal:#1a7a8a;--orange:#d4692a;--bg:#f4f7fa;--border:#c8d6e5;--text:#1e2d3d;--muted:#6b7f94;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Source Sans 3',sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.6;}
+header{background:var(--navy);padding:22px 40px;display:flex;align-items:center;gap:18px;box-shadow:0 2px 10px rgba(0,0,0,.25);}
+header h1{font-family:'Playfair Display',serif;color:#fff;font-size:21px;font-weight:500;}
+header p{color:rgba(255,255,255,.6);font-size:13px;margin-top:2px;}
+.anchor{font-size:30px;color:var(--orange);}
+.tabs{background:var(--navy);display:flex;padding:0 40px;border-top:1px solid rgba(255,255,255,.1);}
+.tab{background:none;border:none;color:rgba(255,255,255,.55);font-family:'Source Sans 3',sans-serif;font-size:13.5px;font-weight:500;padding:12px 20px;cursor:pointer;border-bottom:3px solid transparent;}
+.tab.active{color:#fff;border-bottom-color:var(--orange);}
+.main{max-width:860px;margin:32px auto;padding:0 20px 60px;}
+.panel{display:none;}.panel.active{display:block;}
+.card{background:#fff;border-radius:10px;box-shadow:0 2px 14px rgba(26,58,92,.08);overflow:hidden;margin-bottom:18px;}
+.ch{background:var(--navy);color:#fff;padding:18px 28px;}
+.ch h2{font-family:'Playfair Display',serif;font-size:19px;font-weight:500;}
+.ch p{font-size:13px;color:rgba(255,255,255,.65);margin-top:4px;}
+.cb{padding:26px 28px;}
+.notice{background:#eaf3ff;border-left:4px solid var(--teal);border-radius:6px;padding:13px 17px;font-size:13.5px;margin-bottom:22px;color:#1a4060;}
+.notice-warn{background:#fff4ec;border-left:4px solid var(--orange);border-radius:6px;padding:13px 17px;font-size:13.5px;margin-bottom:22px;color:#6b2c00;}
+.caps{font-weight:700;font-size:13px;line-height:1.6;color:#6b2c00;background:#fff8f2;border:1.5px solid #f0d0b4;border-radius:6px;padding:13px 17px;margin-bottom:14px;}
+.fr{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+.fr3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:16px;}
+.field{display:flex;flex-direction:column;gap:5px;}
+.field label{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;}
+.field input,.field textarea{border:1.5px solid var(--border);border-radius:6px;padding:9px 12px;font-family:'Source Sans 3',sans-serif;font-size:14px;color:var(--text);background:#fafcfe;}
+.field input:focus,.field textarea:focus{outline:none;border-color:var(--teal);}
+.field textarea{min-height:80px;resize:vertical;line-height:1.5;}
+.divider{border:none;border-top:1.5px solid var(--border);margin:22px 0;}
+.sec-title{font-family:'Playfair Display',serif;font-size:16px;color:var(--navy);margin-bottom:14px;padding-bottom:7px;border-bottom:2px solid var(--border);}
+.qrow{display:flex;align-items:flex-start;gap:14px;padding:13px 0;border-bottom:1px solid #edf2f7;}
+.qrow:last-child{border-bottom:none;}
+.qtext{flex:1;font-size:14.5px;line-height:1.55;}
+.qans{display:flex;flex-direction:row;gap:10px;min-width:110px;flex-shrink:0;align-items:center;}
+.qans label{display:flex;align-items:center;gap:5px;cursor:pointer;font-size:14px;font-weight:500;touch-action:manipulation;}.qans label:first-child{min-width:54px;}
+.qans input[type=radio]{accent-color:var(--navy);cursor:pointer;touch-action:manipulation;}
+.qans-wide{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;}
+.qans-wide label{display:flex;align-items:center;gap:6px;cursor:pointer;font-size:14px;font-weight:500;border:1.5px solid var(--border);border-radius:6px;padding:7px 14px;background:#fafcfe;touch-action:manipulation;}
+.qans-wide input[type=radio]{accent-color:var(--navy);cursor:pointer;touch-action:manipulation;}
+.expand{display:none;background:#eef5ff;border:1.5px solid #b8d0ef;border-radius:8px;padding:16px 20px;margin:4px 0 14px 0;}
+.expand.shown{display:block;}
+.expand .blabel{font-family:'Playfair Display',serif;font-size:14px;font-weight:700;color:var(--navy);margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.phys-warn{display:none;background:#fff4ec;border:2px solid var(--orange);border-radius:8px;padding:16px 20px;margin-top:14px;}
+.phys-warn.shown{display:block;}
+.phys-warn h3{color:var(--orange);font-family:'Playfair Display',serif;font-size:16px;margin-bottom:6px;}
+.phys-warn p{font-size:13.5px;color:#6b2c00;}
+.chk-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px 22px;margin-bottom:6px;}
+.chk-row{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid #edf2f7;}
+.chk-row input[type=checkbox]{accent-color:var(--navy);width:16px;height:16px;margin-top:3px;flex-shrink:0;cursor:pointer;touch-action:manipulation;}
+.chk-row label{font-size:14px;line-height:1.5;cursor:pointer;}
+.sig-area{border:1.5px dashed var(--border);border-radius:8px;padding:18px;background:#fafcfe;}
+.sig-wrap{border:1.5px solid var(--border);border-radius:6px;background:#fff;position:relative;margin-bottom:8px;}
+canvas.sig{display:block;width:100%;height:110px;cursor:crosshair;touch-action:none;border-radius:6px;-ms-touch-action:none;}
+.sig-ph{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#bdc8d4;font-size:13px;pointer-events:none;font-style:italic;}
+.sig-acts{display:flex;justify-content:flex-end;}
+.btn-clr{background:none;border:1.5px solid var(--border);border-radius:5px;padding:4px 13px;font-size:12.5px;color:var(--muted);cursor:pointer;}
+.btn-clr:hover{border-color:#c0392b;color:#c0392b;}
+.init-box{width:90px;border:1.5px solid var(--border);border-radius:5px;padding:6px 9px;font-size:14px;text-align:center;font-weight:600;color:var(--navy);background:#fafcfe;}
+.init-box:focus{outline:none;border-color:var(--teal);}
+.clauses{counter-reset:none;font-size:14px;line-height:1.6;}
+.clauses li{margin-bottom:11px;}
+.btn-next{background:var(--navy);color:#fff;border:none;border-radius:7px;padding:13px 34px;font-family:'Source Sans 3',sans-serif;font-size:15px;font-weight:600;cursor:pointer;margin-top:20px;touch-action:manipulation;}
+.btn-next:hover{background:#0f2440;}
+.btn-print{background:var(--orange);color:#fff;border:none;border-radius:7px;padding:13px 34px;font-family:'Source Sans 3',sans-serif;font-size:15px;font-weight:600;cursor:pointer;margin-top:20px;}
+.btn-print:hover{background:#b85520;}
+.btn-email{background:#2a6496;color:#fff;border:none;border-radius:7px;padding:13px 34px;font-family:'Source Sans 3',sans-serif;font-size:15px;font-weight:600;cursor:pointer;margin-top:12px;display:block;}
+.btn-email:hover{background:#1e4f75;}
+.btn-email:disabled{background:#aaa;cursor:not-allowed;}
+.email-status{display:none;margin-top:12px;padding:12px 16px;border-radius:6px;font-size:14px;line-height:1.5;}
+@media print{
+  header,.tabs,.btn-print,.btn-next,.phys-warn,.btn-clr,.btn-email,.email-section,.val-errors{display:none!important;}
+  .panel{display:none!important;}
+  #panel-0,#panel-1{display:block!important;}
+  #panel-0 .ch{padding:10px 20px;}
+  #panel-0 .ch h2{font-size:15px;}
+  #panel-0 .cb{padding:14px 20px;font-size:11.5px;line-height:1.5;}
+  #panel-0 .notice{display:none;}
+  #panel-0 .divider{margin:10px 0;}
+  #panel-0 .sec-title{font-size:13px;margin-bottom:8px;padding-bottom:4px;}
+  #panel-0 .fr,#panel-0 .fr3{gap:12px;margin-bottom:10px;}
+  #panel-0 .field label{font-size:11px;}
+  #panel-0 .field input,#panel-0 .field textarea{padding:6px 10px;font-size:12px;}
+  #panel-0 .qrow{padding:5px 0!important;gap:10px!important;break-inside:avoid;}
+  #panel-0 .qtext{font-size:11.5px!important;line-height:1.38!important;}
+  #panel-0 .qans{min-width:80px!important;flex-shrink:0!important;}
+  #panel-0 .qans label{font-size:11px!important;}
+  #panel-0 .qans-wide label{font-size:11px!important;padding:4px 9px!important;}
+  #panel-0 .chk-row{padding:4px 0!important;break-inside:avoid;}
+  #panel-0 .chk-row label{font-size:11.5px!important;}
+  #panel-0 .caps{font-size:10.5px!important;padding:8px 12px!important;break-inside:avoid;}
+  #panel-1{page-break-before:always;}
+  #panel-1 .card{box-shadow:none;border:1px solid #ccc;}
+  #panel-1 .ch{padding:8px 20px;}
+  #panel-1 .ch h2{font-size:14px;}
+  #panel-1 .cb{padding:12px 20px;}
+  #panel-1 .cb > p{font-size:11px!important;line-height:1.45!important;margin-bottom:6px!important;}
+  #panel-1 .clauses{font-size:10.5px!important;line-height:1.4!important;}
+  #panel-1 .clauses li{margin-bottom:4px!important;break-inside:avoid;}
+  #panel-1 .fr,#panel-1 .fr3{gap:12px;margin-bottom:8px;}
+  #panel-1 .field label{font-size:11px;}
+  #panel-1 .field input{padding:5px 9px;font-size:11px;}
+  #panel-1 .sig-area{padding:10px;break-inside:avoid;}
+  #panel-1 .sig-wrap canvas{height:70px!important;}
+  #panel-1 .sig-wrap{margin-bottom:4px;}
+  .main{margin:0;padding:0;max-width:100%;}
+  .card{box-shadow:none;border:1px solid #ccc;}
+}
+@media(max-width:600px){
+  .fr,.fr3{grid-template-columns:1fr;}
+  .chk-grid{grid-template-columns:1fr;}
+  .tabs{padding:0 4px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  .tab{font-size:12px;padding:10px 8px;white-space:nowrap;flex-shrink:0;touch-action:manipulation;}
+  .cb{padding:16px;}
+  .main{margin:12px auto;padding:0 10px 40px;}
+  canvas.sig{height:130px !important;}
+  .qans{min-width:90px;}
+  .qans label{font-size:13px;}
+  .btn-next,.btn-print,.btn-email{width:100%;text-align:center;padding:15px;}
+  header{padding:16px 16px;}
+  header h1{font-size:17px;}
+  .field input,.field textarea{font-size:16px;}
+  /* mobile only: question text full-width on top, Yes/No as wide low-profile buttons underneath */
+  .qrow{flex-wrap:wrap;gap:6px;}
+  .qrow .qans{flex-basis:100%;width:100%;min-width:0;margin-top:4px;gap:10px;}
+  .qrow .qans label{flex:1;min-width:0;justify-content:center;border:1.5px solid var(--border);border-radius:6px;padding:6px 14px;background:#fafcfe;font-size:14px;font-weight:600;touch-action:manipulation;}
+  .qrow .qans label:first-child{min-width:0;}
+  .qans-wide label{flex:1 1 45%;justify-content:center;}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="anchor">&#128011;</div>
+  <div>
+    <h1>WhaleSwim Adventures &ndash; Guest Documentation</h1>
+    <p>Please complete both forms prior to your departure</p>
+  </div>
+</header>
+<div class="tabs">
+  <button class="tab active" data-tab="0">1. Aqua Abilities &amp; Medical</button>
+  <button class="tab" data-tab="1">2. Liability Waiver</button>
+</div>
+<div class="main">
+
+<!-- ══════════════ PANEL 0: AQUA ABILITIES & WAIVERS ══════════════ -->
+<div class="panel active" id="panel-0">
+  <div class="card">
+    <div class="ch">
+      <h2>Guest Aquatic Abilities &amp; Waivers</h2>
+      <p>WhaleSwim Adventures</p>
+    </div>
+    <div class="cb">
+      <div class="notice">This form must be filled in by each person coming on the tour. The information on this document helps us to evaluate your skills in the water, so we can assist you in having a great expedition. Check as appropriate. Please be honest.</div>
+
+      <div class="fr">
+        <div class="field"><label>Full Name</label><input type="text" id="aq-name"></div>
+        <div class="field"><label>Email Address</label><input type="email" id="aq-email" placeholder="email@example.com"></div>
+      </div>
+      <div class="fr">
+        <div class="field"><label>Date of Birth (dd/mm/yyyy)</label><input type="date" id="aq-dob"></div>
+        <div class="field"><label>Tour Start Date (dd/mm/yyyy)</label><input type="date" id="aq-tour"></div>
+      </div>
+
+      <hr class="divider">
+      <div class="sec-title">Swimming and Snorkeling Ability</div>
+      <div class="notice-warn">This adventure is medium to high challenge and is not suitable if you are unfit or have a mobility disability.</div>
+
+      <div class="qrow">
+        <div class="qtext">Are you a Certified diver?</div>
+        <div class="qans">
+          <label><input type="radio" name="cert" value="yes"> Yes</label>
+          <label><input type="radio" name="cert" value="no"> No</label>
+        </div>
+      </div>
+      <div class="qrow">
+        <div class="qtext">Can you Swim?</div>
+        <div class="qans">
+          <label><input type="radio" name="swim" value="yes"> Yes</label>
+          <label><input type="radio" name="swim" value="no"> No</label>
+        </div>
+      </div>
+      <div style="padding:13px 0;border-bottom:1px solid #edf2f7;">
+        <div class="qtext">What is your swimming skill level?</div>
+        <div class="qans-wide">
+          <label><input type="radio" name="swimlvl" value="excellent"> excellent</label>
+          <label><input type="radio" name="swimlvl" value="above average"> above average</label>
+          <label><input type="radio" name="swimlvl" value="average"> average</label>
+          <label><input type="radio" name="swimlvl" value="good"> good</label>
+          <label><input type="radio" name="swimlvl" value="poor"> poor</label>
+        </div>
+      </div>
+      <div class="qrow">
+        <div class="qtext">Can you Snorkel?</div>
+        <div class="qans">
+          <label><input type="radio" name="snorkel" value="yes"> Yes</label>
+          <label><input type="radio" name="snorkel" value="no"> No</label>
+        </div>
+      </div>
+      <div style="padding:13px 0;">
+        <div class="qtext">What is your snorkeling skill level?</div>
+        <div class="qans-wide">
+          <label><input type="radio" name="snorkellvl" value="excellent"> excellent</label>
+          <label><input type="radio" name="snorkellvl" value="above average"> above average</label>
+          <label><input type="radio" name="snorkellvl" value="average"> average</label>
+          <label><input type="radio" name="snorkellvl" value="good"> good</label>
+          <label><input type="radio" name="snorkellvl" value="poor"> poor</label>
+        </div>
+      </div>
+
+      <hr class="divider">
+      <div class="sec-title">Confidence</div>
+      <div class="qrow">
+        <div class="qtext">Do you believe your swimming/snorkelling skills are at a level to confidently snorkel 50 to 80 metres (55 to 87 yards) un-aided in 1 to 2m (3 to 7 feet) swells, to the whales?</div>
+        <div class="qans">
+          <label><input type="radio" name="conf" value="yes" data-hide="conf-box"> Yes</label>
+          <label><input type="radio" name="conf" value="no" data-show="conf-box"> No</label>
+        </div>
+      </div>
+      <div class="expand" id="conf-box">
+        <div class="blabel">If No</div>
+        <div class="qrow">
+          <div class="qtext">Are you happy to just whale watch from the boat?</div>
+          <div class="qans">
+            <label><input type="radio" name="watch" value="yes"> Yes</label>
+            <label><input type="radio" name="watch" value="no"> No</label>
+          </div>
+        </div>
+      </div>
+      <div class="phys-warn" id="conf-warn">
+        <h3>Please talk to us before you travel</h3>
+        <p>You have indicated that you are not confident snorkelling to the whales and would not be happy whale watching from the boat. Please contact Buddy-Divers before your departure so we can discuss the expedition with you.</p>
+      </div>
+
+      <hr class="divider">
+      <div class="sec-title">Medical History</div>
+      <div class="notice">To the participant: The information that you are providing is necessary in the event that you become injured during your expedition and/or tour and are unable to supply us with this information.</div>
+      <div class="caps">PLEASE FULLY UNDERSTAND THAT YOU ALONE ARE RESPONSIBLE FOR DETERMINING YOUR MEDICAL AND PHYSICAL CONDITION AND YOUR ABILITY TO FULLY PARTICIPATE IN THE AQUATIC ACTIVITIES PROVIDED TO YOU BY WHALESWIM ADVENTURES.</div>
+      <div class="caps">NEITHER WHALESWIM ADVENTURES OR THEIR AGENTS WILL TAKE ANY RESPONSIBILITY IN DETERMINING YOUR MEDICAL AND PHYSICAL ABILITY TO PARTICIPATE IN SAID ACTIVITIES.</div>
+      <div class="caps">IF YOU HAVE ANY QUESTIONS CONCERNING YOUR MEDICAL OR PHYSICAL CONDITION WITH REGARD TO YOUR ABILITY TO PARTICIPATE IN THESE ACTIVITIES, PLEASE CONSULT YOUR PERSONAL PHYSICIAN PRIOR TO BOOKING.</div>
+      <p style="font-size:14px;margin:16px 0 10px;">Please check any of the following items which apply to your past medical history or present medical condition.</p>
+
+      <div class="chk-grid">
+        <div class="chk-row"><input type="checkbox" id="m1"><label for="m1">I have a physical/mobility disability</label></div>
+        <div class="chk-row"><input type="checkbox" id="m2"><label for="m2">I have had a head or back injury</label></div>
+        <div class="chk-row"><input type="checkbox" id="m3"><label for="m3">I am currently taking medication</label></div>
+        <div class="chk-row"><input type="checkbox" id="m4"><label for="m4">I have hay-fever or other allergies</label></div>
+        <div class="chk-row"><input type="checkbox" id="m5"><label for="m5">I have a history of high blood pressure</label></div>
+        <div class="chk-row"><input type="checkbox" id="m6"><label for="m6">I have a history of high cholesterol</label></div>
+        <div class="chk-row"><input type="checkbox" id="m7"><label for="m7">I have respiratory problems or disease</label></div>
+        <div class="chk-row"><input type="checkbox" id="m8"><label for="m8">I have had a collapsed lung</label></div>
+        <div class="chk-row"><input type="checkbox" id="m9"><label for="m9">I am a diabetic</label></div>
+        <div class="chk-row"><input type="checkbox" id="m10"><label for="m10">I have a history of seizures, dizziness, fainting, or blackouts</label></div>
+        <div class="chk-row"><input type="checkbox" id="m11"><label for="m11">I have had asthma, emphysema, or tuberculosis</label></div>
+        <div class="chk-row"><input type="checkbox" id="m12"><label for="m12">I am pregnant</label></div>
+        <div class="chk-row"><input type="checkbox" id="m13"><label for="m13">I have had surgery or a penetrating injury to my chest</label></div>
+        <div class="chk-row"><input type="checkbox" id="m14"><label for="m14">I have had a nervous system disorder</label></div>
+        <div class="chk-row"><input type="checkbox" id="m15"><label for="m15">I am under the care of a physician or have a chronic illness</label></div>
+        <div class="chk-row"><input type="checkbox" id="m16"><label for="m16">I have had decompression sickness or another type of diving accident</label></div>
+        <div class="chk-row"><input type="checkbox" id="m17"><label for="m17">I have a history of sinus problems</label></div>
+      </div>
+
+      <div class="field" style="margin-top:18px;">
+        <label>Please list any medical conditions we need to know about and all current medication</label>
+        <textarea id="med-details" placeholder="Leave blank if none apply"></textarea>
+      </div>
+
+      <div class="chk-row" style="margin-top:14px;border-top:1px solid #edf2f7;padding-top:12px;">
+        <input type="checkbox" id="sober">
+        <label for="sober">I confirm that I am not under the influence of drugs or alcohol, nor am I addicted to drugs or alcohol</label>
+      </div>
+
+      <hr class="divider">
+      <div class="sec-title">Travel Insurance is Compulsory</div>
+      <p style="font-size:14px;margin-bottom:9px;">Comprehensive travel insurance is mandatory for all our WhaleSwim Adventures guests and should be taken out at the time of booking.</p>
+      <p style="font-size:14px;margin-bottom:9px;">Your travel insurance must provide cover against personal accident, death, medical expenses and emergency repatriation with a recommended minimum coverage of US$200,000 for each of the categories of cover. It must also cover trip and flight cancellation.</p>
+      <p style="font-size:14px;margin-bottom:9px;">We also strongly recommend it also covers curtailment, personal liability and loss of luggage and personal effects.</p>
+      <p style="font-size:14px;margin-bottom:16px;">You must provide WhaleSwim Adventures with proof of your travel insurance within 30 days of commencement of your tour; you will not be able to join the tour without it. A copy of this policy is to be provided before this booking is confirmed.</p>
+      <div class="qrow">
+        <div class="qtext">Do you have comprehensive travel insurance that covers you for the duration of this WhaleSwim Adventures tour?</div>
+        <div class="qans">
+          <label><input type="radio" name="ins" value="yes"> Yes</label>
+          <label><input type="radio" name="ins" value="no"> No</label>
+        </div>
+      </div>
+
+      <hr class="divider">
+      <div class="sec-title">Declaration</div>
+      <p style="font-size:14px;margin-bottom:12px;">Please ACCEPT below to indicate that this page of information is true and correct, and that you ACCEPT any consequences arising as a result of incorrect or false information.</p>
+      <p style="font-size:14px;margin-bottom:14px;font-style:italic;">I am not, nor have I suffered from, any medical and/or physical disease, illness or disability which would render me unfit for any type of aquatic activity or land excursion associated with or available during any expedition, adventure and/or tour offered by WhaleSwim Adventures, Rae Gill, nor their agents.</p>
+      <div class="qrow">
+        <div class="qtext"><strong>ACCEPT</strong></div>
+        <div class="qans">
+          <label><input type="radio" name="accept" value="YES"> Yes</label>
+          <label><input type="radio" name="accept" value="NO"> No</label>
+        </div>
+      </div>
+      <div class="phys-warn" id="accept-warn">
+        <h3>Please contact Buddy-Divers</h3>
+        <p>You have not accepted the declaration above. WhaleSwim Adventures cannot accept this form without it. Please contact Buddy-Divers so we can help.</p>
+      </div>
+
+      <hr class="divider">
+      <div class="sec-title">Dietary Requirements</div>
+      <div class="notice">Please keep in mind that Tonga is a developing island nation and that we are a remote island. What is not grown there (a limited selection of vegetables and seasonal tropical fruit) is shipped in, therefore strict dietary needs are not always possible. If you have strict vegan, GF or dairy-free dietary requirements please advise us beforehand. We can provide a limited range of gluten-free items (bread and cakes) but we recommend that you bring your own GF snacks if required. For more dietary information see our Trip Preparation Bulletin.</div>
+      <div class="field" style="margin-bottom:14px;">
+        <label>Dietary requirements</label>
+        <textarea id="diet" placeholder="Vegan, gluten-free, dairy-free, other. Leave blank if none"></textarea>
+      </div>
+      <div class="field">
+        <label>Food allergies</label>
+        <textarea id="allergies" placeholder="Leave blank if none"></textarea>
+      </div>
+
+      <button class="btn-next" data-next="1">Continue to Liability Waiver &rarr;</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ PANEL 1: LIABILITY WAIVER ══════════════ -->
+<div class="panel" id="panel-1">
+  <div class="card">
+    <div class="ch">
+      <h2>Affirmation &amp; Liability Waiver and Indemnifying Agreement</h2>
+      <p>WhaleSwim Adventures</p>
+    </div>
+    <div class="cb">
+      <div class="notice-warn"><strong>WARNING:</strong> Please read carefully before signing; activity waivers have held up in both Australian and New Zealand courts. Consider that you are assuming both physical and legal risks which have potential financial implications for yourself and/or your family should you be injured or killed while participating on a WhaleSwim Adventure expedition.</div>
+
+      <div class="fr">
+        <div class="field"><label>Name</label><input type="text" id="w-name"></div>
+        <div class="field"><label>Participant's Date of Birth (dd/mm/yyyy)</label><input type="date" id="w-dob"></div>
+      </div>
+
+      <p style="font-size:14px;line-height:1.65;margin-bottom:14px;">I, the person named above, do hereby release <strong>WhaleSwim Adventures</strong>, its owners, employees, independent contractors and agents from all liability, and do hereby waive as against WhaleSwim Adventures, its owners, employees, independent contractors and agents all resources, claims, courses of action of any kind whatsoever, in respect of all personal injuries or property losses which I may suffer arising out of or connected with my preparation for, or participation in, the aforesaid WhaleSwim Adventures expedition, notwithstanding that such injuries or losses may have been caused solely or partly by the negligence of WhaleSwim Adventures or any of its owners, employees, independent contractors or agents.</p>
+
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px;padding:12px 0;border-top:1px solid #edf2f7;border-bottom:1px solid #edf2f7;">
+        <label style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;">Initial here</label>
+        <input type="text" id="w-initial" class="init-box" maxlength="6" placeholder="ABC">
+      </div>
+
+      <p style="font-size:14px;font-weight:600;margin-bottom:10px;">And I do hereby acknowledge and agree:</p>
+      <ol class="clauses" style="padding-left:20px;">
+        <li>that the sport of swimming with whales is dangerous, exposing participants to many inherent risks and hazards, including but not restricted to: loss or damage of personal property, injury from marine mammals, hypothermia, drowning, inclement weather, slipping and falling, falling objects, or suffering any type of accident or illness in remote areas without easy access to medical facilities. While some of these risks are inherent in the very nature of the sport itself, others may result from human error and negligence on the part of persons involved in preparing, organizing, participating in and leading the aforesaid whale-watching/swimming expedition;</li>
+        <li>that, as a result of the aforesaid risks and hazards, I as a participant may suffer serious personal injury, even DEATH, as well as property loss;</li>
+        <li>that some of the aforesaid risks are foreseeable, but others are not;</li>
+        <li>that I nevertheless freely and voluntarily assume all the aforesaid risks and hazards, and that, accordingly, my preparation for and participation in the aforesaid WhaleSwim Adventure expedition shall be entirely at my own risk;</li>
+        <li value="4" style="list-style:none;margin-left:-20px;padding-left:20px;"><strong>4.5</strong> &nbsp;that I agree to refrain from making any deliberate physical contact with the whales during this or any other WhaleSwim Adventures expedition and understand that I would be expelled from the said WhaleSwim Adventures expedition at the discretion of any of its owner, employees or tour leaders/guides without refund of full or part of monies paid for the said expedition or any expenses incurred from being expelled for the said expedition;</li>
+        <li value="5">that while I recognise that the WhaleSwim Adventures owners, employees, independent contractors and agents, tour leaders/guides will make every reasonable effort to minimize exposure to known risks, that I have a personal responsibility to learn and follow safety rules and procedures established by my leaders/guides and to make them aware at any point in which I question my knowledge of these procedures or my ability to participate in any activity;</li>
+        <li>that I consent to receive first aid and medical treatment by the leaders/guides and medical personnel in the event of an accident, and/or illness during this or any other WhaleSwim expedition;</li>
+        <li>that I agree to pay any and all expenses related to medical treatment and/or evacuation of myself in the event of an accident, injury, illness including but not restricted to: air-sea rescue, air-sea search, ambulatory care;</li>
+        <li>that I understand that neither WhaleSwim Adventures nor any of its owners or employees assumes any responsibility whatsoever for my safety during the course of my preparation or participation in the aforesaid whale watching/swimming expedition;</li>
+        <li>that I have carefully read this ASSUMPTION OF RISK AGREEMENT AND INDEMNIFYING RELEASE agreement, that I fully understand same, and that I am freely and voluntarily executing same;</li>
+        <li>that I understand clearly that by signing this release, I will be forever prevented from suing or otherwise claiming against WhaleSwim Adventures, its owners, employees, independent contractors and agents for any loss or damage connected with any property loss or personal injury that I may sustain while participating in or preparing for any of WhaleSwim Adventures expeditions, whether or not such loss or personal injury is caused solely or partly by the NEGLIGENCE of WhaleSwim Adventures, its owners, employees, independent contractors or agents;</li>
+        <li>that I have been given the opportunity and have been encouraged to seek independent legal advice prior to signing this agreement;</li>
+        <li>that I understand clearly that WhaleSwim Adventures would not permit me to participate in any such whale-watching/swimming programs or expeditions unless I signed this ASSUMPTION OF RISK AGREEMENT AND INDEMNIFYING RELEASE, that this agreement applies to all the aforesaid whale-watching/swimming expeditions and programs whether occurring in the near or distant future, and that the terms of the Agreement need not be brought to my attention each time I participate in any such whale-watching/swimming expeditions or programs in order to be effective;</li>
+        <li>that this ASSUMPTION OF RISK AGREEMENT AND INDEMNIFYING RELEASE is binding on myself, my heirs, my executors, administrators, personal representatives and assigns;</li>
+        <li>that I understand clearly that WhaleSwim Adventures is and shall be deemed to be acting for itself and as an agent on behalf of and for the benefit of the owners, employees, independent contractors and agents of WhaleSwim Adventures for the purposes set out in the above-stated clauses of the agreement; and</li>
+        <li>that I am of sufficient age and mental capacity to sign this ASSUMPTION OF RISK AGREEMENT AND INDEMNIFYING RELEASE.</li>
+      </ol>
+
+      <hr class="divider">
+      <div class="sec-title">Signatures</div>
+
+      <div class="fr">
+        <div class="field"><label>Dated at (City, Country)</label><input type="text" id="w-city" placeholder="City, Country"></div>
+        <div class="field"><label>Date (dd/mm/yyyy)</label><input type="date" id="w-date"></div>
+      </div>
+      <div class="field" style="margin-bottom:18px;"><label>Tour Date / No.</label><input type="text" id="w-tour" placeholder="e.g. 5 to 12 September 2026"></div>
+
+      <div class="sig-area" style="margin-bottom:18px;">
+        <label style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:9px;">Signature of Participant</label>
+        <div class="sig-wrap"><canvas class="sig" id="sig-waiver" width="800" height="110"></canvas><div class="sig-ph" id="sig-waiver-ph">Sign here</div></div>
+        <div class="sig-acts"><button type="button" class="btn-clr" data-canvas="sig-waiver" data-ph="sig-waiver-ph">Clear</button></div>
+      </div>
+
+      <div class="sig-area" id="guardian-area" style="margin-bottom:18px;">
+        <label style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:9px;">Signature of Parent or Guardian <span id="guardian-req" style="color:var(--orange);"></span></label>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:10px;">Required if the participant is under 19 years of age.</p>
+        <div class="sig-wrap"><canvas class="sig" id="sig-guardian" width="800" height="110"></canvas><div class="sig-ph" id="sig-guardian-ph">Sign here if applicable</div></div>
+        <div class="sig-acts"><button type="button" class="btn-clr" data-canvas="sig-guardian" data-ph="sig-guardian-ph">Clear</button></div>
+      </div>
+
+      <div class="field" style="margin-bottom:12px;"><label>Witnessed by (Print Name)</label><input type="text" id="w-witness"></div>
+      <div class="sig-area">
+        <label style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:9px;">Signature of Witness</label>
+        <div class="sig-wrap"><canvas class="sig" id="sig-witness" width="800" height="110"></canvas><div class="sig-ph" id="sig-witness-ph">Witness signs here</div></div>
+        <div class="sig-acts"><button type="button" class="btn-clr" data-canvas="sig-witness" data-ph="sig-witness-ph">Clear</button></div>
+      </div>
+
+      <p style="font-size:12.5px;color:var(--muted);margin-top:18px;">WhaleSwim Adventures Ltd, PO Box 20, Rawene, Northland 0443 New Zealand</p>
+
+      <div class="email-section">
+        <button class="btn-print">Print / Save as PDF</button>
+        <button class="btn-email" id="btn-email-pdf">Submit and email me a copy</button>
+        <div class="email-status" id="email-status"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+<script>
+// ── Tabs and navigation ───────────────────────────────────────────
+var tabs = Array.prototype.slice.call(document.querySelectorAll(".tab"));
+tabs.forEach(function(btn) {
+  btn.addEventListener("click", function() {
+    var idx = parseInt(this.getAttribute("data-tab"));
+    document.querySelectorAll(".panel").forEach(function(p,i){ p.classList[i===idx?"add":"remove"]("active"); });
+    tabs.forEach(function(b,i){ b.classList[i===idx?"add":"remove"]("active"); });
+    window.scrollTo(0,0);
+  });
+});
+document.querySelectorAll(".btn-next").forEach(function(btn) {
+  btn.addEventListener("click", function() {
+    var panel = document.getElementById("panel-0");
+    var errors = validatePanel(panel, 0);
+    if(errors.length > 0) { showErrors(errors, panel); return; }
+    clearErrors(panel);
+    var idx = parseInt(this.getAttribute("data-next"));
+    document.querySelectorAll(".panel").forEach(function(p,i){ p.classList[i===idx?"add":"remove"]("active"); });
+    tabs.forEach(function(b,i){ b.classList[i===idx?"add":"remove"]("active"); });
+    window.scrollTo(0,0);
+  });
+});
+
+// ── Conditional boxes ─────────────────────────────────────────────
+document.querySelectorAll("input[type=radio]").forEach(function(r) {
+  r.addEventListener("click", function() {
+    var show = this.getAttribute("data-show");
+    var hide = this.getAttribute("data-hide");
+    if (show) { var el = document.getElementById(show); if(el) el.classList.add("shown"); }
+    if (hide) {
+      var el2 = document.getElementById(hide);
+      if(el2) {
+        el2.classList.remove("shown");
+        el2.querySelectorAll("input[type=radio]").forEach(function(cr){ cr.checked = false; });
+      }
+    }
+    checkWarnings();
+  });
+});
+function checkWarnings() {
+  var confNo  = document.querySelector("input[name=conf][value=no]");
+  var watchNo = document.querySelector("input[name=watch][value=no]");
+  var cw = document.getElementById("conf-warn");
+  if (cw) cw.classList[(confNo && confNo.checked && watchNo && watchNo.checked) ? "add" : "remove"]("shown");
+  var accNo = document.querySelector("input[name=accept][value=NO]");
+  var aw = document.getElementById("accept-warn");
+  if (aw) aw.classList[(accNo && accNo.checked) ? "add" : "remove"]("shown");
+}
+
+// ── Under 19 requires a parent/guardian signature ─────────────────
+function isMinor() {
+  var dobEl = document.getElementById("aq-dob");
+  var tourEl = document.getElementById("aq-tour");
+  if (!dobEl || !dobEl.value) return false;
+  var dob = new Date(dobEl.value);
+  var ref = (tourEl && tourEl.value) ? new Date(tourEl.value) : new Date();
+  if (isNaN(dob.getTime()) || isNaN(ref.getTime())) return false;
+  var age = ref.getFullYear() - dob.getFullYear();
+  var m = ref.getMonth() - dob.getMonth();
+  if (m < 0 || (m === 0 && ref.getDate() < dob.getDate())) age--;
+  return age < 19;
+}
+function updateGuardian() {
+  var lbl = document.getElementById("guardian-req");
+  if (lbl) lbl.textContent = isMinor() ? "(required)" : "";
+}
+
+// ── Signature clear buttons ───────────────────────────────────────
+document.querySelectorAll(".btn-clr").forEach(function(btn) {
+  btn.addEventListener("click", function() {
+    var c = document.getElementById(this.getAttribute("data-canvas"));
+    var p = document.getElementById(this.getAttribute("data-ph"));
+    if(c) c.getContext("2d").clearRect(0,0,c.width,c.height);
+    if(p) p.style.display="";
+  });
+});
+document.querySelectorAll(".btn-print").forEach(function(btn) {
+  btn.addEventListener("click", function() {
+    var panel = document.getElementById("panel-1");
+    var errors = validatePanel(panel, 1);
+    if(errors.length > 0) { showErrors(errors, panel); return; }
+    clearErrors(panel);
+    window.print();
+  });
+});
+
+// ── Error display ─────────────────────────────────────────────────
+function showErrors(errors, panel) {
+  clearErrors(panel);
+  var box = document.createElement("div");
+  box.className = "val-errors";
+  box.style.cssText = "background:#fff0f0;border:2px solid #c0392b;border-radius:8px;padding:14px 18px;margin-bottom:16px;font-size:13.5px;color:#c0392b;";
+  box.innerHTML = "<strong>Please complete the following before continuing:</strong><ul style='margin-top:8px;padding-left:18px;'>" +
+    errors.map(function(e){ return "<li style='margin-bottom:4px;'>"+e+"</li>"; }).join("") + "</ul>";
+  panel.insertBefore(box, panel.firstChild);
+  panel.scrollIntoView({behavior:"smooth", block:"start"});
+}
+function clearErrors(panel) {
+  var existing = panel.querySelector(".val-errors");
+  if(existing) existing.remove();
+}
+function sigBlank(id) {
+  var c = document.getElementById(id);
+  if (!c) return true;
+  return !c.getContext("2d").getImageData(0,0,c.width,c.height).data.some(function(v,i){ return i%4!==3 && v!==0; });
+}
+
+function validatePanel(panel, idx) {
+  var errors = [];
+  if(idx === 0) {
+    var name = document.getElementById("aq-name");
+    if(!name || !name.value.trim()) errors.push("Full name is required");
+    var email = document.getElementById("aq-email");
+    if(!email || !email.value.trim()) errors.push("Email address is required");
+    else if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim())) errors.push("Please enter a valid email address");
+    var dob = document.getElementById("aq-dob");
+    if(!dob || !dob.value) errors.push("Date of birth is required");
+    var tour = document.getElementById("aq-tour");
+    if(!tour || !tour.value) errors.push("Tour start date is required");
+    var qs = {cert:"Are you a Certified diver?", swim:"Can you Swim?", swimlvl:"Swimming skill level",
+              snorkel:"Can you Snorkel?", snorkellvl:"Snorkeling skill level",
+              conf:"The snorkelling confidence question", ins:"The travel insurance question",
+              accept:"The ACCEPT declaration"};
+    Object.keys(qs).forEach(function(n){
+      if(!document.querySelector("input[name="+n+"]:checked")) errors.push(qs[n] + " must be answered");
+    });
+    var confBox = document.getElementById("conf-box");
+    if(confBox && confBox.classList.contains("shown") && !document.querySelector("input[name=watch]:checked")) {
+      errors.push("Please answer whether you are happy to whale watch from the boat");
+    }
+    if(!document.getElementById("sober").checked) {
+      errors.push("Please confirm the drugs and alcohol statement");
+    }
+    var anyCond = false;
+    for (var i = 1; i <= 17; i++) { var cb = document.getElementById("m"+i); if (cb && cb.checked) anyCond = true; }
+    var det = document.getElementById("med-details");
+    if(anyCond && (!det || !det.value.trim())) {
+      errors.push("You have checked a medical condition, please list the details and any current medication");
+    }
+  } else if(idx === 1) {
+    var wn = document.getElementById("w-name");
+    if(!wn || !wn.value.trim()) errors.push("Name is required");
+    var wdob = document.getElementById("w-dob");
+    if(!wdob || !wdob.value) errors.push("Participant's date of birth is required");
+    var wi = document.getElementById("w-initial");
+    if(!wi || !wi.value.trim()) errors.push("Your initials are required after the release paragraph");
+    var wc = document.getElementById("w-city");
+    if(!wc || !wc.value.trim()) errors.push("City and country are required");
+    var wd = document.getElementById("w-date");
+    if(!wd || !wd.value) errors.push("Date is required");
+    var wt = document.getElementById("w-tour");
+    if(!wt || !wt.value.trim()) errors.push("Tour date is required");
+    if(sigBlank("sig-waiver")) errors.push("Participant signature is required");
+    var ww = document.getElementById("w-witness");
+    if(!ww || !ww.value.trim()) errors.push("Witness name is required");
+    if(sigBlank("sig-witness")) errors.push("Witness signature is required");
+    if(isMinor() && sigBlank("sig-guardian")) {
+      errors.push("The participant is under 19, so a parent or guardian signature is required");
+    }
+  }
+  return errors;
+}
+
+// ── Signature pads ────────────────────────────────────────────────
+function initSig(cid,pid) {
+  var cnv=document.getElementById(cid), ph=document.getElementById(pid);
+  if(!cnv) return;
+  var ctx=cnv.getContext("2d"), drawing=false, lx=0, ly=0;
+  function getPos(e) {
+    var r=cnv.getBoundingClientRect();
+    var sx=cnv.width/r.width, sy=cnv.height/r.height;
+    var src=(e.touches&&e.touches.length) ? e.touches[0] : e;
+    return {x:(src.clientX-r.left)*sx, y:(src.clientY-r.top)*sy};
+  }
+  function draw(lx,ly,x,y){
+    ctx.beginPath(); ctx.moveTo(lx,ly); ctx.lineTo(x,y);
+    ctx.strokeStyle="#1a3a5c"; ctx.lineWidth=2.5; ctx.lineCap="round"; ctx.stroke();
+  }
+  cnv.addEventListener("pointerdown",function(e){
+    cnv.setPointerCapture(e.pointerId);
+    drawing=true;
+    var p=getPos(e); lx=p.x; ly=p.y;
+    if(ph) ph.style.display="none";
+  });
+  cnv.addEventListener("pointermove",function(e){
+    if(!drawing) return;
+    var p=getPos(e); draw(lx,ly,p.x,p.y); lx=p.x; ly=p.y;
+  });
+  cnv.addEventListener("pointerup",function(){ drawing=false; });
+  cnv.addEventListener("pointercancel",function(){ drawing=false; });
+}
+initSig("sig-waiver","sig-waiver-ph");
+initSig("sig-guardian","sig-guardian-ph");
+initSig("sig-witness","sig-witness-ph");
+
+// ── Carry the shared fields across to the waiver ──────────────────
+document.getElementById("aq-name").addEventListener("input", function() {
+  var w = document.getElementById("w-name"); if(w) w.value = this.value;
+});
+document.getElementById("aq-dob").addEventListener("change", function() {
+  var w = document.getElementById("w-dob"); if(w) w.value = this.value;
+  updateGuardian();
+});
+document.getElementById("aq-tour").addEventListener("change", function() {
+  var w = document.getElementById("w-tour");
+  if(w && !w.value.trim() && this.value) {
+    var d = new Date(this.value);
+    if(!isNaN(d.getTime())) w.value = d.toLocaleDateString("en-GB", {day:"numeric", month:"long", year:"numeric"});
+  }
+  updateGuardian();
+});
+
+var today = new Date().toISOString().split("T")[0];
+["w-date"].forEach(function(id){ var el=document.getElementById(id); if(el)el.value=today; });
+
+// ── Email PDF ─────────────────────────────────────────────────────
+var MAKE_WEBHOOK_URL = "https://hook.eu1.make.com/ugucimbs6p6tbac9sjmrr4as1l6pconu";
+var FORM_NAME = "WhaleSwim";
+var FOLDER_NAME = "WhaleSwim Tonga";
+var TRIP_DATE_ID = "aq-tour";
+var EMAIL_PANEL_INDEX = 1;
+
+async function sendPDFByEmail() {
+  var panel0 = document.getElementById("panel-0");
+  var errors0 = validatePanel(panel0, 0);
+  if (errors0.length > 0) {
+    setEmailStatus("Please complete the Aqua Abilities &amp; Medical form first, some answers are missing.", "error");
+    document.querySelectorAll(".panel").forEach(function(p,i){ p.classList[i===0?"add":"remove"]("active"); });
+    tabs.forEach(function(b,i){ b.classList[i===0?"add":"remove"]("active"); });
+    showErrors(errors0, panel0);
+    return;
+  }
+  var panel = document.getElementById("panel-" + EMAIL_PANEL_INDEX);
+  var errors = validatePanel(panel, EMAIL_PANEL_INDEX);
+  if (errors.length > 0) { showErrors(errors, panel); return; }
+  clearErrors(panel);
+  var guestName  = ((document.getElementById("aq-name")  || {}).value || "Guest").trim();
+  var guestEmail = ((document.getElementById("aq-email") || {}).value || "").trim();
+  var guestDate  = ((document.getElementById("w-date") || {}).value || new Date().toISOString().split("T")[0]);
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(guestEmail)) {
+    setEmailStatus("Please enter a valid email address in the Aqua Abilities form first.", "error");
+    return;
+  }
+  var btn = document.getElementById("btn-email-pdf");
+  btn.disabled = true;
+  try {
+    setEmailStatus("Preparing your forms&hellip;", "progress");
+    var formHtml = buildSnapshotHTML();
+    setEmailStatus("Sending&hellip;", "progress");
+    await sendToMake(guestName, guestEmail, guestDate, formHtml);
+    setEmailStatus("&#10003; Submitted. A copy has been emailed to " + guestEmail + " and Buddy-Divers.", "success");
+  } catch (err) {
+    setEmailStatus("&#10007; " + (err.message || "Something went wrong. Please use Print / Save PDF and email it to info@buddy-divers.com."), "error");
+    console.error(err);
+  }
+  btn.disabled = false;
+}
+document.getElementById("btn-email-pdf").addEventListener("click", sendPDFByEmail);
+
+function setEmailStatus(msg, type) {
+  var el = document.getElementById("email-status");
+  if (!el) return;
+  el.innerHTML = msg;
+  el.style.display = "block";
+  el.style.background = type==="success"?"#e8f5e9":type==="error"?"#fff0f0":"#f0f4ff";
+  el.style.color      = type==="success"?"#2a6430":type==="error"?"#c0392b":"#2c4070";
+  el.style.border     = "1.5px solid "+(type==="success"?"#81c784":type==="error"?"#e57373":"#9db4e8");
+}
+
+// ── Compact signature export ────────────────────────────────
+// Signatures used to be exported as full-size transparent PNGs, which pushed
+// the emailed payload past PDFBolt's 1 MB request limit (PAYLOAD_TOO_LARGE).
+// Flatten onto white and export a downscaled JPEG instead: visually identical
+// in the printed/PDF form (a signature is black ink on white anyway), but only
+// ~30 KB each instead of several hundred KB. Falls back to the original PNG
+// export if anything throws, so behaviour is never worse than before.
+function compactSig(src) {
+  try {
+    var maxW = 600;
+    var scale = src.width > maxW ? maxW / src.width : 1;
+    var w = Math.max(1, Math.round(src.width * scale));
+    var h = Math.max(1, Math.round(src.height * scale));
+    var tmp = document.createElement("canvas");
+    tmp.width = w; tmp.height = h;
+    var tctx = tmp.getContext("2d");
+    tctx.fillStyle = "#ffffff";
+    tctx.fillRect(0, 0, w, h);
+    tctx.drawImage(src, 0, 0, w, h);
+    return tmp.toDataURL("image/jpeg", 0.85);
+  } catch (e) {
+    return src.toDataURL("image/png");
+  }
+}
+
+// Build a self-contained desktop-width snapshot of all completed panels.
+// PDFBolt renders it at full width; mobile layout rules do not apply in the PDF.
+function buildSnapshotHTML() {
+  function bakeClone(orig) {
+    var clone = orig.cloneNode(true);
+    var oF = orig.querySelectorAll("input,select,textarea");
+    var cF = clone.querySelectorAll("input,select,textarea");
+    for (var i = 0; i < oF.length; i++) {
+      var o = oF[i], c = cF[i]; if (!c) continue;
+      var tag = o.tagName.toLowerCase();
+      if (tag === "select") {
+        for (var s = 0; s < c.options.length; s++) {
+          if (s === o.selectedIndex) c.options[s].setAttribute("selected", "selected");
+          else c.options[s].removeAttribute("selected");
+        }
+      } else if (o.type === "radio" || o.type === "checkbox") {
+        if (o.checked) c.setAttribute("checked", "checked"); else c.removeAttribute("checked");
+      } else if (tag === "textarea") {
+        c.textContent = o.value;
+      } else {
+        c.setAttribute("value", o.value == null ? "" : o.value);
+      }
+    }
+    var oC = orig.querySelectorAll("canvas");
+    var cC = clone.querySelectorAll("canvas");
+    for (var k = 0; k < oC.length; k++) {
+      var oc = oC[k], cc = cC[k]; if (!cc) continue;
+      try {
+        var img = document.createElement("img");
+        img.src = compactSig(oc);
+        img.setAttribute("style", "display:block;width:auto;max-width:100%;height:auto;border-radius:6px;");
+        if (cc.parentNode) cc.parentNode.replaceChild(img, cc);
+      } catch (e) {}
+    }
+    clone.style.display = "block";
+    return clone;
+  }
+
+  var head = '<meta charset="UTF-8"><meta name="viewport" content="width=900">';
+  document.querySelectorAll('link[rel="stylesheet"]').forEach(function(l){ head += l.outerHTML; });
+
+  var css = "";
+  document.querySelectorAll("style").forEach(function(s){ css += s.textContent + "\n"; });
+  css +=
+    "\n/* snapshot overrides: force clean full-width document */\n" +
+    "body{background:#ffffff!important;}" +
+    ".main{max-width:100%!important;margin:0!important;padding:24px 30px 30px!important;}" +
+    ".panel{display:block!important;}" +
+    ".fr{grid-template-columns:1fr 1fr!important;}" +
+    ".chk-grid{grid-template-columns:1fr 1fr!important;}" +
+    "header,.tabs,.btn-next,.btn-print,.btn-email,.email-section,.val-errors,.phys-warn{display:none!important;}" +
+    ".card{box-shadow:none!important;border:1px solid #d8d8d8!important;}" +
+    ".snap-break{page-break-before:always;}" +
+    "/* --- compact Aqua Abilities (panel-0) --- */" +
+    "#panel-0 .ch{padding:8px 20px!important;}" +
+    "#panel-0 .ch h2{font-size:14px!important;}" +
+    "#panel-0 .cb{padding:12px 20px!important;}" +
+    "#panel-0 .notice{font-size:11px!important;line-height:1.4!important;break-inside:avoid;}" +
+    "#panel-0 .caps{font-size:10.5px!important;padding:8px 12px!important;break-inside:avoid;}" +
+    "#panel-0 .sec-title{font-size:13px!important;margin-bottom:8px!important;padding-bottom:5px!important;break-after:avoid;}" +
+    "#panel-0 .qrow{padding:5px 0!important;gap:10px!important;break-inside:avoid;}" +
+    "#panel-0 .qtext{font-size:11.5px!important;line-height:1.38!important;}" +
+    "#panel-0 .qans{min-width:80px!important;flex-shrink:0!important;}" +
+    "#panel-0 .qans label{font-size:11px!important;}" +
+    "#panel-0 .qans-wide label{font-size:11px!important;padding:4px 9px!important;}" +
+    "#panel-0 .chk-row{padding:4px 0!important;break-inside:avoid;}" +
+    "#panel-0 .chk-row label{font-size:11.5px!important;}" +
+    "#panel-0 .field label{font-size:11px!important;}" +
+    "#panel-0 .field input,#panel-0 .field textarea{font-size:11px!important;padding:5px 9px!important;}" +
+    "#panel-0 .cb > p{font-size:11px!important;line-height:1.45!important;margin-bottom:6px!important;}" +
+    "/* --- compact waiver (panel-1) --- */" +
+    "#panel-1 .ch{padding:8px 20px!important;}" +
+    "#panel-1 .ch h2{font-size:14px!important;}" +
+    "#panel-1 .cb{padding:12px 20px!important;}" +
+    "#panel-1 .cb > p{font-size:11px!important;line-height:1.45!important;margin-bottom:6px!important;}" +
+    "#panel-1 .clauses{font-size:10.5px!important;line-height:1.4!important;}" +
+    "#panel-1 .clauses li{margin-bottom:4px!important;break-inside:avoid;}" +
+    "#panel-1 .sec-title{break-before:always;font-size:13px!important;margin-bottom:6px!important;padding-bottom:4px!important;}" +
+    "#panel-1 .field label{font-size:11px!important;}" +
+    "#panel-1 .field input{padding:5px 9px!important;font-size:11px!important;}" +
+    "#panel-1 .sig-area{padding:10px!important;break-inside:avoid;}" +
+    "#panel-1 .sig-wrap{margin-bottom:4px!important;}";
+
+  var targets = [];
+  document.querySelectorAll(".main > .panel").forEach(function(p){ targets.push(p); });
+
+  var body = '<div class="main">';
+  for (var t = 0; t < targets.length; t++) {
+    var clone = bakeClone(targets[t]);
+    if (t > 0) clone.className = (clone.className + " snap-break").replace(/^\s+/, "");
+    body += clone.outerHTML;
+  }
+  body += '</div>';
+
+  return '<!DOCTYPE html><html lang="en"><head>' + head + '<style>' + css + '</style></head><body>' + body + '</body></html>';
+}
+
+function utf8ToBase64(str) {
+  return btoa(unescape(encodeURIComponent(str)));
+}
+
+async function sendToMake(name, email, date, formHtml) {
+  var tripEl = document.getElementById(TRIP_DATE_ID);
+  var tripDate = (tripEl && tripEl.value) ? tripEl.value : "date-tbd";
+  var folder = FOLDER_NAME + "/" + tripDate;
+  var res = await fetch(MAKE_WEBHOOK_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name: name, email: email, date: date, form: FORM_NAME, folder: folder, html_b64: utf8ToBase64(formHtml) })
+  });
+  if (!res.ok) throw new Error("Could not submit (" + res.status + "). Please use Print / Save PDF instead.");
+}
+
+updateGuardian();
+</script>
+</body>
+</html>
