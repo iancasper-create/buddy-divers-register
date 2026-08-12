@@ -26,7 +26,7 @@ campaign email.
 ## Coding rules (always apply)
 
 1. **Version tags.** Every edited file gets a new tag: `<!-- BD-[FILE] YYYY-MM-DD[letter] | short change description -->`.
-   Location: line 2 for CRM files, line 1 for edit-diver.html, line 45 for the four guest-form
+   Location: line 2 for CRM files, line 1 for edit-diver.html, line 45 for the five guest-form
    files (after the anti-translation script). Bump the letter (a, b, c) for same-day edits.
 2. **Structural HTML edits:** use assertion-based Python `str.replace()`. Assert the old
    string appears exactly the expected number of times BEFORE replacing. Never sed,
@@ -38,7 +38,7 @@ campaign email.
    (e.g. `nondiver_2730`). Known intentional exceptions, do NOT "fix":
    `credit_1750` (priceNum -1750, a credit) and `private_guide_resort_110` (priceNum 0,
    per-day price excluded from totals).
-5. **Guest forms** (dune_*, naia_*): never edit the `buildSnapshotHTML()` return-line html
+5. **Guest forms** (dune_*, naia_*, whaleswim_*): never edit the `buildSnapshotHTML()` return-line html
    tag; keep signature compression via `compactSig()` (JPEG). After every deploy of
    naia_electronic_forms.html, re-check that `explore@naia.com.fj` is plain text
    (Cloudflare email-obfuscates it on each deploy).
@@ -66,7 +66,7 @@ campaign email.
 | registration-copy-email.html | "Request Copy" email template used by Make |
 | lottery-check.html | Annual lottery registration verification |
 | myanmar.html | Destination page |
-| dune_aurora_forms.html, dune_black_manta_forms.html, dune_madagascar_forms.html, naia_electronic_forms.html | Guest declaration forms (shared Make webhook, Cloudinary raw upload, PDFBolt) |
+| dune_aurora_forms.html, dune_black_manta_forms.html, dune_madagascar_forms.html, naia_electronic_forms.html, whaleswim_forms.html | Guest declaration forms (shared Make webhook, Cloudinary raw upload, PDFBolt) |
 | logo.png | Unused asset (all pages load the logo from Cloudinary); keep as-is |
 | sulawesi-independent-diver-calculator.html | Standalone private-trip (unescorted) price calculator for North Sulawesi (Siladen + Coral Eye) - not a `?trip=ID` entry, self-serve marketing page with its own JS calculator engine |
 | sulawesi-net-rate-calculator.html | Admin-only companion to the calculator above: same trip logic, but priced from the contracted NET rates instead of Published, for Ian's internal cost/margin view. CRM-styled (English, DM Sans/DM Mono), linked from crm.html Operations |
