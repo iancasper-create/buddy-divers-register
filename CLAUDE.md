@@ -12,11 +12,30 @@ complete files (never partial snippets), and confirm before destructive changes.
 Backend stack (not in this repo): Airtable (CRM), Make.com (automation, EU1),
 Cloudinary (media, cloud `dccbsfte0`), Active Trail (email), WhatsApp Business API.
 
-## Source of truth
+## Source of truth — TWO handover files, read the right one
 
-The full system history lives in **HANDOVER.md**, kept OFFLINE by Ian (deliberately not
-in this public repo). If a task needs history, Airtable schema, Make scenario details, or
-past decisions, ask Ian to provide HANDOVER.md before proceeding. Do not guess.
+Both are git-ignored (never published) and both are on this Mac. **Read them directly, do
+not ask Ian to send them.**
+
+| File | Covers | Read it when the task is about |
+|------|--------|-------------------------------|
+| `HANDOVER.md` (this repo folder) | Website, CRM, guest forms, Airtable schema, Make scenarios, session history | Anything in the file map below, Airtable structure, past decisions |
+| `~/bin/HANDOVER.md` | Personal automation in `~/bin`: cron schedule, invoice extraction, daily digest, contacts sync, backups, Liveaboard Finder build, **flight itinerary tracker** | Anything that runs on a schedule, or any script under `~/bin` |
+
+**The flight itinerary tracker spans both.** `~/bin/buddy-divers-flights.py` runs daily at
+08:30, reads `PNR MAIN` / `PNR 2` / `PNR 3` from Airtable Bookings, resolves each to a real
+ticket out of three mailboxes, and writes Excel workbooks to Dropbox.
+
+- **Airtable-facing behaviour** (fields read, conventions that must not break, where output
+  goes): repo `HANDOVER.md`, SHARED REFERENCE section.
+- **Parser internals** (18 ticket formats, change-notice overlays, the reasoning behind the
+  non-obvious ones): `~/bin/HANDOVER.md` section 13.
+
+Keep it that way. Do not copy one into the other — the repo handover records that duplicated
+handovers are what caused version drift before. Update the file that owns the fact.
+
+If a task needs history, Airtable schema, Make scenario details or past decisions and the
+relevant handover does not cover it, ask Ian. Do not guess.
 
 Email campaign builds (Active Trail promo emails) follow **BUDDY-DIVERS-EMAIL-CAMPAIGN-GUIDE.md**,
 also kept in the repo folder but git-ignored (colors, typography, section structure, bullet/dash
