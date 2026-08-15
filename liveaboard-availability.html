@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- BD-LBLAH 2026-08-15a | destination facet opens with every box ticked: all ticked and none ticked both mean no filter, a "select all" button sits beside "clear all", and the chip row shows whichever list is shorter (selected, or excluded) instead of 22 chips. A near-full selection is shared as ?xdest=, naming what is missing, so a one-destination untick no longer writes the other 22 into the address bar -->
 <!-- BD-LBLAH 2026-08-08c | tagline on both pages is now "The perfect way to choose your next liveaboard" / "הדרך המושלמת לבחור את ההפלגה הבאה שלכם". The old one claimed every departure and every destination, overstating a hand-picked 100 ship fleet across 22 destinations; the stats bubble already carries the real numbers -->
 <!-- BD-LBLAH 2026-08-08b | English edition: the same template and payload also build liveaboard-finder-en.html (LTR, feed content untranslated), with a language switch on both pages -->
 <!-- BD-LBLAH 2026-08-08a | date filter fix: the two ends of the range are independent now, so opening the עד שנה picker no longer snaps both dates back to today -->
@@ -667,6 +668,13 @@ const BOAT_NAME={};TRIPS.forEach(t=>BOAT_NAME[t.boat_id]=t.boat);
    entry never disappears: it greys out at zero instead. Ian looked for סיני
    with רק מבצעים on, found it gone, and reasonably read that as missing data. */
 const ALL_DEST=[...new Set(TRIPS.map(t=>t.destination))].filter(Boolean);
+/* Ian 2026-08-15: the destination facet opens with every box ticked, so the list reads
+   as "everything is in, untick what you do not want" instead of as an empty form you
+   have to fill in before the page means anything. All ticked and none ticked both mean
+   no destination filter (see filtered()), so the page can never open on nothing and
+   every ?dest= link sent before today still selects exactly what it always did.
+   readUrl() replaces this seed when the link carries a selection of its own. */
+ALL_DEST.forEach(d=>S.dest.add(d));
 function heDest(d){return HEB[d]||d;}
 
 /* destination -> Hebrew, grouped by region for the dropdown */
@@ -727,7 +735,9 @@ function MultiSelect(mountId, opts) {
     + '<div class="mspanel">'
     + (opts.search ? '<input class="mssearch" placeholder="סינון ברשימה" />' : '')
     + '<div class="msopts"></div>'
-    + '<div class="msfoot"><button type="button" class="mclr">נקה</button>'
+    + '<div class="msfoot">'
+    + (opts.all ? '<button type="button" class="mall">סמן הכל</button>' : '')
+    + '<button type="button" class="mclr">נקה הכל</button>'
     + '<button type="button" class="mcls">סנן</button></div></div>';
 
   const btn = host.querySelector('.msbtn');
@@ -749,7 +759,7 @@ function MultiSelect(mountId, opts) {
         /* A zero-count option stays visible but inert, so the list never changes
            shape under the cursor. Still tickable if already selected, or you could
            not undo the selection that emptied it. */
-        const dead = !n && !opts.sel.has(v);
+        const dead = !n && !opts.sel.has(v) && !opts.all;
         h += '<label class="msopt' + (dead ? ' off' : '') + '">'
           + '<input type="checkbox" value="' + esc(v) + '"'
           + (opts.sel.has(v) ? ' checked' : '') + (dead ? ' disabled' : '') + ' />'
@@ -772,7 +782,7 @@ function MultiSelect(mountId, opts) {
       if (!cb || !n) return;
       const cnt = m.get(cb.value) || 0;
       n.textContent = cnt;
-      const dead = !cnt && !cb.checked;
+      const dead = !cnt && !cb.checked && !opts.all;
       row.classList.toggle('off', dead);
       cb.disabled = dead;
     });
@@ -780,8 +790,11 @@ function MultiSelect(mountId, opts) {
 
   function label() {
     const n = opts.sel.size;
-    btn.classList.toggle('on', n > 0);
-    btn.innerHTML = n === 0
+    /* A facet with every box ticked reads as its own empty state: it is showing
+       everything, so it says "all destinations" rather than counting 23 filters. */
+    const full = !!opts.all && n >= opts.all().length;
+    btn.classList.toggle('on', n > 0 && !full);
+    btn.innerHTML = (n === 0 || full)
       ? esc(opts.empty) + '<span class="arw">&#9662;</span>'
       : esc(opts.label) + '<span class="cnt">' + n + '</span>';
   }
@@ -811,6 +824,12 @@ function MultiSelect(mountId, opts) {
   };
   host.querySelector('.mclr').onclick = () => {
     opts.sel.clear(); opts.onChange(); paint(); label();
+  };
+  /* Only facets that open full get this: it is the way back from "clear all". */
+  const mall = host.querySelector('.mall');
+  if (mall) mall.onclick = () => {
+    opts.all().forEach(v => opts.sel.add(v));
+    opts.onChange(); paint(); label();
   };
   host.querySelector('.mcls').onclick = () => panel.classList.remove('on');
 
@@ -849,7 +868,16 @@ function readUrl() {
       if (x) target.add(parse ? parse(x) : x);
     });
   };
+  /* A link that names destinations replaces the all-ticked default, it does not
+     add to it: ?dest=Maldives has to mean the Maldives and nothing else. */
+  if (p.get('dest')) S.dest.clear();
   setOf('dest', S.dest);
+  /* xdest is the mirror image of dest: the all-ticked seed stays and the destinations
+     it names are taken out, which is how writeUrl() records a near-full selection. */
+  (p.get('xdest') || '').split(',').forEach(x => {
+    x = decodeURIComponent(x.trim());
+    if (x) S.dest.delete(x);
+  });
   setOf('boat', S.boat);
   setOf('itin', S.itin);
   setOf('nights', S.nights, Number);
@@ -866,7 +894,15 @@ function readUrl() {
 function writeUrl() {
   const p = new URLSearchParams();
   const put = (k, set) => { if (set.size) p.set(k, [...set].join(',')); };
-  put('dest', S.dest); put('boat', S.boat); put('itin', S.itin); put('nights', S.nights);
+  /* A near-full selection is written as what is MISSING. Unticking Egypt would
+     otherwise put the other 22 destination names in the address bar, and these links
+     are sent to customers on WhatsApp. */
+  if (S.dest.size < ALL_DEST.length) {
+    const gone = ALL_DEST.filter(d => !S.dest.has(d));
+    if (S.dest.size && gone.length < S.dest.size) p.set('xdest', gone.join(','));
+    else put('dest', S.dest);
+  }
+  put('boat', S.boat); put('itin', S.itin); put('nights', S.nights);
   if (S.from !== DEF_FROM) p.set('from', S.from);
   if (S.to !== DEF_TO) p.set('to', S.to);
   if (S.text.trim()) p.set('q', S.text.trim());
@@ -917,7 +953,7 @@ function filtered(skip){
      instead of returning an empty page. */
   const lo=S.from<=S.to?S.from:S.to, hi=S.from<=S.to?S.to:S.from;
   return TRIPS.filter(t=>{
-    if(skip!=='dest'&&S.dest.size&&!S.dest.has(t.destination))return false;
+    if(skip!=='dest'&&S.dest.size&&S.dest.size<ALL_DEST.length&&!S.dest.has(t.destination))return false;
     if(skip!=='boat'&&S.boat.size&&!S.boat.has(t.boat_id))return false;
     if(skip!=='itin'&&S.itin.size&&!(t.areas||[]).some(a=>S.itin.has(a)))return false;
     if(skip!=='nights'&&S.nights.size&&!S.nights.has(t.nights))return false;
@@ -935,7 +971,7 @@ function filtered(skip){
 
 /* ---------- the four facets, same widget as the live page ---------- */
 const MS={};
-MS.dest=MultiSelect('msDest',{label:'יעד',empty:'כל היעדים',sel:S.dest,search:true,onChange:render,
+MS.dest=MultiSelect('msDest',{label:'יעד',empty:'כל היעדים',sel:S.dest,search:true,all:()=>ALL_DEST,onChange:render,
   groups:()=>{const c=tally('dest',t=>t.destination),out=[],known={};
     REGIONS.forEach(([region,keys])=>{keys.forEach(k=>known[k]=1);
       const live=keys.filter(k=>ALL_DEST.includes(k)).map(k=>[k,heDest(k),c.get(k)||0]);
@@ -958,7 +994,16 @@ MS.nights=MultiSelect('msNights',{label:'לילות',empty:'מספר לילות'
 
 function renderTags(){
   const bits=[];
-  S.dest.forEach(v=>bits.push(['dest',v,heDest(v)]));
+  /* Listing every selected destination would put 23 chips on screen for the default
+     view and 22 after a single untick. So the chips name whichever list is shorter:
+     what is selected while that is the smaller half, what has been removed once it is
+     not, and nothing at all while the whole list is in. A 'dest+' chip puts its
+     destination back rather than taking one away. */
+  if(S.dest.size<ALL_DEST.length){
+    if(S.dest.size*2<=ALL_DEST.length)S.dest.forEach(v=>bits.push(['dest',v,heDest(v)]));
+    else ALL_DEST.filter(d=>!S.dest.has(d))
+      .forEach(v=>bits.push(['dest+',v,'ללא '+heDest(v)]));
+  }
   S.boat.forEach(v=>bits.push(['boat',v,BOAT_NAME[v]||v]));
   S.itin.forEach(v=>bits.push(['itin',v,v]));
   [...S.nights].sort((a,b)=>a-b).forEach(v=>bits.push(['nights',v,v+' לילות']));
@@ -967,7 +1012,9 @@ function renderTags(){
 }
 $('tags').onclick=e=>{const b=e.target.closest('button[data-k]');if(!b)return;
   const k=b.getAttribute('data-k'),raw=b.getAttribute('data-v');
-  S[k].delete(k==='nights'?+raw:raw);render();};
+  if(k==='dest+')S.dest.add(raw);
+  else S[k].delete(k==='nights'?+raw:raw);
+  render();};
 
 const daysIn=(y,m)=>new Date(y,m+1,0).getDate();
 
@@ -1387,7 +1434,8 @@ $('fSort').onchange=e=>{S.sort=e.target.value;render();};
 $('fDeal').onclick=()=>{S.deal=!S.deal;render();};
 let tmr;$('fText').oninput=e=>{clearTimeout(tmr);tmr=setTimeout(()=>{S.text=e.target.value;render();},200);};
 $('clr').onclick=()=>{
-  S.dest.clear();S.boat.clear();S.itin.clear();S.nights.clear();
+  S.dest.clear();ALL_DEST.forEach(d=>S.dest.add(d));
+  S.boat.clear();S.itin.clear();S.nights.clear();
   S.from=DEF_FROM;S.to=DEF_TO;S.sort='date';S.text='';S.deal=false;
   syncMonthUI();$('fSort').value='date';$('fText').value='';
   Object.keys(MS).forEach(k=>MS[k].close());render();};
