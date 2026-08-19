@@ -1,0 +1,34 @@
+# robots.txt for register.buddy-divers.com
+# Added 2026-08-19. This host had no robots.txt at all until today: the URL returned
+# the GitHub Pages 404 page.
+#
+# WHY THE ADMIN TOOLS ARE NOT LISTED HERE.
+# crm.html, followup.html, edit-diver.html, manifest.html, lottery-check.html, the five
+# guest forms, the registration form and the net-rate calculator must stay out of Google.
+# They are kept out with <meta name="robots" content="noindex, nofollow"> in each file,
+# NOT with a Disallow line here, and that is deliberate. Disallow stops a crawler from
+# FETCHING a page; it does not stop it indexing one. A page that is disallowed here can
+# still be listed in search results from its inbound links alone, and because the crawler
+# was never allowed to open it, it never sees the noindex tag telling it to stay away.
+# Blocking the fetch would therefore make these pages HARDER to remove, not easier.
+# Leave them crawlable so the noindex is read and obeyed.
+#
+# If a page must never be fetched at all, the answer is not robots.txt either: this repo
+# is public on GitHub Pages and anything served here is readable by anyone who has the
+# URL. Real secrets do not belong in it.
+
+User-agent: *
+Allow: /
+
+# The two Finder pages are about 6.6 MB each, and every filter the visitor touches writes
+# its state into the query string (?dest=, ?trip=, ?from=, ?deals=1 and so on). Those are
+# the same page with the same content, and there are thousands of possible combinations.
+# Letting a crawler walk them would mean thousands of multi-megabyte fetches of duplicate
+# content. The clean URLs below the block are still fully crawlable, the per-destination
+# pages in /destinations/ carry the real indexable text, and each Finder page declares a
+# canonical pointing at its own clean URL, so any parameterised link that is followed
+# anyway still credits the one real page.
+Disallow: /liveaboard-availability.html?
+Disallow: /liveaboard-finder-en.html?
+
+Sitemap: https://register.buddy-divers.com/sitemap.xml
