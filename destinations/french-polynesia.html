@@ -65,6 +65,24 @@ td a:hover{text-decoration:underline}
  padding:7px 15px;color:#eaf4f7;text-decoration:none;font-size:15px}
 .others a:hover{border-color:#F5A623}
 .note{color:#9db9c4;font-size:13.5px;margin-top:14px}
+/* Language switch. The Finder uses a JavaScript dropdown; these pages deliberately ship
+   no executable JavaScript at all, so with only two languages and a known counterpart
+   both flags are simply shown and the current one is ringed. One click instead of two,
+   and nothing to load. Flag artwork is imported from en.py so the control is visibly the
+   same object as the Finder's. dir=ltr keeps the pair in the same physical corner on the
+   RTL and LTR editions alike, which is what the Finder does too. */
+.langpick{position:absolute;top:14px;inset-inline-end:14px;z-index:20;display:flex;gap:6px;
+ align-items:center;background:#F5A623;border-radius:999px;padding:5px 8px;
+ box-shadow:0 4px 14px rgba(245,166,35,.35)}
+.langpick a{display:block;line-height:0;border-radius:4px;padding:2px;opacity:.55}
+.langpick a:hover{opacity:1}
+.langpick a.on{opacity:1;box-shadow:0 0 0 2px #fff}
+.flg{width:24px;height:16px;border-radius:2px;display:block;
+ box-shadow:0 0 0 1px rgba(0,0,0,.18)}
+/* On a phone the logo is 72vw and centred, so an absolutely positioned pill in the corner
+   lands on top of it. Below 620px it becomes a normal element above the logo instead. */
+@media(max-width:620px){.langpick{position:static;margin:0 0 12px;margin-inline-start:auto;
+ width:max-content}}
 .foot{text-align:center;color:#9db9c4;font-size:13.5px;margin-top:40px;
  border-top:1px solid #24485a;padding-top:18px}
 .foot a{color:#bcd7e0}
@@ -74,6 +92,7 @@ td a:hover{text-decoration:underline}
 </head>
 <body>
 <div class="wrap">
+<div class="langpick" dir="ltr" aria-label="Choose Language"><a href="french-polynesia.html" hreflang="he" lang="he" title="Hebrew" aria-label="Hebrew" class="on" aria-current="true"><svg class="flg" viewBox="0 0 66 48" aria-hidden="true"><rect width="66" height="48" fill="#fff"/><rect y="5" width="66" height="6" fill="#0038b8"/><rect y="37" width="66" height="6" fill="#0038b8"/><path d="M33 15 26.07 27h13.86Z" fill="none" stroke="#0038b8" stroke-width="1.7"/><path d="M33 33 26.07 21h13.86Z" fill="none" stroke="#0038b8" stroke-width="1.7"/></svg></a><a href="french-polynesia-en.html" hreflang="en" lang="en" title="English" aria-label="English"><svg class="flg" viewBox="0 0 60 30" aria-hidden="true"><clipPath id="ukc"><path d="M0 0h60v30H0z"/></clipPath><g clip-path="url(#ukc)"><path d="M0 0h60v30H0z" fill="#012169"/><path d="M0 0 60 30M60 0 0 30" stroke="#fff" stroke-width="6"/><path d="M0 0 60 30M60 0 0 30" stroke="#c8102e" stroke-width="4"/><path d="M30 0v30M0 15h60" stroke="#fff" stroke-width="10"/><path d="M30 0v30M0 15h60" stroke="#c8102e" stroke-width="6"/></g></svg></a></div>
 <a class="homelink" href="https://www.buddy-divers.com/"><img class="logo" src="https://res.cloudinary.com/dccbsfte0/image/upload/logo_hnmilh" width="2216" height="576" alt="Buddy-Divers" /></a>
 <h1>ליבאבורד <span>פולינזיה הצרפתית</span></h1>
 <p class="lede">157 הפלגות זמינות על 2 ספינות, מ-<span dir="ltr">19/08/2026</span> עד <span dir="ltr">24/12/2029</span>. כל המחירים לאדם, בתא הזול ביותר של אותה הפלגה.</p>
