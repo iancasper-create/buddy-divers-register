@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- BD-LBLAH 2026-08-19c | destination strip added above the footer, 23 links to the per-destination landing pages. Until now nothing on the site linked to them at all and Search Console reported no referring page, so they were reachable only through the sitemap; a page nothing links to starts weaker than it needs to. The list is filled per edition by the build from the same function that generates the pages, and asserts the two agree, so the strip can never carry a link to a page that was not written -->
 <!-- BD-LBLAH 2026-08-19b | Hebrew spelling of "liveaboard" corrected in the title and both descriptions to the house form, the one used in every Buddy-Divers campaign email and contradicted nowhere. The form shipped earlier today appeared in no other Buddy-Divers material. The wrong forms are deliberately NOT written out here: this comment ships inside the published page, and spelling them would put them in the page source and defeat the correction. The live Wix site carries a third form again in its homepage title, which cannot be fixed from this repo -->
 <!-- BD-LBLAH 2026-08-19a | SEO: description, canonical, hreflang pair, Open Graph and JSON-LD added to the head of both editions, the two live counts filled in by the build; the header logo now links to www.buddy-divers.com -->
 <!-- BD-LBLAH 2026-08-15a | destination facet opens with every box ticked: all ticked and none ticked both mean no filter, a "select all" button sits beside "clear all", and the chip row shows whichever list is shorter (selected, or excluded) instead of 22 chips. A near-full selection is shared as ?xdest=, naming what is missing, so a one-destination untick no longer writes the other 22 into the address bar -->
@@ -432,6 +433,13 @@ table.cab tr.sold td{opacity:.45}
  box-shadow:0 6px 20px rgba(37,211,102,.35)}
 .wa svg{width:18px;height:18px;fill:currentColor}
 .foot{text-align:center;color:#8fb0bd;font-size:12.5px;margin-top:22px;line-height:1.9}
+.destnav{margin-top:34px;border-top:1px solid rgba(197,223,230,.18);padding-top:20px}
+.destnav h2{font-family:'Raleway',sans-serif;font-weight:700;font-size:17px;color:#dbeef4;
+ text-align:center;margin-bottom:14px}
+.destlinks{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.destlinks a{background:rgba(255,255,255,.07);border:1px solid rgba(197,223,230,.22);
+ border-radius:999px;padding:6px 14px;color:#cfe6ee;text-decoration:none;font-size:14px}
+.destlinks a:hover{border-color:var(--orange);color:#fff}
 /* Breakpoint raised from 1050 to 1200 (Ian 2026-08-01) and the number is measured, not
    picked. On this row the search box comes out at viewport minus 841px, so the 342px its
    placeholder needs is met from 1183px up. 1200 is that floor plus ~18px of headroom,
@@ -649,6 +657,13 @@ table.cab th,table.cab td.av{text-align:left}
 
   <div class="count" id="count"></div>
   <div id="view"></div>
+
+  <!-- Destination strip. Filled per edition by build_lah.py from seo.nav_html(): the
+       Hebrew page links to destinations/<slug>.html with Hebrew names, the English page to
+       <slug>-en.html with the feed's own names. Added 2026-08-19 because nothing on the
+       site linked to those pages at all - Search Console reported "Referring page: None
+       detected" against them, so they existed only in the sitemap. -->
+  <nav class="destnav" aria-label="Liveaboards by destination"><h2>Liveaboards by destination</h2><div class="destlinks"><a href="destinations/cocos-island-en.html">Cocos Island</a><a href="destinations/cayman-islands-en.html">Cayman Islands</a><a href="destinations/solomon-islands-en.html">Solomon Islands</a><a href="destinations/indonesia-en.html">Indonesia</a><a href="destinations/bahamas-en.html">Bahamas</a><a href="destinations/belize-en.html">Belize</a><a href="destinations/galapagos-islands-en.html">Galapagos Islands</a><a href="destinations/egypt-en.html">Egypt</a><a href="destinations/honduras-en.html">Honduras</a><a href="destinations/dominican-republic-en.html">Dominican Republic</a><a href="destinations/truk-lagoon-en.html">Truk Lagoon</a><a href="destinations/turks-and-caicos-islands-en.html">Turks and Caicos Islands</a><a href="destinations/myanmar-en.html">Myanmar</a><a href="destinations/maldives-en.html">Maldives</a><a href="destinations/mexico-en.html">Mexico</a><a href="destinations/saint-eustatius-and-saba-en.html">Saint Eustatius and Saba</a><a href="destinations/sinai-en.html">Sinai</a><a href="destinations/french-polynesia-en.html">French Polynesia</a><a href="destinations/fiji-en.html">Fiji</a><a href="destinations/philippines-en.html">Philippines</a><a href="destinations/palau-en.html">Palau</a><a href="destinations/papua-new-guinea-en.html">Papua New Guinea</a><a href="destinations/thailand-en.html">Thailand</a></div></nav>
 
   <div class="foot">
     Prices are per person, in the currency the operator quotes. Data comes from our licensed supplier feed.<br />

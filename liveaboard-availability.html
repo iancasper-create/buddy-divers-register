@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- BD-LBLAH 2026-08-19c | destination strip added above the footer, 23 links to the per-destination landing pages. Until now nothing on the site linked to them at all and Search Console reported no referring page, so they were reachable only through the sitemap; a page nothing links to starts weaker than it needs to. The list is filled per edition by the build from the same function that generates the pages, and asserts the two agree, so the strip can never carry a link to a page that was not written -->
 <!-- BD-LBLAH 2026-08-19b | Hebrew spelling of "liveaboard" corrected in the title and both descriptions to the house form, the one used in every Buddy-Divers campaign email and contradicted nowhere. The form shipped earlier today appeared in no other Buddy-Divers material. The wrong forms are deliberately NOT written out here: this comment ships inside the published page, and spelling them would put them in the page source and defeat the correction. The live Wix site carries a third form again in its homepage title, which cannot be fixed from this repo -->
 <!-- BD-LBLAH 2026-08-19a | SEO: description, canonical, hreflang pair, Open Graph and JSON-LD added to the head of both editions, the two live counts filled in by the build; the header logo now links to www.buddy-divers.com -->
 <!-- BD-LBLAH 2026-08-15a | destination facet opens with every box ticked: all ticked and none ticked both mean no filter, a "select all" button sits beside "clear all", and the chip row shows whichever list is shorter (selected, or excluded) instead of 22 chips. A near-full selection is shared as ?xdest=, naming what is missing, so a one-destination untick no longer writes the other 22 into the address bar -->
@@ -432,6 +433,13 @@ table.cab tr.sold td{opacity:.45}
  box-shadow:0 6px 20px rgba(37,211,102,.35)}
 .wa svg{width:18px;height:18px;fill:currentColor}
 .foot{text-align:center;color:#8fb0bd;font-size:12.5px;margin-top:22px;line-height:1.9}
+.destnav{margin-top:34px;border-top:1px solid rgba(197,223,230,.18);padding-top:20px}
+.destnav h2{font-family:'Raleway',sans-serif;font-weight:700;font-size:17px;color:#dbeef4;
+ text-align:center;margin-bottom:14px}
+.destlinks{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.destlinks a{background:rgba(255,255,255,.07);border:1px solid rgba(197,223,230,.22);
+ border-radius:999px;padding:6px 14px;color:#cfe6ee;text-decoration:none;font-size:14px}
+.destlinks a:hover{border-color:var(--orange);color:#fff}
 /* Breakpoint raised from 1050 to 1200 (Ian 2026-08-01) and the number is measured, not
    picked. On this row the search box comes out at viewport minus 841px, so the 342px its
    placeholder needs is met from 1183px up. 1200 is that floor plus ~18px of headroom,
@@ -601,6 +609,13 @@ table.cab tr.sold td{opacity:.45}
 
   <div class="count" id="count"></div>
   <div id="view"></div>
+
+  <!-- Destination strip. Filled per edition by build_lah.py from seo.nav_html(): the
+       Hebrew page links to destinations/<slug>.html with Hebrew names, the English page to
+       <slug>-en.html with the feed's own names. Added 2026-08-19 because nothing on the
+       site linked to those pages at all - Search Console reported "Referring page: None
+       detected" against them, so they existed only in the sitemap. -->
+  <nav class="destnav" aria-label="ליבאבורד לפי יעד"><h2>ליבאבורד לפי יעד</h2><div class="destlinks"><a href="destinations/cocos-island.html">איי קוקוס</a><a href="destinations/cayman-islands.html">איי קיימן</a><a href="destinations/solomon-islands.html">איי שלמה</a><a href="destinations/indonesia.html">אינדונזיה</a><a href="destinations/bahamas.html">בהאמה</a><a href="destinations/belize.html">בליז</a><a href="destinations/galapagos-islands.html">גלפגוס</a><a href="destinations/egypt.html">דרום מצרים</a><a href="destinations/honduras.html">הונדורס</a><a href="destinations/dominican-republic.html">הרפובליקה הדומיניקנית</a><a href="destinations/truk-lagoon.html">טרוק לגון</a><a href="destinations/turks-and-caicos-islands.html">טרקס וקייקוס</a><a href="destinations/myanmar.html">מיאנמר</a><a href="destinations/maldives.html">מלדיביים</a><a href="destinations/mexico.html">מקסיקו</a><a href="destinations/saint-eustatius-and-saba.html">סבא וסנט אוסטטיוס</a><a href="destinations/sinai.html">סיני</a><a href="destinations/french-polynesia.html">פולינזיה הצרפתית</a><a href="destinations/fiji.html">פיג&#x27;י</a><a href="destinations/philippines.html">פיליפינים</a><a href="destinations/palau.html">פלאו</a><a href="destinations/papua-new-guinea.html">פפואה גינאה החדשה</a><a href="destinations/thailand.html">תאילנד</a></div></nav>
 
   <div class="foot">
     מחירים במטבע שהפיד מחזיר, לאדם. הנתונים מגיעים מהפיד המורשה של חשבון הסוכן שלך.<br />
