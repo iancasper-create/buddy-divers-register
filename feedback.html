@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<!-- BD-FEEDBACK 2026-08-22j | a skipped sub-rating is sent as null instead of 0. Airtable's Rating field rejects both 0 and "" and only takes null as "not rated", verified against the live base, so every submission that left one of the four optional stars alone would have failed at the Airtable step.
+<!-- BD-FEEDBACK 2026-08-22k | live Make webhook in, placeholder out. The self-disabling submit guard clears itself as a result and the form is now accepting submissions.
+     BD-FEEDBACK 2026-08-22j | a skipped sub-rating is sent as null instead of 0. Airtable's Rating field rejects both 0 and "" and only takes null as "not rated", verified against the live base, so every submission that left one of the four optional stars alone would have failed at the Airtable step.
      BD-FEEDBACK 2026-08-22i | submit button blocks itself while CONFIG.webhook is still the placeholder, so the page can be deployed and viewed before the Make scenario exists without a guest ever losing a filled-in form to a failed POST. Clears itself the moment the real URL is pasted.
      BD-FEEDBACK 2026-08-22h | live Google and Facebook review links in, placeholders out. Ian's name removed from the three places it appeared: the WhatsApp button, the low-score note and the prefilled WhatsApp message.
      BD-FEEDBACK 2026-08-22g | Buddy-Divers in the house orange inside the H1, the Hebrew prefix left navy, per Ian.
@@ -539,7 +540,7 @@
    ══════════════════════════════════════════════════════════════════ */
 var CONFIG = {
   // Make.com webhook that writes the Airtable row and fires the low-score alert.
-  webhook: "PASTE_FEEDBACK_WEBHOOK_URL_HERE",
+  webhook: "https://hook.eu1.make.com/ilhudatmmfn1o99jg4fxglaqs9js74be",
 
   // Google review link, from Ian's Business Profile ("Ask for reviews" / "בקש ביקורות").
   // Opens the write-a-review dialog straight away, no extra click.
