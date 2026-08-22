@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<!-- BD-FEEDBACK 2026-08-22i | submit button blocks itself while CONFIG.webhook is still the placeholder, so the page can be deployed and viewed before the Make scenario exists without a guest ever losing a filled-in form to a failed POST. Clears itself the moment the real URL is pasted.
+<!-- BD-FEEDBACK 2026-08-22j | a skipped sub-rating is sent as null instead of 0. Airtable's Rating field rejects both 0 and "" and only takes null as "not rated", verified against the live base, so every submission that left one of the four optional stars alone would have failed at the Airtable step.
+     BD-FEEDBACK 2026-08-22i | submit button blocks itself while CONFIG.webhook is still the placeholder, so the page can be deployed and viewed before the Make scenario exists without a guest ever losing a filled-in form to a failed POST. Clears itself the moment the real URL is pasted.
      BD-FEEDBACK 2026-08-22h | live Google and Facebook review links in, placeholders out. Ian's name removed from the three places it appeared: the WhatsApp button, the low-score note and the prefilled WhatsApp message.
      BD-FEEDBACK 2026-08-22g | Buddy-Divers in the house orange inside the H1, the Hebrew prefix left navy, per Ian.
      BD-FEEDBACK 2026-08-22f | non-breaking hyphen before the Latin brand name in the H1, and a chevron on the destination select, which appearance:none had left with no affordance at all.
@@ -670,11 +671,15 @@ btn.addEventListener("click", async function(){
     name: elName.value.trim(),
     email: elMail.value.trim(),
     phone: elTel.value.trim(),
+    /* A skipped sub-rating goes out as null, never 0. Airtable's Rating field type
+       rejects 0 outright ("cannot accept the provided value") and rejects "" as well;
+       null and an absent key are the only things it takes as "not rated". The key stays
+       present so Make can still see the field when it learns the data structure. */
     overall: scores.overall,
-    preTrip: scores.preTrip,
-    guide: scores.guide,
-    boat: scores.boat,
-    value: scores.value,
+    preTrip: scores.preTrip || null,
+    guide: scores.guide || null,
+    boat: scores.boat || null,
+    value: scores.value || null,
     best: document.getElementById("fBest").value.trim(),
     improve: document.getElementById("fImprove").value.trim(),
     publishConsent: chk.checked,
