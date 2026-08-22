@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<!-- BD-FEEDBACK 2026-08-22k | live Make webhook in, placeholder out. The self-disabling submit guard clears itself as a result and the form is now accepting submissions.
+<!-- BD-FEEDBACK 2026-08-22l | the publish-name hint now offers "אנונימי" as a third option, so someone happy to have the words published but not their name has a way to say so instead of ticking the consent box off.
+     BD-FEEDBACK 2026-08-22k | live Make webhook in, placeholder out. The self-disabling submit guard clears itself as a result and the form is now accepting submissions.
      BD-FEEDBACK 2026-08-22j | a skipped sub-rating is sent as null instead of 0. Airtable's Rating field rejects both 0 and "" and only takes null as "not rated", verified against the live base, so every submission that left one of the four optional stars alone would have failed at the Airtable step.
      BD-FEEDBACK 2026-08-22i | submit button blocks itself while CONFIG.webhook is still the placeholder, so the page can be deployed and viewed before the Make scenario exists without a guest ever losing a filled-in form to a failed POST. Clears itself the moment the real URL is pasted.
      BD-FEEDBACK 2026-08-22h | live Google and Facebook review links in, placeholders out. Ian's name removed from the three places it appeared: the WhatsApp button, the low-score note and the prefilled WhatsApp message.
@@ -127,6 +128,7 @@
     .field-label { display:block; font-size:15px; font-weight:600; color:var(--text); margin-bottom:8px; }
     .field-label .req { color: var(--error); margin-inline-start:3px; }
     .field-hint { font-size:13px; color:var(--muted); font-weight:400; margin-top:-4px; margin-bottom:8px; line-height:1.6; }
+    .field-hint b { color:var(--text); font-weight:600; }
 
     .field-label .opt { font-weight:400; color:var(--muted); font-size:13px; }
     input[type="text"], input[type="email"], input[type="tel"], select, textarea {
@@ -481,7 +483,7 @@
         </div>
         <div id="publishNameWrap">
           <label class="field-label" for="fPublishName">איך לרשום את השם בפרסום?</label>
-          <div class="field-hint">למשל "רונית מ." או השם המלא. אימייל וטלפון לעולם לא מתפרסמים.</div>
+          <div class="field-hint">למשל "רונית מ.", השם המלא, או פשוט <b>אנונימי</b> אם אתם מעדיפים שההמלצה תתפרסם בלי שם. אימייל וטלפון לעולם לא מתפרסמים.</div>
           <input type="text" id="fPublishName" />
         </div>
 
