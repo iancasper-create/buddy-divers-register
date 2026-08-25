@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- BD-FOLLOWUP 2026-08-25a | Trip 261030 (Sinai, 30/10-03/11/2026) added to all three trip maps: the confirmation-letter TRIPS map with its nine option keys, and the payment-request country and name maps, which had never carried a Sinai trip at all -->
 <!-- BD-FOLLOWUP 2026-08-19a | noindex, nofollow added: this page is not for search engines. It is deliberately NOT disallowed in the new robots.txt: a crawler that is blocked from fetching a page never reads the noindex inside it, so blocking would make this page harder to keep out of Google, not easier -->
 <!-- BD-FOLLOWUP 2026-08-11b | Pro forma payment request gains a Trip ID field, so an ad hoc request can be tied to a real trip instead of only a free text description
      BD-FOLLOWUP 2026-08-11a | Payment Requests table merged into WA Messages: the duplicate second write is gone, and Currency and Trip ID are now logged on the WA Messages row itself
@@ -2026,6 +2027,7 @@ function buildPaymentHTML(booking, amount, nisAmount, rate, notes, paidSoFar, sa
     '260301': 'תאילנד', '260328': 'מדגסקר', '260620': 'מדגסקר', '260730': 'מדגסקר',
     '260815': 'מדגסקר', '260828': 'פיג׳י / טונגה', '260915': 'מדגסקר', '260925': 'מדגסקר',
     '261009': 'מדגסקר', '261022': 'גלפגוס', '271014': 'גלפגוס',
+    '261030': 'סיני',
     '261211': 'מיאנמר', '270106': 'מיאנמר', '270203': 'מיאנמר',
     '261219': 'פיליפינים',
     '270118': 'אינדונזיה — ראג׳ה אמפאט',
@@ -2205,6 +2207,7 @@ async function generatePaymentImage() {
     '260328':'מדגסקר — מרץ 2026', '260620':'מדגסקר — יוני 2026', '260730':'מדגסקר — יולי 2026',
     '260815':'מדגסקר — אוגוסט 2026', '260915':'מדגסקר — ספטמבר 2026 א׳', '260925':'מדגסקר — ספטמבר 2026 ב׳',
     '261009':'מדגסקר — אוקטובר 2026',
+    '261030':'ספארי 5 כוכבים — סיני — אוקטובר 2026',
     '261211':'מיאנמר — דצמבר 2026', '270106':'מיאנמר — ינואר 2027', '270203':'מיאנמר — פברואר 2027',
     '261219':'פיליפינים — דצמבר 2026',
     '270118':'ראג׳ה אמפאט — ינואר 2027',
@@ -2766,6 +2769,8 @@ const CF_TRIPS_FALLBACK = {
     opts:{"twin_2890": "Single occupancy in twin room", "twin_2690": "Non-diver sharing twin room", "single_supplement": "Single room supplement (add-on)"} },
   "261022": { name:"Galapagos Safari", dest:"the Galapagos Islands", vessel:"", arrive:"22 October 2026", depart:"29 October 2026", currency:"USD",
     opts:{"single_7300": "Price per person"} },
+  "261030": { name:"Sinai 5-Star Dive Safari", dest:"Sinai, Egypt", vessel:"Renaissance Sharm El Sheikh Golden View Beach Resort", arrive:"30 October 2026", depart:"3 November 2026", currency:"ILS",
+    opts:{"certified_3980": "Certified diver package", "ow_course_3980": "Package incl. Open Water course", "advanced_course_4580": "Package incl. Advanced Open Water course", "nondiver_2890": "Non-diver accommodation package", "single_supp_760": "Single use of double room supplement", "sea_view_double_190": "Sea view room, double occupancy (per person)", "sea_view_single_380": "Sea view room, single occupancy", "suite_double_290": "Suite with garden exit or sea view, double occupancy (per person)", "suite_single_580": "Suite with garden exit or sea view, single occupancy"} },
   "261111": { name:"Flagship Journey - North Sulawesi", dest:"Indonesia (North Sulawesi)", vessel:"Coral Eye Resort and Siladen Resort & Spa", arrive:"11 November 2026", depart:"21 November 2026", currency:"EUR",
     opts:{"full_trip_3429": "Base price, 5 nights Coral Eye Resort, 5 nights Siladen Resort & Spa (Double Bedroom Garden Villa, twin share), 14 resort dives and 2 dives on the sea crossing between the resorts"} },
   "261122": { name:"Thailand Safari", dest:"Thailand", vessel:"", arrive:"22 November 2026", depart:"29 November 2026", currency:"USD",

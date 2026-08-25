@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- BD-REG 2026-08-25d | Trip config 261030 added: ספארי 5 כוכבים סיני, Renaissance Sharm El Sheikh Golden View Beach Resort, 30/10-03/11/2026, ILS, built from Ian's trip document. Non-diver is ₪2,890 here, confirmed by Ian against the ₪2,730 the September trip carries. Room upgrades are the document's own numbers (sea view 190/380, suite 290/580), not 260927's. The third person in room discount in the document is deliberately NOT in the form, per Ian, same call as Session 38. noFlights true, roomOptional true -->
 <!-- BD-REG 2026-08-25c | Passport upload wording made unambiguous after divers uploaded selfies: label is now the passport data page, camera button says photograph the passport page, error and validation texts match. Same for the second passport block. No extra hint line, Ian judged the label self-explanatory -->
 <!-- BD-REG 2026-08-25b | 261010 cabin prices raised per Ian: +200 lower and upper, +100 main deck. value keys, price and priceNum moved together. Pricing title no longer mentions flights at all, since flights are not part of the Sinai product; noFlights stays true so the flights card is hidden and self-arranged is preselected. Single-use supplements deliberately unchanged -->
 <!-- BD-REG 2026-08-25a | Trip config 261010 added: Snefro Target Sinai liveaboard, 10-17/10/2026, ILS. Three per-deck cabin prices plus a matching single-use supplement for each deck, since the supplement differs by deck and the pricing list is flat -->
@@ -1802,6 +1803,90 @@ const TRIPS = {
       }
     ],
     noFlights: true
+  },
+  "261030": {
+    name: "🌊 ספארי 5 כוכבים — סיני",
+    dates: "30/10/2026 – 03/11/2026",
+    note: "🏨 Renaissance Sharm El Sheikh Golden View Beach Resort | הכל כלול | מלווה יפורסם בהמשך",
+    currency: "ILS",
+    pricingTitle: {
+      he: "עלות הספארי",
+      en: "Safari Pricing"
+    },
+    roomOptionsTitle: {
+      he: "שדרוג חדר",
+      en: "Room Upgrade"
+    },
+    pricing: [
+      {
+        value: "certified_3980",
+        he: "חבילת צלילה לצולל.ת מוסמך.ת",
+        en: "Certified diver package",
+        price: "₪3,980",
+        priceNum: 3980
+      },
+      {
+        value: "ow_course_3980",
+        he: "חבילת צלילה כולל קורס כוכב ראשון",
+        en: "Package incl. Open Water course",
+        price: "₪3,980",
+        priceNum: 3980
+      },
+      {
+        value: "advanced_course_4580",
+        he: "חבילת צלילה כולל קורס כוכב שני",
+        en: "Package incl. Advanced Open Water course",
+        price: "₪4,580",
+        priceNum: 4580
+      },
+      {
+        value: "nondiver_2890",
+        he: "חבילת אירוח לאינו.ה צולל.ת",
+        en: "Non-diver accommodation package",
+        price: "₪2,890",
+        priceNum: 2890
+      },
+      {
+        value: "single_supp_760",
+        he: "תוספת חדר זוגי בתפוסת יחיד.ה",
+        en: "Single use of double room supplement",
+        price: "₪760",
+        priceNum: 760,
+        supplement: true
+      }
+    ],
+    noFlights: true,
+    roomOptional: true,
+    roomOptions: [
+      {
+        value: "sea_view_double_190",
+        he: "חדר עם נוף לים — תפוסה זוגית (לאדם)",
+        en: "Sea view room — double occupancy (per person)",
+        price: "₪190",
+        priceNum: 190
+      },
+      {
+        value: "sea_view_single_380",
+        he: "חדר עם נוף לים — תפוסת יחיד.ה",
+        en: "Sea view room — single occupancy",
+        price: "₪380",
+        priceNum: 380
+      },
+      {
+        value: "suite_double_290",
+        he: "סוויטה עם יציאה לגינה או נוף לים — תפוסה זוגית (לאדם)",
+        en: "Suite with garden exit or sea view — double occupancy (per person)",
+        price: "₪290",
+        priceNum: 290
+      },
+      {
+        value: "suite_single_580",
+        he: "סוויטה עם יציאה לגינה או נוף לים — תפוסת יחיד.ה",
+        en: "Suite with garden exit or sea view — single occupancy",
+        price: "₪580",
+        priceNum: 580
+      }
+    ]
   },
   "260725": {
     name: "🐠 Black Manta — מלדיביים",
