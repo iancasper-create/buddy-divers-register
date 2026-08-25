@@ -1,3 +1,4 @@
+<!-- BD-EDIT 2026-08-25a | Trip 261030 (Sinai, 30/10-03/11/2026) added to the TRIPS pricing map, so a booking on that trip renders its real pricing cards instead of falling back to the default standard-price card. Same nine option keys as the registration form. Several other live trips are still missing from this map, see OUTSTANDING ITEMS -->
 <!-- BD-EDIT 2026-08-19a | noindex, nofollow added: this page is not for search engines. It is deliberately NOT disallowed in the new robots.txt: a crawler that is blocked from fetching a page never reads the noindex inside it, so blocking would make this page harder to keep out of Google, not easier -->
 <!-- BD-EDIT 2026-06-04b | Current-doc thumbnail preview; Returning Customer sends Yes/null not 'No' (Airtable select-option fix) -->
 <!DOCTYPE html>
@@ -1580,6 +1581,80 @@ const TRIPS = {
         price: "$1,750",
         priceNum: -1750,
         supplement: true
+      }
+    ]
+  },
+  "261030": {
+    name: "🌊 ספארי 5 כוכבים — סיני",
+    dates: "30/10/2026 – 03/11/2026",
+    note: "🏨 Renaissance Sharm El Sheikh Golden View Beach Resort | הכל כלול",
+    currency: "ILS",
+    pricing: [
+      {
+        value: "certified_3980",
+        he: "חבילת צלילה לצולל.ת מוסמך.ת",
+        en: "Certified diver package",
+        price: "₪3,980",
+        priceNum: 3980
+      },
+      {
+        value: "ow_course_3980",
+        he: "חבילת צלילה כולל קורס כוכב ראשון",
+        en: "Package incl. Open Water course",
+        price: "₪3,980",
+        priceNum: 3980
+      },
+      {
+        value: "advanced_course_4580",
+        he: "חבילת צלילה כולל קורס כוכב שני",
+        en: "Package incl. Advanced Open Water course",
+        price: "₪4,580",
+        priceNum: 4580
+      },
+      {
+        value: "nondiver_2890",
+        he: "חבילת אירוח לאינו.ה צולל.ת",
+        en: "Non-diver accommodation package",
+        price: "₪2,890",
+        priceNum: 2890
+      },
+      {
+        value: "single_supp_760",
+        he: "תוספת חדר זוגי בתפוסת יחיד.ה",
+        en: "Single use of double room supplement",
+        price: "₪760",
+        priceNum: 760,
+        supplement: true
+      }
+    ],
+    roomOptions: [
+      {
+        value: "sea_view_double_190",
+        he: "חדר עם נוף לים — תפוסה זוגית (לאדם)",
+        en: "Sea view room — double occupancy (per person)",
+        price: "₪190",
+        priceNum: 190
+      },
+      {
+        value: "sea_view_single_380",
+        he: "חדר עם נוף לים — תפוסת יחיד.ה",
+        en: "Sea view room — single occupancy",
+        price: "₪380",
+        priceNum: 380
+      },
+      {
+        value: "suite_double_290",
+        he: "סוויטה עם יציאה לגינה או נוף לים — תפוסה זוגית (לאדם)",
+        en: "Suite with garden exit or sea view — double occupancy (per person)",
+        price: "₪290",
+        priceNum: 290
+      },
+      {
+        value: "suite_single_580",
+        he: "סוויטה עם יציאה לגינה או נוף לים — תפוסת יחיד.ה",
+        en: "Suite with garden exit or sea view — single occupancy",
+        price: "₪580",
+        priceNum: 580
       }
     ]
   },
