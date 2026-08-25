@@ -1,4 +1,7 @@
 <!DOCTYPE html>
+<!-- BD-REG 2026-08-25c | Passport upload wording made unambiguous after divers uploaded selfies: label is now the passport data page, camera button says photograph the passport page, error and validation texts match. Same for the second passport block. No extra hint line, Ian judged the label self-explanatory -->
+<!-- BD-REG 2026-08-25b | 261010 cabin prices raised per Ian: +200 lower and upper, +100 main deck. value keys, price and priceNum moved together. Pricing title no longer mentions flights at all, since flights are not part of the Sinai product; noFlights stays true so the flights card is hidden and self-arranged is preselected. Single-use supplements deliberately unchanged -->
+<!-- BD-REG 2026-08-25a | Trip config 261010 added: Snefro Target Sinai liveaboard, 10-17/10/2026, ILS. Three per-deck cabin prices plus a matching single-use supplement for each deck, since the supplement differs by deck and the pricing list is flat -->
 <!-- BD-REG 2026-08-19a | noindex, nofollow added: this page is not for search engines. It is deliberately NOT disallowed in the new robots.txt: a crawler that is blocked from fetching a page never reads the noindex inside it, so blocking would make this page harder to keep out of Google, not easier -->
 <!-- BD-REG 2026-08-09b | 261219 upper_premium_275 note reads "בשיתוף לאישה" (singular), not "לנשים" -->
 <!-- BD-REG 2026-08-09a | Cabin options support soldOut (strike-through + FULL badge, still selectable) and a per-option availability note. Applied to 261219: main_front_140 and main_premium_205 marked full, upper_premium_275 notes the remaining female share -->
@@ -693,7 +696,7 @@
 
       <!-- Passport photo upload -->
       <div class="field" style="margin-top:8px;">
-        <label>תמונת דרכון <span class="en">Passport Photo Upload</span><span class="req">*</span></label>
+        <label>צילום עמוד הפרטים בדרכון <span class="en">Passport Data Page Photo</span><span class="req">*</span></label>
         <div class="upload-box" id="passportUploadArea">
           <input type="file" id="passportFileInput" accept="image/jpeg, image/png" style="display:none"
             onchange="handleUpload(this,'passportUploadArea','passportPhotoUrl','passportUploadStatus','passports','passport')" />
@@ -702,13 +705,13 @@
           <div class="upload-box-status" id="passportUploadStatus"></div>
           <div class="upload-box-buttons">
             <a id="passportViewBtn" class="upload-btn upload-btn-view" href="#" target="_blank" style="display:none">👁 צפה בתמונה הקיימת / View existing photo</a>
-            <button type="button" class="upload-btn upload-btn-gallery" onclick="document.getElementById('passportFileInput').click()">🖼 העלה.י תמונה מהגלריה / Upload from gallery</button>
-            <button type="button" class="upload-btn upload-btn-camera" onclick="document.getElementById('passportCameraInput').click()">📷 העלה.י תמונה באמצעות המצלמה / Upload using camera</button>
+            <button type="button" class="upload-btn upload-btn-gallery" onclick="document.getElementById('passportFileInput').click()">🖼 העלה.י צילום דרכון מהגלריה / Upload passport photo from gallery</button>
+            <button type="button" class="upload-btn upload-btn-camera" onclick="document.getElementById('passportCameraInput').click()">📷 צלם.י את עמוד הדרכון / Photograph the passport page</button>
           </div>
           <div class="upload-hint">JPG, PNG, HEIC, WebP · עד 5MB / up to 5MB</div>
         </div>
         <input type="hidden" name="passportPhoto" id="passportPhotoUrl" />
-        <span class="field-error" id="passportPhotoError" style="display:none;">יש להעלות תמונת דרכון / Passport photo is required</span>
+        <span class="field-error" id="passportPhotoError" style="display:none;">יש להעלות צילום של עמוד הפרטים בדרכון / Passport data page photo is required</span>
       </div>
 
       <!-- Dual citizenship checkbox -->
@@ -842,7 +845,7 @@
 
         <!-- P2 Photo upload -->
         <div class="field" style="margin-top:8px;">
-          <label>תמונת דרכון שני <span class="en">Second Passport Photo</span><span class="req">*</span></label>
+          <label>צילום עמוד הפרטים בדרכון השני <span class="en">Second Passport Data Page Photo</span><span class="req">*</span></label>
           <div class="upload-box" id="passport2UploadArea">
             <input type="file" id="passport2FileInput" accept="image/jpeg, image/png" style="display:none"
               onchange="handleUpload(this,'passport2UploadArea','passport2PhotoUrl','passport2UploadStatus','passports','passport2')" />
@@ -850,13 +853,13 @@
               onchange="handleUpload(this,'passport2UploadArea','passport2PhotoUrl','passport2UploadStatus','passports','passport2')" />
             <div class="upload-box-status" id="passport2UploadStatus"></div>
             <div class="upload-box-buttons">
-              <button type="button" class="upload-btn upload-btn-gallery" onclick="document.getElementById('passport2FileInput').click()">🖼 העלה.י תמונה מהגלריה / Upload from gallery</button>
-              <button type="button" class="upload-btn upload-btn-camera" onclick="document.getElementById('passport2CameraInput').click()">📷 העלה.י תמונה באמצעות המצלמה / Upload using camera</button>
+              <button type="button" class="upload-btn upload-btn-gallery" onclick="document.getElementById('passport2FileInput').click()">🖼 העלה.י צילום דרכון מהגלריה / Upload passport photo from gallery</button>
+              <button type="button" class="upload-btn upload-btn-camera" onclick="document.getElementById('passport2CameraInput').click()">📷 צלם.י את עמוד הדרכון / Photograph the passport page</button>
             </div>
             <div class="upload-hint">JPG, PNG, HEIC, WebP · עד 5MB / up to 5MB</div>
           </div>
           <input type="hidden" name="passport2Photo" id="passport2PhotoUrl" />
-          <span class="field-error" id="passport2PhotoError" style="display:none;">יש להעלות תמונת דרכון שני / Second passport photo is required</span>
+          <span class="field-error" id="passport2PhotoError" style="display:none;">יש להעלות צילום של עמוד הפרטים בדרכון השני / Second passport data page photo is required</span>
         </div>
       </div>
 
@@ -1741,6 +1744,64 @@ const TRIPS = {
         priceNum: 790
       }
     ]
+  },
+  "261010": {
+    name: "🤿 ספארי סיני | Snefro Target",
+    dates: "10/10/2026 – 17/10/2026",
+    note: "🚢 Snefro Target | 7 לילות | ראס מוחמד, מיצרי טיראן, דהב וראס אבו גלום | מלווה יפורסם בהמשך",
+    currency: "ILS",
+    pricingTitle: {
+      he: "עלות הספארי",
+      en: "Safari Pricing"
+    },
+    pricing: [
+      {
+        value: "lower_twin_4590",
+        he: "תא טווין מפלס תחתון, שתי מיטות יחיד (לאדם בתפוסה זוגית)",
+        en: "Lower deck twin cabin, two single beds (per person, double occupancy)",
+        price: "₪4,590",
+        priceNum: 4590
+      },
+      {
+        value: "upper_double_4790",
+        he: "תא זוגי מפלס עליון, מיטה זוגית (לאדם בתפוסה זוגית)",
+        en: "Upper deck double cabin, double bed (per person, double occupancy)",
+        price: "₪4,790",
+        priceNum: 4790
+      },
+      {
+        value: "main_master_4990",
+        he: "סוויטת מאסטר מפלס ראשי, מיטה זוגית (לאדם בתפוסה זוגית)",
+        en: "Main deck master suite, double bed (per person, double occupancy)",
+        price: "₪4,990",
+        priceNum: 4990
+      },
+      {
+        value: "single_supp_lower_1440",
+        he: "תוספת שימוש יחיד.ה, תא טווין מפלס תחתון",
+        en: "Single use supplement, lower deck twin cabin",
+        price: "₪1,440",
+        priceNum: 1440,
+        supplement: true
+      },
+      {
+        value: "single_supp_upper_1540",
+        he: "תוספת שימוש יחיד.ה, תא זוגי מפלס עליון",
+        en: "Single use supplement, upper deck double cabin",
+        price: "₪1,540",
+        priceNum: 1540,
+        supplement: true
+      },
+      {
+        value: "single_supp_main_1640",
+        he: "תוספת שימוש יחיד.ה, סוויטת מאסטר מפלס ראשי",
+        en: "Single use supplement, main deck master suite",
+        price: "₪1,640",
+        priceNum: 1640,
+        supplement: true
+      }
+    ],
+    noFlights: true
   },
   "260725": {
     name: "🐠 Black Manta — מלדיביים",
@@ -3253,7 +3314,7 @@ function validateForm() {
   // Passport photo
   const passportPhotoOk = !!document.getElementById('passportPhotoUrl').value;
   document.getElementById('passportPhotoError').style.display = passportPhotoOk ? 'none' : 'block';
-  if (!passportPhotoOk) { valid = false; missingFields.push('תמונת דרכון / Passport Photo'); }
+  if (!passportPhotoOk) { valid = false; missingFields.push('צילום עמוד הפרטים בדרכון / Passport Data Page Photo'); }
 
   // Second passport — only validate if checkbox is ticked
   const dualPassportChecked = document.getElementById('dualPassportCheckbox') && document.getElementById('dualPassportCheckbox').checked;
@@ -3275,7 +3336,7 @@ function validateForm() {
     });
     const p2PhotoOk = !!document.getElementById('passport2PhotoUrl').value;
     document.getElementById('passport2PhotoError').style.display = p2PhotoOk ? 'none' : 'block';
-    if (!p2PhotoOk) { valid = false; missingFields.push('תמונת דרכון שני / Second Passport Photo'); }
+    if (!p2PhotoOk) { valid = false; missingFields.push('צילום עמוד הפרטים בדרכון השני / Second Passport Data Page Photo'); }
   }
 
   // Dive computer selection
