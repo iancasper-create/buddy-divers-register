@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- BD-REG 2026-08-26a | Two new trips: 270525B (combo, 23/05-15/06/2027, EUR, resorts of 270525 plus the Solitude Adventurer Komodo liveaboard 9-15/06, EUR5,580 divers only, no boat cabin choice) and 270609 (that same liveaboard sold on its own, 9-15/06/2027, USD 3,000). The 5 free nights 4-9/06 are unpriced, self-arranged or alternatives through the office. Boat private guide (private_guide_750) removed from 270814 at Ian's call. Trip lookup now matches a letter suffix case-insensitively, so ?trip=270525b still works -->
 <!-- BD-REG 2026-08-25d | Trip config 261030 added: ספארי 5 כוכבים סיני, Renaissance Sharm El Sheikh Golden View Beach Resort, 30/10-03/11/2026, ILS, built from Ian's trip document. Non-diver is ₪2,890 here, confirmed by Ian against the ₪2,730 the September trip carries. Room upgrades are the document's own numbers (sea view 190/380, suite 290/580), not 260927's. The third person in room discount in the document is deliberately NOT in the form, per Ian, same call as Session 38. noFlights true, roomOptional true -->
 <!-- BD-REG 2026-08-25c | Passport upload wording made unambiguous after divers uploaded selfies: label is now the passport data page, camera button says photograph the passport page, error and validation texts match. Same for the second passport block. No extra hint line, Ian judged the label self-explanatory -->
 <!-- BD-REG 2026-08-25b | 261010 cabin prices raised per Ian: +200 lower and upper, +100 main deck. value keys, price and priceNum moved together. Pricing title no longer mentions flights at all, since flights are not part of the Sinai product; noFlights stays true so the flights card is hidden and self-arranged is preselected. Single-use supplements deliberately unchanged -->
@@ -2556,6 +2557,89 @@ const TRIPS = {
       }
     ]
   },
+  "270525B": {
+    name: "🇮🇩 מסע הדגל לצפון סולאווסי + קומודו",
+    dates: "23 במאי – 15 ביוני 2027",
+    note: "🏝️ Siladen Resort & Spa, Bunaken (25–30/5) | 🌊 Coral Eye Resort, Bangka (30/5–4/6) | 5 לילות חופשיים (4–9/6), עצמאי או חלופות דרך המשרד | 🚢 Solitude Adventurer, קומודו (9–15/6)",
+    currency: "EUR",
+    pricingTitle: {
+      he: "עלות המסע (ללא טיסות)",
+      en: "Trip Pricing (excl. flights)"
+    },
+    pricing: [
+      {
+        value: "combo_5580",
+        he: "חבילת קומבו לצוללים: ריזורטים והפלגה",
+        en: "Combo diver package: resorts and liveaboard",
+        price: "€5,580",
+        priceNum: 5580
+      }
+    ],
+    addons: [
+      {
+        value: "siladen_seaview_338",
+        he: "Siladen Resort & Spa: שדרוג וילה נוף לים",
+        en: "Siladen Resort & Spa: Sea View Villa upgrade",
+        price: "€338",
+        priceNum: 338
+      },
+      {
+        value: "siladen_luxury_638",
+        he: "Siladen Resort & Spa: שדרוג וילת יוקרה",
+        en: "Siladen Resort & Spa: Luxury Villa upgrade",
+        price: "€638",
+        priceNum: 638
+      },
+      {
+        value: "coraleye_garden_313",
+        he: "Coral Eye Resort: שדרוג וילה נוף לגינה",
+        en: "Coral Eye Resort: Garden View Villa upgrade",
+        price: "€313",
+        priceNum: 313
+      },
+      {
+        value: "coraleye_seaview_500",
+        he: "Coral Eye Resort: שדרוג וילה נוף לים",
+        en: "Coral Eye Resort: Sea View Villa upgrade",
+        price: "€500",
+        priceNum: 500
+      },
+      {
+        value: "coraleye_pool_863",
+        he: "Coral Eye Resort: שדרוג וילה עם בריכה בקו ראשון לים",
+        en: "Coral Eye Resort: Beachfront Pool Villa upgrade",
+        price: "€863",
+        priceNum: 863
+      },
+      {
+        value: "extra_dives_50",
+        he: "צלילות נוספות בהזמנה מראש (יום/לילה) — €50 לצלילה במקום €60 ברכישה ישירה בריזורט",
+        en: "Additional pre-booked dives (day/night) — €50/dive instead of €60 if purchased directly at the resort",
+        price: "€50 לצלילה",
+        priceNum: 50,
+        qty: true
+      }
+    ]
+  },
+  "270609": {
+    name: "🇮🇩 קומודו - Solitude Adventurer",
+    dates: "9–15 ביוני 2027",
+    note: "🚢 Solitude Adventurer | קומודו, 6 לילות | סיור דרקוני קומודו כלול",
+    currency: "USD",
+    pricingTitle: {
+      he: "עלות ההפלגה (ללא טיסות)",
+      en: "Liveaboard Pricing (excl. flights)"
+    },
+    pricing: [
+      {
+        value: "komodo_3000",
+        he: "מחיר לצולל.ת בחדר זוגי",
+        en: "Price per diver, twin share",
+        price: "$3,000",
+        priceNum: 3000
+      }
+    ]
+  },
   "270814": {
     name: "🇮🇩 מסע הדגל | קומודו וצפון סולאווסי",
     dates: "14–28 באוגוסט 2027",
@@ -2638,13 +2722,6 @@ const TRIPS = {
         priceNum: 590
       },
       {
-        value: "private_guide_750",
-        he: "מדריך צלילה פרטי — Solitude Adventurer",
-        en: "Private dive guide — Solitude Adventurer",
-        price: "$750",
-        priceNum: 750
-      },
-      {
         value: "private_guide_resort_110",
         he: "מדריך צלילה פרטי — ריזורטים ($110 ליום צלילה)",
         en: "Private dive guide — Resorts ($110 per diving day)",
@@ -2691,7 +2768,12 @@ const TRIPS = {
 // ============================================================
 function init() {
   const params = new URLSearchParams(window.location.search);
-  const tripId = params.get('trip') || 'default';
+  const rawTripId = params.get('trip') || 'default';
+  // Trip ids can carry a letter (270525B). Match it in any case, so a link that arrives
+  // lower-cased still lands on the trip instead of falling through to the default config.
+  const tripId = TRIPS[rawTripId]
+    ? rawTripId
+    : (Object.keys(TRIPS).find(k => k.toLowerCase() === rawTripId.toLowerCase()) || rawTripId);
   const tripConfig = TRIPS[tripId] || TRIPS['default'];
 
   // Set trip banner

@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- BD-FOLLOWUP 2026-08-26a | Trips 270525B (combo, 23/05-15/06/2027, EUR) and 270609 (Solitude Adventurer Komodo alone, 09-15/06/2027, USD) added to all three trip maps. The live trip loader only accepted six-digit ids, which would have dropped 270525B entirely, so it now accepts an optional letter suffix. private_guide_750 is deliberately KEPT in the 270814 fallback opts even though the option was removed from the registration form, and the live loader now merges the snapshot labels under the live ones, so a letter for a booking that already chose a retired option still reads properly instead of printing the raw key -->
 <!-- BD-FOLLOWUP 2026-08-25a | Trip 261030 (Sinai, 30/10-03/11/2026) added to all three trip maps: the confirmation-letter TRIPS map with its nine option keys, and the payment-request country and name maps, which had never carried a Sinai trip at all -->
 <!-- BD-FOLLOWUP 2026-08-19a | noindex, nofollow added: this page is not for search engines. It is deliberately NOT disallowed in the new robots.txt: a crawler that is blocked from fetching a page never reads the noindex inside it, so blocking would make this page harder to keep out of Google, not easier -->
 <!-- BD-FOLLOWUP 2026-08-11b | Pro forma payment request gains a Trip ID field, so an ad hoc request can be tied to a real trip instead of only a free text description
@@ -2032,6 +2033,8 @@ function buildPaymentHTML(booking, amount, nisAmount, rate, notes, paidSoFar, sa
     '261219': 'פיליפינים',
     '270118': 'אינדונזיה — ראג׳ה אמפאט',
     '270814': 'אינדונזיה — קומודו וצפון סולאווסי',
+    '270525B': 'אינדונזיה, צפון סולאווסי וקומודו',
+    '270609': 'אינדונזיה, קומודו',
     '270422': 'פיליפינים — טובטאהה',
     '260801': 'מלדיביים',
   };
@@ -2212,6 +2215,8 @@ async function generatePaymentImage() {
     '261219':'פיליפינים — דצמבר 2026',
     '270118':'ראג׳ה אמפאט — ינואר 2027',
     '270814':'מסע הדגל — קומודו וצפון סולאווסי — אוגוסט 2027',
+    '270525B':'מסע הדגל, צפון סולאווסי וקומודו, מאי 2027',
+    '270609':'קומודו, Solitude Adventurer, יוני 2027',
     '270422':'טובטאהה — פיליפינים — אפריל 2027',
     '260801':'מלדיביים — Black Manta — אוגוסט 2026',
   };
@@ -2791,6 +2796,10 @@ const CF_TRIPS_FALLBACK = {
     opts:{"tubbataha_3630": "Safari price, Main Deck Deluxe cabin (double bed), incl. nitrox"} },
   "270525": { name:"Flagship Journey - North Sulawesi", dest:"Indonesia (North Sulawesi)", vessel:"Siladen Resort & Spa and Coral Eye Resort", arrive:"23 May 2027", depart:"5 June 2027", currency:"EUR",
     opts:{"diver_2990": "Diver package", "nondiver_1990": "Non-diver package", "siladen_seaview_338": "Siladen Resort & Spa: Sea View Villa upgrade", "siladen_luxury_638": "Siladen Resort & Spa: Luxury Villa upgrade", "coraleye_garden_313": "Coral Eye Resort: Garden View Villa upgrade", "coraleye_seaview_500": "Coral Eye Resort: Sea View Villa upgrade", "coraleye_pool_863": "Coral Eye Resort: Beachfront Pool Villa upgrade", "extra_dives_50": "Additional pre-booked dives (day/night), €50/dive instead of €60 if purchased directly at the resort"} },
+  "270525B": { name:"Flagship Journey - North Sulawesi & Komodo", dest:"Indonesia (North Sulawesi & Komodo)", vessel:"Siladen Resort & Spa, Coral Eye Resort and Solitude Adventurer", arrive:"23 May 2027", depart:"15 June 2027", currency:"EUR",
+    opts:{"combo_5580": "Combo diver package: resorts and liveaboard", "siladen_seaview_338": "Siladen Resort & Spa: Sea View Villa upgrade", "siladen_luxury_638": "Siladen Resort & Spa: Luxury Villa upgrade", "coraleye_garden_313": "Coral Eye Resort: Garden View Villa upgrade", "coraleye_seaview_500": "Coral Eye Resort: Sea View Villa upgrade", "coraleye_pool_863": "Coral Eye Resort: Beachfront Pool Villa upgrade", "extra_dives_50": "Additional pre-booked dives (day/night), €50/dive instead of €60 if purchased directly at the resort"} },
+  "270609": { name:"Komodo - Solitude Adventurer", dest:"Indonesia (Komodo)", vessel:"Solitude Adventurer", arrive:"9 June 2027", depart:"15 June 2027", currency:"USD",
+    opts:{"komodo_3000": "Price per diver, twin share"} },
   "270814": { name:"Flagship Journey - Komodo & North Sulawesi", dest:"Indonesia (Komodo & North Sulawesi)", vessel:"Solitude Adventurer, Coral Eye Resort and Siladen Resort & Spa", arrive:"14 August 2027", depart:"28 August 2027", currency:"USD",
     opts:{"full_trip_5980": "Base price, twin share throughout all segments", "boat_twin_0": "Standard twin cabin, upper deck", "boat_quad_neg500": "Four-person cabin, $500 credit", "boat_stateroom_490": "Stateroom upgrade, $490 supplement", "coral_garden_290": "Coral Eye Resort: Garden View upgrade", "coral_beach_470": "Coral Eye Resort: Beach View upgrade", "coral_beachpool_820": "Coral Eye Resort: Beach Front Pool upgrade", "siladen_beach_usd320": "Siladen Resort & Spa: Beach View upgrade", "siladen_villa_usd590": "Siladen Resort & Spa: Luxury Villa upgrade", "private_guide_750": "Private dive guide, Solitude Adventurer", "private_guide_resort_110": "Private dive guide, Resorts ($110 per diving day)"} },
   "271014": { name:"Galapagos Safari", dest:"the Galapagos Islands", vessel:"", arrive:"14 October 2027", depart:"21 October 2027", currency:"USD",
@@ -2877,7 +2886,7 @@ function cfLoadTrips() {
 
       const built = {};
       Object.keys(raw).forEach(id => {
-        if (!/^\d{6}$/.test(id)) return;          // skip "default"
+        if (!/^\d{6}[A-Za-z]?$/.test(id)) return; // skip "default"; a trip id may carry a letter (270525B)
         const src  = raw[id] || {};
         const back = CF_TRIPS_FALLBACK[id] || {};
         const dates = cfParseDates(src.dates);
@@ -2888,7 +2897,9 @@ function cfLoadTrips() {
           arrive:   dates[0] || back.arrive || '',
           depart:   dates[1] || back.depart || '',
           currency: src.currency || back.currency || 'USD',
-          opts:     cfCollectOpts(src)
+          // Live labels win, but any option that was retired from the registration form keeps
+          // its snapshot label, so letters for bookings that already chose it still read properly
+          opts:     Object.assign({}, back.opts || {}, cfCollectOpts(src))
         };
       });
 

@@ -1,3 +1,4 @@
+<!-- BD-EDIT 2026-08-26a | Trips 270525B (combo, 23/05-15/06/2027, EUR5,580 plus the five resort upgrades and extra dives as supplements) and 270609 (Solitude Adventurer Komodo alone, 09-15/06/2027, $3,000) added to the TRIPS pricing map, so bookings on them render their real pricing cards instead of the standard-price fallback -->
 <!-- BD-EDIT 2026-08-25a | Trip 261030 (Sinai, 30/10-03/11/2026) added to the TRIPS pricing map, so a booking on that trip renders its real pricing cards instead of falling back to the default standard-price card. Same nine option keys as the registration form. Several other live trips are still missing from this map, see OUTSTANDING ITEMS -->
 <!-- BD-EDIT 2026-08-19a | noindex, nofollow added: this page is not for search engines. It is deliberately NOT disallowed in the new robots.txt: a crawler that is blocked from fetching a page never reads the noindex inside it, so blocking would make this page harder to keep out of Google, not easier -->
 <!-- BD-EDIT 2026-06-04b | Current-doc thumbnail preview; Returning Customer sends Yes/null not 'No' (Airtable select-option fix) -->
@@ -1655,6 +1656,92 @@ const TRIPS = {
         en: "Suite with garden exit or sea view — single occupancy",
         price: "₪580",
         priceNum: 580
+      }
+    ]
+  },
+  "270525B": {
+    name: "🇮🇩 מסע הדגל לצפון סולאווסי + קומודו",
+    dates: "23/05/2027 – 15/06/2027",
+    note: "🏝️ Siladen (25–30/5) | 🌊 Coral Eye (30/5–4/6) | 5 לילות חופשיים (4–9/6) | 🚢 Solitude Adventurer, קומודו (9–15/6)",
+    currency: "EUR",
+    pricingTitle: {
+      he: "עלות המסע (ללא טיסות)",
+      en: "Trip Pricing (excl. flights)"
+    },
+    pricing: [
+      {
+        value: "combo_5580",
+        he: "חבילת קומבו לצוללים: ריזורטים והפלגה",
+        en: "Combo diver package: resorts and liveaboard",
+        price: "€5,580",
+        priceNum: 5580
+      },
+      {
+        value: "siladen_seaview_338",
+        he: "Siladen Resort & Spa: שדרוג וילה נוף לים",
+        en: "Siladen Resort & Spa: Sea View Villa upgrade",
+        price: "€338",
+        priceNum: 338,
+        supplement: true
+      },
+      {
+        value: "siladen_luxury_638",
+        he: "Siladen Resort & Spa: שדרוג וילת יוקרה",
+        en: "Siladen Resort & Spa: Luxury Villa upgrade",
+        price: "€638",
+        priceNum: 638,
+        supplement: true
+      },
+      {
+        value: "coraleye_garden_313",
+        he: "Coral Eye Resort: שדרוג וילה נוף לגינה",
+        en: "Coral Eye Resort: Garden View Villa upgrade",
+        price: "€313",
+        priceNum: 313,
+        supplement: true
+      },
+      {
+        value: "coraleye_seaview_500",
+        he: "Coral Eye Resort: שדרוג וילה נוף לים",
+        en: "Coral Eye Resort: Sea View Villa upgrade",
+        price: "€500",
+        priceNum: 500,
+        supplement: true
+      },
+      {
+        value: "coraleye_pool_863",
+        he: "Coral Eye Resort: שדרוג וילה עם בריכה בקו ראשון לים",
+        en: "Coral Eye Resort: Beachfront Pool Villa upgrade",
+        price: "€863",
+        priceNum: 863,
+        supplement: true
+      },
+      {
+        value: "extra_dives_50",
+        he: "צלילות נוספות בהזמנה מראש (יום/לילה), €50 לצלילה",
+        en: "Additional pre-booked dives (day/night), €50 per dive",
+        price: "€50 לצלילה",
+        priceNum: 50,
+        supplement: true
+      }
+    ]
+  },
+  "270609": {
+    name: "🇮🇩 קומודו - Solitude Adventurer",
+    dates: "09/06/2027 – 15/06/2027",
+    note: "🚢 Solitude Adventurer | קומודו, 6 לילות",
+    currency: "USD",
+    pricingTitle: {
+      he: "עלות ההפלגה (ללא טיסות)",
+      en: "Liveaboard Pricing (excl. flights)"
+    },
+    pricing: [
+      {
+        value: "komodo_3000",
+        he: "מחיר לצולל.ת בחדר זוגי",
+        en: "Price per diver, twin share",
+        price: "$3,000",
+        priceNum: 3000
       }
     ]
   },
