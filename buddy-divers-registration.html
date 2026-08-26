@@ -1,4 +1,6 @@
 <!DOCTYPE html>
+<!-- BD-REG 2026-08-26c | Banner note of 270525B and 270609 made bidi-safe: each date range wrapped in first-strong isolates so "(4–9/6)" stops rendering mirrored as "(9/6–4)" inside the Hebrew sentence, and the leading digits spelled out (חמישה / שישה לילות) so they stop detaching from the word after them -->
+<!-- BD-REG 2026-08-26b | 270525B and 270609 dates switched from the written Hebrew form to the numeric dd/mm/yyyy the other 30 trips use. The banner date line is direction:ltr, so a Hebrew date scrambled there ("23 במאי" came out with the 23 at the far end). The numeric form also parses in followup cfParseDates, which only reads dd/mm/yyyy, so the confirmation letter now takes arrive/depart live instead of off the snapshot -->
 <!-- BD-REG 2026-08-26a | Two new trips: 270525B (combo, 23/05-15/06/2027, EUR, resorts of 270525 plus the Solitude Adventurer Komodo liveaboard 9-15/06, EUR5,580 divers only, no boat cabin choice) and 270609 (that same liveaboard sold on its own, 9-15/06/2027, USD 3,000). The 5 free nights 4-9/06 are unpriced, self-arranged or alternatives through the office. Boat private guide (private_guide_750) removed from 270814 at Ian's call. Trip lookup now matches a letter suffix case-insensitively, so ?trip=270525b still works -->
 <!-- BD-REG 2026-08-25d | Trip config 261030 added: ספארי 5 כוכבים סיני, Renaissance Sharm El Sheikh Golden View Beach Resort, 30/10-03/11/2026, ILS, built from Ian's trip document. Non-diver is ₪2,890 here, confirmed by Ian against the ₪2,730 the September trip carries. Room upgrades are the document's own numbers (sea view 190/380, suite 290/580), not 260927's. The third person in room discount in the document is deliberately NOT in the form, per Ian, same call as Session 38. noFlights true, roomOptional true -->
 <!-- BD-REG 2026-08-25c | Passport upload wording made unambiguous after divers uploaded selfies: label is now the passport data page, camera button says photograph the passport page, error and validation texts match. Same for the second passport block. No extra hint line, Ian judged the label self-explanatory -->
@@ -2559,8 +2561,8 @@ const TRIPS = {
   },
   "270525B": {
     name: "🇮🇩 מסע הדגל לצפון סולאווסי + קומודו",
-    dates: "23 במאי – 15 ביוני 2027",
-    note: "🏝️ Siladen Resort & Spa, Bunaken (25–30/5) | 🌊 Coral Eye Resort, Bangka (30/5–4/6) | 5 לילות חופשיים (4–9/6), עצמאי או חלופות דרך המשרד | 🚢 Solitude Adventurer, קומודו (9–15/6)",
+    dates: "23/05/2027 – 15/06/2027",
+    note: "🏝️ Siladen Resort & Spa, Bunaken ⁨(25–30/5)⁩ | 🌊 Coral Eye Resort, Bangka ⁨(30/5–4/6)⁩ | חמישה לילות חופשיים ⁨(4–9/6)⁩, עצמאי או חלופות דרך המשרד | 🚢 Solitude Adventurer, קומודו ⁨(9–15/6)⁩",
     currency: "EUR",
     pricingTitle: {
       he: "עלות המסע (ללא טיסות)",
@@ -2623,8 +2625,8 @@ const TRIPS = {
   },
   "270609": {
     name: "🇮🇩 קומודו - Solitude Adventurer",
-    dates: "9–15 ביוני 2027",
-    note: "🚢 Solitude Adventurer | קומודו, 6 לילות | סיור דרקוני קומודו כלול",
+    dates: "09/06/2027 – 15/06/2027",
+    note: "🚢 Solitude Adventurer | קומודו, שישה לילות | סיור דרקוני קומודו כלול",
     currency: "USD",
     pricingTitle: {
       he: "עלות ההפלגה (ללא טיסות)",
