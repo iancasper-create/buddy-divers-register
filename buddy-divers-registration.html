@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- BD-REG 2026-08-26e | Trip id renamed 261030 -> 261029 at Ian's instruction, SUPERSEDING the line below: Airtable already held this trip as 261029 with the correct dates, so the website was the side that was wrong and every registration on ?trip=261030 was dying at the Make Trips lookup. A ?trip=261030 link shared before today now falls through to the DEFAULT config; no alias was added, Ian chose the straight rename -->
 <!-- BD-REG 2026-08-26d | Trip 261030 (Sinai) dates changed at Ian's instruction from 30/10-03/11/2026 to 29/10-02/11/2026. Trip id deliberately NOT renamed: 261030 is referenced by the live Airtable Trips row, by links already shared, and by the trip maps in three other files, so the id no longer tracks its own departure date and that is intentional -->
 <!-- BD-REG 2026-08-26c | Banner note of 270525B and 270609 made bidi-safe: each date range wrapped in first-strong isolates so "(4–9/6)" stops rendering mirrored as "(9/6–4)" inside the Hebrew sentence, and the leading digits spelled out (חמישה / שישה לילות) so they stop detaching from the word after them -->
 <!-- BD-REG 2026-08-26b | 270525B and 270609 dates switched from the written Hebrew form to the numeric dd/mm/yyyy the other 30 trips use. The banner date line is direction:ltr, so a Hebrew date scrambled there ("23 במאי" came out with the 23 at the far end). The numeric form also parses in followup cfParseDates, which only reads dd/mm/yyyy, so the confirmation letter now takes arrive/depart live instead of off the snapshot -->
@@ -1808,7 +1809,7 @@ const TRIPS = {
     ],
     noFlights: true
   },
-  "261030": {
+  "261029": {
     name: "🌊 ספארי 5 כוכבים — סיני",
     dates: "29/10/2026 – 02/11/2026",
     note: "🏨 Renaissance Sharm El Sheikh Golden View Beach Resort | הכל כלול | מלווה יפורסם בהמשך",
