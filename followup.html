@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- BD-FOLLOWUP 2026-08-31a | Trip 270303 added to all three trip maps: tripCountries, tripNames and CF_TRIPS_FALLBACK. Its three option keys are new strings (upper_standard_2325 / main_deluxe_2391 / main_master_2491), so without the fallback entry a letter for this trip would print raw keys whenever the live read of the registration form fails -->
 <!-- BD-FOLLOWUP 2026-08-26d | Trip id renamed 261030 -> 261029 in all three trip maps: tripCountries, tripNames and CF_TRIPS_FALLBACK. Airtable holds this trip as 261029, and followup reads bookings by trip id, so the old key matched nothing -->
 <!-- BD-FOLLOWUP 2026-08-26c | CF_TRIPS_FALLBACK 261030 arrive/depart moved to 29 October / 2 November 2026 to match the registration form. Fallback only for dates, but a stale date here reaches a customer confirmation letter whenever the live read of buddy-divers-registration.html fails -->
 <!-- BD-FOLLOWUP 2026-08-26b | 270525 added to tripCountries and tripNames, which had never carried it, so its payment message read 'טיול 270525' with no country -->
@@ -2032,7 +2033,7 @@ function buildPaymentHTML(booking, amount, nisAmount, rate, notes, paidSoFar, sa
     '260815': 'מדגסקר', '260828': 'פיג׳י / טונגה', '260915': 'מדגסקר', '260925': 'מדגסקר',
     '261009': 'מדגסקר', '261022': 'גלפגוס', '271014': 'גלפגוס',
     '261029': 'סיני',
-    '261211': 'מיאנמר', '270106': 'מיאנמר', '270203': 'מיאנמר',
+    '261211': 'מיאנמר', '270106': 'מיאנמר', '270203': 'מיאנמר', '270303': 'מיאנמר',
     '261219': 'פיליפינים',
     '270118': 'אינדונזיה — ראג׳ה אמפאט',
     '270814': 'אינדונזיה — קומודו וצפון סולאווסי',
@@ -2215,7 +2216,7 @@ async function generatePaymentImage() {
     '260815':'מדגסקר — אוגוסט 2026', '260915':'מדגסקר — ספטמבר 2026 א׳', '260925':'מדגסקר — ספטמבר 2026 ב׳',
     '261009':'מדגסקר — אוקטובר 2026',
     '261029':'ספארי 5 כוכבים — סיני — אוקטובר 2026',
-    '261211':'מיאנמר — דצמבר 2026', '270106':'מיאנמר — ינואר 2027', '270203':'מיאנמר — פברואר 2027',
+    '261211':'מיאנמר — דצמבר 2026', '270106':'מיאנמר — ינואר 2027', '270203':'מיאנמר — פברואר 2027', '270303':'מיאנמר — מרץ 2027',
     '261219':'פיליפינים — דצמבר 2026',
     '270118':'ראג׳ה אמפאט — ינואר 2027',
     '270814':'מסע הדגל — קומודו וצפון סולאווסי — אוגוסט 2027',
@@ -2797,6 +2798,8 @@ const CF_TRIPS_FALLBACK = {
     opts:{"full_package_6980": "Full package incl. flights, transfers & transit hotel, 9 nights liveaboard", "superior_upgrade_330": "Upgrade to Main Deck Superior Cabin", "credit_1750": "Cash Credit for Self-Arranged Flights"} },
   "270203": { name:"Myanmar Safari", dest:"Myanmar", vessel:"", arrive:"3 February 2027", depart:"10 February 2027", currency:"USD",
     opts:{"upper_standard_2350": "Single in twin room, upper deck standard (shared bathroom)", "main_deluxe_2470": "Single in twin room, main deck deluxe", "main_master_2550": "Single in twin room, main deck master (double bed only)"} },
+  "270303": { name:"Myanmar Safari", dest:"Myanmar", vessel:"", arrive:"3 March 2027", depart:"10 March 2027", currency:"USD",
+    opts:{"upper_standard_2325": "Single in twin room, upper deck standard (shared bathroom)", "main_deluxe_2391": "Single in twin room, main deck deluxe", "main_master_2491": "Single in twin room, main deck master (double bed only)"} },
   "270422": { name:"Tubbataha", dest:"the Philippines (Tubbataha Reef)", vessel:"Stella Maris Explorer", arrive:"22 April 2027", depart:"28 April 2027", currency:"USD",
     opts:{"tubbataha_3630": "Safari price, Main Deck Deluxe cabin (double bed), incl. nitrox"} },
   "270525": { name:"Flagship Journey - North Sulawesi", dest:"Indonesia (North Sulawesi)", vessel:"Siladen Resort & Spa and Coral Eye Resort", arrive:"23 May 2027", depart:"5 June 2027", currency:"EUR",
