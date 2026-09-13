@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- BD-REG 2026-09-13f | 261004 cabin wording per Ian: every room has a double bed AND a single bed (was "double or twin"), lower deck cabin renamed from twin cabin to standard room (חדר רגיל). Labels and banner note only; value keys lower_twin_2452 / main_suite_2735 / upper_suite_2735 deliberately unchanged -->
 <!-- BD-REG 2026-09-13e | 30% discount shown on trip 261004, per Ian. Two new optional config fields: promo (orange pill in the trip banner, #tripPromo) and wasPrice on a pricing option (struck-through grey price shown before the real price, display only). 261004: promo "30% הנחה", wasPrice $3,503 / $3,907 / $3,907 (Emperor full prices $3,502.68 and $3,907.28 rounded), pricingTitle "עלות הספארי | 30% הנחה". value, price and priceNum unchanged -->
 <!-- BD-REG 2026-09-13d | Trip 261004 leader set to Ian Casper: banner note "מלווה יפורסם בהמשך" replaced by "מוביל: איאן כספר" -->
 <!-- BD-REG 2026-09-13c | Trip 261004 now carries a bold red "לבעלי דרכונים זרים בלבד" alert in the trip banner, per Ian. New optional config field noteAlert, shown in its own #tripAlert element as red bold text on a white pill (plain red on the dark teal/navy banner is unreadable). Trips without noteAlert are unaffected -->
@@ -1955,7 +1956,7 @@ const TRIPS = {
   "261004": {
     name: "🐠 Best of Maldives | מלדיביים",
     dates: "04/10/2026 – 11/10/2026",
-    note: "🚢 Emperor Explorer II | 7 לילות | כל התאים ניתנים כמיטה זוגית או כשתי מיטות נפרדות | מוביל: איאן כספר",
+    note: "🚢 Emperor Explorer II | 7 לילות | בכל החדרים מיטה זוגית ומיטת יחיד | מוביל: איאן כספר",
     promo: "30% הנחה",
     noteAlert: "לבעלי דרכונים זרים בלבד",
     currency: "USD",
@@ -1966,24 +1967,24 @@ const TRIPS = {
     pricing: [
       {
         value: "lower_twin_2452",
-        he: "תא טווין מפלס תחתון, מיטה זוגית או שתי מיטות נפרדות (לאדם בתפוסה זוגית)",
-        en: "Lower deck twin cabin, double bed or two single beds (per person, double occupancy)",
+        he: "חדר רגיל מפלס תחתון, מיטה זוגית ומיטת יחיד (לאדם בתפוסה זוגית)",
+        en: "Standard room, lower deck, double bed and single bed (per person, double occupancy)",
         wasPrice: "$3,503",
         price: "$2,452",
         priceNum: 2452
       },
       {
         value: "main_suite_2735",
-        he: "סוויטה מפלס ראשי, מיטה זוגית או שתי מיטות נפרדות (לאדם בתפוסה זוגית)",
-        en: "Main deck suite, double bed or two single beds (per person, double occupancy)",
+        he: "סוויטה מפלס ראשי, מיטה זוגית ומיטת יחיד (לאדם בתפוסה זוגית)",
+        en: "Main deck suite, double bed and single bed (per person, double occupancy)",
         wasPrice: "$3,907",
         price: "$2,735",
         priceNum: 2735
       },
       {
         value: "upper_suite_2735",
-        he: "סוויטה מפלס עליון, מיטה זוגית או שתי מיטות נפרדות (לאדם בתפוסה זוגית)",
-        en: "Upper deck suite, double bed or two single beds (per person, double occupancy)",
+        he: "סוויטה מפלס עליון, מיטה זוגית ומיטת יחיד (לאדם בתפוסה זוגית)",
+        en: "Upper deck suite, double bed and single bed (per person, double occupancy)",
         wasPrice: "$3,907",
         price: "$2,735",
         priceNum: 2735

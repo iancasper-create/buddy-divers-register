@@ -1,3 +1,4 @@
+<!-- BD-EDIT 2026-09-13b | 261004 cabin labels match the registration form: standard room (חדר רגיל) on the lower deck, double bed and single bed in every room. Value keys unchanged -->
 <!-- BD-EDIT 2026-09-13a | Trip 261004 (Best of Maldives, Emperor Explorer II, 04/10-11/10/2026) added to the TRIPS pricing map, same three cabin options as the registration form: lower_twin_2452 / main_suite_2735 / upper_suite_2735 -->
 <!-- BD-EDIT 2026-08-31a | Trip 270303 added to the TRIPS pricing map, same three cabin options as the registration form. Without it a booking on this trip renders the fallback single standard-price card -->
 <!-- BD-EDIT 2026-08-26d | Trip id renamed 261030 -> 261029 in the TRIPS pricing map, matching the Airtable Trips row. Without this a booking on the trip would render the fallback single "standard price" card -->
@@ -1261,22 +1262,22 @@ const TRIPS = {
     pricing: [
       {
         value: "lower_twin_2452",
-        he: "תא טווין מפלס תחתון, מיטה זוגית או שתי מיטות נפרדות (לאדם בתפוסה זוגית)",
-        en: "Lower deck twin cabin, double bed or two single beds (per person, double occupancy)",
+        he: "חדר רגיל מפלס תחתון, מיטה זוגית ומיטת יחיד (לאדם בתפוסה זוגית)",
+        en: "Standard room, lower deck, double bed and single bed (per person, double occupancy)",
         price: "$2,452",
         priceNum: 2452
       },
       {
         value: "main_suite_2735",
-        he: "סוויטה מפלס ראשי, מיטה זוגית או שתי מיטות נפרדות (לאדם בתפוסה זוגית)",
-        en: "Main deck suite, double bed or two single beds (per person, double occupancy)",
+        he: "סוויטה מפלס ראשי, מיטה זוגית ומיטת יחיד (לאדם בתפוסה זוגית)",
+        en: "Main deck suite, double bed and single bed (per person, double occupancy)",
         price: "$2,735",
         priceNum: 2735
       },
       {
         value: "upper_suite_2735",
-        he: "סוויטה מפלס עליון, מיטה זוגית או שתי מיטות נפרדות (לאדם בתפוסה זוגית)",
-        en: "Upper deck suite, double bed or two single beds (per person, double occupancy)",
+        he: "סוויטה מפלס עליון, מיטה זוגית ומיטת יחיד (לאדם בתפוסה זוגית)",
+        en: "Upper deck suite, double bed and single bed (per person, double occupancy)",
         price: "$2,735",
         priceNum: 2735
       }
