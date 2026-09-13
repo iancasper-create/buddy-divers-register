@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- BD-REG 2026-09-13b | Trip config 261010 (Sinai, Snefro Target, 10-17/10/2026) removed at Ian's instruction: the trip is not happening. It never had an Airtable Trips row or a trips.html card; its public page sinai-liveaboard.html was deleted in the same commit. ?trip=261010 now falls back to the default config -->
 <!-- BD-REG 2026-09-13a | New trip 261004 added, Best of Maldives 04/10/2026-11/10/2026 on Emperor Explorer II, no leader yet. USD, three cabins: lower deck twin $2,452 (was $3,502.68), main deck suite and upper deck suite $2,735 each (was $3,907.28, less $1,172.18 = $2,735.10, rounded to whole dollars like the twin). All cabins can be set up as double or twin, stated in every label and in the note. Flights card left on (no noFlights) -->
 <!-- BD-REG 2026-08-31a | New trip 270303 added, Myanmar Safari 03/03/2027-10/03/2027 on The Smiling Seahorse, built from Ian's 270303 PDF. USD, three cabin grades priced upper_standard_2325 / main_deluxe_2391 / main_master_2491. Prices are NOT the same as the other three Myanmar departures ($2,350 / $2,470 / $2,550), so the value keys differ too and no option key is shared with them. Currency read as USD to match the other Myanmar trips and the PDF's dollar flight quotes; the PDF prints the cabin prices with no currency symbol. Config block inserted immediately before 261211. No leader on this trip -->
 <!-- BD-REG 2026-08-26e | Trip id renamed 261030 -> 261029 at Ian's instruction, SUPERSEDING the line below: Airtable already held this trip as 261029 with the correct dates, so the website was the side that was wrong and every registration on ?trip=261030 was dying at the Make Trips lookup. A ?trip=261030 link shared before today now falls through to the DEFAULT config; no alias was added, Ian chose the straight rename -->
@@ -1752,64 +1753,6 @@ const TRIPS = {
         priceNum: 790
       }
     ]
-  },
-  "261010": {
-    name: "🤿 ספארי סיני | Snefro Target",
-    dates: "10/10/2026 – 17/10/2026",
-    note: "🚢 Snefro Target | 7 לילות | ראס מוחמד, מיצרי טיראן, דהב וראס אבו גלום | מלווה יפורסם בהמשך",
-    currency: "ILS",
-    pricingTitle: {
-      he: "עלות הספארי",
-      en: "Safari Pricing"
-    },
-    pricing: [
-      {
-        value: "lower_twin_4590",
-        he: "תא טווין מפלס תחתון, שתי מיטות יחיד (לאדם בתפוסה זוגית)",
-        en: "Lower deck twin cabin, two single beds (per person, double occupancy)",
-        price: "₪4,590",
-        priceNum: 4590
-      },
-      {
-        value: "upper_double_4790",
-        he: "תא זוגי מפלס עליון, מיטה זוגית (לאדם בתפוסה זוגית)",
-        en: "Upper deck double cabin, double bed (per person, double occupancy)",
-        price: "₪4,790",
-        priceNum: 4790
-      },
-      {
-        value: "main_master_4990",
-        he: "סוויטת מאסטר מפלס ראשי, מיטה זוגית (לאדם בתפוסה זוגית)",
-        en: "Main deck master suite, double bed (per person, double occupancy)",
-        price: "₪4,990",
-        priceNum: 4990
-      },
-      {
-        value: "single_supp_lower_1440",
-        he: "תוספת שימוש יחיד.ה, תא טווין מפלס תחתון",
-        en: "Single use supplement, lower deck twin cabin",
-        price: "₪1,440",
-        priceNum: 1440,
-        supplement: true
-      },
-      {
-        value: "single_supp_upper_1540",
-        he: "תוספת שימוש יחיד.ה, תא זוגי מפלס עליון",
-        en: "Single use supplement, upper deck double cabin",
-        price: "₪1,540",
-        priceNum: 1540,
-        supplement: true
-      },
-      {
-        value: "single_supp_main_1640",
-        he: "תוספת שימוש יחיד.ה, סוויטת מאסטר מפלס ראשי",
-        en: "Single use supplement, main deck master suite",
-        price: "₪1,640",
-        priceNum: 1640,
-        supplement: true
-      }
-    ],
-    noFlights: true
   },
   "261029": {
     name: "🌊 ספארי 5 כוכבים — סיני",
