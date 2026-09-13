@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- BD-REG 2026-09-13e | 30% discount shown on trip 261004, per Ian. Two new optional config fields: promo (orange pill in the trip banner, #tripPromo) and wasPrice on a pricing option (struck-through grey price shown before the real price, display only). 261004: promo "30% הנחה", wasPrice $3,503 / $3,907 / $3,907 (Emperor full prices $3,502.68 and $3,907.28 rounded), pricingTitle "עלות הספארי | 30% הנחה". value, price and priceNum unchanged -->
 <!-- BD-REG 2026-09-13d | Trip 261004 leader set to Ian Casper: banner note "מלווה יפורסם בהמשך" replaced by "מוביל: איאן כספר" -->
 <!-- BD-REG 2026-09-13c | Trip 261004 now carries a bold red "לבעלי דרכונים זרים בלבד" alert in the trip banner, per Ian. New optional config field noteAlert, shown in its own #tripAlert element as red bold text on a white pill (plain red on the dark teal/navy banner is unreadable). Trips without noteAlert are unaffected -->
 <!-- BD-REG 2026-09-13b | Trip config 261010 (Sinai, Snefro Target, 10-17/10/2026) removed at Ian's instruction: the trip is not happening. It never had an Airtable Trips row or a trips.html card; its public page sinai-liveaboard.html was deleted in the same commit. ?trip=261010 now falls back to the default config -->
@@ -263,6 +264,7 @@
     .option-item.sold-out .option-label .he,
     .option-item.sold-out .option-label .en,
     .option-item.sold-out .option-label .price { text-decoration:line-through; color:var(--muted); }
+    .option-label .was-price { display:inline-block; text-decoration:line-through; color:var(--muted); font-size:13px; font-weight:500; margin:0 10px; }
     .option-label .full-badge {
       display:inline-block; margin-right:7px;
       background:#d4692a; color:#fff;
@@ -457,6 +459,7 @@
       <div class="trip-name" id="tripName">🤿 ספארי מדגסקר — Madagascar Safari</div>
       <div class="trip-dates"><span id="tripDates"></span></div>
       <div class="trip-note-banner" id="tripNote" style="display:none;margin-top:6px;font-size:13px;color:#f0c040;font-weight:600;"></div>
+      <div id="tripPromo" style="display:none;margin:8px auto 0;padding:3px 14px;border-radius:12px;background:#d4692a;color:#fff;font-size:15px;font-weight:800;width:fit-content;"></div>
       <div id="tripAlert" style="display:none;margin:8px auto 0;padding:3px 12px;border-radius:12px;background:#fff;color:#c0392b;font-size:14px;font-weight:800;width:fit-content;"></div>
     </div>
   </div>
@@ -1953,17 +1956,19 @@ const TRIPS = {
     name: "🐠 Best of Maldives | מלדיביים",
     dates: "04/10/2026 – 11/10/2026",
     note: "🚢 Emperor Explorer II | 7 לילות | כל התאים ניתנים כמיטה זוגית או כשתי מיטות נפרדות | מוביל: איאן כספר",
+    promo: "30% הנחה",
     noteAlert: "לבעלי דרכונים זרים בלבד",
     currency: "USD",
     pricingTitle: {
-      he: "עלות הספארי",
-      en: "Safari Pricing"
+      he: "עלות הספארי | 30% הנחה",
+      en: "Safari Pricing | 30% off"
     },
     pricing: [
       {
         value: "lower_twin_2452",
         he: "תא טווין מפלס תחתון, מיטה זוגית או שתי מיטות נפרדות (לאדם בתפוסה זוגית)",
         en: "Lower deck twin cabin, double bed or two single beds (per person, double occupancy)",
+        wasPrice: "$3,503",
         price: "$2,452",
         priceNum: 2452
       },
@@ -1971,6 +1976,7 @@ const TRIPS = {
         value: "main_suite_2735",
         he: "סוויטה מפלס ראשי, מיטה זוגית או שתי מיטות נפרדות (לאדם בתפוסה זוגית)",
         en: "Main deck suite, double bed or two single beds (per person, double occupancy)",
+        wasPrice: "$3,907",
         price: "$2,735",
         priceNum: 2735
       },
@@ -1978,6 +1984,7 @@ const TRIPS = {
         value: "upper_suite_2735",
         he: "סוויטה מפלס עליון, מיטה זוגית או שתי מיטות נפרדות (לאדם בתפוסה זוגית)",
         en: "Upper deck suite, double bed or two single beds (per person, double occupancy)",
+        wasPrice: "$3,907",
         price: "$2,735",
         priceNum: 2735
       }
@@ -2804,6 +2811,13 @@ function init() {
   } else {
     noteEl.style.display = 'none';
   }
+  const promoEl = document.getElementById('tripPromo');
+  if (tripConfig.promo) {
+    promoEl.textContent = tripConfig.promo;
+    promoEl.style.display = 'block';
+  } else {
+    promoEl.style.display = 'none';
+  }
   const alertEl = document.getElementById('tripAlert');
   if (tripConfig.noteAlert) {
     alertEl.textContent = tripConfig.noteAlert;
@@ -2864,7 +2878,7 @@ function init() {
         <div class="option-label">
           <span class="he">${opt.he}</span>
           <span class="en">${opt.en}</span>
-          <span class="price">${opt.price}</span>
+          <span class="price">${opt.wasPrice ? '<span class="was-price">' + opt.wasPrice + '</span>' : ''}${opt.price}</span>
         </div>
       `;
       label.addEventListener('click', () => {
@@ -2876,7 +2890,7 @@ function init() {
         <div class="option-label">
           <span class="he">${opt.he}</span>
           <span class="en">${opt.en}</span>
-          <span class="price">${opt.price}</span>
+          <span class="price">${opt.wasPrice ? '<span class="was-price">' + opt.wasPrice + '</span>' : ''}${opt.price}</span>
         </div>
       `;
       label.addEventListener('click', () => {
