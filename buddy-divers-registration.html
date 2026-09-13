@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- BD-REG 2026-09-13a | New trip 261004 added, Best of Maldives 04/10/2026-11/10/2026 on Emperor Explorer II, no leader yet. USD, three cabins: lower deck twin $2,452 (was $3,502.68), main deck suite and upper deck suite $2,735 each (was $3,907.28, less $1,172.18 = $2,735.10, rounded to whole dollars like the twin). All cabins can be set up as double or twin, stated in every label and in the note. Flights card left on (no noFlights) -->
 <!-- BD-REG 2026-08-31a | New trip 270303 added, Myanmar Safari 03/03/2027-10/03/2027 on The Smiling Seahorse, built from Ian's 270303 PDF. USD, three cabin grades priced upper_standard_2325 / main_deluxe_2391 / main_master_2491. Prices are NOT the same as the other three Myanmar departures ($2,350 / $2,470 / $2,550), so the value keys differ too and no option key is shared with them. Currency read as USD to match the other Myanmar trips and the PDF's dollar flight quotes; the PDF prints the cabin prices with no currency symbol. Config block inserted immediately before 261211. No leader on this trip -->
 <!-- BD-REG 2026-08-26e | Trip id renamed 261030 -> 261029 at Ian's instruction, SUPERSEDING the line below: Airtable already held this trip as 261029 with the correct dates, so the website was the side that was wrong and every registration on ?trip=261030 was dying at the Make Trips lookup. A ?trip=261030 link shared before today now falls through to the DEFAULT config; no alias was added, Ian chose the straight rename -->
 <!-- BD-REG 2026-08-26d | Trip 261030 (Sinai) dates changed at Ian's instruction from 30/10-03/11/2026 to 29/10-02/11/2026. Trip id deliberately NOT renamed: 261030 is referenced by the live Airtable Trips row, by links already shared, and by the trip maps in three other files, so the id no longer tracks its own departure date and that is intentional -->
@@ -1999,6 +2000,39 @@ const TRIPS = {
         en: "Superior cabin (upper deck) — single use",
         price: "$4,640",
         priceNum: 4640
+      }
+    ]
+  },
+  "261004": {
+    name: "🐠 Best of Maldives | מלדיביים",
+    dates: "04/10/2026 – 11/10/2026",
+    note: "🚢 Emperor Explorer II | 7 לילות | כל התאים ניתנים כמיטה זוגית או כשתי מיטות נפרדות | מלווה יפורסם בהמשך",
+    currency: "USD",
+    pricingTitle: {
+      he: "עלות הספארי",
+      en: "Safari Pricing"
+    },
+    pricing: [
+      {
+        value: "lower_twin_2452",
+        he: "תא טווין מפלס תחתון, מיטה זוגית או שתי מיטות נפרדות (לאדם בתפוסה זוגית)",
+        en: "Lower deck twin cabin, double bed or two single beds (per person, double occupancy)",
+        price: "$2,452",
+        priceNum: 2452
+      },
+      {
+        value: "main_suite_2735",
+        he: "סוויטה מפלס ראשי, מיטה זוגית או שתי מיטות נפרדות (לאדם בתפוסה זוגית)",
+        en: "Main deck suite, double bed or two single beds (per person, double occupancy)",
+        price: "$2,735",
+        priceNum: 2735
+      },
+      {
+        value: "upper_suite_2735",
+        he: "סוויטה מפלס עליון, מיטה זוגית או שתי מיטות נפרדות (לאדם בתפוסה זוגית)",
+        en: "Upper deck suite, double bed or two single beds (per person, double occupancy)",
+        price: "$2,735",
+        priceNum: 2735
       }
     ]
   },

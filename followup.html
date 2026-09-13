@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- BD-FOLLOWUP 2026-09-13a | Trip 261004 (Best of Maldives, Emperor Explorer II, 04/10-11/10/2026, USD) added to all three trip maps: tripCountries, tripNames and CF_TRIPS_FALLBACK. Option keys lower_twin_2452 / main_suite_2735 / upper_suite_2735 are new strings, so the fallback entry is needed for letters when the live read of the registration form fails -->
 <!-- BD-FOLLOWUP 2026-08-31a | Trip 270303 added to all three trip maps: tripCountries, tripNames and CF_TRIPS_FALLBACK. Its three option keys are new strings (upper_standard_2325 / main_deluxe_2391 / main_master_2491), so without the fallback entry a letter for this trip would print raw keys whenever the live read of the registration form fails -->
 <!-- BD-FOLLOWUP 2026-08-26d | Trip id renamed 261030 -> 261029 in all three trip maps: tripCountries, tripNames and CF_TRIPS_FALLBACK. Airtable holds this trip as 261029, and followup reads bookings by trip id, so the old key matched nothing -->
 <!-- BD-FOLLOWUP 2026-08-26c | CF_TRIPS_FALLBACK 261030 arrive/depart moved to 29 October / 2 November 2026 to match the registration form. Fallback only for dates, but a stale date here reaches a customer confirmation letter whenever the live read of buddy-divers-registration.html fails -->
@@ -2041,7 +2042,7 @@ function buildPaymentHTML(booking, amount, nisAmount, rate, notes, paidSoFar, sa
     '270525B': 'אינדונזיה, צפון סולאווסי וקומודו',
     '270609': 'אינדונזיה, קומודו',
     '270422': 'פיליפינים — טובטאהה',
-    '260801': 'מלדיביים',
+    '260801': 'מלדיביים', '261004': 'מלדיביים',
   };
   const tripCountry = tripCountries[booking.tripId] || '';
 
@@ -2225,6 +2226,7 @@ async function generatePaymentImage() {
     '270609':'קומודו, Solitude Adventurer, יוני 2027',
     '270422':'טובטאהה — פיליפינים — אפריל 2027',
     '260801':'מלדיביים — Black Manta — אוגוסט 2026',
+    '261004':'מלדיביים, Emperor Explorer II, אוקטובר 2026',
   };
   const tripDisplayName = tripNames[booking.tripId] || `טיול ${booking.tripId}`;
   const tripCurrency = booking.currency || 'USD';
@@ -2776,6 +2778,8 @@ const CF_TRIPS_FALLBACK = {
     opts:{"twin_2890": "Single occupancy in twin room", "twin_2690": "Non-diver sharing twin room", "single_supplement": "Single room supplement (add-on)"} },
   "260927": { name:"Sinai 5-Star Dive Safari", dest:"Sinai, Egypt", vessel:"Renaissance Sharm El Sheikh Golden View Beach Resort", arrive:"27 September 2026", depart:"1 October 2026", currency:"ILS",
     opts:{"certified_3980": "Certified diver package", "ow_course_3980": "Package incl. Open Water course", "advanced_course_4580": "Package incl. Advanced Open Water course", "nondiver_2730": "Non-diver accommodation package", "single_supp_760": "Single use of double room supplement", "sea_view_double_175": "Sea view room, double occupancy (per person)", "sea_view_single_350": "Sea view room, single occupancy", "suite_double_395": "Suite with garden exit or sea view, double occupancy (per person)", "suite_single_790": "Suite with garden exit or sea view, single occupancy"} },
+  "261004": { name:"Best of Maldives", dest:"the Maldives", vessel:"Emperor Explorer II", arrive:"4 October 2026", depart:"11 October 2026", currency:"USD",
+    opts:{"lower_twin_2452": "Lower deck twin cabin, double bed or two single beds", "main_suite_2735": "Main deck suite, double bed or two single beds", "upper_suite_2735": "Upper deck suite, double bed or two single beds"} },
   "261009": { name:"Madagascar Safari", dest:"Madagascar", vessel:"DUNE Madagascar", arrive:"9 October 2026", depart:"18 October 2026", currency:"EUR",
     opts:{"twin_2890": "Single occupancy in twin room", "twin_2690": "Non-diver sharing twin room", "single_supplement": "Single room supplement (add-on)"} },
   "261022": { name:"Galapagos Safari", dest:"the Galapagos Islands", vessel:"", arrive:"22 October 2026", depart:"29 October 2026", currency:"USD",
