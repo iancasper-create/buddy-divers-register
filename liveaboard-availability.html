@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- BD-LBLAH 2026-09-18a | filter-list buttons (select all / clear all / filter) moved from the bottom of the dropdown to the top, under the search box and above the first country, per Ian. Both editions -->
 <!-- BD-LBLAH 2026-09-15b | booking panel heading is now "בקשה להצעת מחיר ללא כל התחייבות מצדכם" / "Request a price quote, with no commitment on your part" (was "booking request for this departure"), per Ian -->
 <!-- BD-LBLAH 2026-09-15a | opening screen says whose tool this is: "by Buddy-Divers" byline under the wordmark, tagline "find it here, book it through us", three promise cards (book through Buddy-Divers, lowest price at booking, personal service until you are home) and the header WhatsApp button relabelled to booking. Customers were booking trips found here elsewhere, some taking it for a general listings board. Wording is Ian's. Both editions -->
 <!-- BD-LBLAH 2026-08-27a | minimum open spots filter added to the search panel: picking a number keeps departures with that many places free OR MORE, so a group of six is not shown a boat with two left. Sixth control on row 1, full width on tablet and phone. Shareable as ?spots=N, and a link may carry a minimum the dropdown does not list - it is honoured and the option is inserted rather than rounded to a neighbour, which would show departures the sender had filtered out -->
@@ -255,7 +256,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background:
 .msopt .n{color:var(--muted);font-size:11.5px}
 .msopt.off{opacity:.38;cursor:default}
 .msopt.off:hover{background:none}
-.msfoot{display:flex;gap:8px;padding:8px 10px;border-top:1px solid var(--border);background:#fafdfe}
+.msfoot{display:flex;gap:8px;padding:8px 10px;border-bottom:1px solid var(--border);background:#fafdfe}
 .msfoot button{flex:1;font-family:inherit;font-size:13px;font-weight:600;padding:6px;border-radius:7px;
   border:1.5px solid var(--border);background:#fff;color:var(--muted);cursor:pointer}
 .msfoot button:hover{border-color:var(--teal2);color:var(--teal)}
@@ -862,11 +863,11 @@ function MultiSelect(mountId, opts) {
     + ' aria-haspopup="listbox" aria-expanded="false"></button>'
     + '<div class="mspanel">'
     + (opts.search ? '<input class="mssearch" placeholder="סינון ברשימה" />' : '')
-    + '<div class="msopts"></div>'
     + '<div class="msfoot">'
     + (opts.all ? '<button type="button" class="mall">סמן הכל</button>' : '')
     + '<button type="button" class="mclr">נקה הכל</button>'
-    + '<button type="button" class="mcls">סנן</button></div></div>';
+    + '<button type="button" class="mcls">סנן</button></div>'
+    + '<div class="msopts"></div></div>';
 
   const btn = host.querySelector('.msbtn');
   const panel = host.querySelector('.mspanel');
