@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- BD-REG 2026-09-18a | 261004: both suites (main_suite_2735, upper_suite_2735) removed from the pricing options, per Ian. Only the standard room on the lower deck is left for sale, the 2 last places. followup.html and edit-diver.html maps untouched so any existing suite booking still resolves -->
 <!-- BD-REG 2026-09-13f | 261004 cabin wording per Ian: every room has a double bed AND a single bed (was "double or twin"), lower deck cabin renamed from twin cabin to standard room (חדר רגיל). Labels and banner note only; value keys lower_twin_2452 / main_suite_2735 / upper_suite_2735 deliberately unchanged -->
 <!-- BD-REG 2026-09-13e | 30% discount shown on trip 261004, per Ian. Two new optional config fields: promo (orange pill in the trip banner, #tripPromo) and wasPrice on a pricing option (struck-through grey price shown before the real price, display only). 261004: promo "30% הנחה", wasPrice $3,503 / $3,907 / $3,907 (Emperor full prices $3,502.68 and $3,907.28 rounded), pricingTitle "עלות הספארי | 30% הנחה". value, price and priceNum unchanged -->
 <!-- BD-REG 2026-09-13d | Trip 261004 leader set to Ian Casper: banner note "מלווה יפורסם בהמשך" replaced by "מוביל: איאן כספר" -->
@@ -1972,22 +1973,6 @@ const TRIPS = {
         wasPrice: "$3,503",
         price: "$2,452",
         priceNum: 2452
-      },
-      {
-        value: "main_suite_2735",
-        he: "סוויטה מפלס ראשי, מיטה זוגית ומיטת יחיד (לאדם בתפוסה זוגית)",
-        en: "Main deck suite, double bed and single bed (per person, double occupancy)",
-        wasPrice: "$3,907",
-        price: "$2,735",
-        priceNum: 2735
-      },
-      {
-        value: "upper_suite_2735",
-        he: "סוויטה מפלס עליון, מיטה זוגית ומיטת יחיד (לאדם בתפוסה זוגית)",
-        en: "Upper deck suite, double bed and single bed (per person, double occupancy)",
-        wasPrice: "$3,907",
-        price: "$2,735",
-        priceNum: 2735
       }
     ]
   },
