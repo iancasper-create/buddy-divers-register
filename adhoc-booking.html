@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- BD-ADHOC 2026-09-20b | Step 1 added: read a supplier invoice PDF in the browser (pdf.js, nothing uploaded) and prefill supplier, invoice number, reservation date, vessel, sailing dates, guests, cabin, occupancy, price and the fuel surcharge split per guest, then auto-select the trip by matching the departure date. Lines are rebuilt from pdf.js text fragments by y coordinate, and Vessel / Departure / Return are read by COLUMN because this invoice puts them under their heading rather than beside it. Paste-the-text fallback for scans -->
 <!-- BD-ADHOC 2026-09-20a | New admin page: enter a direct (adhoc) booking from a supplier invoice. Creates the Divers row only when no existing diver matches, then one Bookings row per guest with Source=Direct (which mints the D-ref via the new Ref formula field) plus Supplier / Supplier Invoice, and the matching Payments row that Make would normally create at registration. Duplicate-diver search is mandatory and fuzzy, because Airtable already holds the same person twice under two spellings. A blank price is allowed and writes no Total Price, no Pricing key and no Safari Price Override, so Price Check flags the row instead of it reading as priced at zero -->
 <html lang="en" dir="ltr">
 <head>
@@ -7,6 +8,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Buddy-Divers — Direct Booking Entry</title>
 <meta name="robots" content="noindex, nofollow"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
 
@@ -163,6 +165,18 @@
   }
   .match-new { border-top: 1px dashed var(--border); margin-top: 8px; padding-top: 10px; }
 
+  /* PDF DROP ZONE */
+  .drop {
+    border: 2px dashed var(--border);
+    border-radius: 12px;
+    padding: 26px 20px;
+    text-align: center;
+    transition: all 0.15s;
+    background: #fbfeff;
+  }
+  .drop.over { border-color: var(--teal); background: #eaf6f9; }
+  .drop .note { margin-top: 10px; }
+
   /* BANNERS */
   .banner {
     border-radius: 10px; padding: 14px 18px; margin-bottom: 18px;
@@ -249,9 +263,32 @@
     Tell the tour leader before departure.
   </div>
 
-  <!-- STEP 1: INVOICE -->
+  <!-- STEP 1: READ THE INVOICE -->
   <div class="card">
-    <div class="card-title"><span class="step-badge">1</span> Supplier invoice</div>
+    <div class="card-title"><span class="step-badge">1</span> Read the invoice</div>
+    <div class="drop" id="drop">
+      <input type="file" id="pdfFile" accept="application/pdf" style="display:none;" onchange="onPdfPicked(this.files)"/>
+      <button class="btn btn-primary" onclick="document.getElementById('pdfFile').click()">Choose a PDF invoice</button>
+      <div class="note" style="margin-top:10px;">or drag the PDF onto this box</div>
+    </div>
+    <details style="margin-top:14px;">
+      <summary style="cursor:pointer;font-size:13px;color:var(--muted);">The PDF will not read, or it is a scan. Paste the text instead.</summary>
+      <div class="field" style="margin-top:10px;">
+        <textarea id="pasteText" placeholder="Paste the whole invoice text here" style="min-height:130px;"></textarea>
+      </div>
+      <button class="btn btn-ghost btn-sm" style="margin-top:8px;" onclick="readPasted()">Read pasted text</button>
+    </details>
+    <div id="parseOut" style="margin-top:16px;"></div>
+    <div class="note">
+      The file is read inside your browser and is never uploaded anywhere. Whatever it finds is
+      filled in below for you to check, and nothing is written to Airtable until you press the
+      green button at the end.
+    </div>
+  </div>
+
+  <!-- STEP 2: INVOICE -->
+  <div class="card">
+    <div class="card-title"><span class="step-badge">2</span> Invoice and trip</div>
     <div class="field-row three">
       <div class="field">
         <label>Supplier</label>
@@ -311,20 +348,20 @@
 
   <!-- STEP 2: GUESTS -->
   <div class="card">
-    <div class="card-title"><span class="step-badge">2</span> Guests, one booking row each</div>
+    <div class="card-title"><span class="step-badge">3</span> Guests, one booking row each</div>
     <div id="guests"></div>
     <button class="btn btn-ghost btn-sm" onclick="addGuest()">+ Add another guest</button>
   </div>
 
   <!-- STEP 3: REVIEW -->
   <div class="card">
-    <div class="card-title"><span class="step-badge">3</span> Review, then write</div>
+    <div class="card-title"><span class="step-badge">4</span> Review, then write</div>
     <button class="btn btn-primary" onclick="buildReview()">Build the plan</button>
     <div id="reviewOut" style="margin-top:20px;"></div>
   </div>
 
   <div class="card" id="resultCard" style="display:none;">
-    <div class="card-title"><span class="step-badge">4</span> Result</div>
+    <div class="card-title"><span class="step-badge">5</span> Result</div>
     <div id="resultOut"></div>
   </div>
 
@@ -638,6 +675,319 @@ function esc(s) {
   return String(s === null || s === undefined ? '' : s)
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
+
+// ── INVOICE READING ──────────────────────────────────────────────
+// Everything here runs on the visitor's own machine. The PDF is never uploaded:
+// these invoices carry guest names, so they should not leave the browser.
+
+function onPdfPicked(files) {
+  if (files && files[0]) readPdf(files[0]);
+}
+function readPasted() {
+  const t = document.getElementById('pasteText').value;
+  if (!t.trim()) { parseMsg('err', 'Nothing pasted yet.'); return; }
+  applyParsed(parseInvoice(t), 'pasted text');
+}
+function parseMsg(kind, html) {
+  document.getElementById('parseOut').innerHTML =
+    '<div class="banner banner-' + kind + '">' + html + '</div>';
+}
+
+async function readPdf(file) {
+  if (typeof pdfjsLib === 'undefined') {
+    parseMsg('err', 'The PDF reader library did not load. Check the connection, or paste the invoice text instead.');
+    return;
+  }
+  parseMsg('ok', 'Reading ' + esc(file.name) + '…');
+  try {
+    pdfjsLib.GlobalWorkerOptions.workerSrc =
+      'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    const buf = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
+    let rows = [];
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      rows = rows.concat(pageRows(await page.getTextContent()));
+    }
+    const text = linesFromRows(rows);
+    if (!text.replace(/\s/g, '')) {
+      parseMsg('err', 'That PDF has no text layer, so it is probably a scan. Open it, copy the text, and paste it in the box below.');
+      return;
+    }
+    applyParsed(parseInvoice(text, rows), file.name);
+  } catch (e) {
+    parseMsg('err', 'Could not read that PDF: ' + esc(e.message) + '. Paste the text instead.');
+  }
+}
+
+// pdf.js hands back loose text fragments. Rebuild real lines by grouping on the
+// y coordinate and sorting each line left to right, otherwise a guest row like
+// "Haim David  Cabin 1, Twin Share  7,140 USD" arrives shredded and no regex holds.
+// Keep the x positions too: this invoice lays out Vessel / Guests / Nights /
+// Departure / Return as a table, so those values sit UNDER their label rather
+// than beside it and can only be picked out by column.
+function pageRows(tc) {
+  const rows = {};
+  tc.items.forEach(function (it) {
+    if (!it.str || !it.str.trim()) return;
+    const key = Math.round(it.transform[5] / 3) * 3;   // tolerate sub-pixel drift
+    (rows[key] = rows[key] || []).push({ x: it.transform[4], s: it.str.trim() });
+  });
+  return Object.keys(rows)
+    .sort(function (a, b) { return Number(b) - Number(a); })   // top of page first
+    .map(function (k) {
+      return { items: rows[k].sort(function (a, b) { return a.x - b.x; }) };
+    });
+}
+function linesFromRows(rows) {
+  return rows.map(function (r) {
+    return r.items.map(function (p) { return p.s; }).join(' ').replace(/\s+/g, ' ').trim();
+  }).join('\n');
+}
+
+// Read the value sitting underneath a column heading.
+function colUnder(rows, re, wantDate) {
+  for (let i = 0; i < rows.length - 1; i++) {
+    // only real words define columns, so an arrow glyph cannot close one early
+    const cols = rows[i].items.filter(function (it) { return /[A-Za-z]{3}/.test(it.s); });
+    const hi = cols.findIndex(function (it) { return re.test(it.s); });
+    if (hi === -1) continue;
+    const x0 = cols[hi].x, x1 = (hi + 1 < cols.length) ? cols[hi + 1].x : Infinity;
+    for (let j = i + 1; j <= Math.min(i + 2, rows.length - 1); j++) {
+      const v = rows[j].items
+        .filter(function (it) { return it.x >= x0 - 4 && it.x < x1 - 4; })
+        .map(function (it) { return it.s; }).join(' ').trim();
+      if (!v) continue;
+      if (!wantDate) return v;
+      const m = v.match(/\d{1,2}\/\d{1,2}\/\d{4}/);
+      if (m) return m[0];
+    }
+  }
+  return '';
+}
+
+// Fallback when the columns do not line up: find the row carrying both labels
+// and read the dates off the row below it, left to right.
+function datePairBelow(rows, reA, reB) {
+  for (let i = 0; i < rows.length - 1; i++) {
+    const t = rows[i].items.map(function (x) { return x.s; }).join(' ');
+    if (!reA.test(t) || !reB.test(t)) continue;
+    for (let j = i + 1; j <= Math.min(i + 2, rows.length - 1); j++) {
+      const d = (rows[j].items.map(function (x) { return x.s; }).join(' ')
+        .match(/\d{1,2}\/\d{1,2}\/\d{4}/g) || []);
+      if (d.length >= 2) return d;
+    }
+  }
+  return [];
+}
+
+function money(s) { return parseFloat(String(s).replace(/,/g, '')); }
+
+function isoFromDMY(d) {
+  const m = String(d || '').match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if (!m) return '';
+  return m[3] + '-' + ('0' + m[2]).slice(-2) + '-' + ('0' + m[1]).slice(-2);
+}
+
+function parseInvoice(raw, rows) {
+  rows = rows || [];
+  const text = String(raw).replace(/\r/g, '');
+  const lines = text.split('\n').map(function (s) { return s.trim(); }).filter(Boolean);
+  const r = { guests: [], notes: [] };
+
+  function grab(re, g) { const m = text.match(re); return m ? m[g || 1] : ''; }
+  function after(label) {                       // value sitting on the next line
+    for (let i = 0; i < lines.length; i++) {
+      if (new RegExp('^' + label + '\\s*:?\\s*$', 'i').test(lines[i])) return lines[i + 1] || '';
+      const inline = lines[i].match(new RegExp('^' + label + '\\s*:\\s*(.+)$', 'i'));
+      if (inline) return inline[1].trim();
+    }
+    return '';
+  }
+
+  r.invoiceNo  = grab(/Invoice\s*(?:No|Number|#)\s*[:.]?\s*([A-Za-z0-9\-\/]+)/i);
+  r.resDate    = isoFromDMY(grab(/Reservation\s*date\s*[:.]?\s*(\d{1,2}\/\d{1,2}\/\d{4})/i)
+                          || grab(/Invoice\s*date\s*[:.]?\s*(\d{1,2}\/\d{1,2}\/\d{4})/i));
+  // Vessel and the two dates may sit beside their label or underneath it.
+  // Try the label-on-the-same-line form, then the column form, then the pair form.
+  r.vessel    = after('Vessel') || colUnder(rows, /^Vessel$/i, false);
+  r.departure = isoFromDMY(grab(/Departure[^0-9\n]{0,24}(\d{1,2}\/\d{1,2}\/\d{4})/i)
+                        || colUnder(rows, /^Departure$/i, true));
+  r.ret       = isoFromDMY(grab(/Return[^0-9\n]{0,24}(\d{1,2}\/\d{1,2}\/\d{4})/i)
+                        || colUnder(rows, /^Return$/i, true));
+  if (!r.departure || !r.ret) {
+    const pair = datePairBelow(rows, /Departure/i, /Return/i);
+    if (pair.length >= 2) {
+      r.departure = r.departure || isoFromDMY(pair[0]);
+      r.ret       = r.ret       || isoFromDMY(pair[1]);
+    }
+  }
+  // A vessel cell picked out of a table can drag the next column in with it.
+  if (r.vessel) r.vessel = r.vessel.replace(/\s*\d.*$/, '').trim();
+
+  // Supplier: the trading name that is not us.
+  const trade = grab(/([A-Z][A-Za-z.&'\- ]+?)\s+(?:T\/A|trading as)\s+([A-Za-z.&'\- ]+)/i, 2);
+  if (trade) r.supplier = trade.trim();
+  if (!r.supplier) {
+    const co = lines.find(function (l) {
+      return /\b(Ltd|Limited|LLC|Inc|GmbH|B\.V\.)\b/i.test(l) && !/buddy[\s-]*divers/i.test(l);
+    });
+    if (co) r.supplier = co.replace(/\s*(Ltd|Limited|LLC|Inc|GmbH|B\.V\.)\.?\s*$/i, '').trim();
+  }
+  if (/master\s*liveaboards/i.test(text)) r.supplier = 'Master Liveaboards';
+
+  // Guest lines: "<name> Cabin 1, Twin Share 7,140 USD"
+  lines.forEach(function (l) {
+    const m = l.match(/^(.+?)\s+Cabin\s+([A-Za-z0-9]+)\s*,\s*(.+?)\s+([\d,]+(?:\.\d{1,2})?)\s*([A-Z]{3})\b/);
+    if (m && !/^(booking|total|fuel|agent|guests?\s+and)/i.test(m[1])) {
+      r.guests.push({
+        name: m[1].trim(), cabin: m[2], occRaw: m[3].trim(),
+        price: money(m[4]), currency: m[5]
+      });
+      r.currency = m[5];
+    }
+  });
+  // Fallback for layouts without the word "Cabin"
+  if (!r.guests.length) {
+    lines.forEach(function (l) {
+      const m = l.match(/^([A-Za-z][A-Za-z'\-. ]{4,45}?)\s+([\d,]+(?:\.\d{1,2})?)\s*([A-Z]{3})$/);
+      if (m && !/^(booking amount|total price|fuel|agent commission|balance|subtotal|vat|tax)/i.test(m[1])) {
+        r.guests.push({ name: m[1].trim(), cabin: '', occRaw: '', price: money(m[2]), currency: m[3] });
+        r.currency = m[3];
+      }
+    });
+  }
+
+  const fuel = text.match(/Fuel\s*Surcharge[^0-9\n]{0,20}([\d,]+(?:\.\d{1,2})?)\s*([A-Z]{3})?/i);
+  if (fuel) r.fuel = money(fuel[1]);
+  const comm = text.match(/Agent\s*commission[^0-9\n]{0,20}([\d,]+(?:\.\d{1,2})?)/i);
+  if (comm) r.commission = money(comm[1]);
+  const tot = text.match(/Total\s*price[^0-9\n]{0,20}([\d,]+(?:\.\d{1,2})?)\s*([A-Z]{3})?/i);
+  if (tot) { r.supplierTotal = money(tot[1]); if (tot[2]) r.currency = r.currency || tot[2]; }
+  const bal = text.match(/Balance[^0-9\n]{0,20}([\d,]+(?:\.\d{1,2})?)/i);
+  if (bal) r.balance = money(bal[1]);
+
+  return r;
+}
+
+function mapOccupancy(s) {
+  if (/twin/i.test(s)) return 'Twin Beds';
+  if (/double|matrimonial/i.test(s)) return 'Double Bed';
+  if (/single|sole\s*occupancy/i.test(s)) return 'Single Occupancy';
+  return '';
+}
+function mapCabinType(s) {
+  if (/suite/i.test(s)) return 'Suite';
+  if (/deluxe/i.test(s)) return 'Deluxe';
+  if (/standard/i.test(s)) return 'Standard';
+  return '';
+}
+function splitName(n) {
+  const parts = String(n).trim().split(/\s+/);
+  if (parts.length === 1) return { first: parts[0], last: '' };
+  return { first: parts[0], last: parts.slice(1).join(' ') };
+}
+
+function applyParsed(r, sourceLabel) {
+  const found = [], missing = [];
+
+  if (r.supplier)  { document.getElementById('supplier').value = r.supplier; found.push('Supplier: <b>' + esc(r.supplier) + '</b>'); }
+  else missing.push('supplier name');
+
+  if (r.invoiceNo) { document.getElementById('invoiceNo').value = r.invoiceNo; found.push('Invoice: <b>' + esc(r.invoiceNo) + '</b>'); }
+  else missing.push('invoice number');
+
+  if (r.resDate)   { document.getElementById('bookingDate').value = r.resDate; found.push('Reservation date: <b>' + fmt(r.resDate) + '</b>'); }
+  else missing.push('reservation date');
+
+  if (r.vessel) found.push('Vessel: <b>' + esc(r.vessel) + '</b>');
+  if (r.departure) found.push('Sailing: <b>' + fmt(r.departure) + '</b> to <b>' + fmt(r.ret) + '</b>');
+
+  // Match the trip on departure date, which is far safer than matching on a name.
+  let matched = null;
+  if (r.departure) {
+    Object.keys(tripsCache).forEach(function (rec) {
+      if (tripsCache[rec].dep === r.departure) matched = rec;
+    });
+  }
+  if (matched) {
+    document.getElementById('tripSelect').value = matched;
+    onTripChange();
+    const t = tripsCache[matched];
+    found.push('Trip: <b>' + esc(t.tripId) + ' ' + esc(t.name) + '</b>, matched on departure ' + fmt(r.departure));
+    if (r.vessel && t.vessel && norm(r.vessel) !== norm(t.vessel)) {
+      missing.push('the invoice says vessel <b>' + esc(r.vessel) + '</b> but trip ' + esc(t.tripId) +
+                   ' is recorded as <b>' + esc(t.vessel) + '</b>. Worth checking which is right');
+    }
+  } else if (r.departure) {
+    missing.push('no trip in Airtable departs on ' + fmt(r.departure) +
+                 (r.vessel ? ' (invoice vessel: ' + esc(r.vessel) + ')' : '') + '. Pick the trip by hand, or create it first');
+  } else {
+    missing.push('departure date, so the trip could not be matched');
+  }
+
+  // Guests
+  document.getElementById('guests').innerHTML = '';
+  if (r.guests.length) {
+    const share = (r.fuel && r.guests.length) ? Math.round((r.fuel / r.guests.length) * 100) / 100 : 0;
+    r.guests.forEach(function (g) {
+      addGuest();
+      const n = guestSeq;
+      const nm = splitName(g.name);
+      document.getElementById('g' + n + 'first').value = nm.first;
+      document.getElementById('g' + n + 'last').value = nm.last;
+      if (g.cabin) document.getElementById('g' + n + 'cabin').value = g.cabin;
+      const occ = mapOccupancy(g.occRaw); if (occ) document.getElementById('g' + n + 'occ').value = occ;
+      const ct = mapCabinType(g.occRaw);  if (ct)  document.getElementById('g' + n + 'ctype').value = ct;
+      if (g.price) document.getElementById('g' + n + 'price').value = g.price;
+      if (share) {
+        document.getElementById('g' + n + 'extra').value = share;
+        document.getElementById('g' + n + 'extranote').value = 'Fuel surcharge';
+      }
+      refreshMatch(n);
+    });
+    found.push('Guests: <b>' + r.guests.length + '</b> (' +
+      r.guests.map(function (g) { return esc(g.name); }).join(', ') + ')');
+    if (r.fuel) found.push('Fuel surcharge <b>' + r.fuel + '</b> split ' + r.guests.length + ' ways, ' + share + ' each');
+  } else {
+    addGuest(); addGuest();
+    missing.push('no guest lines recognised. Type the names in yourself');
+  }
+
+  if (r.supplierTotal) r.notes.push('Invoice total to the supplier: ' + r.supplierTotal + ' ' + (r.currency || ''));
+  if (r.commission)    r.notes.push('Agent commission on the invoice: ' + r.commission);
+  if (r.balance)       r.notes.push('Balance still owed to the supplier: <b>' + r.balance + '</b>');
+
+  let html = '<div class="banner banner-ok"><b>Read ' + esc(sourceLabel) + '.</b><br/>· ' +
+    found.join('<br/>· ') + '</div>';
+  if (r.notes.length) {
+    html += '<div class="note" style="margin:-8px 0 14px;">Supplier side, for information only, not written to Airtable: ' +
+      r.notes.join('. ') + '.</div>';
+  }
+  if (missing.length) {
+    html += '<div class="banner banner-warn"><b>Check these by hand.</b><br/>· ' + missing.join('<br/>· ') + '</div>';
+  }
+  html += '<div class="note">Prices are the published figures off the invoice. If you charged ' +
+    'something different, change them before writing, or clear them to leave the booking unpriced.</div>';
+  document.getElementById('parseOut').innerHTML = html;
+}
+
+// drag and drop
+(function () {
+  document.addEventListener('DOMContentLoaded', function () {
+    const d = document.getElementById('drop');
+    if (!d) return;
+    ['dragenter', 'dragover'].forEach(function (e) {
+      d.addEventListener(e, function (ev) { ev.preventDefault(); d.classList.add('over'); });
+    });
+    ['dragleave', 'drop'].forEach(function (e) {
+      d.addEventListener(e, function (ev) { ev.preventDefault(); d.classList.remove('over'); });
+    });
+    d.addEventListener('drop', function (ev) {
+      if (ev.dataTransfer && ev.dataTransfer.files && ev.dataTransfer.files[0]) readPdf(ev.dataTransfer.files[0]);
+    });
+  });
+})();
 
 // ── REVIEW ───────────────────────────────────────────────────────
 function buildReview() {
