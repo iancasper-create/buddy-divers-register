@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<!-- BD-ADHOC 2026-09-20a | New admin page: enter a direct (adhoc) booking from a supplier invoice. Creates the Divers row only when no existing diver matches, then one Bookings row per guest with Source=Direct (which mints the D-ref via the new Ref formula field) plus Supplier / Supplier Invoice, and the matching Payments row that Make would normally create at registration. Duplicate-diver search is mandatory and fuzzy, because Airtable already holds the same person twice under two spellings. A blank price is allowed and writes no Total Price, no Pricing key and no Safari Price Override, so Price Check flags the row instead of it reading as priced at zero -->
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8"/>
+<link rel="icon" type="image/jpeg" href="https://res.cloudinary.com/dccbsfte0/image/upload/v1774016253/logo2_swvqfe.jpg"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Buddy-Divers — Direct Booking Entry</title>
+<meta name="robots" content="noindex, nofollow"/>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+
+  :root {
+    --teal: #007289;
+    --navy: #1B4F8A;
+    --bg: #f0f7f9;
+    --white: #ffffff;
+    --border: #c5dfe6;
+    --text: #1a3a4a;
+    --muted: #5a7a8a;
+    --green: #22a06b;
+    --orange: #c47d00;
+    --red: #d93f3f;
+    --card-shadow: 0 2px 16px rgba(0,114,137,0.10);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  .header {
+    background: linear-gradient(135deg, #007289, #1B4F8A);
+    padding: 14px 32px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+  }
+  .header img { height: 48px; }
+  .header-title { color: white; font-size: 18px; font-weight: 600; letter-spacing: 0.3px; }
+  .header-sub { color: rgba(255,255,255,0.7); font-size: 12px; margin-top: 2px; }
+
+  .container { max-width: 1000px; margin: 0 auto; padding: 32px 24px 64px; }
+
+  .card {
+    background: var(--white);
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    box-shadow: var(--card-shadow);
+    padding: 28px 32px;
+    margin-bottom: 20px;
+  }
+
+  .card-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--teal);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card-title .step-badge {
+    background: var(--teal);
+    color: white;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700; flex-shrink: 0;
+  }
+
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .field-row.full { grid-template-columns: 1fr; }
+  .field-row.three { grid-template-columns: 1fr 1fr 1fr; }
+  .field-row.four { grid-template-columns: 1fr 1fr 1fr 1fr; }
+
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field label {
+    font-size: 12px; font-weight: 600; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .field input, .field select, .field textarea {
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    color: var(--text);
+    background: white;
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus {
+    border-color: var(--teal);
+    box-shadow: 0 0 0 3px rgba(0,114,137,0.08);
+  }
+  .field textarea { resize: vertical; min-height: 70px; }
+  .field input[readonly] { background: var(--bg); color: var(--muted); cursor: default; }
+
+  .btn {
+    padding: 10px 24px; border-radius: 8px; border: none;
+    font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600;
+    cursor: pointer; transition: all 0.2s; white-space: nowrap;
+  }
+  .btn-primary { background: var(--teal); color: white; }
+  .btn-primary:hover { background: #005f73; }
+  .btn-ghost { background: white; color: var(--teal); border: 1.5px solid var(--border); }
+  .btn-ghost:hover { border-color: var(--teal); }
+  .btn-danger { background: white; color: var(--red); border: 1.5px solid #f0c8c8; }
+  .btn-danger:hover { border-color: var(--red); }
+  .btn-go { background: var(--green); color: white; font-size: 16px; padding: 14px 32px; }
+  .btn-go:hover { background: #1b8a5a; }
+  .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+  .btn-sm { padding: 7px 14px; font-size: 13px; }
+
+  /* GUEST BLOCK */
+  .guest {
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 16px;
+    background: #fbfeff;
+  }
+  .guest-head {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 16px; gap: 12px;
+  }
+  .guest-num {
+    font-size: 12px; font-weight: 700; color: var(--teal);
+    text-transform: uppercase; letter-spacing: 1px;
+  }
+
+  /* DIVER MATCH PANEL */
+  .match-panel {
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    background: white;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+  }
+  .match-panel.undecided { border-color: var(--orange); background: #fffaf0; }
+  .match-panel.resolved { border-color: var(--green); background: #f4fbf7; }
+  .match-hint { font-size: 13px; color: var(--muted); margin-bottom: 10px; }
+  .match-opt {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 9px 10px; border-radius: 8px; cursor: pointer;
+    border: 1px solid transparent;
+  }
+  .match-opt:hover { background: var(--bg); }
+  .match-opt input { margin-top: 3px; flex-shrink: 0; }
+  .match-name { font-weight: 600; font-size: 14px; }
+  .match-meta {
+    font-family: 'DM Mono', monospace; font-size: 12px; color: var(--muted);
+    margin-top: 2px; line-height: 1.5;
+  }
+  .match-new { border-top: 1px dashed var(--border); margin-top: 8px; padding-top: 10px; }
+
+  /* BANNERS */
+  .banner {
+    border-radius: 10px; padding: 14px 18px; margin-bottom: 18px;
+    font-size: 14px; line-height: 1.6;
+  }
+  .banner-warn { background: #fff6e5; border: 1.5px solid #f0d9a8; color: #8a6200; }
+  .banner-err  { background: #fdeaea; border: 1.5px solid #f0c8c8; color: #a32020; }
+  .banner-ok   { background: #eefaf4; border: 1.5px solid #b8e4cd; color: #14663f; }
+  .banner b { font-weight: 700; }
+
+  /* REVIEW TABLE */
+  table.review { width: 100%; border-collapse: collapse; font-size: 13px; }
+  table.review th {
+    text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 0.6px;
+    color: var(--muted); padding: 8px 10px; border-bottom: 2px solid var(--border);
+  }
+  table.review td {
+    padding: 9px 10px; border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  table.review td.mono { font-family: 'DM Mono', monospace; font-size: 12px; }
+  .pill {
+    display: inline-block; padding: 2px 9px; border-radius: 20px;
+    font-size: 11px; font-weight: 600; letter-spacing: 0.3px;
+  }
+  .pill-new { background: #e5f3ff; color: #1B4F8A; }
+  .pill-link { background: #eefaf4; color: #14663f; }
+
+  .totals {
+    display: flex; gap: 28px; flex-wrap: wrap;
+    margin-top: 18px; padding-top: 16px; border-top: 2px solid var(--border);
+  }
+  .total-item .total-label {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.6px; color: var(--muted);
+  }
+  .total-item .total-val {
+    font-family: 'DM Mono', monospace; font-size: 19px; font-weight: 500; margin-top: 3px;
+  }
+
+  .log {
+    font-family: 'DM Mono', monospace; font-size: 12.5px; line-height: 1.8;
+    background: #fbfeff; border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; max-height: 340px; overflow-y: auto; white-space: pre-wrap;
+  }
+  .log .ok  { color: var(--green); }
+  .log .bad { color: var(--red); }
+
+  .note { font-size: 12.5px; color: var(--muted); line-height: 1.6; margin-top: 10px; }
+
+  @media (max-width: 720px) {
+    .field-row, .field-row.three, .field-row.four { grid-template-columns: 1fr; }
+    .container { padding: 20px 14px 48px; }
+    .card { padding: 20px 18px; }
+    .header { padding: 12px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="tokenOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center;">
+  <div style="background:white;border-radius:16px;padding:32px;width:min(420px,90vw);box-shadow:0 8px 40px rgba(0,0,0,0.2);">
+    <img src="https://res.cloudinary.com/dccbsfte0/image/upload/v1773063708/logo_hnmilh.png" style="height:40px;display:block;margin:0 auto 20px;" alt="Buddy-Divers"/>
+    <h2 style="font-family:'DM Sans',sans-serif;font-size:18px;font-weight:700;color:#1a3a4a;text-align:center;margin-bottom:8px;">Direct Booking Entry</h2>
+    <p style="font-family:'DM Sans',sans-serif;font-size:13px;color:#5a7a8a;text-align:center;margin-bottom:20px;">Enter your Airtable token to continue.<br/>It will be remembered for this session.</p>
+    <input type="password" id="tokenInput" placeholder="pat..." style="width:100%;border:1.5px solid #c5dfe6;border-radius:8px;padding:10px 14px;font-family:'DM Sans',sans-serif;font-size:15px;color:#1a3a4a;outline:none;margin-bottom:12px;"/>
+    <button onclick="submitToken()" style="width:100%;background:#007289;color:white;border:none;border-radius:8px;padding:12px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;">Enter</button>
+    <div id="tokenError" style="color:#d93f3f;font-size:13px;text-align:center;margin-top:8px;display:none;">Invalid token. Please try again.</div>
+  </div>
+</div>
+
+<div class="header">
+  <img src="https://res.cloudinary.com/dccbsfte0/image/upload/v1773063708/logo_hnmilh.png" alt="Buddy-Divers"/>
+  <div>
+    <div class="header-title">Direct Booking Entry</div>
+    <div class="header-sub">Adhoc bookings from a supplier invoice — no registration form involved</div>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="banner banner-warn">
+    These divers never filled in a registration form, so their booking carries no medical notes, no gear
+    sizes, no certification and no passport scan. The trip manifest will show those columns blank.
+    Tell the tour leader before departure.
+  </div>
+
+  <!-- STEP 1: INVOICE -->
+  <div class="card">
+    <div class="card-title"><span class="step-badge">1</span> Supplier invoice</div>
+    <div class="field-row three">
+      <div class="field">
+        <label>Supplier</label>
+        <input type="text" id="supplier" placeholder="Master Liveaboards"/>
+      </div>
+      <div class="field">
+        <label>Invoice number</label>
+        <input type="text" id="invoiceNo" placeholder="59187"/>
+      </div>
+      <div class="field">
+        <label>Reservation date</label>
+        <input type="date" id="bookingDate"/>
+      </div>
+    </div>
+    <div class="field-row three">
+      <div class="field">
+        <label>Trip</label>
+        <select id="tripSelect" onchange="onTripChange()">
+          <option value="">Loading trips…</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Currency</label>
+        <input type="text" id="tripCurrency" readonly placeholder="—"/>
+      </div>
+      <div class="field">
+        <label>Dates</label>
+        <input type="text" id="tripDates" readonly placeholder="—"/>
+      </div>
+    </div>
+    <div class="field-row three">
+      <div class="field">
+        <label>Flights</label>
+        <select id="selfArranged">
+          <option value="SelfArranged">SelfArranged — we are not booking their flights</option>
+          <option value="BuddyArranged">BuddyArranged — we book the flights</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Confirmed</label>
+        <select id="confirmed">
+          <option value="Confirmed">Confirmed</option>
+          <option value="Yes">Yes</option>
+          <option value="No">No</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>&nbsp;</label>
+        <div class="note" style="margin:0;">
+          SelfArranged keeps these divers off the daily flight chase list. Pick BuddyArranged only if
+          you are actually issuing their tickets.
+        </div>
+      </div>
+    </div>
+    <div id="tripWarn"></div>
+  </div>
+
+  <!-- STEP 2: GUESTS -->
+  <div class="card">
+    <div class="card-title"><span class="step-badge">2</span> Guests, one booking row each</div>
+    <div id="guests"></div>
+    <button class="btn btn-ghost btn-sm" onclick="addGuest()">+ Add another guest</button>
+  </div>
+
+  <!-- STEP 3: REVIEW -->
+  <div class="card">
+    <div class="card-title"><span class="step-badge">3</span> Review, then write</div>
+    <button class="btn btn-primary" onclick="buildReview()">Build the plan</button>
+    <div id="reviewOut" style="margin-top:20px;"></div>
+  </div>
+
+  <div class="card" id="resultCard" style="display:none;">
+    <div class="card-title"><span class="step-badge">4</span> Result</div>
+    <div id="resultOut"></div>
+  </div>
+
+</div>
+
+<script>
+// ── CONFIG ───────────────────────────────────────────────────────
+// sessionStorage throws outright in a private window or a data: URL preview, which would
+// otherwise kill the whole script on its first line and leave a dead page.
+function ssGet(k) { try { return sessionStorage.getItem(k) || ''; } catch (e) { return ''; } }
+function ssSet(k, v) { try { sessionStorage.setItem(k, v); } catch (e) { /* token lasts the page only */ } }
+
+let AIRTABLE_API_KEY = ssGet('bd_airtable_token');
+const BASE_ID        = 'app2RAeuaXaWrHOan';
+const BOOKINGS_TABLE = 'tblMCB8nCSoRuiTKI';
+const PAYMENTS_TABLE = 'tbl0oLEDoa4PCQOOp';
+const TRIPS_TABLE    = 'tbl8KGVwkIHi26plq';
+const DIVERS_TABLE   = 'tblE9d3rE4uDv2uxO';
+
+let tripsCache  = {};   // recId -> {tripId, name, currency, dep, ret, vessel}
+let diversCache = [];   // [{id, first, last, email, phone, dob, passport, norm}]
+let tripBookings = [];  // divers already booked on the selected trip
+let guestSeq = 0;
+let lastPlan = null;
+
+// ── TOKEN ────────────────────────────────────────────────────────
+function checkToken() {
+  if (!AIRTABLE_API_KEY || !AIRTABLE_API_KEY.startsWith('pat')) {
+    document.getElementById('tokenOverlay').style.display = 'flex';
+  } else {
+    boot();
+  }
+}
+function submitToken() {
+  const val = document.getElementById('tokenInput').value.trim();
+  if (!val.startsWith('pat')) {
+    document.getElementById('tokenError').style.display = 'block';
+    return;
+  }
+  AIRTABLE_API_KEY = val;
+  ssSet('bd_airtable_token', val);
+  document.getElementById('tokenOverlay').style.display = 'none';
+  document.getElementById('tokenError').style.display = 'none';
+  boot();
+}
+
+// ── AIRTABLE HELPERS ─────────────────────────────────────────────
+async function atGet(table, query) {
+  const out = [];
+  let offset = '';
+  do {
+    const url = 'https://api.airtable.com/v0/' + BASE_ID + '/' + table + '?pageSize=100'
+              + (query ? '&' + query : '') + (offset ? '&offset=' + offset : '');
+    const res = await fetch(url, { headers: { Authorization: 'Bearer ' + AIRTABLE_API_KEY } });
+    if (!res.ok) throw new Error(table + ' read failed: ' + res.status + ' ' + (await res.text()).slice(0, 200));
+    const data = await res.json();
+    out.push.apply(out, data.records);
+    offset = data.offset || '';
+  } while (offset);
+  return out;
+}
+
+async function atCreate(table, fields) {
+  const res = await fetch('https://api.airtable.com/v0/' + BASE_ID + '/' + table, {
+    method: 'POST',
+    headers: { Authorization: 'Bearer ' + AIRTABLE_API_KEY, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ fields: fields, typecast: true })
+  });
+  const body = await res.json();
+  if (!res.ok) throw new Error(table + ' write failed: ' + JSON.stringify(body).slice(0, 300));
+  return body;
+}
+
+// ── BOOT ─────────────────────────────────────────────────────────
+async function boot() {
+  try {
+    await Promise.all([loadTrips(), loadDivers()]);
+    if (!document.querySelectorAll('.guest').length) { addGuest(); addGuest(); }
+  } catch (e) {
+    alert('Could not load from Airtable.\n\n' + e.message);
+  }
+}
+
+async function loadTrips() {
+  const recs = await atGet(TRIPS_TABLE, 'fields%5B%5D=Trip+Id&fields%5B%5D=Trip+Name&fields%5B%5D=Currency'
+            + '&fields%5B%5D=Departure+Date&fields%5B%5D=Return+Date&fields%5B%5D=Vessel');
+  const sel = document.getElementById('tripSelect');
+  sel.innerHTML = '<option value="">Select a trip…</option>';
+  const rows = [];
+  recs.forEach(function (r) {
+    const f = r.fields;
+    const tid = f['Trip Id'] || '';
+    if (!tid || /copy/i.test(tid)) return;          // lottery duplicates are not real travel
+    if (tid === '999999') return;                    // Cancelled Bookings holding pen
+    tripsCache[r.id] = {
+      tripId: tid, name: f['Trip Name'] || '', currency: f['Currency'] || '',
+      dep: f['Departure Date'] || '', ret: f['Return Date'] || '', vessel: f['Vessel'] || ''
+    };
+    rows.push({ id: r.id, tid: tid, label: tid + '  —  ' + (f['Trip Name'] || '') });
+  });
+  rows.sort(function (a, b) { return a.tid < b.tid ? 1 : -1; });   // newest trip id first
+  rows.forEach(function (r) {
+    const o = document.createElement('option');
+    o.value = r.id; o.textContent = r.label;
+    sel.appendChild(o);
+  });
+}
+
+async function loadDivers() {
+  const recs = await atGet(DIVERS_TABLE, 'fields%5B%5D=First+Name&fields%5B%5D=Last+Name'
+            + '&fields%5B%5D=Email&fields%5B%5D=Phone&fields%5B%5D=Date+of+Birth&fields%5B%5D=Passport+Number');
+  diversCache = recs.map(function (r) {
+    const f = r.fields;
+    return {
+      id: r.id,
+      first: f['First Name'] || '',
+      last: f['Last Name'] || '',
+      email: f['Email'] || '',
+      phone: f['Phone'] || '',
+      dob: f['Date of Birth'] || '',
+      passport: f['Passport Number'] || '',
+      norm: norm((f['First Name'] || '') + ' ' + (f['Last Name'] || ''))
+    };
+  });
+}
+
+async function onTripChange() {
+  const recId = document.getElementById('tripSelect').value;
+  const t = tripsCache[recId];
+  document.getElementById('tripCurrency').value = t ? t.currency : '';
+  document.getElementById('tripDates').value = t ? (fmt(t.dep) + ' to ' + fmt(t.ret)) : '';
+  document.getElementById('tripWarn').innerHTML = '';
+  tripBookings = [];
+  if (!recId) return;
+  try {
+    const recs = await atGet(BOOKINGS_TABLE,
+      'filterByFormula=' + encodeURIComponent('{Trip Name (from Trip)} != ""')
+      + '&fields%5B%5D=Diver+ID&fields%5B%5D=First+Name+%28from+Divers%29&fields%5B%5D=Last+Name+%28from+Divers%29&fields%5B%5D=Trip&fields%5B%5D=Ref');
+    tripBookings = recs.filter(function (r) {
+      return (r.fields['Trip'] || []).indexOf(recId) !== -1;
+    }).map(function (r) {
+      return {
+        diverId: (r.fields['Diver ID'] || [])[0] || '',
+        name: ((r.fields['First Name (from Divers)'] || [])[0] || '') + ' '
+            + ((r.fields['Last Name (from Divers)'] || [])[0] || ''),
+        ref: r.fields['Ref'] || ''
+      };
+    });
+  } catch (e) { /* the duplicate check is a courtesy, not a gate */ }
+  refreshAllMatches();
+}
+
+function fmt(d) {
+  if (!d) return '—';
+  const p = d.split('-');
+  return p.length === 3 ? (p[2] + '/' + p[1] + '/' + p[0]) : d;
+}
+
+// ── NAME MATCHING ────────────────────────────────────────────────
+// Deliberately loose. Airtable already holds one guest twice as
+// "Carmit Shatzman-David" and "Carmit Shatzman david", so an exact
+// match would have missed the duplicate and created a third copy.
+function norm(s) {
+  return (s || '').toLowerCase()
+    .replace(/[־\-_'`".,]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+function tokens(s) { return norm(s).split(' ').filter(Boolean); }
+
+function scoreDiver(d, first, last) {
+  const want = tokens(first + ' ' + last);
+  if (!want.length) return 0;
+  const have = tokens(d.first + ' ' + d.last);
+  if (!have.length) return 0;
+  let hit = 0;
+  want.forEach(function (w) {
+    for (let i = 0; i < have.length; i++) {
+      const h = have[i];
+      if (h === w) { hit += 1; return; }
+      if (w.length >= 4 && (h.indexOf(w) === 0 || w.indexOf(h) === 0)) { hit += 0.7; return; }
+    }
+  });
+  return hit / want.length;
+}
+
+function candidatesFor(first, last) {
+  if (!norm(first + last)) return [];
+  return diversCache
+    .map(function (d) { return { d: d, s: scoreDiver(d, first, last) }; })
+    .filter(function (x) { return x.s >= 0.5; })
+    .sort(function (a, b) { return b.s - a.s; })
+    .slice(0, 8)
+    .map(function (x) { return x.d; });
+}
+
+// ── GUEST ROWS ───────────────────────────────────────────────────
+function addGuest() {
+  const n = ++guestSeq;
+  const div = document.createElement('div');
+  div.className = 'guest';
+  div.id = 'guest' + n;
+  div.innerHTML =
+    '<div class="guest-head">' +
+      '<span class="guest-num">Guest ' + n + '</span>' +
+      '<button class="btn btn-danger btn-sm" onclick="removeGuest(' + n + ')">Remove</button>' +
+    '</div>' +
+    '<div class="field-row">' +
+      '<div class="field"><label>First name</label>' +
+        '<input type="text" id="g' + n + 'first" oninput="refreshMatch(' + n + ')"/></div>' +
+      '<div class="field"><label>Last name</label>' +
+        '<input type="text" id="g' + n + 'last" oninput="refreshMatch(' + n + ')"/></div>' +
+    '</div>' +
+    '<div class="match-panel undecided" id="g' + n + 'match">' +
+      '<div class="match-hint">Type a name above to search the 1,300 existing diver records.</div>' +
+    '</div>' +
+    '<div class="field-row three">' +
+      '<div class="field"><label>Cabin number</label><input type="text" id="g' + n + 'cabin"/></div>' +
+      '<div class="field"><label>Cabin occupancy</label><select id="g' + n + 'occ">' +
+        '<option value="">—</option><option>Twin Beds</option><option>Double Bed</option>' +
+        '<option>Single Occupancy</option></select></div>' +
+      '<div class="field"><label>Cabin type</label><select id="g' + n + 'ctype">' +
+        '<option value="">—</option><option>Standard</option><option>Deluxe</option>' +
+        '<option>Suite</option></select></div>' +
+    '</div>' +
+    '<div class="field-row three">' +
+      '<div class="field"><label>Price to the customer</label>' +
+        '<input type="number" step="0.01" id="g' + n + 'price" placeholder="7140"/></div>' +
+      '<div class="field"><label>Extras amount</label>' +
+        '<input type="number" step="0.01" id="g' + n + 'extra" placeholder="0"/></div>' +
+      '<div class="field"><label>Extras notes</label>' +
+        '<input type="text" id="g' + n + 'extranote" placeholder="Fuel surcharge"/></div>' +
+    '</div>' +
+    '<div class="field-row full">' +
+      '<div class="field"><label>Booking notes</label>' +
+        '<textarea id="g' + n + 'notes"></textarea></div>' +
+    '</div>';
+  document.getElementById('guests').appendChild(div);
+}
+
+function removeGuest(n) {
+  const el = document.getElementById('guest' + n);
+  if (el) el.remove();
+}
+
+function refreshAllMatches() {
+  document.querySelectorAll('.guest').forEach(function (g) {
+    refreshMatch(parseInt(g.id.replace('guest', ''), 10));
+  });
+}
+
+function refreshMatch(n) {
+  const panel = document.getElementById('g' + n + 'match');
+  if (!panel) return;
+  const first = (document.getElementById('g' + n + 'first') || {}).value || '';
+  const last  = (document.getElementById('g' + n + 'last')  || {}).value || '';
+  const prev  = (panel.querySelector('input[type=radio]:checked') || {}).value || '';
+
+  if (!norm(first + last)) {
+    panel.className = 'match-panel undecided';
+    panel.innerHTML = '<div class="match-hint">Type a name above to search the 1,300 existing diver records.</div>';
+    return;
+  }
+
+  const cands = candidatesFor(first, last);
+  let html = '<div class="match-hint">' +
+    (cands.length
+      ? '<b>' + cands.length + '</b> possible existing record' + (cands.length > 1 ? 's' : '') +
+        '. Check the birthday and passport before you pick: the same person can already be in here twice under two spellings.'
+      : 'No existing diver looks like this name.') +
+    '</div>';
+
+  cands.forEach(function (d) {
+    const booked = tripBookings.filter(function (b) { return b.diverId === d.id; })[0];
+    const meta = [
+      d.email || 'no email',
+      d.phone || 'no phone',
+      d.dob ? 'born ' + fmt(d.dob) : 'no DOB',
+      d.passport ? 'passport ' + d.passport : 'no passport'
+    ].join('  ·  ');
+    html += '<label class="match-opt">' +
+      '<input type="radio" name="g' + n + 'diver" value="' + d.id + '" onchange="markResolved(' + n + ')"' +
+        (prev === d.id ? ' checked' : '') + '/>' +
+      '<span><span class="match-name">' + esc(d.first + ' ' + d.last) + '</span>' +
+        (booked ? ' <span class="pill pill-link">already on this trip as ' + esc(booked.ref) + '</span>' : '') +
+        '<span class="match-meta">' + esc(meta) + '</span></span></label>';
+  });
+
+  html += '<div class="match-new"><label class="match-opt">' +
+    '<input type="radio" name="g' + n + 'diver" value="__new__" onchange="markResolved(' + n + ')"' +
+      (prev === '__new__' ? ' checked' : '') + '/>' +
+    '<span><span class="match-name">Create a new diver record</span>' +
+    '<span class="match-meta">Only if none of the above is this person</span></span></label>' +
+    '<div class="field-row" style="margin-top:10px;margin-bottom:0;">' +
+      '<div class="field"><label>Email, optional</label><input type="email" id="g' + n + 'email"/></div>' +
+      '<div class="field"><label>Phone, optional</label><input type="text" id="g' + n + 'phone"/></div>' +
+    '</div></div>';
+
+  panel.innerHTML = html;
+  markResolved(n);
+}
+
+function markResolved(n) {
+  const panel = document.getElementById('g' + n + 'match');
+  if (!panel) return;
+  const picked = panel.querySelector('input[type=radio]:checked');
+  panel.className = 'match-panel ' + (picked ? 'resolved' : 'undecided');
+}
+
+function esc(s) {
+  return String(s === null || s === undefined ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+// ── REVIEW ───────────────────────────────────────────────────────
+function buildReview() {
+  const out = document.getElementById('reviewOut');
+  const errs = [];
+  const warns = [];
+
+  const tripRec  = document.getElementById('tripSelect').value;
+  const supplier = document.getElementById('supplier').value.trim();
+  const invoice  = document.getElementById('invoiceNo').value.trim();
+  const bDate    = document.getElementById('bookingDate').value;
+  const flights  = document.getElementById('selfArranged').value;
+  const confirmed= document.getElementById('confirmed').value;
+
+  if (!tripRec)  errs.push('No trip selected.');
+  if (!supplier) errs.push('Supplier is empty.');
+  if (!invoice)  errs.push('Invoice number is empty.');
+
+  const guests = [];
+  document.querySelectorAll('.guest').forEach(function (g) {
+    const n = parseInt(g.id.replace('guest', ''), 10);
+    const first = (document.getElementById('g' + n + 'first') || {}).value.trim();
+    const last  = (document.getElementById('g' + n + 'last')  || {}).value.trim();
+    if (!first && !last) return;
+    const picked = document.querySelector('input[name=g' + n + 'diver]:checked');
+    const price  = parseFloat((document.getElementById('g' + n + 'price') || {}).value || '');
+    const extra  = parseFloat((document.getElementById('g' + n + 'extra') || {}).value || '0');
+
+    if (!picked) errs.push('Guest ' + n + ' (' + (first + ' ' + last).trim() + '): pick an existing diver or choose to create a new one.');
+    // A blank price is allowed on purpose. Sometimes the invoice arrives before what the
+    // customer is being charged has been settled, and the base already carries bookings
+    // priced by hand. The Price Check formula flags them until a figure is filled in.
+    if (!(price > 0)) warns.push('Guest ' + n + ' (' + (first + ' ' + last).trim() + '): no price. The booking will carry no Total Price and no Pricing key, and Airtable will show CHECK PRICE against it until you set one in the Follow-up manager.');
+
+    const diverId = picked ? picked.value : '';
+    if (diverId && diverId !== '__new__') {
+      const dupe = tripBookings.filter(function (b) { return b.diverId === diverId; })[0];
+      if (dupe) errs.push('Guest ' + n + ' (' + (first + ' ' + last).trim() + ') already has a booking on this trip (' + dupe.ref + '). Entering them again would duplicate the row.');
+    }
+
+    guests.push({
+      n: n, first: first, last: last,
+      diverId: diverId,
+      isNew: diverId === '__new__',
+      email: (document.getElementById('g' + n + 'email') || {}).value || '',
+      phone: (document.getElementById('g' + n + 'phone') || {}).value || '',
+      cabin: (document.getElementById('g' + n + 'cabin') || {}).value.trim(),
+      occ:   (document.getElementById('g' + n + 'occ') || {}).value,
+      ctype: (document.getElementById('g' + n + 'ctype') || {}).value,
+      price: isNaN(price) ? 0 : price,
+      extra: isNaN(extra) ? 0 : extra,
+      extraNote: (document.getElementById('g' + n + 'extranote') || {}).value.trim(),
+      notes: (document.getElementById('g' + n + 'notes') || {}).value.trim()
+    });
+  });
+
+  if (!guests.length) errs.push('No guests entered.');
+
+  if (errs.length) {
+    lastPlan = null;
+    out.innerHTML = '<div class="banner banner-err"><b>Not ready to write.</b><br/>· ' +
+      errs.map(esc).join('<br/>· ') + '</div>';
+    return;
+  }
+
+  const t = tripsCache[tripRec];
+  lastPlan = {
+    tripRec: tripRec, trip: t, supplier: supplier, invoice: invoice,
+    bookingDate: bDate, flights: flights, confirmed: confirmed, guests: guests
+  };
+
+  let rows = '';
+  let sum = 0, sumX = 0;
+  guests.forEach(function (g) {
+    sum += g.price; sumX += g.extra;
+    rows += '<tr>' +
+      '<td><b>' + esc((g.first + ' ' + g.last).trim()) + '</b><br/>' +
+        (g.isNew ? '<span class="pill pill-new">new diver record</span>'
+                 : '<span class="pill pill-link">links to existing diver</span>') + '</td>' +
+      '<td class="mono">' + esc([g.cabin, g.occ, g.ctype].filter(Boolean).join(' · ') || '—') + '</td>' +
+      '<td class="mono">' + (g.price > 0 ? t.currency + ' ' + g.price.toLocaleString() : 'not set') +
+        (g.extra ? '<br/>+ ' + g.extra.toLocaleString() + ' ' + esc(g.extraNote || 'extras') : '') + '</td>' +
+      '<td class="mono">' + (g.price > 0 ? 'direct_' + Math.round(g.price) : '—') + '</td>' +
+    '</tr>';
+  });
+
+  out.innerHTML =
+    '<div class="banner banner-ok">Nothing has been written yet. Check the rows below, then press the green button.</div>' +
+    (warns.length ? '<div class="banner banner-warn"><b>Worth a second look, but not blocking.</b><br/>· ' +
+      warns.map(esc).join('<br/>· ') + '</div>' : '') +
+    '<table class="review"><thead><tr>' +
+      '<th>Guest</th><th>Cabin</th><th>Price</th><th>Pricing key</th>' +
+    '</tr></thead><tbody>' + rows + '</tbody></table>' +
+    '<div class="totals">' +
+      '<div class="total-item"><div class="total-label">Trip</div><div class="total-val">' + esc(t.tripId) + '</div></div>' +
+      '<div class="total-item"><div class="total-label">Bookings to create</div><div class="total-val">' + guests.length + '</div></div>' +
+      '<div class="total-item"><div class="total-label">New diver records</div><div class="total-val">' + guests.filter(function (g) { return g.isNew; }).length + '</div></div>' +
+      '<div class="total-item"><div class="total-label">Customer total</div><div class="total-val">' + t.currency + ' ' + (sum + sumX).toLocaleString() + '</div></div>' +
+    '</div>' +
+    '<div class="note">Each guest also gets a Payments row, because Make only creates those for website ' +
+      'registrations and this booking never goes through Make. What you paid the supplier is not recorded ' +
+      'anywhere in Payments: that table tracks customer money only.</div>' +
+    '<div style="margin-top:20px;"><button class="btn btn-go" onclick="writeAll()">Write ' +
+      guests.length + ' booking' + (guests.length > 1 ? 's' : '') + ' to Airtable</button></div>';
+}
+
+// ── WRITE ────────────────────────────────────────────────────────
+async function writeAll() {
+  if (!lastPlan) return;
+  const card = document.getElementById('resultCard');
+  const out  = document.getElementById('resultOut');
+  card.style.display = 'block';
+  card.scrollIntoView({ behavior: 'smooth' });
+
+  const lines = [];
+  function log(msg, cls) {
+    lines.push(cls ? '<span class="' + cls + '">' + esc(msg) + '</span>' : esc(msg));
+    out.innerHTML = '<div class="log">' + lines.join('\n') + '</div>';
+  }
+
+  document.querySelectorAll('.btn-go').forEach(function (b) { b.disabled = true; });
+
+  const p = lastPlan;
+  const created = [];
+  let failed = 0;
+
+  for (let i = 0; i < p.guests.length; i++) {
+    const g = p.guests[i];
+    const who = (g.first + ' ' + g.last).trim();
+    try {
+      // 1. Diver
+      let diverId = g.diverId;
+      if (g.isNew) {
+        const df = {
+          'First Name': g.first,
+          'Last Name': g.last,
+          'Notes': 'Created from supplier invoice ' + p.invoice + ' (' + p.supplier + '). Direct booking, no registration form.'
+        };
+        if (g.email) df['Email'] = g.email;
+        if (g.phone) df['Phone'] = g.phone;
+        const dRec = await atCreate(DIVERS_TABLE, df);
+        diverId = dRec.id;
+        log('✓ ' + who + ': diver record created (' + diverId + ')', 'ok');
+      } else {
+        log('· ' + who + ': linking to existing diver (' + diverId + ')');
+      }
+
+      // 2. Booking
+      const bf = {
+        'Diver ID': [diverId],
+        'Trip': [p.tripRec],
+        'Source': 'Direct',
+        'Supplier': p.supplier,
+        'Supplier Invoice': p.invoice,
+        'Self Arranged Flights': p.flights,
+        'Confirmed': p.confirmed,
+        'Notes': (g.notes ? g.notes + '\n\n' : '') +
+                 'Direct booking, no registration form. ' + p.supplier + ' invoice ' + p.invoice + '.'
+      };
+      // Left off entirely when there is no price yet, so Price Check flags the row
+      // instead of it looking priced at zero.
+      if (g.price > 0) {
+        bf['Total Price'] = g.price;
+        bf['Pricing'] = 'direct_' + Math.round(g.price);
+      }
+      if (p.bookingDate) bf['Booking Date'] = p.bookingDate;
+      if (g.cabin) bf['Cabin Number'] = g.cabin;
+      if (g.occ)   bf['Cabin Occupancy'] = g.occ;
+      if (g.ctype) bf['Cabin Type'] = g.ctype;
+
+      const bRec = await atCreate(BOOKINGS_TABLE, bf);
+      const ref = bRec.fields['Ref'] || ('#' + (bRec.fields['Booking ID'] || '?'));
+      log('✓ ' + who + ': booking ' + ref + ' created', 'ok');
+
+      // 3. Payments row — Make does this for registrations, not for adhoc
+      const pf = {
+        'Booking': [bRec.id],
+        'Diver ID': [diverId],
+        'Trip Link': [p.tripRec],
+        'Trip ID': p.trip.tripId,
+        'Notes': 'Direct booking ' + ref + '. ' + p.supplier + ' invoice ' + p.invoice + '.'
+      };
+      if (g.price > 0) pf['Safari Price Override'] = g.price;
+      if (g.extra) {
+        pf['Extras Amount'] = g.extra;
+        pf['Extras Notes'] = g.extraNote || 'Supplier extras';
+      }
+      await atCreate(PAYMENTS_TABLE, pf);
+      log('✓ ' + who + ': payment row created', 'ok');
+
+      created.push({ who: who, ref: ref });
+    } catch (e) {
+      failed++;
+      log('✗ ' + who + ': ' + e.message, 'bad');
+    }
+  }
+
+  let summary;
+  if (failed === 0) {
+    summary = '<div class="banner banner-ok"><b>Done.</b> ' + created.length +
+      ' booking' + (created.length > 1 ? 's' : '') + ' written: ' +
+      created.map(function (c) { return esc(c.ref + ' ' + c.who); }).join(', ') +
+      '.<br/>Quote the D-reference to the supplier. Reload the page to enter another invoice.</div>';
+  } else {
+    summary = '<div class="banner banner-err"><b>' + failed + ' of ' + p.guests.length +
+      ' guests failed.</b> Read the log below, fix the cause, then re-enter only the failed guests. ' +
+      'The ones that succeeded are already in Airtable, so do not run the whole invoice again.</div>';
+  }
+  out.innerHTML = summary + '<div class="log">' + lines.join('\n') + '</div>';
+
+  // refresh the duplicate guard so a second press cannot double-write
+  await onTripChange();
+}
+
+document.addEventListener('DOMContentLoaded', checkToken);
+</script>
+</body>
+</html>
