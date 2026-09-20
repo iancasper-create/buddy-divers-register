@@ -81,6 +81,7 @@ campaign email.
 | crm.html | Admin dashboard, links all tools |
 | followup.html | Payment manager (multi-currency, WhatsApp payment JPGs) |
 | edit-diver.html | Admin diver record editor |
+| adhoc-booking.html | Direct (adhoc) booking entry from a supplier invoice, for divers who never register. Reads the invoice PDF in the browser, searches Divers before creating one, writes the Bookings row with `Source` = `Direct` (the `Ref` formula then shows `D1315`) plus the Payments row |
 | manifest.html | Tour-leader manifest |
 | registration-copy-email.html | "Request Copy" email template used by Make |
 | lottery-check.html | Annual lottery registration verification |
