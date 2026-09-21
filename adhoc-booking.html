@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- BD-ADHOC 2026-09-21a | When the invoice's trip is not in Airtable, the page now creates it: a new "create a new trip" choice in the trip list, picked automatically when no trip departs on the invoice date, with Trip Id (YYMMDD of departure, B/C suffix if taken, checked against every Trips row incl. lottery copies), Destination, Trip Name, Vessel, dates, Currency, Status, Leader (default Self) and Capacity prefilled from the invoice. The Trips row is written first and every Bookings and Payments row links to it; if the trip write fails nothing else is written -->
 <!-- BD-ADHOC 2026-09-20b | Step 1 added: read a supplier invoice PDF in the browser (pdf.js, nothing uploaded) and prefill supplier, invoice number, reservation date, vessel, sailing dates, guests, cabin, occupancy, price and the fuel surcharge split per guest, then auto-select the trip by matching the departure date. Lines are rebuilt from pdf.js text fragments by y coordinate, and Vessel / Departure / Return are read by COLUMN because this invoice puts them under their heading rather than beside it. Paste-the-text fallback for scans -->
 <!-- BD-ADHOC 2026-09-20a | New admin page: enter a direct (adhoc) booking from a supplier invoice. Creates the Divers row only when no existing diver matches, then one Bookings row per guest with Source=Direct (which mints the D-ref via the new Ref formula field) plus Supplier / Supplier Invoice, and the matching Payments row that Make would normally create at registration. Duplicate-diver search is mandatory and fuzzy, because Airtable already holds the same person twice under two spellings. A blank price is allowed and writes no Total Price, no Pricing key and no Safari Price Override, so Price Check flags the row instead of it reading as priced at zero -->
 <html lang="en" dir="ltr">
@@ -344,6 +345,71 @@
       </div>
     </div>
     <div id="tripWarn"></div>
+
+    <!-- NEW TRIP: shown only when the trip is not in Airtable yet -->
+    <div id="newTripPanel" class="match-panel undecided" style="display:none;margin-top:4px;">
+      <div class="match-hint">
+        <b>This trip is not in Airtable yet.</b> It will be created in the Trips table first, then every
+        booking below is linked to it, which also fills the trip's Bookings and Payments columns.
+        Nothing is written until you press the green button at the end.
+      </div>
+      <div class="field-row three">
+        <div class="field">
+          <label>Trip Id</label>
+          <input type="text" id="ntId" placeholder="260921" oninput="ntTouched('id')"/>
+        </div>
+        <div class="field">
+          <label>Destination</label>
+          <input type="text" id="ntDest" list="ntDestList" placeholder="Galapagos" oninput="ntAutoName()"/>
+          <datalist id="ntDestList"></datalist>
+        </div>
+        <div class="field">
+          <label>Trip name</label>
+          <input type="text" id="ntName" placeholder="Galapagos Sep 2026" oninput="ntTouched('name')"/>
+        </div>
+      </div>
+      <div class="field-row three">
+        <div class="field">
+          <label>Vessel</label>
+          <input type="text" id="ntVessel" placeholder="Galapagos Master"/>
+        </div>
+        <div class="field">
+          <label>Departure date</label>
+          <input type="date" id="ntDep" onchange="ntAutoId(); ntAutoName(); ntSyncHeader()"/>
+        </div>
+        <div class="field">
+          <label>Return date</label>
+          <input type="date" id="ntRet" onchange="ntSyncHeader()"/>
+        </div>
+      </div>
+      <div class="field-row four" style="margin-bottom:0;">
+        <div class="field">
+          <label>Currency</label>
+          <select id="ntCur" onchange="ntSyncHeader()">
+            <option>USD</option><option>EUR</option><option>ILS</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Status</label>
+          <select id="ntStatus">
+            <option>Open</option><option>Full</option><option>Planning</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Leader</label>
+          <input type="text" id="ntLeader" value="Self"/>
+        </div>
+        <div class="field">
+          <label>Capacity, optional</label>
+          <input type="number" id="ntCap" min="1" step="1"/>
+        </div>
+      </div>
+      <div class="note">
+        The Trip Id follows the house habit of the departure date as YYMMDD. If that id is already taken
+        a letter is added (B, C) rather than reusing it. This does not add the trip to the website: it
+        stays off trips.html and has no registration link, which is right for a direct booking.
+      </div>
+    </div>
   </div>
 
   <!-- STEP 2: GUESTS -->
@@ -381,7 +447,10 @@ const PAYMENTS_TABLE = 'tbl0oLEDoa4PCQOOp';
 const TRIPS_TABLE    = 'tbl8KGVwkIHi26plq';
 const DIVERS_TABLE   = 'tblE9d3rE4uDv2uxO';
 
+const NEW_TRIP = '__newtrip__';
 let tripsCache  = {};   // recId -> {tripId, name, currency, dep, ret, vessel}
+let allTripIds  = {};   // every Trip Id in Airtable, lottery copies and 999999 included, lower-cased
+let ntManual    = {};   // which new-trip fields the operator typed over, so autofill leaves them alone
 let diversCache = [];   // [{id, first, last, email, phone, dob, passport, norm}]
 let tripBookings = [];  // divers already booked on the selected trip
 let guestSeq = 0;
@@ -449,11 +518,16 @@ async function loadTrips() {
   const recs = await atGet(TRIPS_TABLE, 'fields%5B%5D=Trip+Id&fields%5B%5D=Trip+Name&fields%5B%5D=Currency'
             + '&fields%5B%5D=Departure+Date&fields%5B%5D=Return+Date&fields%5B%5D=Vessel');
   const sel = document.getElementById('tripSelect');
-  sel.innerHTML = '<option value="">Select a trip…</option>';
+  sel.innerHTML = '<option value="">Select a trip…</option>' +
+    '<option value="' + NEW_TRIP + '">+ Not in Airtable yet: create a new trip</option>';
   const rows = [];
+  const dests = {};
+  allTripIds = {};
   recs.forEach(function (r) {
     const f = r.fields;
     const tid = f['Trip Id'] || '';
+    if (tid) allTripIds[tid.toLowerCase()] = true;   // a new id must not collide with ANY row
+    if (f['Destination']) dests[f['Destination']] = true;
     if (!tid || /copy/i.test(tid)) return;          // lottery duplicates are not real travel
     if (tid === '999999') return;                    // Cancelled Bookings holding pen
     tripsCache[r.id] = {
@@ -468,6 +542,78 @@ async function loadTrips() {
     o.value = r.id; o.textContent = r.label;
     sel.appendChild(o);
   });
+  document.getElementById('ntDestList').innerHTML = Object.keys(dests).sort()
+    .map(function (d) { return '<option value="' + esc(d) + '"></option>'; }).join('');
+}
+
+// ── NEW TRIP ─────────────────────────────────────────────────────
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+function ntTouched(which) { ntManual[which] = true; }
+
+// Departure 2026-09-21 -> 260921, then 260921B, 260921C if already taken.
+function ntSuggestId(dep) {
+  const m = String(dep || '').match(/^\d{2}(\d{2})-(\d{2})-(\d{2})$/);
+  if (!m) return '';
+  const base = m[1] + m[2] + m[3];
+  if (!allTripIds[base.toLowerCase()]) return base;
+  for (let c = 66; c <= 90; c++) {                    // B..Z
+    const id = base + String.fromCharCode(c);
+    if (!allTripIds[id.toLowerCase()]) return id;
+  }
+  return '';
+}
+function ntAutoId() {
+  if (ntManual.id) return;
+  document.getElementById('ntId').value = ntSuggestId(document.getElementById('ntDep').value);
+}
+// Same shape as the existing rows: "Galapagos Sep 2026".
+function ntAutoName() {
+  if (ntManual.name) return;
+  const dest = document.getElementById('ntDest').value.trim();
+  const m = document.getElementById('ntDep').value.match(/^(\d{4})-(\d{2})/);
+  document.getElementById('ntName').value =
+    [dest, m ? MONTHS[parseInt(m[2], 10) - 1] + ' ' + m[1] : ''].filter(Boolean).join(' ');
+}
+function ntSyncHeader() {
+  if (document.getElementById('tripSelect').value !== NEW_TRIP) return;
+  const dep = document.getElementById('ntDep').value, ret = document.getElementById('ntRet').value;
+  document.getElementById('tripCurrency').value = document.getElementById('ntCur').value;
+  document.getElementById('tripDates').value = dep ? (fmt(dep) + ' to ' + fmt(ret)) : '';
+}
+// Prefill from the invoice. Id and name are derived, unless typed over by hand.
+function ntPrefill(r) {
+  if (r.vessel)    document.getElementById('ntVessel').value = r.vessel;
+  if (r.departure) document.getElementById('ntDep').value = r.departure;
+  if (r.ret)       document.getElementById('ntRet').value = r.ret;
+  if (r.currency && /^(USD|EUR|ILS)$/.test(r.currency)) document.getElementById('ntCur').value = r.currency;
+  ntAutoId(); ntAutoName(); ntSyncHeader();
+}
+function ntRead() {
+  return {
+    tripId: document.getElementById('ntId').value.trim(),
+    dest:   document.getElementById('ntDest').value.trim(),
+    name:   document.getElementById('ntName').value.trim(),
+    vessel: document.getElementById('ntVessel').value.trim(),
+    dep:    document.getElementById('ntDep').value,
+    ret:    document.getElementById('ntRet').value,
+    currency: document.getElementById('ntCur').value,
+    status: document.getElementById('ntStatus').value,
+    leader: document.getElementById('ntLeader').value.trim(),
+    capacity: parseInt(document.getElementById('ntCap').value, 10)
+  };
+}
+function ntErrors(t) {
+  const e = [];
+  if (!t.tripId) e.push('New trip: Trip Id is empty.');
+  else if (allTripIds[t.tripId.toLowerCase()]) e.push('New trip: Trip Id ' + t.tripId + ' already exists in Airtable. Pick that trip from the list instead, or use another id.');
+  else if (!/^[0-9]{6}[A-Za-z]?$/.test(t.tripId)) e.push('New trip: Trip Id ' + t.tripId + ' does not look like the house format (YYMMDD, optionally one letter).');
+  if (!t.dest) e.push('New trip: Destination is empty.');
+  if (!t.name) e.push('New trip: Trip name is empty.');
+  if (!t.dep)  e.push('New trip: Departure date is empty.');
+  if (!t.ret)  e.push('New trip: Return date is empty.');
+  if (t.dep && t.ret && t.ret < t.dep) e.push('New trip: Return date is before the departure date.');
+  return e;
 }
 
 async function loadDivers() {
@@ -494,7 +640,13 @@ async function onTripChange() {
   document.getElementById('tripCurrency').value = t ? t.currency : '';
   document.getElementById('tripDates').value = t ? (fmt(t.dep) + ' to ' + fmt(t.ret)) : '';
   document.getElementById('tripWarn').innerHTML = '';
+  document.getElementById('newTripPanel').style.display = recId === NEW_TRIP ? 'block' : 'none';
   tripBookings = [];
+  if (recId === NEW_TRIP) {                       // a trip that does not exist has no bookings to clash with
+    ntAutoId(); ntSyncHeader();
+    refreshAllMatches();
+    return;
+  }
   if (!recId) return;
   try {
     const recs = await atGet(BOOKINGS_TABLE,
@@ -920,8 +1072,14 @@ function applyParsed(r, sourceLabel) {
                    ' is recorded as <b>' + esc(t.vessel) + '</b>. Worth checking which is right');
     }
   } else if (r.departure) {
+    ntManual = {};
+    ntPrefill(r);
+    document.getElementById('tripSelect').value = NEW_TRIP;
+    onTripChange();
     missing.push('no trip in Airtable departs on ' + fmt(r.departure) +
-                 (r.vessel ? ' (invoice vessel: ' + esc(r.vessel) + ')' : '') + '. Pick the trip by hand, or create it first');
+                 (r.vessel ? ' (invoice vessel: ' + esc(r.vessel) + ')' : '') +
+                 '. A <b>new trip</b> has been set up from the invoice in step 2: fill in the Destination and check it. ' +
+                 'If the trip does exist under another date, pick it from the list instead');
   } else {
     missing.push('departure date, so the trip could not be matched');
   }
@@ -1002,7 +1160,10 @@ function buildReview() {
   const flights  = document.getElementById('selfArranged').value;
   const confirmed= document.getElementById('confirmed').value;
 
+  const isNewTrip = tripRec === NEW_TRIP;
+  const newTrip = isNewTrip ? ntRead() : null;
   if (!tripRec)  errs.push('No trip selected.');
+  if (isNewTrip) errs.push.apply(errs, ntErrors(newTrip));
   if (!supplier) errs.push('Supplier is empty.');
   if (!invoice)  errs.push('Invoice number is empty.');
 
@@ -1053,11 +1214,21 @@ function buildReview() {
     return;
   }
 
-  const t = tripsCache[tripRec];
+  const t = isNewTrip ? newTrip : tripsCache[tripRec];
   lastPlan = {
-    tripRec: tripRec, trip: t, supplier: supplier, invoice: invoice,
+    tripRec: isNewTrip ? '' : tripRec, trip: t, newTrip: newTrip, supplier: supplier, invoice: invoice,
     bookingDate: bDate, flights: flights, confirmed: confirmed, guests: guests
   };
+
+  const tripBlock = isNewTrip
+    ? '<div class="banner banner-warn"><b>A new trip will be created in Airtable Trips first:</b><br/>' +
+        '<span style="font-family:\'DM Mono\',monospace;font-size:13px;">' +
+        esc(t.tripId) + '  ·  ' + esc(t.name) + '  ·  ' + esc(t.dest) +
+        (t.vessel ? '  ·  ' + esc(t.vessel) : '') + '<br/>' +
+        fmt(t.dep) + ' to ' + fmt(t.ret) + '  ·  ' + esc(t.currency) + '  ·  ' + esc(t.status) +
+        '  ·  leader ' + esc(t.leader || 'none') + (t.capacity > 0 ? '  ·  capacity ' + t.capacity : '') +
+        '</span><br/>Every booking below is then linked to it.</div>'
+    : '';
 
   let rows = '';
   let sum = 0, sumX = 0;
@@ -1076,6 +1247,7 @@ function buildReview() {
 
   out.innerHTML =
     '<div class="banner banner-ok">Nothing has been written yet. Check the rows below, then press the green button.</div>' +
+    tripBlock +
     (warns.length ? '<div class="banner banner-warn"><b>Worth a second look, but not blocking.</b><br/>· ' +
       warns.map(esc).join('<br/>· ') + '</div>' : '') +
     '<table class="review"><thead><tr>' +
@@ -1091,6 +1263,7 @@ function buildReview() {
       'registrations and this booking never goes through Make. What you paid the supplier is not recorded ' +
       'anywhere in Payments: that table tracks customer money only.</div>' +
     '<div style="margin-top:20px;"><button class="btn btn-go" onclick="writeAll()">Write ' +
+      (isNewTrip ? 'the trip and ' : '') +
       guests.length + ' booking' + (guests.length > 1 ? 's' : '') + ' to Airtable</button></div>';
 }
 
@@ -1113,6 +1286,53 @@ async function writeAll() {
   const p = lastPlan;
   const created = [];
   let failed = 0;
+  let tripMade = '';
+
+  // 0. Trip, when it is not in Airtable yet. Created once: on success the page switches
+  // to the new row, so pressing the button again links to it instead of making a second trip.
+  if (p.newTrip) {
+    const nt = p.newTrip;
+    try {
+      const tf = {
+        'Trip Id': nt.tripId,
+        'Trip Name': nt.name,
+        'Destination': nt.dest,
+        'Departure Date': nt.dep,
+        'Return Date': nt.ret,
+        'Currency': nt.currency,
+        'Status': nt.status,
+        'Price Notes': 'Direct booking trip, created from ' + p.supplier + ' invoice ' + p.invoice +
+                       '. No registration form and no website listing.'
+      };
+      if (nt.vessel) tf['Vessel'] = nt.vessel;
+      if (nt.leader) tf['Leader Name'] = nt.leader;
+      if (nt.capacity > 0) tf['Capacity'] = nt.capacity;
+      const tRec = await atCreate(TRIPS_TABLE, tf);
+      tripsCache[tRec.id] = {
+        tripId: nt.tripId, name: nt.name, currency: nt.currency,
+        dep: nt.dep, ret: nt.ret, vessel: nt.vessel
+      };
+      allTripIds[nt.tripId.toLowerCase()] = true;
+      const o = document.createElement('option');
+      o.value = tRec.id; o.textContent = nt.tripId + '  —  ' + nt.name;
+      const sel = document.getElementById('tripSelect');
+      sel.insertBefore(o, sel.options[2] || null);
+      sel.value = tRec.id;
+      document.getElementById('newTripPanel').style.display = 'none';
+      p.tripRec = tRec.id;
+      p.trip = tripsCache[tRec.id];
+      p.newTrip = null;
+      tripMade = nt.tripId + ' ' + nt.name;
+      log('✓ Trip ' + nt.tripId + ' ' + nt.name + ' created in Trips (' + tRec.id + ')', 'ok');
+    } catch (e) {
+      log('✗ Trip ' + nt.tripId + ': ' + e.message, 'bad');
+      out.innerHTML = '<div class="banner banner-err"><b>The trip could not be created, so nothing else was written.</b> ' +
+        'No diver, booking or payment row exists yet. Fix the cause and press Build the plan again.</div>' +
+        '<div class="log">' + lines.join('\n') + '</div>';
+      lastPlan = null;
+      return;
+    }
+  }
 
   for (let i = 0; i < p.guests.length; i++) {
     const g = p.guests[i];
@@ -1187,7 +1407,8 @@ async function writeAll() {
 
   let summary;
   if (failed === 0) {
-    summary = '<div class="banner banner-ok"><b>Done.</b> ' + created.length +
+    summary = '<div class="banner banner-ok"><b>Done.</b> ' +
+      (tripMade ? 'Trip ' + esc(tripMade) + ' created in Trips. ' : '') + created.length +
       ' booking' + (created.length > 1 ? 's' : '') + ' written: ' +
       created.map(function (c) { return esc(c.ref + ' ' + c.who); }).join(', ') +
       '.<br/>Quote the D-reference to the supplier. Reload the page to enter another invoice.</div>';
