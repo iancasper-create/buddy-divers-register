@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- BD-FOLLOWUP 2026-09-21c | Trip 270421 (Sinai Pesach 2027, Snefro Love, 21/04-28/04/2027, ILS) added to all three trip maps: tripCountries, tripNames, CF_TRIPS_FALLBACK (dest + vessel + four option labels) -->
 <!-- BD-FOLLOWUP 2026-09-21b | 280408: nitrox_150 label removed from CF_TRIPS_FALLBACK, nitrox is no longer a form option (paid on board) -->
 <!-- BD-FOLLOWUP 2026-09-21a | Trip 280408 (Galapagos Pesach 2028, Tiburon Explorer, 08/04-15/04/2028, USD) added to all three trip maps: tripCountries, tripNames, CF_TRIPS_FALLBACK (dest + vessel + six cabin labels + nitrox) -->
 <!-- BD-FOLLOWUP 2026-09-13b | 261004 CF_TRIPS_FALLBACK option labels match the registration form: standard room on the lower deck, double bed and single bed in every room. Keys unchanged -->
@@ -2036,7 +2037,7 @@ function buildPaymentHTML(booking, amount, nisAmount, rate, notes, paidSoFar, sa
     '260301': 'תאילנד', '260328': 'מדגסקר', '260620': 'מדגסקר', '260730': 'מדגסקר',
     '260815': 'מדגסקר', '260828': 'פיג׳י / טונגה', '260915': 'מדגסקר', '260925': 'מדגסקר',
     '261009': 'מדגסקר', '261022': 'גלפגוס', '271014': 'גלפגוס', '280408': 'גלפגוס',
-    '261029': 'סיני',
+    '261029': 'סיני', '270421': 'סיני',
     '261211': 'מיאנמר', '270106': 'מיאנמר', '270203': 'מיאנמר', '270303': 'מיאנמר',
     '261219': 'פיליפינים',
     '270118': 'אינדונזיה — ראג׳ה אמפאט',
@@ -2221,6 +2222,7 @@ async function generatePaymentImage() {
     '260815':'מדגסקר — אוגוסט 2026', '260915':'מדגסקר — ספטמבר 2026 א׳', '260925':'מדגסקר — ספטמבר 2026 ב׳',
     '261009':'מדגסקר — אוקטובר 2026',
     '261029':'ספארי 5 כוכבים — סיני — אוקטובר 2026',
+    '270421':'ספארי סיני, Snefro Love, פסח 2027',
     '261211':'מיאנמר — דצמבר 2026', '270106':'מיאנמר — ינואר 2027', '270203':'מיאנמר — פברואר 2027', '270303':'מיאנמר — מרץ 2027',
     '261219':'פיליפינים — דצמבר 2026',
     '270118':'ראג׳ה אמפאט — ינואר 2027',
@@ -2820,6 +2822,8 @@ const CF_TRIPS_FALLBACK = {
     opts:{"full_trip_5980": "Base price, twin share throughout all segments", "boat_twin_0": "Standard twin cabin, upper deck", "boat_quad_neg500": "Four-person cabin, $500 credit", "boat_stateroom_490": "Stateroom upgrade, $490 supplement", "coral_garden_290": "Coral Eye Resort: Garden View upgrade", "coral_beach_470": "Coral Eye Resort: Beach View upgrade", "coral_beachpool_820": "Coral Eye Resort: Beach Front Pool upgrade", "siladen_beach_usd320": "Siladen Resort & Spa: Beach View upgrade", "siladen_villa_usd590": "Siladen Resort & Spa: Luxury Villa upgrade", "private_guide_750": "Private dive guide, Solitude Adventurer", "private_guide_resort_110": "Private dive guide, Resorts ($110 per diving day)"} },
   "271014": { name:"Galapagos Safari", dest:"the Galapagos Islands", vessel:"", arrive:"14 October 2027", depart:"21 October 2027", currency:"USD",
     opts:{"single_7350": "Price per person"} },
+  "270421": { name:"Sinai Dive Safari, Pesach 2027", dest:"Sinai, Egypt", vessel:"Snefro Love", arrive:"21 April 2027", depart:"28 April 2027", currency:"ILS",
+    opts:{"certified_4890": "Certified diver package, 7 nights", "single_supp_2445": "Single use of double room supplement", "upper_double_280": "Upper deck double cabin, 9 sqm, queen bed", "master_suite_330": "Main deck master suite, 12 sqm, queen bed"} },
   "280408": { name:"Galapagos Safari, Pesach 2028", dest:"the Galapagos Islands", vessel:"Tiburon Explorer", arrive:"8 April 2028", depart:"15 April 2028", currency:"USD",
     opts:{"cabin3_main_6695": "Cabin 3, main deck, large cabin", "cabin5_main_6695": "Cabin 5, main deck, large cabin", "cabin6_main_6695": "Cabin 6, main deck, large cabin", "cabin7_lower_6695": "Cabin 7, lower deck, 14 sqm suite with sofa", "cabin8_lower_6695": "Cabin 8, lower deck, 14 sqm suite with sofa", "cabin9_lower_6695": "Cabin 9, lower deck, 14 sqm suite with sofa"} },
 };

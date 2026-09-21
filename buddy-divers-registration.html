@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- BD-REG 2026-09-21e | New trip 270421 Sinai Pesach 2027, Snefro Love, 21/04-28/04/2027, ILS, noFlights + roomOptional like 261029. certified_4890, single_supp_2445 (supplement), room upgrades upper_double_280 and master_suite_330 (master suite on the MAIN deck per King Snefro). Leader TBA -->
 <!-- BD-REG 2026-09-21d | 280408: nitrox_150 addon removed, per Ian nitrox is booked and paid on board -->
 <!-- BD-REG 2026-09-21c | 280408: DEMA deadline extended 30/11/2026 -> 31/12/2026 in the pricing title, per Ian -->
 <!-- BD-REG 2026-09-21b | New trip 280408 Galapagos Pesach 2028, Tiburon Explorer, 08/04-15/04/2028, USD. Six held cabins, one option each (3, 5, 6 main deck; 7, 8, 9 lower deck suites 14 sqm with sofa), all $6,695 DEMA price with wasPrice $7,495, promo pill "$800 הנחה", nitrox_150 addon. Leader TBA -->
@@ -2355,6 +2356,55 @@ const TRIPS = {
         wasPrice: "$7,495",
         price: "$6,695",
         priceNum: 6695
+      }
+    ]
+  },
+  "270421": {
+    name: "🚢 ספארי סיני בפסח | Snefro Love",
+    dates: "21/04/2027 – 28/04/2027",
+    note: "🚢 Snefro Love | 7 לילות | ספינה פרטית לקבוצה | הכל כלול | מלווה יפורסם בהמשך",
+    currency: "ILS",
+    pricingTitle: {
+      he: "עלות הספארי",
+      en: "Safari Pricing"
+    },
+    roomOptionsTitle: {
+      he: "שדרוג חדר",
+      en: "Room Upgrade"
+    },
+    pricing: [
+      {
+        value: "certified_4890",
+        he: "חבילת צלילה לצולל.ת מוסמך.ת, 7 לילות",
+        en: "Certified diver package, 7 nights",
+        price: "₪4,890",
+        priceNum: 4890
+      },
+      {
+        value: "single_supp_2445",
+        he: "תוספת חדר זוגי בתפוסת יחיד.ה",
+        en: "Single use of double room supplement",
+        price: "₪2,445",
+        priceNum: 2445,
+        supplement: true
+      }
+    ],
+    noFlights: true,
+    roomOptional: true,
+    roomOptions: [
+      {
+        value: "upper_double_280",
+        he: "חדר זוגי במפלס העליון, 9 מ\"ר, מיטת Queen (מותנה בהרשמה של שניים)",
+        en: "Upper deck double cabin, 9 sqm, queen bed (requires two guests)",
+        price: "₪280",
+        priceNum: 280
+      },
+      {
+        value: "master_suite_330",
+        he: "סוויטת מאסטר במפלס הראשי, 12 מ\"ר, מיטת Queen (מותנה בהרשמה של שניים)",
+        en: "Main deck master suite, 12 sqm, queen bed (requires two guests)",
+        price: "₪330",
+        priceNum: 330
       }
     ]
   },
