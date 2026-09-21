@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- BD-REG 2026-09-21a | per Ian: registration closed for 260915 Madagascar, 270303 Myanmar, 270422 Tubbataha. New optional config flag closed: true hides the form and shows a closed notice with a link to trips.html; submit handler refuses closed trips too. Config blocks kept (followup/edit-diver untouched) -->
 <!-- BD-REG 2026-09-18a | 261004: both suites (main_suite_2735, upper_suite_2735) removed from the pricing options, per Ian. Only the standard room on the lower deck is left for sale, the 2 last places. followup.html and edit-diver.html maps untouched so any existing suite booking still resolves -->
 <!-- BD-REG 2026-09-13f | 261004 cabin wording per Ian: every room has a double bed AND a single bed (was "double or twin"), lower deck cabin renamed from twin cabin to standard room (חדר רגיל). Labels and banner note only; value keys lower_twin_2452 / main_suite_2735 / upper_suite_2735 deliberately unchanged -->
 <!-- BD-REG 2026-09-13e | 30% discount shown on trip 261004, per Ian. Two new optional config fields: promo (orange pill in the trip banner, #tripPromo) and wasPrice on a pricing option (struck-through grey price shown before the real price, display only). 261004: promo "30% הנחה", wasPrice $3,503 / $3,907 / $3,907 (Emperor full prices $3,502.68 and $3,907.28 rounded), pricingTitle "עלות הספארי | 30% הנחה". value, price and priceNum unchanged -->
@@ -2035,6 +2036,7 @@ const TRIPS = {
     ]
   },
   "260915": {
+    closed: true,
     name: "🤿 ספארי מדגסקר — Madagascar Safari",
     dates: "15/09/2026 – 24/09/2026",
     currency: "EUR",
@@ -2151,6 +2153,7 @@ const TRIPS = {
   },
 
   "270303": {
+    closed: true,
     name: "🤿 ספארי מיאנמר — Myanmar Safari",
     dates: "03/03/2027 – 10/03/2027",
     currency: "USD",
@@ -2739,6 +2742,7 @@ const TRIPS = {
     ]
   },
   "270422": {
+    closed: true,
     name: "🇵🇭 טובטאהה — Tubbataha",
     dates: "22–28 באפריל 2027",
     note: "🚢 ספינה: Stella Maris Explorer | צלילה בשונית טובטאהה, פיליפינים",
@@ -2788,6 +2792,22 @@ function init() {
   document.getElementById('tripName').textContent = tripConfig.name;
   document.getElementById('tripDates').textContent = tripConfig.dates;
   document.getElementById('tripName').dataset.tripId = tripId;
+
+  // Registration closed for this trip: keep the banner, replace the form with a notice
+  if (tripConfig.closed) {
+    const form = document.getElementById('regForm');
+    form.style.display = 'none';
+    const closedBox = document.createElement('div');
+    closedBox.className = 'card';
+    closedBox.id = 'regClosed';
+    closedBox.style.textAlign = 'center';
+    closedBox.innerHTML =
+      '<div style="font-size:20px;font-weight:800;color:#1a3a5c;margin-bottom:8px;">ההרשמה לטיול זה סגורה</div>' +
+      '<div style="font-size:14px;color:var(--muted);margin-bottom:16px;">Registration for this trip is closed</div>' +
+      '<a href="https://register.buddy-divers.com/trips.html" style="display:inline-block;padding:10px 22px;border-radius:10px;background:#d4692a;color:#fff;font-weight:700;text-decoration:none;">לכל הטיולים / All trips</a>';
+    form.parentNode.insertBefore(closedBox, form.nextSibling);
+    return;
+  }
 
   // Show note if present
   const noteEl = document.getElementById('tripNote');
@@ -3596,6 +3616,10 @@ function validateForm() {
 // ============================================================
 document.getElementById('regForm').addEventListener('submit', async function(e) {
   e.preventDefault();
+
+  // Never submit a trip whose registration is closed
+  const closedTripId = document.getElementById('tripName').dataset.tripId;
+  if (TRIPS[closedTripId] && TRIPS[closedTripId].closed) return;
 
   // Block submission if any file is still uploading
   if (document.querySelector('.file-upload-area.uploading')) {
