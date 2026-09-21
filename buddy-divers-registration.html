@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- BD-REG 2026-09-21b | New trip 280408 Galapagos Pesach 2028, Tiburon Explorer, 08/04-15/04/2028, USD. Six held cabins, one option each (3, 5, 6 main deck; 7, 8, 9 lower deck suites 14 sqm with sofa), all $6,695 DEMA price with wasPrice $7,495, promo pill "$800 הנחה", nitrox_150 addon. Leader TBA -->
 <!-- BD-REG 2026-09-21a | per Ian: registration closed for 260915 Madagascar, 270303 Myanmar, 270422 Tubbataha. New optional config flag closed: true hides the form and shows a closed notice with a link to trips.html; submit handler refuses closed trips too. Config blocks kept (followup/edit-diver untouched) -->
 <!-- BD-REG 2026-09-18a | 261004: both suites (main_suite_2735, upper_suite_2735) removed from the pricing options, per Ian. Only the standard room on the lower deck is left for sale, the 2 last places. followup.html and edit-diver.html maps untouched so any existing suite booking still resolves -->
 <!-- BD-REG 2026-09-13f | 261004 cabin wording per Ian: every room has a double bed AND a single bed (was "double or twin"), lower deck cabin renamed from twin cabin to standard room (חדר רגיל). Labels and banner note only; value keys lower_twin_2452 / main_suite_2735 / upper_suite_2735 deliberately unchanged -->
@@ -2291,6 +2292,76 @@ const TRIPS = {
         en: "Price per person",
         price: "$7,350",
         priceNum: 7350
+      }
+    ]
+  },
+  "280408": {
+    name: "🦈 ספארי גלאפגוס בפסח | Galapagos Safari",
+    dates: "08/04/2028 – 15/04/2028",
+    note: "🚢 Tiburon Explorer | 7 לילות | Darwin & Wolf | מוביל: יפורסם בקרוב",
+    promo: "$800 הנחה",
+    currency: "USD",
+    pricingTitle: {
+      he: "בחירת חדר | מבצע DEMA לנרשמים עד 30/11/2026",
+      en: "Choose your cabin | DEMA special until 30/11/2026"
+    },
+    pricing: [
+      {
+        value: "cabin3_main_6695",
+        he: "חדר 3, מפלס ראשי: חדר גדול, מיטה זוגית (Queen) או שתי מיטות נפרדות (לאדם בתפוסה זוגית)",
+        en: "Cabin 3, main deck: large cabin, 1 queen bed or 2 twin beds (per person, double occupancy)",
+        wasPrice: "$7,495",
+        price: "$6,695",
+        priceNum: 6695
+      },
+      {
+        value: "cabin5_main_6695",
+        he: "חדר 5, מפלס ראשי: חדר גדול, מיטה זוגית (Queen) או שתי מיטות נפרדות (לאדם בתפוסה זוגית)",
+        en: "Cabin 5, main deck: large cabin, 1 queen bed or 2 twin beds (per person, double occupancy)",
+        wasPrice: "$7,495",
+        price: "$6,695",
+        priceNum: 6695
+      },
+      {
+        value: "cabin6_main_6695",
+        he: "חדר 6, מפלס ראשי: חדר גדול, מיטה זוגית (Queen) או שתי מיטות נפרדות (לאדם בתפוסה זוגית)",
+        en: "Cabin 6, main deck: large cabin, 1 queen bed or 2 twin beds (per person, double occupancy)",
+        wasPrice: "$7,495",
+        price: "$6,695",
+        priceNum: 6695
+      },
+      {
+        value: "cabin7_lower_6695",
+        he: "חדר 7, מפלס תחתון: סוויטה גדולה 14 מ\"ר עם ספה, אידיאלית לצלמים עם ציוד רב. מיטה זוגית (Queen) או שתי מיטות נפרדות (לאדם בתפוסה זוגית)",
+        en: "Cabin 7, lower deck: large 14 sqm suite with sofa, ideal for photographers with plenty of gear. 1 queen bed or 2 twin beds (per person, double occupancy)",
+        wasPrice: "$7,495",
+        price: "$6,695",
+        priceNum: 6695
+      },
+      {
+        value: "cabin8_lower_6695",
+        he: "חדר 8, מפלס תחתון: סוויטה גדולה 14 מ\"ר עם ספה, אידיאלית לצלמים עם ציוד רב. מיטה זוגית (Queen) או שתי מיטות נפרדות (לאדם בתפוסה זוגית)",
+        en: "Cabin 8, lower deck: large 14 sqm suite with sofa, ideal for photographers with plenty of gear. 1 queen bed or 2 twin beds (per person, double occupancy)",
+        wasPrice: "$7,495",
+        price: "$6,695",
+        priceNum: 6695
+      },
+      {
+        value: "cabin9_lower_6695",
+        he: "חדר 9, מפלס תחתון: סוויטה גדולה 14 מ\"ר עם ספה, אידיאלית לצלמים עם ציוד רב. מיטה זוגית (Queen) או שתי מיטות נפרדות (לאדם בתפוסה זוגית)",
+        en: "Cabin 9, lower deck: large 14 sqm suite with sofa, ideal for photographers with plenty of gear. 1 queen bed or 2 twin beds (per person, double occupancy)",
+        wasPrice: "$7,495",
+        price: "$6,695",
+        priceNum: 6695
+      }
+    ],
+    addons: [
+      {
+        value: "nitrox_150",
+        he: "נייטרוקס לכל ההפלגה",
+        en: "Nitrox for the whole trip",
+        price: "$150",
+        priceNum: 150
       }
     ]
   },

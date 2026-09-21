@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- BD-FOLLOWUP 2026-09-21a | Trip 280408 (Galapagos Pesach 2028, Tiburon Explorer, 08/04-15/04/2028, USD) added to all three trip maps: tripCountries, tripNames, CF_TRIPS_FALLBACK (dest + vessel + six cabin labels + nitrox) -->
 <!-- BD-FOLLOWUP 2026-09-13b | 261004 CF_TRIPS_FALLBACK option labels match the registration form: standard room on the lower deck, double bed and single bed in every room. Keys unchanged -->
 <!-- BD-FOLLOWUP 2026-09-13a | Trip 261004 (Best of Maldives, Emperor Explorer II, 04/10-11/10/2026, USD) added to all three trip maps: tripCountries, tripNames and CF_TRIPS_FALLBACK. Option keys lower_twin_2452 / main_suite_2735 / upper_suite_2735 are new strings, so the fallback entry is needed for letters when the live read of the registration form fails -->
 <!-- BD-FOLLOWUP 2026-08-31a | Trip 270303 added to all three trip maps: tripCountries, tripNames and CF_TRIPS_FALLBACK. Its three option keys are new strings (upper_standard_2325 / main_deluxe_2391 / main_master_2491), so without the fallback entry a letter for this trip would print raw keys whenever the live read of the registration form fails -->
@@ -2033,7 +2034,7 @@ function buildPaymentHTML(booking, amount, nisAmount, rate, notes, paidSoFar, sa
     '260615': 'אינדונזיה',
     '260301': 'תאילנד', '260328': 'מדגסקר', '260620': 'מדגסקר', '260730': 'מדגסקר',
     '260815': 'מדגסקר', '260828': 'פיג׳י / טונגה', '260915': 'מדגסקר', '260925': 'מדגסקר',
-    '261009': 'מדגסקר', '261022': 'גלפגוס', '271014': 'גלפגוס',
+    '261009': 'מדגסקר', '261022': 'גלפגוס', '271014': 'גלפגוס', '280408': 'גלפגוס',
     '261029': 'סיני',
     '261211': 'מיאנמר', '270106': 'מיאנמר', '270203': 'מיאנמר', '270303': 'מיאנמר',
     '261219': 'פיליפינים',
@@ -2214,6 +2215,7 @@ async function generatePaymentImage() {
     '260615':'למבה / הלמהרה / ראג׳ה אמפאט — יוני 2026',
     '260301':'תאילנד — מרץ 2026', '260828':'פיג׳י / טונגה — אוגוסט 2026',
     '261022':'גלפגוס — אוקטובר 2026', '271014':'גלפגוס — אוקטובר 2027',
+    '280408':'גלפגוס, Tiburon Explorer, פסח 2028',
     '260328':'מדגסקר — מרץ 2026', '260620':'מדגסקר — יוני 2026', '260730':'מדגסקר — יולי 2026',
     '260815':'מדגסקר — אוגוסט 2026', '260915':'מדגסקר — ספטמבר 2026 א׳', '260925':'מדגסקר — ספטמבר 2026 ב׳',
     '261009':'מדגסקר — אוקטובר 2026',
@@ -2817,6 +2819,8 @@ const CF_TRIPS_FALLBACK = {
     opts:{"full_trip_5980": "Base price, twin share throughout all segments", "boat_twin_0": "Standard twin cabin, upper deck", "boat_quad_neg500": "Four-person cabin, $500 credit", "boat_stateroom_490": "Stateroom upgrade, $490 supplement", "coral_garden_290": "Coral Eye Resort: Garden View upgrade", "coral_beach_470": "Coral Eye Resort: Beach View upgrade", "coral_beachpool_820": "Coral Eye Resort: Beach Front Pool upgrade", "siladen_beach_usd320": "Siladen Resort & Spa: Beach View upgrade", "siladen_villa_usd590": "Siladen Resort & Spa: Luxury Villa upgrade", "private_guide_750": "Private dive guide, Solitude Adventurer", "private_guide_resort_110": "Private dive guide, Resorts ($110 per diving day)"} },
   "271014": { name:"Galapagos Safari", dest:"the Galapagos Islands", vessel:"", arrive:"14 October 2027", depart:"21 October 2027", currency:"USD",
     opts:{"single_7350": "Price per person"} },
+  "280408": { name:"Galapagos Safari, Pesach 2028", dest:"the Galapagos Islands", vessel:"Tiburon Explorer", arrive:"8 April 2028", depart:"15 April 2028", currency:"USD",
+    opts:{"cabin3_main_6695": "Cabin 3, main deck, large cabin", "cabin5_main_6695": "Cabin 5, main deck, large cabin", "cabin6_main_6695": "Cabin 6, main deck, large cabin", "cabin7_lower_6695": "Cabin 7, lower deck, 14 sqm suite with sofa", "cabin8_lower_6695": "Cabin 8, lower deck, 14 sqm suite with sofa", "cabin9_lower_6695": "Cabin 9, lower deck, 14 sqm suite with sofa", "nitrox_150": "Nitrox for the whole trip"} },
 };
 
 
