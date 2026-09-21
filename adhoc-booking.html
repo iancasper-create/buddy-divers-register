@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- BD-ADHOC 2026-09-21b | Guest boxes are numbered by their position on screen (1, 2, 3), renumbered after a remove. Loading a PDF used to replace the two starter boxes and carry on counting, so the first invoice guest showed as Guest 3; the review messages now use the same on-screen number -->
 <!-- BD-ADHOC 2026-09-21a | When the invoice's trip is not in Airtable, the page now creates it: a new "create a new trip" choice in the trip list, picked automatically when no trip departs on the invoice date, with Trip Id (YYMMDD of departure, B/C suffix if taken, checked against every Trips row incl. lottery copies), Destination, Trip Name, Vessel, dates, Currency, Status, Leader (default Self) and Capacity prefilled from the invoice. The Trips row is written first and every Bookings and Payments row links to it; if the trip write fails nothing else is written -->
 <!-- BD-ADHOC 2026-09-20b | Step 1 added: read a supplier invoice PDF in the browser (pdf.js, nothing uploaded) and prefill supplier, invoice number, reservation date, vessel, sailing dates, guests, cabin, occupancy, price and the fuel surcharge split per guest, then auto-select the trip by matching the departure date. Lines are rebuilt from pdf.js text fragments by y coordinate, and Vessel / Departure / Return are read by COLUMN because this invoice puts them under their heading rather than beside it. Paste-the-text fallback for scans -->
 <!-- BD-ADHOC 2026-09-20a | New admin page: enter a direct (adhoc) booking from a supplier invoice. Creates the Divers row only when no existing diver matches, then one Bookings row per guest with Source=Direct (which mints the D-ref via the new Ref formula field) plus Supplier / Supplier Invoice, and the matching Payments row that Make would normally create at registration. Duplicate-diver search is mandatory and fuzzy, because Airtable already holds the same person twice under two spellings. A blank price is allowed and writes no Total Price, no Pricing key and no Safari Price Override, so Price Check flags the row instead of it reading as priced at zero -->
@@ -752,11 +753,22 @@ function addGuest() {
         '<textarea id="g' + n + 'notes"></textarea></div>' +
     '</div>';
   document.getElementById('guests').appendChild(div);
+  renumberGuests();
 }
 
 function removeGuest(n) {
   const el = document.getElementById('guest' + n);
   if (el) el.remove();
+  renumberGuests();
+}
+
+// The label is the guest's position on screen, 1, 2, 3. The n inside the element ids
+// only has to be unique and keeps counting, so it is never shown.
+function renumberGuests() {
+  document.querySelectorAll('.guest').forEach(function (g, i) {
+    const lbl = g.querySelector('.guest-num');
+    if (lbl) lbl.textContent = 'Guest ' + (i + 1);
+  });
 }
 
 function refreshAllMatches() {
@@ -1168,8 +1180,9 @@ function buildReview() {
   if (!invoice)  errs.push('Invoice number is empty.');
 
   const guests = [];
-  document.querySelectorAll('.guest').forEach(function (g) {
+  document.querySelectorAll('.guest').forEach(function (g, i) {
     const n = parseInt(g.id.replace('guest', ''), 10);
+    const pos = i + 1;   // what the screen shows, not the internal id number
     const first = (document.getElementById('g' + n + 'first') || {}).value.trim();
     const last  = (document.getElementById('g' + n + 'last')  || {}).value.trim();
     if (!first && !last) return;
@@ -1177,16 +1190,16 @@ function buildReview() {
     const price  = parseFloat((document.getElementById('g' + n + 'price') || {}).value || '');
     const extra  = parseFloat((document.getElementById('g' + n + 'extra') || {}).value || '0');
 
-    if (!picked) errs.push('Guest ' + n + ' (' + (first + ' ' + last).trim() + '): pick an existing diver or choose to create a new one.');
+    if (!picked) errs.push('Guest ' + pos + ' (' + (first + ' ' + last).trim() + '): pick an existing diver or choose to create a new one.');
     // A blank price is allowed on purpose. Sometimes the invoice arrives before what the
     // customer is being charged has been settled, and the base already carries bookings
     // priced by hand. The Price Check formula flags them until a figure is filled in.
-    if (!(price > 0)) warns.push('Guest ' + n + ' (' + (first + ' ' + last).trim() + '): no price. The booking will carry no Total Price and no Pricing key, and Airtable will show CHECK PRICE against it until you set one in the Follow-up manager.');
+    if (!(price > 0)) warns.push('Guest ' + pos + ' (' + (first + ' ' + last).trim() + '): no price. The booking will carry no Total Price and no Pricing key, and Airtable will show CHECK PRICE against it until you set one in the Follow-up manager.');
 
     const diverId = picked ? picked.value : '';
     if (diverId && diverId !== '__new__') {
       const dupe = tripBookings.filter(function (b) { return b.diverId === diverId; })[0];
-      if (dupe) errs.push('Guest ' + n + ' (' + (first + ' ' + last).trim() + ') already has a booking on this trip (' + dupe.ref + '). Entering them again would duplicate the row.');
+      if (dupe) errs.push('Guest ' + pos + ' (' + (first + ' ' + last).trim() + ') already has a booking on this trip (' + dupe.ref + '). Entering them again would duplicate the row.');
     }
 
     guests.push({
