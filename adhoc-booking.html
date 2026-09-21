@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- BD-ADHOC 2026-09-21d | The BD trip views bookmark is replaced by a private Chrome extension (tools/bd-trip-views-extension, git-ignored, built from bdTripViews() here by build.py): Chrome applies Airtable's CSP to javascript: bookmarks and blocked it silently. Install link removed, last card and Done screen now point to the extension button -->
 <!-- BD-ADHOC 2026-09-21c | New trips get their Bookings view: a "BD trip views" bookmark (install link in the last card) runs inside Airtable, where the logged-in session can use the internal /v0.3 view calls the public API lacks. For each trip created since 2026-09-21 with no view filtered on it, it duplicates the neighbouring trip view (same columns, lands in date order), names it "<Trip Id> <Trip Name>", sets Trip = that trip, and re-reads the view to confirm the filter. Asks before adding anything. Done screen reminds to click it after a new trip -->
 <!-- BD-ADHOC 2026-09-21b | Guest boxes are numbered by their position on screen (1, 2, 3), renumbered after a remove. Loading a PDF used to replace the two starter boxes and carry on counting, so the first invoice guest showed as Guest 3; the review messages now use the same on-screen number -->
 <!-- BD-ADHOC 2026-09-21a | When the invoice's trip is not in Airtable, the page now creates it: a new "create a new trip" choice in the trip list, picked automatically when no trip departs on the invoice date, with Trip Id (YYMMDD of departure, B/C suffix if taken, checked against every Trips row incl. lottery copies), Destination, Trip Name, Vessel, dates, Currency, Status, Leader (default Self) and Capacity prefilled from the invoice. The Trips row is written first and every Bookings and Payments row links to it; if the trip write fails nothing else is written -->
@@ -443,15 +444,14 @@
       touches a trip that already has a view.
     </div>
     <div class="note">
-      <b>Set it up once:</b> show the bookmarks bar (Cmd+Shift+B in Chrome), then drag this button onto it:
-    </div>
-    <div style="margin:12px 0 4px;">
-      <a id="bmLink" class="btn btn-primary" href="#" style="text-decoration:none;display:inline-block;">BD trip views</a>
+      The button is a small private Chrome extension called <b>BD trip views</b>, installed once on
+      Ian's Mac from the folder <code>tools/bd-trip-views-extension</code> in the website folder. It is
+      not a bookmark: Chrome refuses to run bookmark code on Airtable.
     </div>
     <div class="note">
       <b>After writing a new trip:</b> open <a href="https://airtable.com/app2RAeuaXaWrHOan/tblMCB8nCSoRuiTKI" target="_blank" rel="noopener">Airtable Bookings</a>
-      and click <b>BD trip views</b> in the bookmarks bar. It lists what it will add and asks before doing anything.
-      Clicking it here on this page only shows a reminder: it works inside Airtable.
+      and click the <b>BD trip views</b> button next to Chrome's address bar. It lists what it will add
+      and asks before doing anything.
     </div>
   </div>
 
@@ -1449,7 +1449,7 @@ async function writeAll() {
       created.map(function (c) { return esc(c.ref + ' ' + c.who); }).join(', ') +
       '.<br/>Quote the D-reference to the supplier. Reload the page to enter another invoice.' +
       (tripMade ? '<br/><b>Last step for the new trip:</b> open <a href="https://airtable.com/app2RAeuaXaWrHOan/tblMCB8nCSoRuiTKI" target="_blank" rel="noopener">Airtable Bookings</a> ' +
-        'and click the <b>BD trip views</b> bookmark to add its view. See the last card on this page.' : '') +
+        'and click the <b>BD trip views</b> button next to Chrome\'s address bar to add its view.' : '') +
       '</div>';
   } else {
     summary = '<div class="banner banner-err"><b>' + failed + ' of ' + p.guests.length +
@@ -1464,10 +1464,12 @@ async function writeAll() {
 
 // ── AIRTABLE BUTTON: ADD THE BOOKINGS VIEW FOR A NEW TRIP ────────
 // The public API cannot create views and this page only holds a token, so this
-// function never runs here. It is turned into a bookmark (the link in the last card)
-// and runs INSIDE Airtable, where it can use the logged-in session and the same
-// internal /v0.3 calls the Airtable UI makes when you duplicate a view.
-// Inside the function: block comments only, since a bookmark may lose its line breaks.
+// function never runs here. tools/bd-trip-views-extension/build.py copies it into a
+// private Chrome extension, which runs it INSIDE Airtable, where it can use the logged-in
+// session and the same internal /v0.3 calls the Airtable UI makes to duplicate a view.
+// It is not a bookmark because Chrome applies Airtable's CSP to javascript: bookmarks
+// and silently blocks them; extension-injected code is exempt. Kept here as the single
+// source. After editing it: run build.py, then reload the extension in chrome://extensions.
 async function bdTripViews() {
   /* BD-TRIPVIEWS: adds a Bookings view "<Trip Id> <Trip Name>" filtered on Trip, for every
      trip created since 2026-09-21 that has no such view yet. It duplicates the neighbouring
@@ -1475,11 +1477,11 @@ async function bdTripViews() {
   const APP = 'app2RAeuaXaWrHOan', BOOKINGS = 'tblMCB8nCSoRuiTKI', TRIPS = 'tbl8KGVwkIHi26plq';
   const TRIP_FIELD = 'fldqN75NRMCt0Ex3A', SINCE = '2026-09-21';
   if (location.hostname !== 'airtable.com' || location.pathname.indexOf(APP) === -1) {
-    alert('Open the Buddy-Divers CRM base in Airtable first, then click this bookmark again.');
+    alert('Open the Buddy-Divers CRM base in Airtable first, then click BD trip views again.');
     return;
   }
   const sm = document.documentElement.innerHTML.match(/secretSocketId[^A-Za-z0-9]{1,12}(soc[A-Za-z0-9]{14})/);
-  if (!sm) { alert('Could not find the Airtable session. Reload the Airtable page and click the bookmark again.'); return; }
+  if (!sm) { alert('Could not find the Airtable session. Reload the Airtable page and click BD trip views again.'); return; }
   const soc = sm[1];
   const H = { 'X-Requested-With': 'XMLHttpRequest', 'x-airtable-application-id': APP,
               'x-time-zone': Intl.DateTimeFormat().resolvedOptions().timeZone, 'x-user-locale': 'en' };
@@ -1572,10 +1574,7 @@ async function bdTripViews() {
   }
 }
 
-document.addEventListener('DOMContentLoaded', function () {
-  const a = document.getElementById('bmLink');
-  if (a) a.href = 'javascript:' + encodeURIComponent('(' + bdTripViews.toString() + ')()');
-});
+// ── end bdTripViews (build.py reads up to this line) ──
 
 document.addEventListener('DOMContentLoaded', checkToken);
 </script>
