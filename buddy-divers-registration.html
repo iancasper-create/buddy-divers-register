@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- BD-REG 2026-09-23e | 261122 Thailand 22/11-29/11/2026 marked closed: true, per Ian who does not recognise the trip. It had no card on trips.html and no Trips row in Airtable, so a direct ?trip=261122 link could still take a booking with nowhere to land. Config kept so the link resolves to the closed notice -->
 <!-- BD-REG 2026-09-23d | 261213 four cabin types repriced and rewritten: lower deck $2,490, upper deck $2,590, main deck SUITE $2,790 (was a twin), upper deck suite $2,860, listed low to high. All now "double bed and single bed"; square metres dropped from every option; was-prices recomputed to hold 30% off. -->
 <!-- BD-REG 2026-09-23c | 261213: 30% discount added per Ian (promo "30% הנחה", pricingTitle suffix, wasPrice per tier computed as price/0.7: $3,557/$3,700/$3,986/$4,100). Note now says "מצטרפים למוביל איאן כספר" instead of "מלווה: איאן כספר" -->
 <!-- BD-REG 2026-09-23b | New trip 261213 Best of Maldives, Emperor Serenity, 13/12-20/12/2026, USD, foreign-passport-only like 261004. Four cabin tiers (lower_twin_2490/main_twin_2590/upper_suite_2790/upper_twin_2870), no single-use supplement (none in Ian's source doc, none invented). Leader Ian Casper -->
@@ -2468,6 +2469,7 @@ const TRIPS = {
     noFlights: true
   },
   "261122": {
+    closed: true,
     name: "🤿 ספארי תאילנד — Thailand Safari",
     dates: "22/11/2026 – 29/11/2026",
     currency: "USD",
