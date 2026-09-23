@@ -1,3 +1,4 @@
+<!-- BD-EDIT 2026-09-23a | 270421 repriced to match buddy-divers-registration.html BD-REG 2026-09-23a: three cabin tiers (lower_twin_4480, upper_double_4790, master_suite_4870) replace certified_4890 + roomOptions; single-use supplement is now 50% of each cabin's price (single_supp_lower_2240/upper_2395/master_2435), no longer flat -->
 <!-- BD-EDIT 2026-09-21c | Trip 270421 (Sinai Pesach 2027, Snefro Love, 21/04-28/04/2027) added to the TRIPS pricing map: certified_4890, single_supp_2445 and the two room upgrades, matching the registration form -->
 <!-- BD-EDIT 2026-09-21b | 280408: nitrox_150 addon removed to match the registration form (nitrox is booked and paid on board) -->
 <!-- BD-EDIT 2026-09-21a | Trip 280408 (Galapagos Pesach 2028, Tiburon Explorer, 08/04-15/04/2028) added to the TRIPS pricing map: six cabin options matching the registration form plus nitrox_150 addon -->
@@ -1505,39 +1506,53 @@ const TRIPS = {
   "270421": {
     name: "🚢 ספארי סיני בפסח | Snefro Love",
     dates: "21/04/2027 – 28/04/2027",
-    note: "🚢 Snefro Love | 7 לילות | הכל כלול",
+    note: "🚢 Snefro Love | 7 לילות | ראס אבו גלום, דהב, מיצרי טיראן וראס מוחמד | הכל כלול",
     currency: "ILS",
     pricing: [
       {
-        value: "certified_4890",
-        he: "חבילת צלילה לצולל.ת מוסמך.ת, 7 לילות",
-        en: "Certified diver package, 7 nights",
-        price: "₪4,890",
-        priceNum: 4890
+        value: "lower_twin_4480",
+        he: "חדר טווין, מפלס תחתון, 7-8 מ\"ר, שתי מיטות יחיד (מחיר ליחיד, מותנה בהרשמה של שניים)",
+        en: "Twin cabin, lower deck, 7-8 sqm, two single beds (per person, double occupancy)",
+        price: "₪4,480",
+        priceNum: 4480
       },
       {
-        value: "single_supp_2445",
-        he: "תוספת חדר זוגי בתפוסת יחיד.ה",
-        en: "Single use of double room supplement",
-        price: "₪2,445",
-        priceNum: 2445,
+        value: "upper_double_4790",
+        he: "חדר זוגי, מפלס עליון, 9 מ\"ר, מיטת Queen (מחיר ליחיד, מותנה בהרשמה של שניים)",
+        en: "Double cabin, upper deck, 9 sqm, queen bed (per person, double occupancy)",
+        price: "₪4,790",
+        priceNum: 4790
+      },
+      {
+        value: "master_suite_4870",
+        he: "סוויטת מאסטר, מפלס ראשי, 12 מ\"ר, מיטת Queen (מחיר ליחיד, מותנה בהרשמה של שניים)",
+        en: "Master suite, main deck, 12 sqm, queen bed (per person, double occupancy)",
+        price: "₪4,870",
+        priceNum: 4870
+      },
+      {
+        value: "single_supp_lower_2240",
+        he: "תוספת שימוש יחיד.ה, חדר טווין מפלס תחתון",
+        en: "Single use supplement, lower deck twin cabin",
+        price: "₪2,240",
+        priceNum: 2240,
         supplement: true
-      }
-    ],
-    roomOptions: [
-      {
-        value: "upper_double_280",
-        he: "חדר זוגי במפלס העליון, 9 מ\"ר, מיטת Queen (מותנה בהרשמה של שניים)",
-        en: "Upper deck double cabin, 9 sqm, queen bed (requires two guests)",
-        price: "₪280",
-        priceNum: 280
       },
       {
-        value: "master_suite_330",
-        he: "סוויטת מאסטר במפלס הראשי, 12 מ\"ר, מיטת Queen (מותנה בהרשמה של שניים)",
-        en: "Main deck master suite, 12 sqm, queen bed (requires two guests)",
-        price: "₪330",
-        priceNum: 330
+        value: "single_supp_upper_2395",
+        he: "תוספת שימוש יחיד.ה, חדר זוגי מפלס עליון",
+        en: "Single use supplement, upper deck double cabin",
+        price: "₪2,395",
+        priceNum: 2395,
+        supplement: true
+      },
+      {
+        value: "single_supp_master_2435",
+        he: "תוספת שימוש יחיד.ה, סוויטת מאסטר מפלס ראשי",
+        en: "Single use supplement, main deck master suite",
+        price: "₪2,435",
+        priceNum: 2435,
+        supplement: true
       }
     ]
   },
