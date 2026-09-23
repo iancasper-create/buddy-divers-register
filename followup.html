@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- BD-FOLLOWUP 2026-09-23b | Trip 261213 (Best of Maldives, Emperor Serenity, 13/12-20/12/2026, USD) added to all three trip maps: tripCountries, tripNames, CF_TRIPS_FALLBACK (four cabin tier labels, no single-use supplement) -->
 <!-- BD-FOLLOWUP 2026-09-23a | 270421 CF_TRIPS_FALLBACK opts repriced to match buddy-divers-registration.html BD-REG 2026-09-23a: three cabin tiers (lower_twin_4480/upper_double_4790/master_suite_4870) plus three matching single-use supplements (50% of each cabin's price), replacing certified_4890/single_supp_2445/upper_double_280/master_suite_330 -->
 <!-- BD-FOLLOWUP 2026-09-21c | Trip 270421 (Sinai Pesach 2027, Snefro Love, 21/04-28/04/2027, ILS) added to all three trip maps: tripCountries, tripNames, CF_TRIPS_FALLBACK (dest + vessel + four option labels) -->
 <!-- BD-FOLLOWUP 2026-09-21b | 280408: nitrox_150 label removed from CF_TRIPS_FALLBACK, nitrox is no longer a form option (paid on board) -->
@@ -2047,7 +2048,7 @@ function buildPaymentHTML(booking, amount, nisAmount, rate, notes, paidSoFar, sa
     '270525B': 'אינדונזיה, צפון סולאווסי וקומודו',
     '270609': 'אינדונזיה, קומודו',
     '270422': 'פיליפינים — טובטאהה',
-    '260801': 'מלדיביים', '261004': 'מלדיביים',
+    '260801': 'מלדיביים', '261004': 'מלדיביים', '261213': 'מלדיביים',
   };
   const tripCountry = tripCountries[booking.tripId] || '';
 
@@ -2233,7 +2234,7 @@ async function generatePaymentImage() {
     '270609':'קומודו, Solitude Adventurer, יוני 2027',
     '270422':'טובטאהה — פיליפינים — אפריל 2027',
     '260801':'מלדיביים — Black Manta — אוגוסט 2026',
-    '261004':'מלדיביים, Emperor Explorer II, אוקטובר 2026',
+    '261004':'מלדיביים, Emperor Explorer II, אוקטובר 2026', '261213':'מלדיביים, Emperor Serenity, דצמבר 2026',
   };
   const tripDisplayName = tripNames[booking.tripId] || `טיול ${booking.tripId}`;
   const tripCurrency = booking.currency || 'USD';
@@ -2787,6 +2788,8 @@ const CF_TRIPS_FALLBACK = {
     opts:{"certified_3980": "Certified diver package", "ow_course_3980": "Package incl. Open Water course", "advanced_course_4580": "Package incl. Advanced Open Water course", "nondiver_2730": "Non-diver accommodation package", "single_supp_760": "Single use of double room supplement", "sea_view_double_175": "Sea view room, double occupancy (per person)", "sea_view_single_350": "Sea view room, single occupancy", "suite_double_395": "Suite with garden exit or sea view, double occupancy (per person)", "suite_single_790": "Suite with garden exit or sea view, single occupancy"} },
   "261004": { name:"Best of Maldives", dest:"the Maldives", vessel:"Emperor Explorer II", arrive:"4 October 2026", depart:"11 October 2026", currency:"USD",
     opts:{"lower_twin_2452": "Standard room, lower deck, double bed and single bed", "main_suite_2735": "Main deck suite, double bed and single bed", "upper_suite_2735": "Upper deck suite, double bed and single bed"} },
+  "261213": { name:"Best of Maldives", dest:"the Maldives", vessel:"Emperor Serenity", arrive:"13 December 2026", depart:"20 December 2026", currency:"USD",
+    opts:{"lower_twin_2490": "Twin cabin, lower deck", "main_twin_2590": "Twin cabin, main deck", "upper_suite_2790": "Suite, upper deck", "upper_twin_2870": "Twin cabin, upper deck"} },
   "261009": { name:"Madagascar Safari", dest:"Madagascar", vessel:"DUNE Madagascar", arrive:"9 October 2026", depart:"18 October 2026", currency:"EUR",
     opts:{"twin_2890": "Single occupancy in twin room", "twin_2690": "Non-diver sharing twin room", "single_supplement": "Single room supplement (add-on)"} },
   "261022": { name:"Galapagos Safari", dest:"the Galapagos Islands", vessel:"", arrive:"22 October 2026", depart:"29 October 2026", currency:"USD",

@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- BD-REG 2026-09-23b | New trip 261213 Best of Maldives, Emperor Serenity, 13/12-20/12/2026, USD, foreign-passport-only like 261004. Four cabin tiers (lower_twin_2490/main_twin_2590/upper_suite_2790/upper_twin_2870), no single-use supplement (none in Ian's source doc, none invented). Leader Ian Casper -->
 <!-- BD-REG 2026-09-23a | 270421 repriced per Ian: three cabin tiers now separate radio options (lower_twin_4480, upper_double_4790, master_suite_4870, replacing certified_4890 + roomOptions upgrades). Single-use supplement is no longer a flat fee: it is 50% of each cabin's listed price, added as a matching supplement checkbox per cabin (single_supp_lower_2240/upper_2395/master_2435), same pattern as the retired 261010 config. Note elaborated with the Deep North route (Ras Abu Galum, Dahab, Tiran, Ras Mohamed) per kingsnefrofleet.com -->
 <!-- BD-REG 2026-09-21e | New trip 270421 Sinai Pesach 2027, Snefro Love, 21/04-28/04/2027, ILS, noFlights + roomOptional like 261029. certified_4890, single_supp_2445 (supplement), room upgrades upper_double_280 and master_suite_330 (master suite on the MAIN deck per King Snefro). Leader TBA -->
 <!-- BD-REG 2026-09-21d | 280408: nitrox_150 addon removed, per Ian nitrox is booked and paid on board -->
@@ -1979,6 +1980,47 @@ const TRIPS = {
         wasPrice: "$3,503",
         price: "$2,452",
         priceNum: 2452
+      }
+    ]
+  },
+  "261213": {
+    name: "🐠 מלדיביים בסטייל | Emperor Serenity",
+    dates: "13/12/2026 – 20/12/2026",
+    note: "🚢 Emperor Serenity | 7 לילות | ארי אטול, וו אטול ומאלה | מלווה: איאן כספר",
+    noteAlert: "לבעלי דרכונים זרים בלבד",
+    currency: "USD",
+    pricingTitle: {
+      he: "עלות הספארי",
+      en: "Safari Pricing"
+    },
+    pricing: [
+      {
+        value: "lower_twin_2490",
+        he: "חדר טווין, מפלס תחתון, 10.5-13.5 מ\"ר, שתי מיטות יחיד",
+        en: "Twin cabin, lower deck, 10.5-13.5 sqm, two single beds",
+        price: "$2,490",
+        priceNum: 2490
+      },
+      {
+        value: "main_twin_2590",
+        he: "חדר טווין, מפלס ראשי, 11 מ\"ר, שתי מיטות יחיד",
+        en: "Twin cabin, main deck, 11 sqm, two single beds",
+        price: "$2,590",
+        priceNum: 2590
+      },
+      {
+        value: "upper_suite_2790",
+        he: "סוויטה, מפלס עליון, 17.5 מ\"ר, שתי מיטות יחיד",
+        en: "Suite, upper deck, 17.5 sqm, two single beds",
+        price: "$2,790",
+        priceNum: 2790
+      },
+      {
+        value: "upper_twin_2870",
+        he: "חדר טווין, מפלס עליון, 22 מ\"ר, שתי מיטות יחיד",
+        en: "Twin cabin, upper deck, 22 sqm, two single beds",
+        price: "$2,870",
+        priceNum: 2870
       }
     ]
   },
