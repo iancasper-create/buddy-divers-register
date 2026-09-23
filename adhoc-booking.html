@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- BD-ADHOC 2026-09-23a | bdTripViews() now covers every CURRENT trip without a Bookings view, not only trips created since a fixed date: candidates are trips departing in the future or within the last BACKFILL_DAYS (30), finished trips are skipped, and a trip with no departure date still counts. The list is still shown and confirmed before anything is created. Run tools/bd-trip-views-extension/build.py after editing -->
 <!-- BD-ADHOC 2026-09-21d | The BD trip views bookmark is replaced by a private Chrome extension (tools/bd-trip-views-extension, git-ignored, built from bdTripViews() here by build.py): Chrome applies Airtable's CSP to javascript: bookmarks and blocked it silently. Install link removed, last card and Done screen now point to the extension button -->
 <!-- BD-ADHOC 2026-09-21c | New trips get their Bookings view: a "BD trip views" bookmark (install link in the last card) runs inside Airtable, where the logged-in session can use the internal /v0.3 view calls the public API lacks. For each trip created since 2026-09-21 with no view filtered on it, it duplicates the neighbouring trip view (same columns, lands in date order), names it "<Trip Id> <Trip Name>", sets Trip = that trip, and re-reads the view to confirm the filter. Asks before adding anything. Done screen reminds to click it after a new trip -->
 <!-- BD-ADHOC 2026-09-21b | Guest boxes are numbered by their position on screen (1, 2, 3), renumbered after a remove. Loading a PDF used to replace the two starter boxes and carry on counting, so the first invoice guest showed as Guest 3; the review messages now use the same on-screen number -->
@@ -1472,10 +1473,12 @@ async function writeAll() {
 // source. After editing it: run build.py, then reload the extension in chrome://extensions.
 async function bdTripViews() {
   /* BD-TRIPVIEWS: adds a Bookings view "<Trip Id> <Trip Name>" filtered on Trip, for every
-     trip created since 2026-09-21 that has no such view yet. It duplicates the neighbouring
-     trip view, so columns, hidden fields and sort match, and it lands in date order. */
+     current trip that has no such view yet. Current means it departs in the future or left
+     within the last BACKFILL_DAYS, so finished trips are left alone. It duplicates the
+     neighbouring trip view, so columns, hidden fields and sort match, and it lands in date
+     order. Nothing is created before the list is shown and confirmed. */
   const APP = 'app2RAeuaXaWrHOan', BOOKINGS = 'tblMCB8nCSoRuiTKI', TRIPS = 'tbl8KGVwkIHi26plq';
-  const TRIP_FIELD = 'fldqN75NRMCt0Ex3A', SINCE = '2026-09-21';
+  const TRIP_FIELD = 'fldqN75NRMCt0Ex3A', BACKFILL_DAYS = 30;
   if (location.hostname !== 'airtable.com' || location.pathname.indexOf(APP) === -1) {
     alert('Open the Buddy-Divers CRM base in Airtable first, then click BD trip views again.');
     return;
@@ -1526,7 +1529,8 @@ async function bdTripViews() {
     const trips = {};
     td.rows.forEach(function (r) {
       const c = r.cellValuesByColumnId;
-      trips[r.id] = { rec: r.id, tid: String(c[col['Trip Id']] || '').trim(), name: String(c[col['Trip Name']] || '').trim(), created: r.createdTime };
+      trips[r.id] = { rec: r.id, tid: String(c[col['Trip Id']] || '').trim(), name: String(c[col['Trip Name']] || '').trim(),
+                      dep: String(c[col['Departure Date']] || '').slice(0, 10), created: r.createdTime };
     });
 
     /* which trip each existing Bookings view shows, in sidebar order */
@@ -1540,10 +1544,12 @@ async function bdTripViews() {
     views.forEach(function (v) { if (v.trip) covered[v.trip] = true; });
 
     const isReal = function (t) { return t && t.tid && !/copy/i.test(t.tid) && t.tid !== '999999'; };
+    /* a trip with no departure date is treated as current rather than skipped */
+    const cutoff = new Date(Date.now() - BACKFILL_DAYS * 864e5).toISOString().slice(0, 10);
     const todo = Object.keys(trips).map(function (k) { return trips[k]; }).filter(function (t) {
-      return isReal(t) && t.created >= SINCE && !covered[t.rec];
+      return isReal(t) && !covered[t.rec] && (!t.dep || t.dep >= cutoff);
     });
-    if (!todo.length) { alert('Every trip created since ' + SINCE + ' already has its Bookings view. Nothing to add.'); return; }
+    if (!todo.length) { alert('Every current trip already has its Bookings view. Nothing to add.'); return; }
     if (!confirm('Add a Bookings view for:\n\n' + todo.map(function (t) { return t.tid + ' ' + t.name; }).join('\n') + '\n\nOK to go ahead?')) return;
 
     /* templates: ordinary trip views, so the copy gets the usual columns */
