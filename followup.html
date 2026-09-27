@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- BD-FOLLOWUP 2026-09-27a | Trip 270320 (Thailand Andaman, The Smiling Seahorse, 20/03-27/03/2027, USD) added to all three trip maps: tripCountries, tripNames, CF_TRIPS_FALLBACK (one option deluxe_share_2366) -->
 <!-- BD-FOLLOWUP 2026-09-23c | 261213 CF_TRIPS_FALLBACK opts matched to buddy-divers-registration.html BD-REG 2026-09-23d: four cabin types: lower $2,490, upper $2,590, main suite $2,790, upper suite $2,860. -->
 <!-- BD-FOLLOWUP 2026-09-23b | Trip 261213 (Best of Maldives, Emperor Serenity, 13/12-20/12/2026, USD) added to all three trip maps: tripCountries, tripNames, CF_TRIPS_FALLBACK (four cabin tier labels, no single-use supplement) -->
 <!-- BD-FOLLOWUP 2026-09-23a | 270421 CF_TRIPS_FALLBACK opts repriced to match buddy-divers-registration.html BD-REG 2026-09-23a: three cabin tiers (lower_twin_4480/upper_double_4790/master_suite_4870) plus three matching single-use supplements (50% of each cabin's price), replacing certified_4890/single_supp_2445/upper_double_280/master_suite_330 -->
@@ -2042,6 +2043,7 @@ function buildPaymentHTML(booking, amount, nisAmount, rate, notes, paidSoFar, sa
     '261009': 'מדגסקר', '261022': 'גלפגוס', '271014': 'גלפגוס', '280408': 'גלפגוס',
     '261029': 'סיני', '270421': 'סיני',
     '261211': 'מיאנמר', '270106': 'מיאנמר', '270203': 'מיאנמר', '270303': 'מיאנמר',
+    '270320': 'תאילנד',
     '261219': 'פיליפינים',
     '270118': 'אינדונזיה — ראג׳ה אמפאט',
     '270814': 'אינדונזיה — קומודו וצפון סולאווסי',
@@ -2227,6 +2229,7 @@ async function generatePaymentImage() {
     '261029':'ספארי 5 כוכבים — סיני — אוקטובר 2026',
     '270421':'ספארי סיני, Snefro Love, פסח 2027',
     '261211':'מיאנמר — דצמבר 2026', '270106':'מיאנמר — ינואר 2027', '270203':'מיאנמר — פברואר 2027', '270303':'מיאנמר — מרץ 2027',
+    '270320':'תאילנד, ים אנדמן, מרץ 2027',
     '261219':'פיליפינים — דצמבר 2026',
     '270118':'ראג׳ה אמפאט — ינואר 2027',
     '270814':'מסע הדגל — קומודו וצפון סולאווסי — אוגוסט 2027',
@@ -2815,6 +2818,8 @@ const CF_TRIPS_FALLBACK = {
     opts:{"upper_standard_2350": "Single in twin room, upper deck standard (shared bathroom)", "main_deluxe_2470": "Single in twin room, main deck deluxe", "main_master_2550": "Single in twin room, main deck master (double bed only)"} },
   "270303": { name:"Myanmar Safari", dest:"Myanmar", vessel:"", arrive:"3 March 2027", depart:"10 March 2027", currency:"USD",
     opts:{"upper_standard_2325": "Single in twin room, upper deck standard (shared bathroom)", "main_deluxe_2391": "Single in twin room, main deck deluxe", "main_master_2491": "Single in twin room, main deck master (double bed only)"} },
+  "270320": { name:"Thailand Safari - South & North Andaman", dest:"Thailand", vessel:"The Smiling Seahorse", arrive:"20 March 2027", depart:"27 March 2027", currency:"USD",
+    opts:{"deluxe_share_2366": "Deluxe en-suite cabin, single male share"} },
   "270422": { name:"Tubbataha", dest:"the Philippines (Tubbataha Reef)", vessel:"Stella Maris Explorer", arrive:"22 April 2027", depart:"28 April 2027", currency:"USD",
     opts:{"tubbataha_3630": "Safari price, Main Deck Deluxe cabin (double bed), incl. nitrox"} },
   "270525": { name:"Flagship Journey - North Sulawesi", dest:"Indonesia (North Sulawesi)", vessel:"Siladen Resort & Spa and Coral Eye Resort", arrive:"23 May 2027", depart:"5 June 2027", currency:"EUR",
