@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- BD-REG 2026-10-01a | Trip 270421 (Sinai Pesach, Snefro Love) now lists local fees as NOT included: 135 EUR per person (National Park, tax, port, jetty and departure fees), cash on site, per the operator's 2027 increase from 130 EUR. New optional config field notIncluded (array of {he, en}), rendered in #pricingNotIncluded under the pricing options; never added to totals. Trips without it are unaffected -->
 <!-- BD-REG 2026-09-27b | New trip 261205 Raja Ampat, Tiaré, 05/12-15/12/2026 (10 nights, Sorong round trip), USD, private registration link only (no trips.html card), built from the Tiaré price offer PDF. One option triple_couple_5760 (triple cabin for a couple only, $5,760, wasPrice $6,400, promo 10% off). No leader. Config block inserted immediately before 261211 -->
 <!-- BD-REG 2026-09-27a | New trip 270320 Thailand South & North Andaman, The Smiling Seahorse, 20/03-27/03/2027 (7 nights, Phuket to Ranong), USD, built from Ian's Smiling Seahorse proposal PDF. One option deluxe_share_2366 (deluxe en-suite cabin, single male share, $2,366). No leader. Config block inserted immediately before 261211 -->
 <!-- BD-REG 2026-09-23e | 261122 Thailand 22/11-29/11/2026 marked closed: true, per Ian who does not recognise the trip. It had no card on trips.html and no Trips row in Airtable, so a direct ?trip=261122 link could still take a booking with nowhere to land. Config kept so the link resolves to the closed notice -->
@@ -902,6 +903,7 @@
         <!-- Dynamically populated from trip config -->
       </div>
       <span class="field-error" id="pricingError" style="display:none;margin-top:8px;">יש לבחור אפשרות תמחור / Please select a pricing option</span>
+      <div id="pricingNotIncluded" style="display:none;margin-top:12px;padding:10px 12px;border-radius:10px;background:#fdf3ec;border:1px solid #f0c9ad;font-size:13px;color:#1a3a5c;"></div>
     </div>
 
     <!-- SECTION 5b: Cabin Type (shown only for trips with roomOptions) -->
@@ -2506,6 +2508,12 @@ const TRIPS = {
         supplement: true
       }
     ],
+    notIncluded: [
+      {
+        he: "אגרות מקומיות בסך 135 אירו לאדם (פארק לאומי, מסים, נמל, מזח ויציאה), לתשלום במזומן במקום",
+        en: "Local fees of 135 EUR per person (National Park, tax, port, jetty and departure fees), payable in cash on site"
+      }
+    ],
     noFlights: true
   },
   "261122": {
@@ -3054,6 +3062,36 @@ function init() {
       '<span class="icon">💳</span> ' + tripConfig.pricingTitle.he +
       ' <span style="font-weight:400;color:var(--muted);font-size:12px;margin-right:6px;">' + tripConfig.pricingTitle.en + '</span>' +
       '<span class="req">*</span>';
+  }
+
+  // Show "not included" costs if trip has notIncluded (display only, never in totals)
+  const notIncludedEl = document.getElementById('pricingNotIncluded');
+  if (notIncludedEl) {
+    notIncludedEl.innerHTML = '';
+    if (tripConfig.notIncluded && tripConfig.notIncluded.length > 0) {
+      const head = document.createElement('div');
+      head.style.cssText = 'font-weight:800;color:#d4692a;margin-bottom:4px;';
+      head.textContent = 'לא כלול במחיר / Not included';
+      notIncludedEl.appendChild(head);
+      tripConfig.notIncluded.forEach(function(item) {
+        const row = document.createElement('div');
+        row.style.cssText = 'margin-top:4px;';
+        const he = document.createElement('div');
+        he.style.fontWeight = '600';
+        he.textContent = item.he;
+        const en = document.createElement('div');
+        en.style.cssText = 'font-size:12px;color:var(--muted);';
+        en.setAttribute('dir', 'ltr');
+        en.style.textAlign = 'right';
+        en.textContent = item.en;
+        row.appendChild(he);
+        row.appendChild(en);
+        notIncludedEl.appendChild(row);
+      });
+      notIncludedEl.style.display = 'block';
+    } else {
+      notIncludedEl.style.display = 'none';
+    }
   }
 
   // Update room options section title if trip has custom roomOptionsTitle
