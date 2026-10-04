@@ -84,7 +84,6 @@ campaign email.
 | adhoc-booking.html | Direct (adhoc) booking entry from a supplier invoice, for divers who never register. Reads the invoice PDF in the browser, searches Divers before creating one, writes the Bookings row with `Source` = `Direct` (the `Ref` formula then shows `D1315`) plus the Payments row |
 | manifest.html | Tour-leader manifest |
 | registration-copy-email.html | "Request Copy" email template used by Make |
-| lottery-check.html | Annual lottery registration verification |
 | myanmar.html | Destination page |
 | dune_aurora_forms.html, dune_black_manta_forms.html, dune_madagascar_forms.html, naia_electronic_forms.html, whaleswim_forms.html | Guest declaration forms (shared Make webhook, Cloudinary raw upload, PDFBolt) |
 | logo.png | Unused asset (all pages load the logo from Cloudinary); keep as-is |

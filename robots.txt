@@ -3,8 +3,8 @@
 # the GitHub Pages 404 page.
 #
 # WHY THE ADMIN TOOLS ARE NOT LISTED HERE.
-# crm.html, followup.html, edit-diver.html, manifest.html, lottery-check.html, the five
-# guest forms, the registration form and the net-rate calculator must stay out of Google.
+# crm.html, followup.html, edit-diver.html, manifest.html, the five guest
+# forms, the registration form and the net-rate calculator must stay out of Google.
 # They are kept out with <meta name="robots" content="noindex, nofollow"> in each file,
 # NOT with a Disallow line here, and that is deliberate. Disallow stops a crawler from
 # FETCHING a page; it does not stop it indexing one. A page that is disallowed here can
