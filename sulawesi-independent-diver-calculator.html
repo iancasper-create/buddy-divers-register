@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- BD-SULACALC 2026-10-08a | Combo transfer: a lone traveler now pays the boat-transfer sheet's 2-guest minimum (diver EUR 430, non-diver EUR 389 instead of 335/295) -->
 <!-- BD-SULACALC 2026-08-19a | SEO head block added: meta description, canonical, Open Graph and Twitter card, explicit index directive. The page had a title and nothing else, so a search result or a WhatsApp share had no description and no image -->
 <!-- BD-SULACALC 2026-08-10a | Siladen + Coral Eye villa tables rebuilt on the 2027/2028 (August 2026) Published rate sheets -->
 <html lang="he" dir="rtl">
@@ -424,6 +425,15 @@
       }
     }
 
+    // Siladen <-> Coral Eye crossing, per person: airport round trips at both resorts
+    // (Siladen EUR 100 + Coral Eye 2 x EUR 50) plus the 2027/2028 short boat transfer
+    // surcharge (diver EUR 135, non-diver/snorkeler 30% off = EUR 94.50, minimum 2 guests,
+    // so a lone traveler pays the sheet's solo price: diver EUR 230, non-diver EUR 189).
+    function comboTransfer(diver, partySize) {
+      const surcharge = partySize === 1 ? (diver ? 230 : 189) : (diver ? 135 : 94.5);
+      return 200 + surcharge;
+    }
+
     function diveCost(qty) {
       if (!qty || qty <= 0) return 0;
       const rate = qty >= 26 ? 56 : (qty >= 13 ? 58 : 60);
@@ -464,7 +474,7 @@
         const qty = diver ? (parseInt(document.getElementById('diveqty_' + i).value, 10) || 0) : 0;
         const returning = document.querySelector('[name="returning_' + i + '"]:checked').value === 'yes';
         const dCost = diveCost(qty);
-        const transfer = tripType === 'combo' ? (diver ? 335 : 295) : 100;
+        const transfer = tripType === 'combo' ? comboTransfer(diver, occ) : 100;
         const totalBeforeDiscount = Math.round(accommodationPerPerson + transfer + dCost);
         const accAfterDiscount = returning ? accommodationPerPerson * 0.95 : accommodationPerPerson;
         const discountAmount = returning ? Math.round(accommodationPerPerson - accAfterDiscount) : 0;
