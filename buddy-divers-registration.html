@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- BD-REG 2026-10-12a | New trip 271011 North Sulawesi, Coral Eye (11-16/10) + Siladen (16-21/10/2027), EUR, private registration link only (no trips.html card), built from the Coral Eye & Siladen price offer PDF. Two options diver_1915 / nondiver_1915 (same price, records who dives), notIncluded resort dives and Bunaken park fee. No leader. Config block inserted immediately before 261111 -->
 <!-- BD-REG 2026-10-01b | Trip 270421 banner note: "הכל כלול" removed per Ian, since local fees (135 EUR, cash on site) are now listed as not included -->
 <!-- BD-REG 2026-10-01a | Trip 270421 (Sinai Pesach, Snefro Love) now lists local fees as NOT included: 135 EUR per person (National Park, tax, port, jetty and departure fees), cash on site, per the operator's 2027 increase from 130 EUR. New optional config field notIncluded (array of {he, en}), rendered in #pricingNotIncluded under the pricing options; never added to totals. Trips without it are unaffected -->
 <!-- BD-REG 2026-09-27b | New trip 261205 Raja Ampat, Tiaré, 05/12-15/12/2026 (10 nights, Sorong round trip), USD, private registration link only (no trips.html card), built from the Tiaré price offer PDF. One option triple_couple_5760 (triple cabin for a couple only, $5,760, wasPrice $6,400, promo 10% off). No leader. Config block inserted immediately before 261211 -->
@@ -2340,6 +2341,42 @@ const TRIPS = {
         en: "Base price — 6 nights liveaboard, 4 nights Coral Eye Resort (incl. Garden Villa upgrade), 4 nights Siladen Resort & Spa, and 12 resort dives",
         price: "$5,970",
         priceNum: 5970
+      }
+    ]
+  },
+  "271011": {
+    name: "🇮🇩 צפון סולאווסי | Coral Eye & Siladen",
+    dates: "11/10/2027 – 21/10/2027",
+    note: "🌊 Coral Eye Resort, בנקה (11-16/10) | 🏝️ Siladen Resort & Spa, בונאקן (16-21/10) | 10 לילות",
+    currency: "EUR",
+    pricingTitle: {
+      he: "עלות החבילה ללא טיסות",
+      en: "Package Pricing (excl. flights)"
+    },
+    pricing: [
+      {
+        value: "diver_1915",
+        he: "צולל: 5 לילות ב-Coral Eye (Superior Room) ו-5 לילות ב-Siladen (Garden Room), חדר זוגי, פנסיון מלא, העברות, כולל 2 צלילות במעבר הימי בין הריזורטים",
+        en: "Diver: 5 nights Coral Eye (Superior Room) and 5 nights Siladen (Garden Room), double room, full board, transfers, incl. 2 dives on the sea crossing between the resorts",
+        price: "€1,915",
+        priceNum: 1915
+      },
+      {
+        value: "nondiver_1915",
+        he: "לא צולל: 5 לילות ב-Coral Eye (Superior Room) ו-5 לילות ב-Siladen (Garden Room), חדר זוגי, פנסיון מלא, העברות, כולל 2 שנורקלינג במעבר הימי בין הריזורטים",
+        en: "Non-diver: 5 nights Coral Eye (Superior Room) and 5 nights Siladen (Garden Room), double room, full board, transfers, incl. 2 snorkelling stops on the sea crossing between the resorts",
+        price: "€1,915",
+        priceNum: 1915
+      }
+    ],
+    notIncluded: [
+      {
+        he: "צלילות בריזורטים: 60 אירו לצלילה, ניטרוקס ללא תוספת",
+        en: "Resort diving: 60 EUR per dive, free nitrox"
+      },
+      {
+        he: "אגרת הפארק הימי בונאקן, חובה ומשולמת במקום: IDR 150,000 לביקור ועוד IDR 25,000 ליום צלילה",
+        en: "Bunaken Marine Park fee, compulsory and paid on site: IDR 150,000 per visit plus IDR 25,000 per diving day"
       }
     ]
   },
