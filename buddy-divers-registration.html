@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- BD-REG 2026-11-08d | English-only registration moved to the right trip per Ian: 270106e (Myanmar, built by mistake) removed, 270104e added (Mexico Combo 04/01-16/01/2027, same prices as 270104: quino_4295 plus the optional La Paz land supplement land_only_1190). Same English mode, payment (Credit Card / Bank Transfer, "Details will be provided") and neutral dial code; bookings filed under 270104 via submitTripId -->
 <!-- BD-REG 2026-11-08c | 270106e payment options reduced to the headings "Credit Card" and "Bank Transfer", each with "Details will be provided" (bank account line and IBAN/SWIFT promise removed) -->
 <!-- BD-REG 2026-11-08b | 270106e only: payment limited to credit card (any country) or bank transfer, standing order hidden (new optional config paymentOptions + paymentNote; submitted values unchanged). Phone and emergency phone start on a neutral "Code" choice instead of +972, with an "Other" choice for unlisted countries, and a code is required before submit (new optional config neutralDialCode) -->
 <!-- BD-REG 2026-11-08a | New English-only registration 270106e (Myanmar Safari 06/01-13/01/2027, same three cabin prices as 270106). New optional config fields lang:"en" (page switches to LTR, Hebrew stripped, Hebrew-only texts translated, incl. messages added later by the scripts) and submitTripId:"270106" (bookings land on the real 270106 trip, payload otherwise unchanged). Trip id is now resolved case-insensitively in validation and submit too, not just in the banner -->
@@ -2714,6 +2715,40 @@ const TRIPS = {
       }
     ]
   },
+  // English-only copy of 270104 for non-Hebrew speakers. Same trip, same prices:
+  // keep value/price/priceNum in step with 270104 above. submitTripId files the
+  // booking under the real trip 270104.
+  "270104e": {
+    name: "🐋 Mexico Combo 🦈",
+    dates: "04/01/2027 – 16/01/2027",
+    note: "🦭 La Paz (land, optional): 04/01–07/01 | Quino Del Mar: 07/01–16/01 🚢",
+    currency: "USD",
+    lang: "en",
+    submitTripId: "270104",
+    neutralDialCode: true,
+    paymentNote: "Payment methods: credit card (any card except Diners and American Express) or bank transfer.",
+    paymentOptions: [
+      { value: "Credit Card up to 3 payments", label: "Credit Card", sub: "Details will be provided" },
+      { value: "Bank Transfer", label: "Bank Transfer", sub: "Details will be provided" }
+    ],
+    pricing: [
+      {
+        value: "quino_4295",
+        he: "Quino Del Mar, 07/01/27–16/01/27",
+        en: "Quino Del Mar, 07/01/27–16/01/27",
+        price: "$4,295",
+        priceNum: 4295
+      },
+      {
+        value: "land_only_1190",
+        he: "La Paz, land only (optional) 04/01/27–07/01/27",
+        en: "La Paz, land only (optional) 04/01/27–07/01/27",
+        price: "$1,190",
+        priceNum: 1190,
+        supplement: true
+      }
+    ]
+  },
   "270106": {
     name: "🤿 ספארי מיאנמר — Myanmar Safari",
     dates: "06/01/2027 – 13/01/2027",
@@ -2737,45 +2772,6 @@ const TRIPS = {
         value: "main_master_2550",
         he: "יחיד בחדר זוגי — מאסטר מפלס ראשי (מיטה זוגית בלבד)",
         en: "Single in twin room — main deck master (double bed only)",
-        price: "$2,550",
-        priceNum: 2550
-      }
-    ]
-  },
-  // English-only copy of 270106 for non-Hebrew speakers. Same trip, same prices:
-  // keep value/price/priceNum in step with 270106 above. submitTripId files the
-  // booking under the real trip 270106.
-  "270106e": {
-    name: "🤿 Myanmar Safari",
-    dates: "06/01/2027 – 13/01/2027",
-    currency: "USD",
-    lang: "en",
-    submitTripId: "270106",
-    neutralDialCode: true,
-    paymentNote: "Payment methods: credit card (any card except Diners and American Express) or bank transfer.",
-    paymentOptions: [
-      { value: "Credit Card up to 3 payments", label: "Credit Card", sub: "Details will be provided" },
-      { value: "Bank Transfer", label: "Bank Transfer", sub: "Details will be provided" }
-    ],
-    pricing: [
-      {
-        value: "upper_standard_2350",
-        he: "Single in twin room, upper deck standard (shared bathroom)",
-        en: "Single in twin room, upper deck standard (shared bathroom)",
-        price: "$2,350",
-        priceNum: 2350
-      },
-      {
-        value: "main_deluxe_2470",
-        he: "Single in twin room, main deck deluxe",
-        en: "Single in twin room, main deck deluxe",
-        price: "$2,470",
-        priceNum: 2470
-      },
-      {
-        value: "main_master_2550",
-        he: "Single in twin room, main deck master (double bed only)",
-        en: "Single in twin room, main deck master (double bed only)",
         price: "$2,550",
         priceNum: 2550
       }
@@ -3097,7 +3093,7 @@ const TRIPS = {
 // ============================================================
 // TRIP ID — resolve the ?trip= param to a TRIPS key
 // ============================================================
-// Trip ids can carry a letter (270525B, 270106e). Match it in any case, so a link that
+// Trip ids can carry a letter (270525B, 270104e). Match it in any case, so a link that
 // arrives with the other case still lands on the trip instead of the default config.
 function resolveTripId() {
   const rawTripId = new URLSearchParams(window.location.search).get('trip') || 'default';
@@ -4266,7 +4262,7 @@ document.getElementById('regForm').addEventListener('submit', async function(e) 
   data['currency'] = (tripPricingConf && tripPricingConf.currency) ? tripPricingConf.currency : 'USD';
 
   // Add trip ID and destination
-  // submitTripId: a language copy of a trip (270106e) files the booking under the real trip
+  // submitTripId: a language copy of a trip (270104e) files the booking under the real trip
   const submitTripConf = TRIPS[resolveTripId()];
   data.tripId = (submitTripConf && submitTripConf.submitTripId) || submitParams.get('trip') || 'default';
   const tripConf = TRIPS[data.tripId];
