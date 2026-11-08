@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- BD-REG 2026-11-08a | New English-only registration 270106e (Myanmar Safari 06/01-13/01/2027, same three cabin prices as 270106). New optional config fields lang:"en" (page switches to LTR, Hebrew stripped, Hebrew-only texts translated, incl. messages added later by the scripts) and submitTripId:"270106" (bookings land on the real 270106 trip, payload otherwise unchanged). Trip id is now resolved case-insensitively in validation and submit too, not just in the banner -->
 <!-- BD-REG 2026-10-25a | 261029 (Sinai 5-star) suite upgrade repriced per Ian to match the trip document: suite_double_290 -> suite_double_395 (₪395 per person) and suite_single_580 -> suite_single_790 (₪790), value/price/priceNum moved together. Bookings 1310 and 1342 already hold suite_double_290; followup.html and edit-diver.html keep the old keys so they still resolve -->
 <!-- BD-REG 2026-10-24a | 261213 was-prices updated to Emperor's current published rates per Ian ($3,557/$3,700/$3,986/$4,086 -> $3,710/$3,873/$4,117/$4,222); our prices unchanged, so the discount label goes 30% -> 32% (lowest effective discount 32.2%). value/price/priceNum untouched -->
 <!-- BD-REG 2026-10-22b | Reverted 2026-10-22a: fuel surcharge removed from the online forms per Ian (it belongs in the Dropbox registration form only). 261211, 270106, 270203, 270303, 270320 are back to no notIncluded -->
@@ -461,6 +462,18 @@
       font-weight:600;
     }
     .welcome-back-banner.show { display:block; }
+
+    /* English-only mode (trip config lang:"en"), set by applyEnglishMode() */
+    html.lang-en body, html.lang-en .field input, html.lang-en .field select, html.lang-en .field textarea { direction:ltr; }
+    html.lang-en .field select { background-position:right 12px center; padding-left:14px; padding-right:32px; }
+    html.lang-en .option-label .he { display:none; }
+    html.lang-en .option-label .en { font-size:14px; font-weight:500; color:var(--text); margin-top:0; }
+    html.lang-en .option-label .option-note .en { font-size:12px; font-weight:600; color:#d4692a; opacity:1; }
+    html.lang-en .option-label > span:empty { display:none; }
+    html.lang-en .field label .en { font-weight:inherit; color:inherit; font-size:inherit; margin:0; }
+    html.lang-en .checkbox-row span .en { font-size:inherit; color:inherit; display:inline; }
+    html.lang-en .section-title > span:not(.icon):not(.req) { font-weight:inherit !important; color:inherit !important; font-size:inherit !important; margin:0 !important; }
+    html.lang-en .req { margin-right:0; margin-left:2px; }
   </style>
 </head>
 <body>
@@ -2727,6 +2740,39 @@ const TRIPS = {
       }
     ]
   },
+  // English-only copy of 270106 for non-Hebrew speakers. Same trip, same prices:
+  // keep value/price/priceNum in step with 270106 above. submitTripId files the
+  // booking under the real trip 270106.
+  "270106e": {
+    name: "🤿 Myanmar Safari",
+    dates: "06/01/2027 – 13/01/2027",
+    currency: "USD",
+    lang: "en",
+    submitTripId: "270106",
+    pricing: [
+      {
+        value: "upper_standard_2350",
+        he: "Single in twin room, upper deck standard (shared bathroom)",
+        en: "Single in twin room, upper deck standard (shared bathroom)",
+        price: "$2,350",
+        priceNum: 2350
+      },
+      {
+        value: "main_deluxe_2470",
+        he: "Single in twin room, main deck deluxe",
+        en: "Single in twin room, main deck deluxe",
+        price: "$2,470",
+        priceNum: 2470
+      },
+      {
+        value: "main_master_2550",
+        he: "Single in twin room, main deck master (double bed only)",
+        en: "Single in twin room, main deck master (double bed only)",
+        price: "$2,550",
+        priceNum: 2550
+      }
+    ]
+  },
   "270118": {
     name: "🤿 ראג'ה אמפאט — Raja Ampat",
     dates: "16/01/2027 – 28/01/2027",
@@ -3041,17 +3087,147 @@ const TRIPS = {
 };
 
 // ============================================================
+// TRIP ID — resolve the ?trip= param to a TRIPS key
+// ============================================================
+// Trip ids can carry a letter (270525B, 270106e). Match it in any case, so a link that
+// arrives with the other case still lands on the trip instead of the default config.
+function resolveTripId() {
+  const rawTripId = new URLSearchParams(window.location.search).get('trip') || 'default';
+  return TRIPS[rawTripId]
+    ? rawTripId
+    : (Object.keys(TRIPS).find(k => k.toLowerCase() === rawTripId.toLowerCase()) || rawTripId);
+}
+
+// ============================================================
+// ENGLISH-ONLY MODE — trip config lang:"en"
+// The page is written bilingual (Hebrew + English). In English mode the page turns LTR,
+// every Hebrew text is dropped, keeping the English half of "Hebrew / English" pairs,
+// and texts that only exist in Hebrew are translated from EN_TEXT. A MutationObserver
+// applies the same rule to messages the scripts add later (validation, upload, OTP).
+// ============================================================
+const HEB_RE = /[\u0590-\u05FF]/;
+const EN_TEXT = {
+  'דרכי תשלום: לנוחיותכם ניתן לשלם בכרטיס אשראי ישראלי, העברה בנקאית או הוראת קבע בבנק (לא ניתן לשלם באמצעות כרטיסי דיינרס ואמריקן אקספרס)':
+    'Payment methods: for your convenience you can pay by Israeli credit card, bank transfer or standing bank order (Diners and American Express cards are not accepted)',
+  'בנק מזרחי טפחות 20 | סניף 422 | חשבון 625145': 'Mizrahi Tefahot Bank (20) | Branch 422 | Account 625145',
+  'תתבקש.י למלא הצהרת בריאות מפורטת. אם ידוע לך על מצב רפואי העלול להגביל את פעילותך או להוות סיכון במהלך הספארי — פרט.י כאן.':
+    'You will be asked to fill in a detailed health declaration. If you know of any medical condition that may limit your activity or pose a risk during the safari, please describe it here.',
+  'אני שמח.ה לאפשר לבאדי-דייברס להשתמש בתמונות ווידאו בהם אני מופיע.ה לצורך פרסום':
+    'I am happy for Buddy-Divers to use photos and videos I appear in for publicity',
+  'הנתונים שלך מוגנים ומועברים בצורה מאובטחת': 'Your details are protected and sent securely',
+  'JPG, PNG, HEIC, WebP · עד 5MB / up to 5MB': 'JPG, PNG, HEIC, WebP · up to 5MB',
+  'טופס הרשמה לספארי | Buddy-Divers': 'Safari Registration Form | Buddy-Divers'
+};
+
+function toEnglish(text) {
+  if (!text || !HEB_RE.test(text)) return text;
+  const lead = text.match(/^\s*/)[0], trail = text.match(/\s*$/)[0];
+  const core = text.trim();
+  if (EN_TEXT[core] !== undefined) return lead + EN_TEXT[core] + trail;
+  // Split "Hebrew / English" pairs (spaced slash only, so DD/MM/YYYY stays whole) and lines
+  const parts = core.split(/(\s+\/\s+|\n)/);
+  const kept = [];
+  let sepHadNewline = false;
+  let prefix = '';
+  for (let i = 0; i < parts.length; i += 2) {
+    let seg = parts[i];
+    if (i > 0 && parts[i - 1].indexOf('\n') !== -1) sepHadNewline = true;
+    if (HEB_RE.test(seg)) {
+      const segCore = seg.trim();
+      if (EN_TEXT[segCore] !== undefined) {
+        seg = EN_TEXT[segCore];
+      } else {
+        // Keep a leading icon (❌, ✓, ⏳, 📷 ...) of a dropped Hebrew half
+        if (!kept.length && !prefix) { const m = seg.match(/^[^\p{L}\p{N}]+/u); if (m) prefix = m[0]; }
+        continue;
+      }
+    }
+    if (!seg.trim()) continue;
+    kept.push({ seg: seg.trim(), nl: sepHadNewline });
+    sepHadNewline = false;
+  }
+  let out = kept.map((k, i) => (i === 0 ? '' : (k.nl ? '\n' : ' ')) + k.seg).join('');
+  if (out && prefix.trim() && out.indexOf(prefix.trim()) !== 0) out = prefix.trimStart() + out;
+  return out ? lead + out + trail : '';
+}
+
+// English half written as "/ First Name" next to the Hebrew: drop the leading slash
+const LEAD_SLASH_RE = /^(\s*)\/\s+/;
+function englishifyText(t) {
+  const v = t.nodeValue;
+  if (HEB_RE.test(v) || LEAD_SLASH_RE.test(v)) {
+    const nv = toEnglish(v).replace(LEAD_SLASH_RE, '$1');
+    if (nv !== v) t.nodeValue = nv;
+  }
+}
+
+function englishifyNode(root) {
+  if (!root) return;
+  if (root.nodeType === Node.TEXT_NODE) { englishifyText(root); return; }
+  if (root.nodeType !== Node.ELEMENT_NODE) return;
+  const els = [root].concat(Array.from(root.querySelectorAll('*')));
+  els.forEach(function(el) {
+    ['placeholder', 'title'].forEach(function(attr) {
+      const v = el.getAttribute(attr);
+      if (v && HEB_RE.test(v)) el.setAttribute(attr, toEnglish(v));
+    });
+  });
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  const texts = [];
+  while (walker.nextNode()) texts.push(walker.currentNode);
+  texts.forEach(function(t) {
+    if (t.parentNode && t.parentNode.nodeName === 'SCRIPT') return;
+    englishifyText(t);
+  });
+}
+
+function applyEnglishMode() {
+  document.documentElement.lang = 'en';
+  document.documentElement.dir = 'ltr';
+  document.documentElement.classList.add('lang-en');
+  document.title = toEnglish(document.title);
+
+  // Blocks whose Hebrew and English halves are not a simple "Hebrew / English" pair
+  const set = function(sel, html) { const el = document.querySelector(sel); if (el) el.innerHTML = html; };
+  set('#welcomeBackBanner',
+    '✅ Welcome back! Your details have been pre-filled. <span style="color:red;text-decoration:underline;">Please review and update anything that has changed.</span>');
+  set('.success-title', 'Registration Received 🤩');
+  set('.success-msg',
+    'Thank you! We have received your registration.<br/>' +
+    'We will be in touch within 72 hours with payment details to secure your spot.');
+  const idLabelEn = document.querySelector('#idNumberInput') && document.querySelector('#idNumberInput').closest('.field');
+  if (idLabelEn) { const en = idLabelEn.querySelector('label .en'); if (en) en.textContent = 'Israeli ID Number'; }
+  const bankHe = document.querySelector('input[name="paymentMethod"][value="Bank Transfer"]');
+  if (bankHe) {
+    const lbl = bankHe.closest('.option-item').querySelector('.option-label');
+    lbl.innerHTML = '<span class="en">Bank transfer to the account of Buddy-Divers Ltd.</span>' +
+      '<span class="en" style="font-size:12px;color:var(--muted);">' + EN_TEXT['בנק מזרחי טפחות 20 | סניף 422 | חשבון 625145'] + '</span>';
+  }
+
+  // Checkbox rows put the asterisk between the Hebrew and the English: move it after the English
+  document.querySelectorAll('.checkbox-row > span > .req').forEach(function(req) { req.parentNode.appendChild(req); });
+
+  englishifyNode(document.body);
+
+  new MutationObserver(function(muts) {
+    muts.forEach(function(m) {
+      if (m.type === 'characterData') englishifyNode(m.target);
+      else if (m.type === 'attributes') englishifyNode(m.target.nodeType === Node.ELEMENT_NODE ? m.target : null);
+      else m.addedNodes.forEach(englishifyNode);
+    });
+  }).observe(document.body, { childList:true, subtree:true, characterData:true, attributes:true, attributeFilter:['placeholder', 'title'] });
+
+  const nativeAlert = window.alert.bind(window);
+  window.alert = function(msg) { nativeAlert(toEnglish(String(msg))); };
+}
+
+// ============================================================
 // INIT — read trip from URL param
 // ============================================================
 function init() {
-  const params = new URLSearchParams(window.location.search);
-  const rawTripId = params.get('trip') || 'default';
-  // Trip ids can carry a letter (270525B). Match it in any case, so a link that arrives
-  // lower-cased still lands on the trip instead of falling through to the default config.
-  const tripId = TRIPS[rawTripId]
-    ? rawTripId
-    : (Object.keys(TRIPS).find(k => k.toLowerCase() === rawTripId.toLowerCase()) || rawTripId);
+  const tripId = resolveTripId();
   const tripConfig = TRIPS[tripId] || TRIPS['default'];
+  if (tripConfig.lang === 'en') applyEnglishMode();
 
   // Set trip banner
   document.getElementById('tripName').textContent = tripConfig.name;
@@ -3632,7 +3808,7 @@ function validateField(fieldId, name, type) {
         msg = 'הדרכון פג תוקף / Passport has expired (DD/MM/YYYY)';
       } else {
         // Check 180 days beyond trip return date
-        const tripId = new URLSearchParams(window.location.search).get('trip') || 'default';
+        const tripId = resolveTripId();
         const tripConf = TRIPS[tripId] || TRIPS['default'];
         const datesStr = tripConf ? tripConf.dates : '';
         const returnPart = datesStr.includes('–') ? datesStr.split('–')[1].trim() : '';
@@ -3857,7 +4033,7 @@ function validateForm() {
 
   // Cabin type (skip if section hidden, or if trip marks room as optional)
   const roomSectionVisible = document.getElementById('roomOptionsSection').style.display !== 'none';
-  const _tripId = (new URLSearchParams(window.location.search)).get('trip') || '';
+  const _tripId = resolveTripId();
   const _roomOptional = (TRIPS[_tripId] && TRIPS[_tripId].roomOptional) ? true : false;
   if (roomSectionVisible && !_roomOptional) {
     const roomOption = document.querySelector('[name="room_option"]:checked');
@@ -3966,7 +4142,7 @@ document.getElementById('regForm').addEventListener('submit', async function(e) 
   const selectedPricingValue = data['pricing'] || '';
   const checkedSupplements = Array.isArray(data['pricing_supplement']) ? data['pricing_supplement'] : (data['pricing_supplement'] ? [data['pricing_supplement']] : []);
   const supplementChecked = checkedSupplements.length > 0;
-  const tripPricingConf = TRIPS[submitParams.get('trip') || 'default'];
+  const tripPricingConf = TRIPS[resolveTripId()];
   let mainPriceNum = 0;
   let supplementPriceNum = 0;
   let pricingLabel = selectedPricingValue;
@@ -4021,7 +4197,9 @@ document.getElementById('regForm').addEventListener('submit', async function(e) 
   data['currency'] = (tripPricingConf && tripPricingConf.currency) ? tripPricingConf.currency : 'USD';
 
   // Add trip ID and destination
-  data.tripId = submitParams.get('trip') || 'default';
+  // submitTripId: a language copy of a trip (270106e) files the booking under the real trip
+  const submitTripConf = TRIPS[resolveTripId()];
+  data.tripId = (submitTripConf && submitTripConf.submitTripId) || submitParams.get('trip') || 'default';
   const tripConf = TRIPS[data.tripId];
   if (tripConf && tripConf.name) {
     // Extract English part after '—' e.g. "🤿 ספארי מדגסקר — Madagascar Safari" → "Madagascar Safari"
