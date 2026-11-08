@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- BD-REG 2026-11-08e | 270104e: Israeli ID field and "I don't have an Israeli ID" checkbox removed from the opening box, only "Passport Number" is asked (new optional config passportOnly; runs the existing no-ID path, so the passport number still finds returning divers and fills the passport section) -->
 <!-- BD-REG 2026-11-08d | English-only registration moved to the right trip per Ian: 270106e (Myanmar, built by mistake) removed, 270104e added (Mexico Combo 04/01-16/01/2027, same prices as 270104: quino_4295 plus the optional La Paz land supplement land_only_1190). Same English mode, payment (Credit Card / Bank Transfer, "Details will be provided") and neutral dial code; bookings filed under 270104 via submitTripId -->
 <!-- BD-REG 2026-11-08c | 270106e payment options reduced to the headings "Credit Card" and "Bank Transfer", each with "Details will be provided" (bank account line and IBAN/SWIFT promise removed) -->
 <!-- BD-REG 2026-11-08b | 270106e only: payment limited to credit card (any country) or bank transfer, standing order hidden (new optional config paymentOptions + paymentNote; submitted values unchanged). Phone and emergency phone start on a neutral "Code" choice instead of +972, with an "Other" choice for unlisted countries, and a code is required before submit (new optional config neutralDialCode) -->
@@ -2725,6 +2726,7 @@ const TRIPS = {
     currency: "USD",
     lang: "en",
     submitTripId: "270104",
+    passportOnly: true,
     neutralDialCode: true,
     paymentNote: "Payment methods: credit card (any card except Diners and American Express) or bank transfer.",
     paymentOptions: [
@@ -3120,7 +3122,8 @@ const EN_TEXT = {
     'I am happy for Buddy-Divers to use photos and videos I appear in for publicity',
   'הנתונים שלך מוגנים ומועברים בצורה מאובטחת': 'Your details are protected and sent securely',
   'JPG, PNG, HEIC, WebP · עד 5MB / up to 5MB': 'JPG, PNG, HEIC, WebP · up to 5MB',
-  'טופס הרשמה לספארי | Buddy-Divers': 'Safari Registration Form | Buddy-Divers'
+  'טופס הרשמה לספארי | Buddy-Divers': 'Safari Registration Form | Buddy-Divers',
+  'מספר דרכון (במקום ת"ז) / Passport Number (in place of ID)': 'Passport Number (top of form)'
 };
 
 function toEnglish(text) {
@@ -3279,6 +3282,25 @@ function applyNeutralDialCode() {
 }
 
 // ============================================================
+// PASSPORT ONLY — trip config passportOnly (international guests)
+// Hides the Israeli ID field and the "no Israeli ID" checkbox and asks for the passport
+// number only. Same state as ticking the checkbox (no focus, so no jump on load): the
+// substitute field drives the diver lookup and mirrors into the passport section.
+// ============================================================
+function applyPassportOnly() {
+  const cb = document.getElementById('noTzIdCheckbox');
+  const idField = document.getElementById('f-idNumber');
+  const subField = document.getElementById('f-idSubstitute');
+  if (!cb || !idField || !subField) return;
+  cb.checked = true;
+  document.getElementById('idNumberInput').removeAttribute('required');
+  idField.closest('.form-row').style.display = 'none';
+  subField.style.display = '';
+  const en = subField.querySelector('label .en');
+  if (en) en.textContent = 'Passport Number';
+}
+
+// ============================================================
 // INIT — read trip from URL param
 // ============================================================
 function init() {
@@ -3287,6 +3309,7 @@ function init() {
   if (tripConfig.lang === 'en') applyEnglishMode();
   if (tripConfig.paymentOptions) applyPaymentOptions(tripConfig);
   if (tripConfig.neutralDialCode) applyNeutralDialCode();
+  if (tripConfig.passportOnly) applyPassportOnly();
 
   // Set trip banner
   document.getElementById('tripName').textContent = tripConfig.name;
