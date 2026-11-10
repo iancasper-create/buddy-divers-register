@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- BD-REG 2026-11-10d | New optional trip config addonsNote {he,en}: a red line under the add-ons heading. Set on 270525B: "כל השדרוגים בכפוף לאישור הריזורט" / "All upgrades are subject to resort approval" -->
 <!-- BD-REG 2026-11-10c | 270525B new add-on labuanbajo_single_42: single room at Bintang Flores, Labuan Bajo, night 8-9/6, EUR42 (half the EUR83 room, rounded from 41.50) -->
 <!-- BD-REG 2026-11-10b | 270525B Villa Markisa single room supplement EUR461 -> EUR420 per Ian: (290-40) x 4 = 1,000 single vs 290 x 4 / 2 = 580 twin share; the Labuan Bajo hotel night is not part of it. Option value bali_single_461 -> bali_single_420 -->
 <!-- BD-REG 2026-11-10a | 270525B now sold in parts: radio choice of Part 1 North Sulawesi EUR2,990, Part 2 Bali Villa Markisa 4-9/6 EUR702 (4 nights full board Villa 1/3/Sonea + EUR80 transfers + Bintang Flores night Labuan Bajo), Part 3 Komodo EUR2,590 (old combo 5,580 minus 2,990, ~ $3,000), or the full journey EUR6,282 (combo_5580 retired). Bali add-ons: 10 prepaid dives EUR513, single supplement EUR461, non-diver EUR140. Banner: free nights replaced by Villa Markisa, name now includes Bali -->
@@ -944,6 +945,7 @@
     <!-- SECTION 5c: Add-ons (shown only for trips with addons) -->
     <div class="card" id="addonsSection" style="display:none;">
       <div class="section-title"><span class="icon">➕</span> תוספות ואפשרויות <span style="font-weight:400;color:var(--muted);font-size:12px;margin-right:6px;">Add-ons &amp; Options</span></div>
+      <div id="addonsNote" style="display:none;color:#c0392b;font-weight:700;font-size:14px;margin:-4px 0 12px;"></div>
       <div class="options-group" id="addonsOptions">
         <!-- Dynamically populated -->
       </div>
@@ -2927,6 +2929,10 @@ const TRIPS = {
         priceNum: 6282
       }
     ],
+    addonsNote: {
+      he: "כל השדרוגים בכפוף לאישור הריזורט",
+      en: "All upgrades are subject to resort approval"
+    },
     addons: [
       {
         value: "siladen_seaview_338",
@@ -3588,6 +3594,14 @@ function init() {
   // Render add-ons if present
   const addonsSection = document.getElementById('addonsSection');
   const addonsContainer = document.getElementById('addonsOptions');
+  const addonsNoteEl = document.getElementById('addonsNote');
+  if (tripConfig.addonsNote) {
+    addonsNoteEl.innerHTML = '<span class="he">' + tripConfig.addonsNote.he + '</span><span class="en" dir="ltr" style="display:block;font-weight:400;font-size:12px;text-align:right;">' + tripConfig.addonsNote.en + '</span>';
+    addonsNoteEl.style.display = 'block';
+  } else {
+    addonsNoteEl.style.display = 'none';
+    addonsNoteEl.innerHTML = '';
+  }
   if (tripConfig.addons && tripConfig.addons.length > 0) {
     addonsSection.style.display = 'block';
     addonsContainer.innerHTML = '';
