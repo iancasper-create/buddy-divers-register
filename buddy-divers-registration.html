@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- BD-REG 2026-11-10a | 270525B now sold in parts: radio choice of Part 1 North Sulawesi EUR2,990, Part 2 Bali Villa Markisa 4-9/6 EUR702 (4 nights full board Villa 1/3/Sonea + EUR80 transfers + Bintang Flores night Labuan Bajo), Part 3 Komodo EUR2,590 (old combo 5,580 minus 2,990, ~ $3,000), or the full journey EUR6,282 (combo_5580 retired). Bali add-ons: 10 prepaid dives EUR513, single supplement EUR461, non-diver EUR140. Banner: free nights replaced by Villa Markisa, name now includes Bali -->
 <!-- BD-REG 2026-11-08e | 270104e: Israeli ID field and "I don't have an Israeli ID" checkbox removed from the opening box, only "Passport Number" is asked (new optional config passportOnly; runs the existing no-ID path, so the passport number still finds returning divers and fills the passport section) -->
 <!-- BD-REG 2026-11-08d | English-only registration moved to the right trip per Ian: 270106e (Myanmar, built by mistake) removed, 270104e added (Mexico Combo 04/01-16/01/2027, same prices as 270104: quino_4295 plus the optional La Paz land supplement land_only_1190). Same English mode, payment (Credit Card / Bank Transfer, "Details will be provided") and neutral dial code; bookings filed under 270104 via submitTripId -->
 <!-- BD-REG 2026-11-08c | 270106e payment options reduced to the headings "Credit Card" and "Bank Transfer", each with "Details will be provided" (bank account line and IBAN/SWIFT promise removed) -->
@@ -2886,9 +2887,9 @@ const TRIPS = {
     ]
   },
   "270525B": {
-    name: "🇮🇩 מסע הדגל לצפון סולאווסי + קומודו",
+    name: "🇮🇩 מסע הדגל: צפון סולאווסי, באלי וקומודו",
     dates: "23/05/2027 – 15/06/2027",
-    note: "🏝️ Siladen Resort & Spa, Bunaken ⁨(25–30/5)⁩ | 🌊 Coral Eye Resort, Bangka ⁨(30/5–4/6)⁩ | חמישה לילות חופשיים ⁨(4–9/6)⁩, עצמאי או חלופות דרך המשרד | 🚢 Solitude Adventurer, קומודו ⁨(9–15/6)⁩",
+    note: "🏝️ Siladen Resort & Spa, Bunaken ⁨(25–30/5)⁩ | 🌊 Coral Eye Resort, Bangka ⁨(30/5–4/6)⁩ | 🌺 Villa Markisa, באלי ⁨(4–9/6)⁩ | 🚢 Solitude Adventurer, קומודו ⁨(9–15/6)⁩ | כל חלק ניתן להזמנה בנפרד",
     currency: "EUR",
     pricingTitle: {
       he: "עלות המסע (ללא טיסות)",
@@ -2896,11 +2897,32 @@ const TRIPS = {
     },
     pricing: [
       {
-        value: "combo_5580",
-        he: "חבילת קומבו לצוללים: ריזורטים והפלגה",
-        en: "Combo diver package: resorts and liveaboard",
-        price: "€5,580",
-        priceNum: 5580
+        value: "sulawesi_2990",
+        he: "חלק 1: צפון סולאווסי, Siladen + Coral Eye ⁨(25/5–4/6)⁩",
+        en: "Part 1: North Sulawesi, Siladen + Coral Eye (25/5-4/6)",
+        price: "€2,990",
+        priceNum: 2990
+      },
+      {
+        value: "bali_702",
+        he: "חלק 2: באלי, Villa Markisa ⁨(4–9/6)⁩: לינה, ארוחות והעברות",
+        en: "Part 2: Bali, Villa Markisa (4-9/6): accommodation, meals and transfers",
+        price: "€702",
+        priceNum: 702
+      },
+      {
+        value: "komodo_2590",
+        he: "חלק 3: קומודו, Solitude Adventurer ⁨(9–15/6)⁩",
+        en: "Part 3: Komodo, Solitude Adventurer (9-15/6)",
+        price: "€2,590",
+        priceNum: 2590
+      },
+      {
+        value: "combo_6282",
+        he: "המסע המלא: שלושת החלקים ⁨(25/5–15/6)⁩",
+        en: "Full journey: all three parts (25/5-15/6)",
+        price: "€6,282",
+        priceNum: 6282
       }
     ],
     addons: [
@@ -2946,6 +2968,27 @@ const TRIPS = {
         price: "€50 לצלילה",
         priceNum: 50,
         qty: true
+      },
+      {
+        value: "bali_dives_513",
+        he: "Villa Markisa: חבילת 10 צלילות בתשלום מראש (מכלים, משקולות, נייטרוקס, סירה ומדריך)",
+        en: "Villa Markisa: prepaid 10-dive package (tanks, weights, nitrox, boat and guide)",
+        price: "€513",
+        priceNum: 513
+      },
+      {
+        value: "bali_single_461",
+        he: "Villa Markisa: תוספת ליחיד בחדר",
+        en: "Villa Markisa: single room supplement",
+        price: "€461",
+        priceNum: 461
+      },
+      {
+        value: "bali_nondiver_140",
+        he: "Villa Markisa: תוספת למי שאינו צולל (מתקזזת מול סיורים, ספא ושנורקלינג)",
+        en: "Villa Markisa: non-diver supplement (credited to tours, spa and snorkelling)",
+        price: "€140",
+        priceNum: 140
       }
     ]
   },

@@ -1,3 +1,4 @@
+<!-- BD-EDIT 2026-11-10a | Trip 270525B pricing map matched to BD-REG 2026-11-10a: sulawesi_2990, bali_702, komodo_2590, combo_6282, Bali supplements bali_dives_513 / bali_single_461 / bali_nondiver_140. combo_5580 kept (retired) so any existing booking still renders -->
 <!-- BD-EDIT 2026-10-25a | 261029 suite options suite_double_395 (₪395) and suite_single_790 (₪790) added to match BD-REG 2026-10-25a; the old 290/580 options stay so bookings 1310 and 1342 still resolve -->
 <!-- BD-EDIT 2026-10-12b | Trip 271011 Hebrew option labels matched to BD-REG 2026-10-12b -->
 <!-- BD-EDIT 2026-10-12a | Trip 271011 (North Sulawesi, Coral Eye + Siladen, 11/10-21/10/2027, EUR) added to the TRIPS pricing map, options diver_1915 / nondiver_1915 matching the registration form -->
@@ -1943,15 +1944,43 @@ const TRIPS = {
     ]
   },
   "270525B": {
-    name: "🇮🇩 מסע הדגל לצפון סולאווסי + קומודו",
+    name: "🇮🇩 מסע הדגל: צפון סולאווסי, באלי וקומודו",
     dates: "23/05/2027 – 15/06/2027",
-    note: "🏝️ Siladen ⁨(25–30/5)⁩ | 🌊 Coral Eye ⁨(30/5–4/6)⁩ | חמישה לילות חופשיים ⁨(4–9/6)⁩ | 🚢 Solitude Adventurer, קומודו ⁨(9–15/6)⁩",
+    note: "🏝️ Siladen ⁨(25–30/5)⁩ | 🌊 Coral Eye ⁨(30/5–4/6)⁩ | 🌺 Villa Markisa, באלי ⁨(4–9/6)⁩ | 🚢 Solitude Adventurer, קומודו ⁨(9–15/6)⁩",
     currency: "EUR",
     pricingTitle: {
       he: "עלות המסע (ללא טיסות)",
       en: "Trip Pricing (excl. flights)"
     },
     pricing: [
+      {
+        value: "sulawesi_2990",
+        he: "חלק 1: צפון סולאווסי, Siladen + Coral Eye ⁨(25/5–4/6)⁩",
+        en: "Part 1: North Sulawesi, Siladen + Coral Eye (25/5-4/6)",
+        price: "€2,990",
+        priceNum: 2990
+      },
+      {
+        value: "bali_702",
+        he: "חלק 2: באלי, Villa Markisa ⁨(4–9/6)⁩: לינה, ארוחות והעברות",
+        en: "Part 2: Bali, Villa Markisa (4-9/6): accommodation, meals and transfers",
+        price: "€702",
+        priceNum: 702
+      },
+      {
+        value: "komodo_2590",
+        he: "חלק 3: קומודו, Solitude Adventurer ⁨(9–15/6)⁩",
+        en: "Part 3: Komodo, Solitude Adventurer (9-15/6)",
+        price: "€2,590",
+        priceNum: 2590
+      },
+      {
+        value: "combo_6282",
+        he: "המסע המלא: שלושת החלקים ⁨(25/5–15/6)⁩",
+        en: "Full journey: all three parts (25/5-15/6)",
+        price: "€6,282",
+        priceNum: 6282
+      },
       {
         value: "combo_5580",
         he: "חבילת קומבו לצוללים: ריזורטים והפלגה",
@@ -2005,6 +2034,30 @@ const TRIPS = {
         en: "Additional pre-booked dives (day/night), €50 per dive",
         price: "€50 לצלילה",
         priceNum: 50,
+        supplement: true
+      },
+      {
+        value: "bali_dives_513",
+        he: "Villa Markisa: חבילת 10 צלילות בתשלום מראש (מכלים, משקולות, נייטרוקס, סירה ומדריך)",
+        en: "Villa Markisa: prepaid 10-dive package (tanks, weights, nitrox, boat and guide)",
+        price: "€513",
+        priceNum: 513,
+        supplement: true
+      },
+      {
+        value: "bali_single_461",
+        he: "Villa Markisa: תוספת ליחיד בחדר",
+        en: "Villa Markisa: single room supplement",
+        price: "€461",
+        priceNum: 461,
+        supplement: true
+      },
+      {
+        value: "bali_nondiver_140",
+        he: "Villa Markisa: תוספת למי שאינו צולל (מתקזזת מול סיורים, ספא ושנורקלינג)",
+        en: "Villa Markisa: non-diver supplement (credited to tours, spa and snorkelling)",
+        price: "€140",
+        priceNum: 140,
         supplement: true
       }
     ]
