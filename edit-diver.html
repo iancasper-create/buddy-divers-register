@@ -1,3 +1,4 @@
+<!-- BD-EDIT 2026-11-11a | 270421 +₪500 options added to match BD-REG 2026-11-11a: lower_twin_4980, upper_double_5290, master_suite_5370, single_supp_lower_2490/upper_2645/master_2685; the old 4480/4790/4870/2240/2395/2435 options kept so any existing booking still renders -->
 <!-- BD-EDIT 2026-11-10d | 270525B supplement extra_dives_54 (EUR54 per dive) added to match BD-REG 2026-11-10e; extra_dives_50 kept so any existing booking still renders -->
 <!-- BD-EDIT 2026-11-10c | 270525B supplement labuanbajo_single_42 (Bintang Flores single room, EUR42) added, matching BD-REG 2026-11-10c -->
 <!-- BD-EDIT 2026-11-10b | 270525B Bali single supplement bali_single_461 (EUR461) -> bali_single_420 (EUR420), matching BD-REG 2026-11-10b -->
@@ -1615,11 +1616,25 @@ const TRIPS = {
         priceNum: 4480
       },
       {
+        value: "lower_twin_4980",
+        he: "חדר טווין, מפלס תחתון, 7-8 מ\"ר, שתי מיטות יחיד (מחיר ליחיד, מותנה בהרשמה של שניים)",
+        en: "Twin cabin, lower deck, 7-8 sqm, two single beds (per person, double occupancy)",
+        price: "₪4,980",
+        priceNum: 4980
+      },
+      {
         value: "upper_double_4790",
         he: "חדר זוגי, מפלס עליון, 9 מ\"ר, מיטת Queen (מחיר ליחיד, מותנה בהרשמה של שניים)",
         en: "Double cabin, upper deck, 9 sqm, queen bed (per person, double occupancy)",
         price: "₪4,790",
         priceNum: 4790
+      },
+      {
+        value: "upper_double_5290",
+        he: "חדר זוגי, מפלס עליון, 9 מ\"ר, מיטת Queen (מחיר ליחיד, מותנה בהרשמה של שניים)",
+        en: "Double cabin, upper deck, 9 sqm, queen bed (per person, double occupancy)",
+        price: "₪5,290",
+        priceNum: 5290
       },
       {
         value: "master_suite_4870",
@@ -1629,11 +1644,26 @@ const TRIPS = {
         priceNum: 4870
       },
       {
+        value: "master_suite_5370",
+        he: "סוויטת מאסטר, מפלס ראשי, 12 מ\"ר, מיטת Queen (מחיר ליחיד, מותנה בהרשמה של שניים)",
+        en: "Master suite, main deck, 12 sqm, queen bed (per person, double occupancy)",
+        price: "₪5,370",
+        priceNum: 5370
+      },
+      {
         value: "single_supp_lower_2240",
         he: "תוספת שימוש יחיד.ה, חדר טווין מפלס תחתון",
         en: "Single use supplement, lower deck twin cabin",
         price: "₪2,240",
         priceNum: 2240,
+        supplement: true
+      },
+      {
+        value: "single_supp_lower_2490",
+        he: "תוספת שימוש יחיד.ה, חדר טווין מפלס תחתון",
+        en: "Single use supplement, lower deck twin cabin",
+        price: "₪2,490",
+        priceNum: 2490,
         supplement: true
       },
       {
@@ -1645,11 +1675,27 @@ const TRIPS = {
         supplement: true
       },
       {
+        value: "single_supp_upper_2645",
+        he: "תוספת שימוש יחיד.ה, חדר זוגי מפלס עליון",
+        en: "Single use supplement, upper deck double cabin",
+        price: "₪2,645",
+        priceNum: 2645,
+        supplement: true
+      },
+      {
         value: "single_supp_master_2435",
         he: "תוספת שימוש יחיד.ה, סוויטת מאסטר מפלס ראשי",
         en: "Single use supplement, main deck master suite",
         price: "₪2,435",
         priceNum: 2435,
+        supplement: true
+      },
+      {
+        value: "single_supp_master_2685",
+        he: "תוספת שימוש יחיד.ה, סוויטת מאסטר מפלס ראשי",
+        en: "Single use supplement, main deck master suite",
+        price: "₪2,685",
+        priceNum: 2685,
         supplement: true
       }
     ]
