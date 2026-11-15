@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- BD-FOLLOWUP 2026-11-15a | Trip 281127 (Cocos Island, Sea Hunter, 27/11-07/12/2028, USD) added to tripCountries, tripNames and CF_TRIPS_FALLBACK (dest + vessel + option labels lower_deck_7020, upper_suite_7620, park_transfers_654), BD-REG 2026-11-15a -->
 <!-- BD-FOLLOWUP 2026-11-11a | 270421 option labels for the +₪500 keys added (lower_twin_4980, upper_double_5290, master_suite_5370, single_supp_lower_2490/upper_2645/master_2685, BD-REG 2026-11-11a); old 4480-series labels kept -->
 <!-- BD-FOLLOWUP 2026-11-10d | 270525B option label extra_dives_54 (EUR54 per dive, BD-REG 2026-11-10e) added; extra_dives_50 label kept -->
 <!-- BD-FOLLOWUP 2026-11-10c | 270525B option label labuanbajo_single_42 (Bintang Flores, Labuan Bajo single room, EUR42) added for BD-REG 2026-11-10c -->
@@ -2049,6 +2050,7 @@ function buildPaymentHTML(booking, amount, nisAmount, rate, notes, paidSoFar, sa
     '260301': 'תאילנד', '260328': 'מדגסקר', '260620': 'מדגסקר', '260730': 'מדגסקר',
     '260815': 'מדגסקר', '260828': 'פיג׳י / טונגה', '260915': 'מדגסקר', '260925': 'מדגסקר',
     '261009': 'מדגסקר', '261022': 'גלפגוס', '271014': 'גלפגוס', '280408': 'גלפגוס',
+    '281127': 'קוסטה ריקה',
     '261029': 'סיני', '270421': 'סיני',
     '261211': 'מיאנמר', '270106': 'מיאנמר', '270203': 'מיאנמר', '270303': 'מיאנמר',
     '270320': 'תאילנד',
@@ -2233,6 +2235,7 @@ async function generatePaymentImage() {
     '260301':'תאילנד — מרץ 2026', '260828':'פיג׳י / טונגה — אוגוסט 2026',
     '261022':'גלפגוס — אוקטובר 2026', '271014':'גלפגוס — אוקטובר 2027',
     '280408':'גלפגוס, Tiburon Explorer, פסח 2028',
+    '281127':'איי קוקוס, Sea Hunter, נובמבר 2028',
     '260328':'מדגסקר — מרץ 2026', '260620':'מדגסקר — יוני 2026', '260730':'מדגסקר — יולי 2026',
     '260815':'מדגסקר — אוגוסט 2026', '260915':'מדגסקר — ספטמבר 2026 א׳', '260925':'מדגסקר — ספטמבר 2026 ב׳',
     '261009':'מדגסקר — אוקטובר 2026',
@@ -2852,6 +2855,8 @@ const CF_TRIPS_FALLBACK = {
     opts:{"lower_twin_4480": "Twin cabin, lower deck", "upper_double_4790": "Double cabin, upper deck", "master_suite_4870": "Master suite, main deck", "single_supp_lower_2240": "Single use supplement, lower deck twin cabin", "single_supp_upper_2395": "Single use supplement, upper deck double cabin", "single_supp_master_2435": "Single use supplement, main deck master suite", "lower_twin_4980": "Twin cabin, lower deck", "upper_double_5290": "Double cabin, upper deck", "master_suite_5370": "Master suite, main deck", "single_supp_lower_2490": "Single use supplement, lower deck twin cabin", "single_supp_upper_2645": "Single use supplement, upper deck double cabin", "single_supp_master_2685": "Single use supplement, main deck master suite"} },
   "280408": { name:"Galapagos Safari, Pesach 2028", dest:"the Galapagos Islands", vessel:"Tiburon Explorer", arrive:"8 April 2028", depart:"15 April 2028", currency:"USD",
     opts:{"cabin3_main_6695": "Cabin 3, main deck, large cabin", "cabin5_main_6695": "Cabin 5, main deck, large cabin", "cabin6_main_6695": "Cabin 6, main deck, large cabin", "cabin7_lower_6695": "Cabin 7, lower deck, 14 sqm suite with sofa", "cabin8_lower_6695": "Cabin 8, lower deck, 14 sqm suite with sofa", "cabin9_lower_6695": "Cabin 9, lower deck, 14 sqm suite with sofa"} },
+  "281127": { name:"Cocos Island Full Moon Safari", dest:"Cocos Island, Costa Rica", vessel:"Sea Hunter", arrive:"27 November 2028", depart:"7 December 2028", currency:"USD",
+    opts:{"lower_deck_7020": "Lower deck cabin", "upper_suite_7620": "Upper deck suite", "park_transfers_654": "Cocos Island National Park fee and San Jose transfers"} },
 };
 
 
