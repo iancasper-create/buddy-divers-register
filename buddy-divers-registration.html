@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- BD-REG 2026-11-15c | 270421 Black Friday: ₪800 off each cabin until 31/12/2026, new keys lower_twin_4180 / upper_double_4490 / master_suite_4570 with wasPrice ₪4,980 / ₪5,290 / ₪5,370, promo pill "₪800 הנחה", Black Friday pricingTitle. Single-use supplements unchanged -->
 <!-- BD-REG 2026-11-15b | 281127: "אין כפל מבצעים / No double discounts" added to the Black Friday pricingTitle, per Ian. value/price/priceNum untouched -->
 <!-- BD-REG 2026-11-15a | New trip 281127 Cocos Island full moon, Sea Hunter full charter (20 places), 27/11-07/12/2028, USD. Black Friday $800 off until 31/12/2026: lower_deck_7020 (was $7,820), upper_suite_7620 (was $8,420, 2 suites); required roomOptions line park_transfers_654 (park fee $554 + transfers $100) so the fee is in Total Price. Leader TBA -->
 <!-- BD-REG 2026-11-11a | 270421 (Sinai Pesach, Snefro Love) repriced +₪500 per Ian, matching his Dropbox Word doc: lower_twin_4980, upper_double_5290, master_suite_5370; single-use supplements stay 50% of the cabin: single_supp_lower_2490/upper_2645/master_2685. value/price/priceNum moved together -->
@@ -2568,32 +2569,36 @@ const TRIPS = {
     name: "🚢 ספארי סיני בפסח | Snefro Love",
     dates: "21/04/2027 – 28/04/2027",
     note: "🚢 Snefro Love | 7 לילות | ראס אבו גלום, דהב, מיצרי טיראן וראס מוחמד | ספינה פרטית לקבוצה | מלווה יפורסם בהמשך",
+    promo: "₪800 הנחה",
     currency: "ILS",
     pricingTitle: {
-      he: "עלות הספארי",
-      en: "Safari Pricing"
+      he: "עלות הספארי | מבצע Black Friday לנרשמים עד 31/12/2026 | אין כפל מבצעים",
+      en: "Safari Pricing | Black Friday special until 31/12/2026 | No double discounts"
     },
     pricing: [
       {
-        value: "lower_twin_4980",
+        value: "lower_twin_4180",
         he: "חדר טווין, מפלס תחתון, 7-8 מ\"ר, שתי מיטות יחיד (מחיר ליחיד, מותנה בהרשמה של שניים)",
         en: "Twin cabin, lower deck, 7-8 sqm, two single beds (per person, double occupancy)",
-        price: "₪4,980",
-        priceNum: 4980
+        wasPrice: "₪4,980",
+        price: "₪4,180",
+        priceNum: 4180
       },
       {
-        value: "upper_double_5290",
+        value: "upper_double_4490",
         he: "חדר זוגי, מפלס עליון, 9 מ\"ר, מיטת Queen (מחיר ליחיד, מותנה בהרשמה של שניים)",
         en: "Double cabin, upper deck, 9 sqm, queen bed (per person, double occupancy)",
-        price: "₪5,290",
-        priceNum: 5290
+        wasPrice: "₪5,290",
+        price: "₪4,490",
+        priceNum: 4490
       },
       {
-        value: "master_suite_5370",
+        value: "master_suite_4570",
         he: "סוויטת מאסטר, מפלס ראשי, 12 מ\"ר, מיטת Queen (מחיר ליחיד, מותנה בהרשמה של שניים)",
         en: "Master suite, main deck, 12 sqm, queen bed (per person, double occupancy)",
-        price: "₪5,370",
-        priceNum: 5370
+        wasPrice: "₪5,370",
+        price: "₪4,570",
+        priceNum: 4570
       },
       {
         value: "single_supp_lower_2490",
