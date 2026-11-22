@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- BD-REG 2026-11-22a | New trip 281009 Galapagos, Humboldt Explorer, 09/10-16/10/2028, USD, private registration link only (no trips.html card), from the Explorer Ventures option for Elad Fisher. One option male_share_6645 ($6,495 + $150 fuel surcharge), notIncluded park fee + TCT and nitrox, noFlights. Config block inserted immediately before 281127 -->
 <!-- BD-REG 2026-11-15c | 270421 Black Friday: ₪800 off each cabin until 31/12/2026, new keys lower_twin_4180 / upper_double_4490 / master_suite_4570 with wasPrice ₪4,980 / ₪5,290 / ₪5,370, promo pill "₪800 הנחה", Black Friday pricingTitle. Single-use supplements unchanged -->
 <!-- BD-REG 2026-11-15b | 281127: "אין כפל מבצעים / No double discounts" added to the Black Friday pricingTitle, per Ian. value/price/priceNum untouched -->
 <!-- BD-REG 2026-11-15a | New trip 281127 Cocos Island full moon, Sea Hunter full charter (20 places), 27/11-07/12/2028, USD. Black Friday $800 off until 31/12/2026: lower_deck_7020 (was $7,820), upper_suite_7620 (was $8,420, 2 suites); required roomOptions line park_transfers_654 (park fee $554 + transfers $100) so the fee is in Total Price. Leader TBA -->
@@ -2522,6 +2523,36 @@ const TRIPS = {
         priceNum: 6695
       }
     ]
+  },
+  "281009": {
+    name: "🦈 ספארי גלאפגוס | Galapagos Safari",
+    dates: "09/10/2028 – 16/10/2028",
+    note: "🚢 Humboldt Explorer | 7 לילות | Darwin & Wolf | יציאה וחזרה מ-Baltra",
+    currency: "USD",
+    pricingTitle: {
+      he: "עלות ההפלגה ללא טיסות",
+      en: "Cruise pricing (excl. flights)"
+    },
+    pricing: [
+      {
+        value: "male_share_6645",
+        he: "מקום בחדר משותף (גברים), 7 לילות על Humboldt Explorer, פנסיון מלא, כולל היטל דלק של $150",
+        en: "Shared cabin place (male share), 7 nights on Humboldt Explorer, full board, incl. $150 fuel surcharge",
+        price: "$6,645",
+        priceNum: 6645
+      }
+    ],
+    notIncluded: [
+      {
+        he: "דמי כניסה לשמורה הלאומית בגלאפגוס $200 וכרטיס תייר $20, במזומן בכניסה",
+        en: "Galapagos National Park fee $200 and Tourist Card $20, paid in cash on arrival"
+      },
+      {
+        he: "נייטרוקס: $150 לכל ההפלגה, הזמנה ותשלום על הספינה",
+        en: "Nitrox: $150 for the cruise, booked and paid on board"
+      }
+    ],
+    noFlights: true
   },
   "281127": {
     name: "🦈 איי קוקוס בירח מלא | Cocos Island",
