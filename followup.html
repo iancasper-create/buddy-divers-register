@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- BD-FOLLOWUP 2026-11-26f | Payment request JPG for a diver whose Payment Method is "Foreign Currency Bank Transfer": the bottom row becomes one full-width box (new buildFxBankRow) with beneficiary, address, bank/branch/account, IBAN, SWIFT, bank address (as on the registration form) and the red fees line, instead of the shekel account details. Other methods unchanged -->
 <!-- BD-FOLLOWUP 2026-11-26e | Payment request JPG: balance box title is now just "יתרה לתשלום" ("עד 90 יום לפני היציאה לספארי" removed, the deadline differs per trip) -->
 <!-- BD-FOLLOWUP 2026-11-26d | Payment request JPG, bottom row: bank details table 17px -> 22px (labels darker #555), its title 20px; payment-method box title 19px, text 17px -> 18px. Sized so the worst case (standing order + all extras + notes) still fits 900px -->
 <!-- BD-FOLLOWUP 2026-11-26c | Payment request JPG: the two small box titles (סכום לתשלום כעת, יתרה לתשלום עד 90 יום...) 16px -> 18px and opacity 0.75 -> 0.95 so they are sharper; the longer one fits the box on one line at 18px -->
@@ -2048,6 +2049,26 @@ async function fetchDiverDetails(diverId) {
   }
 }
 
+// Payment request JPG, bottom row for a diver who chose "Foreign Currency Bank Transfer"
+// on the registration form: full-width box with the international (IBAN / SWIFT) details,
+// same as the registration form (BD-REG 2026-11-25a), plus the red fees line.
+function buildFxBankRow() {
+  const row = (label, val) => `<tr><td style="color:#555;font-weight:400;padding:2px 12px 2px 0;white-space:nowrap;text-align:left;vertical-align:top;">${label}:</td><td style="font-weight:700;padding:2px 0;white-space:nowrap;text-align:left;">${val}</td></tr>`;
+  return `
+      <div style="border:2px solid #c5dfe6;border-radius:12px;padding:14px 20px;background:#f8fcfd;margin-bottom:18px;">
+        <div style="font-size:19px;font-weight:700;color:#007289;margin-bottom:8px;">שיטת התשלום אותה בחרת בטופס ההרשמה: <span style="color:#1a3a4a;">העברה בנקאית במט"ח</span></div>
+        <table dir="ltr" style="border-collapse:collapse;font-size:19px;color:#1a3a4a;direction:ltr;margin-right:auto;">
+          ${row('Beneficiary', 'Buddy-Divers Ltd.')}
+          ${row('Beneficiary address', '58 Hayahalom St, Tel Mond 4061858, Israel')}
+          ${row('Bank', 'Mizrahi Tefahot Bank | Branch 422 | Account 625145')}
+          ${row('IBAN', 'IL14 0204 2200 0000 0625 145')}
+          ${row('SWIFT', 'MIZBILITXXX')}
+          ${row('Bank address', '5 Maffi Street, Netanya, Israel')}
+        </table>
+        <div style="font-size:16px;color:#c0392b;margin-top:8px;">עמלות ההעברה ועמלות בנק מתווך חלות על המעביר. יש לוודא שהסכום המלא מגיע לחשבון.</div>
+      </div>`;
+}
+
 function buildPaymentHTML(booking, amount, nisAmount, rate, notes, paidSoFar, safari, typeLabel, today, tripDisplayName, rateTime, flightAmt, hotelAmt, extrasAmt, extrasNotes, discountAmt, paymentMethod, currencySymbol) {
   discountAmt = discountAmt || 0;
   currencySymbol = currencySymbol || '$';
@@ -2165,6 +2186,7 @@ function buildPaymentHTML(booking, amount, nisAmount, rate, notes, paidSoFar, sa
       </div>
 
       <!-- BANK DETAILS -->
+      ${(paymentMethod || '').toLowerCase().includes('foreign') ? buildFxBankRow() : `
       <div style="display:flex;gap:16px;margin-bottom:18px;">
         <div style="flex:1;border:2px solid #c5dfe6;border-radius:12px;padding:16px 20px;background:#f8fcfd;">
           <div style="font-size:19px;font-weight:700;color:#007289;margin-bottom:8px;">שיטת התשלום אותה בחרת בטופס ההרשמה:</div>
@@ -2190,7 +2212,7 @@ function buildPaymentHTML(booking, amount, nisAmount, rate, notes, paidSoFar, sa
             <tr><td style="color:#555;font-weight:400;padding:2px 0;white-space:nowrap;text-align:right;">חשבון:</td><td style="font-weight:700;padding:2px 14px 2px 0;white-space:nowrap;">625145</td></tr>
           </table>
         </div>
-      </div>
+      </div>`}
 
       <!-- FOOTER -->
       <div style="text-align:center;font-size:13px;color:#bbb;border-top:1px solid #eee;padding-top:12px;">
