@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- BD-REG 2026-11-26f | 270525B pricing options are now all selectable (checkboxes, any combination of Part 1/2/3, totals summed). New optional trip config pricingMulti: true, plus exclusive: true on an option (combo_6282) that clears the others when picked and is cleared when a part is picked. Other trips unchanged (radio) -->
 <!-- BD-REG 2026-11-26e | "מטבע זר" replaced by "מט"ח" per Ian: foreign transfer title is now just במט"ח, payment note says העברה בנקאית במט"ח (EN_TEXT key updated) -->
 <!-- BD-REG 2026-11-26d | Credit card and standing order titles now say בש"ח (in ILS), like the shekel bank transfer -->
 <!-- BD-REG 2026-11-26c | Red payment lines (cards not accepted, transfer fees) changed from bold to regular weight, per Ian -->
@@ -3001,6 +3002,7 @@ const TRIPS = {
       he: "עלות המסע (ללא טיסות)",
       en: "Trip Pricing (excl. flights)"
     },
+    pricingMulti: true,
     pricing: [
       {
         value: "sulawesi_2990",
@@ -3028,7 +3030,8 @@ const TRIPS = {
         he: "המסע המלא: שלושת החלקים ⁨(25/5–15/6)⁩",
         en: "Full journey: all three parts (25/5-15/6)",
         price: "€6,282",
-        priceNum: 6282
+        priceNum: 6282,
+        exclusive: true
       }
     ],
     addonsNote: {
@@ -3604,6 +3607,30 @@ function init() {
       `;
       label.addEventListener('click', () => {
         label.classList.toggle('selected', label.querySelector('input').checked);
+      });
+    } else if (tripConfig.pricingMulti) {
+      // Multi-select trip: every pricing option is a checkbox. An exclusive option
+      // (e.g. the full journey) clears the others, and picking another clears it.
+      label.innerHTML = `
+        <input type="checkbox" name="pricing" value="${opt.value}"${opt.exclusive ? ' data-exclusive="1"' : ''} />
+        <div class="option-label">
+          <span class="he">${opt.he}</span>
+          <span class="en">${opt.en}</span>
+          <span class="price">${opt.wasPrice ? '<span class="was-price">' + opt.wasPrice + '</span>' : ''}${opt.price}</span>
+        </div>
+      `;
+      const cb = label.querySelector('input');
+      cb.addEventListener('change', () => {
+        if (cb.checked) {
+          container.querySelectorAll('input[name="pricing"]').forEach(other => {
+            if (other === cb) return;
+            if (cb.dataset.exclusive || other.dataset.exclusive) {
+              other.checked = false;
+              other.closest('.option-item').classList.remove('selected');
+            }
+          });
+        }
+        label.classList.toggle('selected', cb.checked);
       });
     } else {
       label.innerHTML = `
@@ -4404,7 +4431,13 @@ document.getElementById('regForm').addEventListener('submit', async function(e) 
   let mainPriceNum = 0;
   let supplementPriceNum = 0;
   let pricingLabel = selectedPricingValue;
-  if (tripPricingConf && tripPricingConf.pricing) {
+  if (tripPricingConf && tripPricingConf.pricing && tripPricingConf.pricingMulti) {
+    // Multi-select pricing: sum every checked option, label joined in config order
+    const pickedMain = fd.getAll('pricing');
+    const pickedOpts = tripPricingConf.pricing.filter(o => o.supplement !== true && pickedMain.includes(o.value));
+    pickedOpts.forEach(function(o) { if (o.priceNum) mainPriceNum += o.priceNum * 1; });
+    pricingLabel = pickedOpts.map(o => o.value).join(' + ');
+  } else if (tripPricingConf && tripPricingConf.pricing) {
     const mainOpt = tripPricingConf.pricing.find(o => o.value === selectedPricingValue);
     if (mainOpt && mainOpt.priceNum) mainPriceNum = mainOpt.priceNum * 1;
     if (checkedSupplements.length > 0) {
