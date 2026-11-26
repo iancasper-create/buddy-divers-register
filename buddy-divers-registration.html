@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- BD-REG 2026-11-26d | Credit card and standing order titles now say בש"ח (in ILS), like the shekel bank transfer -->
 <!-- BD-REG 2026-11-26c | Red payment lines (cards not accepted, transfer fees) changed from bold to regular weight, per Ian -->
 <!-- BD-REG 2026-11-26b | Payment note: the "cannot pay with" part is now its own red bold line, and credit cards issued abroad (כרטיסי אשראי שהונפקו בחו"ל) added to Diners and American Express. EN_TEXT keys split to match -->
 <!-- BD-REG 2026-11-26a | Payment options per Ian: bank transfer titles now say which is in shekels (בשקלים) and which in foreign currency (במט"ח, מטבע זר); foreign transfer fees line in red bold (Hebrew + English); credit card Hebrew title adds "יישלח אליכם קישור לתשלום", em-dash removed from its English line. Submitted values unchanged -->
@@ -1374,15 +1375,15 @@
           <label class="option-item">
             <input type="radio" name="paymentMethod" value="Credit Card up to 3 payments" />
             <div class="option-label">
-              <span class="he">עד 3 תשלומים ללא ריבית בכרטיס אשראי, יישלח אליכם קישור לתשלום</span>
-              <span class="en">Up to 3 interest-free installments, a payment link will be sent</span>
+              <span class="he">עד 3 תשלומים ללא ריבית בכרטיס אשראי <b>בש"ח</b>, יישלח אליכם קישור לתשלום</span>
+              <span class="en">Up to 3 interest-free installments in ILS, a payment link will be sent</span>
             </div>
           </label>
           <label class="option-item">
             <input type="radio" name="paymentMethod" value="Standing Order" />
             <div class="option-label">
-              <span class="he">באמצעות הוראת קבע בבנק (לא תופס מסגרת אשראי)</span>
-              <span class="en">Standing bank order (does not use credit limit)</span>
+              <span class="he">באמצעות הוראת קבע בבנק <b>בש"ח</b> (לא תופס מסגרת אשראי)</span>
+              <span class="en">Standing bank order in ILS (does not use credit limit)</span>
             </div>
           </label>
         </div>
