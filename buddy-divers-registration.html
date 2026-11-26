@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- BD-REG 2026-11-25a | New payment option "Foreign Currency Bank Transfer" on every trip (main form + 270104e English copy): beneficiary Buddy-Divers Ltd., Mizrahi Tefahot 422 / 625145, IBAN IL14 0204 2200 0000 0625 145, SWIFT MIZBILITXXX, fees paid by sender. Payment note line updated in Hebrew and English. Airtable Divers > Payment Method needs the matching choice -->
 <!-- BD-REG 2026-11-22a | New trip 281009 Galapagos, Humboldt Explorer, 09/10-16/10/2028, USD, private registration link only (no trips.html card), from the Explorer Ventures option for Elad Fisher. One option male_share_6645 ($6,495 + $150 fuel surcharge), notIncluded park fee + TCT and nitrox, noFlights. Config block inserted immediately before 281127 -->
 <!-- BD-REG 2026-11-15c | 270421 Black Friday: ₪800 off each cabin until 31/12/2026, new keys lower_twin_4180 / upper_double_4490 / master_suite_4570 with wasPrice ₪4,980 / ₪5,290 / ₪5,370, promo pill "₪800 הנחה", Black Friday pricingTitle. Single-use supplements unchanged -->
 <!-- BD-REG 2026-11-15b | 281127: "אין כפל מבצעים / No double discounts" added to the Black Friday pricingTitle, per Ian. value/price/priceNum untouched -->
@@ -1344,7 +1345,7 @@
       <div class="section-title"><span class="icon">💰</span> אמצעי תשלום <span style="font-weight:400;color:var(--muted);font-size:12px;margin-right:6px;">Payment Method</span><span class="req">*</span></div>
 
       <div style="background:var(--light-bg);border-radius:10px;padding:14px 16px;margin-bottom:18px;font-size:13px;line-height:1.7;color:var(--text);border:1px solid var(--border);">
-        דרכי תשלום: לנוחיותכם ניתן לשלם בכרטיס אשראי ישראלי, העברה בנקאית או הוראת קבע בבנק (לא ניתן לשלם באמצעות כרטיסי דיינרס ואמריקן אקספרס)
+        דרכי תשלום: לנוחיותכם ניתן לשלם בכרטיס אשראי ישראלי, העברה בנקאית, העברה בנקאית במטבע זר או הוראת קבע בבנק (לא ניתן לשלם באמצעות כרטיסי דיינרס ואמריקן אקספרס)
       </div>
 
       <div class="field" id="f-paymentMethod">
@@ -1354,6 +1355,16 @@
             <div class="option-label">
               <span class="he">תשלום בהעברה בנקאית לחשבון על שם: באדי-דייברס בע"מ</span>
               <span class="en">בנק מזרחי טפחות 20 | סניף 422 | חשבון 625145</span>
+            </div>
+          </label>
+          <label class="option-item">
+            <input type="radio" name="paymentMethod" value="Foreign Currency Bank Transfer" />
+            <div class="option-label">
+              <span class="he">תשלום בהעברה בנקאית במטבע זר לחשבון על שם: <bdi>Buddy-Divers Ltd.</bdi></span>
+              <span class="en">Foreign currency bank transfer</span>
+              <span class="en fx-details" dir="ltr" style="text-align:left;margin-top:4px;line-height:1.6;">Beneficiary: Buddy-Divers Ltd.<br/>Beneficiary address: 58 Hayahalom St, Tel Mond 4061858, Israel<br/>Bank: Mizrahi Tefahot Bank | Branch 422 | Account 625145<br/>IBAN: IL14 0204 2200 0000 0625 145<br/>SWIFT: MIZBILITXXX<br/>Bank address: 5 Maffi Street, Netanya, Israel</span>
+              <span class="he" style="font-size:12px;font-weight:400;color:var(--muted);margin-top:4px;">עמלות ההעברה ועמלות בנק מתווך חלות על המעביר. יש לוודא שהסכום המלא מגיע לחשבון.</span>
+              <span class="en" dir="ltr" style="text-align:left;">All transfer and intermediary bank fees are paid by the sender. Please make sure the full amount reaches our account.</span>
             </div>
           </label>
           <label class="option-item">
@@ -2817,10 +2828,11 @@ const TRIPS = {
     submitTripId: "270104",
     passportOnly: true,
     neutralDialCode: true,
-    paymentNote: "Payment methods: credit card (any card except Diners and American Express) or bank transfer.",
+    paymentNote: "Payment methods: credit card (any card except Diners and American Express), bank transfer or foreign currency bank transfer.",
     paymentOptions: [
       { value: "Credit Card up to 3 payments", label: "Credit Card", sub: "Details will be provided" },
-      { value: "Bank Transfer", label: "Bank Transfer", sub: "Details will be provided" }
+      { value: "Bank Transfer", label: "Bank Transfer", sub: "Details will be provided" },
+      { value: "Foreign Currency Bank Transfer", label: "Foreign Currency Bank Transfer", sub: "Details will be provided" }
     ],
     pricing: [
       {
@@ -3255,8 +3267,8 @@ function resolveTripId() {
 // ============================================================
 const HEB_RE = /[\u0590-\u05FF]/;
 const EN_TEXT = {
-  'דרכי תשלום: לנוחיותכם ניתן לשלם בכרטיס אשראי ישראלי, העברה בנקאית או הוראת קבע בבנק (לא ניתן לשלם באמצעות כרטיסי דיינרס ואמריקן אקספרס)':
-    'Payment methods: for your convenience you can pay by Israeli credit card, bank transfer or standing bank order (Diners and American Express cards are not accepted)',
+  'דרכי תשלום: לנוחיותכם ניתן לשלם בכרטיס אשראי ישראלי, העברה בנקאית, העברה בנקאית במטבע זר או הוראת קבע בבנק (לא ניתן לשלם באמצעות כרטיסי דיינרס ואמריקן אקספרס)':
+    'Payment methods: for your convenience you can pay by Israeli credit card, bank transfer, foreign currency bank transfer or standing bank order (Diners and American Express cards are not accepted)',
   'בנק מזרחי טפחות 20 | סניף 422 | חשבון 625145': 'Mizrahi Tefahot Bank (20) | Branch 422 | Account 625145',
   'תתבקש.י למלא הצהרת בריאות מפורטת. אם ידוע לך על מצב רפואי העלול להגביל את פעילותך או להוות סיכון במהלך הספארי — פרט.י כאן.':
     'You will be asked to fill in a detailed health declaration. If you know of any medical condition that may limit your activity or pose a risk during the safari, please describe it here.',

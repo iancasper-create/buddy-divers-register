@@ -1,3 +1,4 @@
+<!-- BD-EDIT 2026-11-25a | Payment method "Foreign Currency Bank Transfer" added to match BD-REG 2026-11-25a -->
 <!-- BD-EDIT 2026-11-22a | Trip 281009 (Galapagos, Humboldt Explorer, 09/10-16/10/2028, USD) added to the TRIPS pricing map, option male_share_6645 matching BD-REG 2026-11-22a -->
 <!-- BD-EDIT 2026-11-15b | 270421 Black Friday keys added to match BD-REG 2026-11-15c: lower_twin_4180, upper_double_4490, master_suite_4570; the 4980/4480-series keys kept for existing bookings -->
 <!-- BD-EDIT 2026-11-15a | Trip 281127 (Cocos Island, Sea Hunter, 27/11-07/12/2028, USD) added to the TRIPS pricing map to match BD-REG 2026-11-15a: lower_deck_7020, upper_suite_7620, roomOptions park_transfers_654 -->
@@ -555,6 +556,14 @@
         <span class="opt-he">תשלום בהעברה בנקאית לחשבון על שם: באדי-דייברס בע"מ</span>
         <span class="opt-en">Bank Transfer</span>
         <span class="opt-sub">בנק מזרחי טפחות 20 | סניף 422 | חשבון 625145</span>
+      </div>
+    </label>
+    <label class="option-item" id="pm-fx">
+      <input type="radio" name="paymentMethod" value="Foreign Currency Bank Transfer" onchange="updateRadioStyle('paymentMethod')" />
+      <div class="opt-label">
+        <span class="opt-he">העברה בנקאית במטבע זר</span>
+        <span class="opt-en">Foreign Currency Bank Transfer</span>
+        <span class="opt-sub">IBAN: IL14 0204 2200 0000 0625 145 | SWIFT: MIZBILITXXX</span>
       </div>
     </label>
     <label class="option-item" id="pm-credit">
