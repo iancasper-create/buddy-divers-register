@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- BD-REG 2026-11-26c | Red payment lines (cards not accepted, transfer fees) changed from bold to regular weight, per Ian -->
 <!-- BD-REG 2026-11-26b | Payment note: the "cannot pay with" part is now its own red bold line, and credit cards issued abroad (כרטיסי אשראי שהונפקו בחו"ל) added to Diners and American Express. EN_TEXT keys split to match -->
 <!-- BD-REG 2026-11-26a | Payment options per Ian: bank transfer titles now say which is in shekels (בשקלים) and which in foreign currency (במט"ח, מטבע זר); foreign transfer fees line in red bold (Hebrew + English); credit card Hebrew title adds "יישלח אליכם קישור לתשלום", em-dash removed from its English line. Submitted values unchanged -->
 <!-- BD-REG 2026-11-25a | New payment option "Foreign Currency Bank Transfer" on every trip (main form + 270104e English copy): beneficiary Buddy-Divers Ltd., Mizrahi Tefahot 422 / 625145, IBAN IL14 0204 2200 0000 0625 145, SWIFT MIZBILITXXX, fees paid by sender. Payment note line updated in Hebrew and English. Airtable Divers > Payment Method needs the matching choice -->
@@ -1348,7 +1349,7 @@
 
       <div style="background:var(--light-bg);border-radius:10px;padding:14px 16px;margin-bottom:18px;font-size:13px;line-height:1.7;color:var(--text);border:1px solid var(--border);">
         דרכי תשלום: לנוחיותכם ניתן לשלם בכרטיס אשראי ישראלי, העברה בנקאית, העברה בנקאית במטבע זר או הוראת קבע בבנק.
-        <span style="display:block;color:#c0392b;font-weight:700;">לא ניתן לשלם באמצעות כרטיסי דיינרס, אמריקן אקספרס וכרטיסי אשראי שהונפקו בחו"ל.</span>
+        <span style="display:block;color:#c0392b;">לא ניתן לשלם באמצעות כרטיסי דיינרס, אמריקן אקספרס וכרטיסי אשראי שהונפקו בחו"ל.</span>
       </div>
 
       <div class="field" id="f-paymentMethod">
@@ -1366,8 +1367,8 @@
               <span class="he">תשלום בהעברה בנקאית <b>במט"ח (מטבע זר)</b> לחשבון על שם: <bdi>Buddy-Divers Ltd.</bdi></span>
               <span class="en">Foreign currency bank transfer</span>
               <span class="en fx-details" dir="ltr" style="text-align:left;margin-top:4px;line-height:1.6;">Beneficiary: Buddy-Divers Ltd.<br/>Beneficiary address: 58 Hayahalom St, Tel Mond 4061858, Israel<br/>Bank: Mizrahi Tefahot Bank | Branch 422 | Account 625145<br/>IBAN: IL14 0204 2200 0000 0625 145<br/>SWIFT: MIZBILITXXX<br/>Bank address: 5 Maffi Street, Netanya, Israel</span>
-              <span class="he" style="font-size:12px;font-weight:700;color:#c0392b;margin-top:4px;">עמלות ההעברה ועמלות בנק מתווך חלות על המעביר. יש לוודא שהסכום המלא מגיע לחשבון.</span>
-              <span class="en" dir="ltr" style="text-align:left;font-weight:700;color:#c0392b;">All transfer and intermediary bank fees are paid by the sender. Please make sure the full amount reaches our account.</span>
+              <span class="he" style="font-size:12px;font-weight:400;color:#c0392b;margin-top:4px;">עמלות ההעברה ועמלות בנק מתווך חלות על המעביר. יש לוודא שהסכום המלא מגיע לחשבון.</span>
+              <span class="en" dir="ltr" style="text-align:left;font-weight:400;color:#c0392b;">All transfer and intermediary bank fees are paid by the sender. Please make sure the full amount reaches our account.</span>
             </div>
           </label>
           <label class="option-item">
