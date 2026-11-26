@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- BD-FOLLOWUP 2026-11-26b | Payment request JPG, "סכום לתשלום כעת" box on foreign-currency trips: shekel and foreign amounts now on one line, same size: בש"ח ₪X או במט"ח $Y (22px, nowrap). ILS trips unchanged -->
 <!-- BD-FOLLOWUP 2026-11-26a | Payment request JPG upload no longer puts the diver's national ID number in the Cloudinary folder path: payment_requests/<ID>_<first>_<last>/<trip>/ -> payment_requests/<first>_<last>/<trip>/. The 490 existing assets are untouched (WA Messages links them) -->
 <!-- BD-FOLLOWUP 2026-11-22a | Trip 281009 (Galapagos, Humboldt Explorer, 09/10-16/10/2028, USD) added to all three trip maps: tripCountries, tripNames, CF_TRIPS_FALLBACK (option male_share_6645) -->
 <!-- BD-FOLLOWUP 2026-11-15b | 270421 option labels for the Black Friday keys added (lower_twin_4180, upper_double_4490, master_suite_4570, BD-REG 2026-11-15c); older labels kept -->
@@ -2149,8 +2150,9 @@ function buildPaymentHTML(booking, amount, nisAmount, rate, notes, paidSoFar, sa
       <div style="display:flex;gap:16px;margin-bottom:18px;">
         <div style="flex:1;background:linear-gradient(135deg,#007289,#1B4F8A);border-radius:16px;padding:24px 28px;color:white;">
           <div style="font-size:16px;opacity:0.75;margin-bottom:6px;">סכום לתשלום כעת</div>
-          <div style="font-size:32px;font-weight:700;line-height:1;">₪${nisAmount.toLocaleString('he-IL')}</div>
-          ${currencySymbol !== '₪' ? `<div style="font-size:18px;opacity:0.75;margin-top:8px;">${currencySymbol}${amount.toLocaleString('en-US')}</div>` : ''}
+          ${currencySymbol !== '₪'
+            ? `<div style="font-size:22px;font-weight:700;line-height:1.2;white-space:nowrap;"><span style="font-weight:400;">בש"ח</span> <bdi dir="ltr">₪${nisAmount.toLocaleString('he-IL')}</bdi> <span style="font-weight:400;opacity:0.75;">או</span> <span style="font-weight:400;">במט"ח</span> <bdi dir="ltr">${currencySymbol}${amount.toLocaleString('en-US')}</bdi></div>`
+            : `<div style="font-size:32px;font-weight:700;line-height:1;">₪${nisAmount.toLocaleString('he-IL')}</div>`}
           ${currencySymbol !== '₪' ? '<div style="font-size:15px;opacity:0.65;margin-top:10px;">' + (() => { const d = new Date(); const dd = String(d.getDate()).padStart(2,'0'); const mm = String(d.getMonth()+1).padStart(2,'0'); const yyyy = d.getFullYear(); return 'שער העברות של בנק לאומי: ' + rate.toFixed(4) + ' · ' + dd + '-' + mm + '-' + yyyy; })() + '</div>' : ''}
         </div>
         <div style="flex:1;background:linear-gradient(135deg,#007289,#1B4F8A);border-radius:16px;padding:24px 28px;color:white;text-align:right;">
