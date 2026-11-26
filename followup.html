@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- BD-FOLLOWUP 2026-11-26e | Payment request JPG: balance box title is now just "יתרה לתשלום" ("עד 90 יום לפני היציאה לספארי" removed, the deadline differs per trip) -->
 <!-- BD-FOLLOWUP 2026-11-26d | Payment request JPG, bottom row: bank details table 17px -> 22px (labels darker #555), its title 20px; payment-method box title 19px, text 17px -> 18px. Sized so the worst case (standing order + all extras + notes) still fits 900px -->
 <!-- BD-FOLLOWUP 2026-11-26c | Payment request JPG: the two small box titles (סכום לתשלום כעת, יתרה לתשלום עד 90 יום...) 16px -> 18px and opacity 0.75 -> 0.95 so they are sharper; the longer one fits the box on one line at 18px -->
 <!-- BD-FOLLOWUP 2026-11-26b | Payment request JPG, "סכום לתשלום כעת" box on foreign-currency trips: shekel and foreign amounts now on one line, same size: בש"ח ₪X או במט"ח $Y (22px, nowrap). ILS trips unchanged -->
@@ -2158,7 +2159,7 @@ function buildPaymentHTML(booking, amount, nisAmount, rate, notes, paidSoFar, sa
           ${currencySymbol !== '₪' ? '<div style="font-size:15px;opacity:0.65;margin-top:10px;">' + (() => { const d = new Date(); const dd = String(d.getDate()).padStart(2,'0'); const mm = String(d.getMonth()+1).padStart(2,'0'); const yyyy = d.getFullYear(); return 'שער העברות של בנק לאומי: ' + rate.toFixed(4) + ' · ' + dd + '-' + mm + '-' + yyyy; })() + '</div>' : ''}
         </div>
         <div style="flex:1;background:linear-gradient(135deg,#007289,#1B4F8A);border-radius:16px;padding:24px 28px;color:white;text-align:right;">
-          <div style="font-size:18px;opacity:0.95;margin-bottom:8px;white-space:nowrap;">יתרה לתשלום עד 90 יום לפני היציאה לספארי</div>
+          <div style="font-size:18px;opacity:0.95;margin-bottom:8px;white-space:nowrap;">יתרה לתשלום</div>
           ${(() => { const bal = safari + flightAmt + hotelAmt + extrasAmt + discountAmt - paidSoFar - amount; const absBal = Math.abs(bal); const balStr = bal < 0 ? '(' + currencySymbol + absBal.toLocaleString('en-US') + ')' : currencySymbol + bal.toLocaleString('en-US'); const balColor = bal < 0 ? '#ffaaaa' : 'white'; return `<div style="font-size:28px;font-weight:700;line-height:1;color:${balColor};">${balStr}</div>`; })()}
         </div>
       </div>
