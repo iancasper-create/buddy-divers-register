@@ -1,3 +1,4 @@
+<!-- BD-EDIT 2026-11-26e | 270525B pricing is multi-select like BD-REG 2026-11-26f: Part 1/2/3 are checkboxes, combo_6282 and retired combo_5580 are exclusive (pricingMulti / exclusive config). Also, any stored Pricing token the page does not show (add-ons, "x3" quantities) is now kept on save instead of being dropped -->
 <!-- BD-EDIT 2026-11-26d | "מטבע זר" replaced by "מט"ח", matching BD-REG 2026-11-26e -->
 <!-- BD-EDIT 2026-11-26c | Credit card and standing order titles say בש"ח (in ILS), matching BD-REG 2026-11-26d -->
 <!-- BD-EDIT 2026-11-26b | Payment section worded as on the registration form (BD-REG 2026-11-26a-c): note with red "cards not accepted" line incl. cards issued abroad, ILS (בשקלים) vs foreign currency (במט"ח) transfer titles, red fees line, credit card title says a payment link will be sent. Values unchanged -->
@@ -2093,6 +2094,7 @@ const TRIPS = {
       he: "עלות המסע (ללא טיסות)",
       en: "Trip Pricing (excl. flights)"
     },
+    pricingMulti: true,
     pricing: [
       {
         value: "sulawesi_2990",
@@ -2120,14 +2122,16 @@ const TRIPS = {
         he: "המסע המלא: שלושת החלקים ⁨(25/5–15/6)⁩",
         en: "Full journey: all three parts (25/5-15/6)",
         price: "€6,282",
-        priceNum: 6282
+        priceNum: 6282,
+        exclusive: true
       },
       {
         value: "combo_5580",
         he: "חבילת קומבו לצוללים: ריזורטים והפלגה",
         en: "Combo diver package: resorts and liveaboard",
         price: "€5,580",
-        priceNum: 5580
+        priceNum: 5580,
+        exclusive: true
       },
       {
         value: "siladen_seaview_338",
@@ -2259,6 +2263,9 @@ function renderPricingCards(tripId, storedPricing) {
 
   // Parse stored pricing into selected values
   const selectedVals = (storedPricing || '').split('+').map(s => s.trim()).filter(Boolean);
+  // Tokens this page has no card for (add-ons, "extra_dives_54 x3") are kept as-is on save
+  const shownVals = (trip.pricing || []).concat(trip.roomOptions || []).map(o => o.value);
+  pricingExtras = selectedVals.filter(v => !shownVals.includes(v));
 
   // Build pricing cards container
   let html = '<div style="margin-bottom:16px;">';
@@ -2269,7 +2276,7 @@ function renderPricingCards(tripId, storedPricing) {
       if (opt.supplement) return; // supplements handled below
       const isSelected = selectedVals.includes(opt.value);
       html += `<label class="option-item ${isSelected ? 'selected' : ''}" style="margin-bottom:10px;cursor:pointer;">
-        <input type="radio" name="editPricing" value="${opt.value}" ${isSelected ? 'checked' : ''} onchange="updatePricingLabel()" />
+        <input type="${trip.pricingMulti ? 'checkbox' : 'radio'}" name="editPricing" value="${opt.value}"${opt.exclusive ? ' data-exclusive="1"' : ''} ${isSelected ? 'checked' : ''} onchange="${trip.pricingMulti ? 'onMultiPricingChange(this)' : 'updatePricingLabel()'}" />
         <div class="opt-label">
           <span class="opt-he">${opt.he}</span>
           <span class="opt-en">${opt.en}</span>
@@ -2318,13 +2325,30 @@ function renderPricingCards(tripId, storedPricing) {
   updatePricingLabel();
 }
 
+let pricingExtras = [];
+
+// Multi-select trips (pricingMulti): an exclusive option (full journey) clears the
+// other main options, and picking any other option clears the exclusive ones.
+function onMultiPricingChange(cb) {
+  if (cb.checked) {
+    document.querySelectorAll('input[name="editPricing"]').forEach(other => {
+      if (other === cb) return;
+      if (cb.dataset.exclusive || other.dataset.exclusive) other.checked = false;
+    });
+  }
+  document.querySelectorAll('input[name="editPricing"]').forEach(el => {
+    el.closest('.option-item').classList.toggle('selected', el.checked);
+  });
+  updatePricingLabel();
+}
+
 function updatePricingLabel() {
   const parts = [];
-  const main = document.querySelector('input[name="editPricing"]:checked');
-  if (main) parts.push(main.value);
+  document.querySelectorAll('input[name="editPricing"]:checked').forEach(cb => parts.push(cb.value));
   document.querySelectorAll('input[name="editPricingSupplement"]:checked').forEach(cb => parts.push(cb.value));
   const room = document.querySelector('input[name="editRoomOption"]:checked');
   if (room) parts.push(room.value);
+  pricingExtras.forEach(v => parts.push(v));
   document.getElementById('f-bookingPricing').value = parts.join(' + ');
 }
 
