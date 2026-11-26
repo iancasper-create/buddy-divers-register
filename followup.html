@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- BD-FOLLOWUP 2026-11-26a | Payment request JPG upload no longer puts the diver's national ID number in the Cloudinary folder path: payment_requests/<ID>_<first>_<last>/<trip>/ -> payment_requests/<first>_<last>/<trip>/. The 490 existing assets are untouched (WA Messages links them) -->
 <!-- BD-FOLLOWUP 2026-11-22a | Trip 281009 (Galapagos, Humboldt Explorer, 09/10-16/10/2028, USD) added to all three trip maps: tripCountries, tripNames, CF_TRIPS_FALLBACK (option male_share_6645) -->
 <!-- BD-FOLLOWUP 2026-11-15b | 270421 option labels for the Black Friday keys added (lower_twin_4180, upper_double_4490, master_suite_4570, BD-REG 2026-11-15c); older labels kept -->
 <!-- BD-FOLLOWUP 2026-11-15a | Trip 281127 (Cocos Island, Sea Hunter, 27/11-07/12/2028, USD) added to tripCountries, tripNames and CF_TRIPS_FALLBACK (dest + vessel + option labels lower_deck_7020, upper_suite_7620, park_transfers_654), BD-REG 2026-11-15a -->
@@ -2382,7 +2383,8 @@ async function openWhatsApp() {
     const booking = currentBookings[idx];
     const blob = await (await fetch(_jpgDataUrl)).blob();
     const sanitize = s => (s || '').toString().trim().replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_-]/g, '');
-    const diverFolder = `${_diverIsraelId || 'unknown'}_${sanitize(_diverFirstName)}_${sanitize(_diverLastName)}`;
+    // No ID number in the path: Cloudinary URLs are public (BD-FOLLOWUP 2026-11-26a)
+    const diverFolder = `${sanitize(_diverFirstName) || 'diver'}_${sanitize(_diverLastName) || 'unknown'}`;
     const tripFolder = sanitize(booking.tripId || 'unknown_trip');
     const cloudFolder = `payment_requests/${diverFolder}/${tripFolder}`;
     const formData = new FormData();

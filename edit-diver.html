@@ -1,3 +1,4 @@
+<!-- BD-EDIT 2026-11-26a | Document uploads no longer put the diver's national ID number in the Cloudinary folder path: divers/<ID>_<last>_<first>/ -> divers/<last>_<first>/ (file name stays Cloudinary's random id). Existing assets untouched -->
 <!-- BD-EDIT 2026-11-25a | Payment method "Foreign Currency Bank Transfer" added to match BD-REG 2026-11-25a -->
 <!-- BD-EDIT 2026-11-22a | Trip 281009 (Galapagos, Humboldt Explorer, 09/10-16/10/2028, USD) added to the TRIPS pricing map, option male_share_6645 matching BD-REG 2026-11-22a -->
 <!-- BD-EDIT 2026-11-15b | 270421 Black Friday keys added to match BD-REG 2026-11-15c: lower_twin_4180, upper_double_4490, master_suite_4570; the 4980/4480-series keys kept for existing bookings -->
@@ -996,12 +997,12 @@ async function handleUpload(input, areaId, urlFieldId, statusId, folder, docType
   area.classList.remove('upload-done','upload-error'); area.classList.add('uploading');
   statusEl.innerHTML='<span class="upload-progress">⏳ מעלה... / Uploading...</span>';
   try {
-    const idNum=(document.getElementById('f-idNumber')||{}).value||'unknown';
+    // No ID number in the path: Cloudinary URLs are public (BD-EDIT 2026-11-26a)
     const first=((document.getElementById('f-firstName')||{}).value||'').trim().replace(/\s+/g,'-')||'unknown';
     const last=((document.getElementById('f-lastName')||{}).value||'').trim().replace(/\s+/g,'-')||'unknown';
     const fd=new FormData();
     fd.append('file',file); fd.append('upload_preset',CLOUDINARY_UPLOAD_PRESET);
-    fd.append('folder','divers/'+idNum+'_'+last+'_'+first+'/'+(folder||'general'));
+    fd.append('folder','divers/'+last+'_'+first+'/'+(folder||'general'));
     fd.append('angle','auto_right');
     const res=await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,{method:'POST',body:fd});
     if(!res.ok) throw new Error('Upload failed: '+res.status);
