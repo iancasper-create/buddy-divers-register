@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- BD-FOLLOWUP 2026-11-26g | Pro forma: payment method select gets "העברה בנקאית במט"ח / Foreign Currency Bank Transfer" (value "foreign currency bank"), so the pro forma JPG can show the IBAN / SWIFT box; it already shares buildPaymentHTML, so all other 2026-11-26 image changes apply to it. Option labels: em-dashes replaced by " / ", shekel transfer labelled בש"ח -->
 <!-- BD-FOLLOWUP 2026-11-26f | Payment request JPG for a diver whose Payment Method is "Foreign Currency Bank Transfer": the bottom row becomes one full-width box (new buildFxBankRow) with beneficiary, address, bank/branch/account, IBAN, SWIFT, bank address (as on the registration form) and the red fees line, instead of the shekel account details. Other methods unchanged -->
 <!-- BD-FOLLOWUP 2026-11-26e | Payment request JPG: balance box title is now just "יתרה לתשלום" ("עד 90 יום לפני היציאה לספארי" removed, the deadline differs per trip) -->
 <!-- BD-FOLLOWUP 2026-11-26d | Payment request JPG, bottom row: bank details table 17px -> 22px (labels darker #555), its title 20px; payment-method box title 19px, text 17px -> 18px. Sized so the worst case (standing order + all extras + notes) still fits 900px -->
@@ -898,9 +899,10 @@
       <div class="field">
         <label>Payment Method / שיטת תשלום</label>
         <select id="pfPaymentMethod">
-          <option value="bank">העברה בנקאית — Bank Transfer</option>
-          <option value="credit">כרטיס אשראי — Credit Card</option>
-          <option value="standing order">הוראת קבע — Standing Order</option>
+          <option value="bank">העברה בנקאית בש"ח / Bank Transfer (ILS)</option>
+          <option value="foreign currency bank">העברה בנקאית במט"ח / Foreign Currency Bank Transfer</option>
+          <option value="credit">כרטיס אשראי / Credit Card</option>
+          <option value="standing order">הוראת קבע / Standing Order</option>
         </select>
       </div>
       <div class="field">
