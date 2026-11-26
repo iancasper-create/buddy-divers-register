@@ -1,3 +1,4 @@
+<!-- BD-EDIT 2026-11-26d | "מטבע זר" replaced by "מט"ח", matching BD-REG 2026-11-26e -->
 <!-- BD-EDIT 2026-11-26c | Credit card and standing order titles say בש"ח (in ILS), matching BD-REG 2026-11-26d -->
 <!-- BD-EDIT 2026-11-26b | Payment section worded as on the registration form (BD-REG 2026-11-26a-c): note with red "cards not accepted" line incl. cards issued abroad, ILS (בשקלים) vs foreign currency (במט"ח) transfer titles, red fees line, credit card title says a payment link will be sent. Values unchanged -->
 <!-- BD-EDIT 2026-11-26a | Document uploads no longer put the diver's national ID number in the Cloudinary folder path: divers/<ID>_<last>_<first>/ -> divers/<last>_<first>/ (file name stays Cloudinary's random id). Existing assets untouched -->
@@ -553,7 +554,7 @@
 
   <div class="card" id="sec-payment">
     <div class="card-title">💰 <strong>אמצעי תשלום</strong> <span class="en">Payment Method</span></div>
-    <div style="font-size:13px;line-height:1.7;margin-bottom:12px;">דרכי תשלום: לנוחיותכם ניתן לשלם בכרטיס אשראי ישראלי, העברה בנקאית, העברה בנקאית במטבע זר או הוראת קבע בבנק.<span style="display:block;color:#c0392b;">לא ניתן לשלם באמצעות כרטיסי דיינרס, אמריקן אקספרס וכרטיסי אשראי שהונפקו בחו"ל.</span></div>
+    <div style="font-size:13px;line-height:1.7;margin-bottom:12px;">דרכי תשלום: לנוחיותכם ניתן לשלם בכרטיס אשראי ישראלי, העברה בנקאית, העברה בנקאית במט"ח או הוראת קבע בבנק.<span style="display:block;color:#c0392b;">לא ניתן לשלם באמצעות כרטיסי דיינרס, אמריקן אקספרס וכרטיסי אשראי שהונפקו בחו"ל.</span></div>
     <label class="option-item" id="pm-bank">
       <input type="radio" name="paymentMethod" value="Bank Transfer" onchange="updateRadioStyle('paymentMethod')" />
       <div class="opt-label">
@@ -565,7 +566,7 @@
     <label class="option-item" id="pm-fx">
       <input type="radio" name="paymentMethod" value="Foreign Currency Bank Transfer" onchange="updateRadioStyle('paymentMethod')" />
       <div class="opt-label">
-        <span class="opt-he">תשלום בהעברה בנקאית <b>במט"ח (מטבע זר)</b> לחשבון על שם: <bdi>Buddy-Divers Ltd.</bdi></span>
+        <span class="opt-he">תשלום בהעברה בנקאית <b>במט"ח</b> לחשבון על שם: <bdi>Buddy-Divers Ltd.</bdi></span>
         <span class="opt-en">Foreign Currency Bank Transfer</span>
         <span class="opt-sub">IBAN: IL14 0204 2200 0000 0625 145 | SWIFT: MIZBILITXXX</span>
         <span class="opt-sub" style="color:#c0392b;">עמלות ההעברה ועמלות בנק מתווך חלות על המעביר. יש לוודא שהסכום המלא מגיע לחשבון.</span>
