@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- BD-REG 2026-11-27b | 261213 Emperor Serenity: main_suite_2790 and upper_suite_2860 marked soldOut (upper_twin_2590 already was), so only lower_twin_2490 is open. Pricing options now honour soldOut (strike-through + FULL badge, still selectable, same as cabin options); before this, soldOut on a pricing option had no visible effect, so the 2026-11-10f mark never showed. New supplement single_supp_lower_1245 (sole use upgrade of the lower deck cabin, 50% of $2,490) -->
 <!-- BD-REG 2026-11-27a | New trip 270117 Best of Maldives, Emperor Serenity, 17/01-24/01/2027, USD, private registration link only (no trips.html card). One cabin upper_double_sole_4540 (upper deck double cabin, sole use). Two priced flydubai options as supplements: flight_economy_1220 (Economy return) and flight_mixed_2170 (one way Economy extra legroom, one way Business). New optional supplement flag flight: true, flight supplements are mutually exclusive, ticking one selects "flights arranged by Buddy-Divers", choosing self-arranged or undecided clears them. Config block inserted immediately before 270118 -->
 <!-- BD-REG 2026-11-26f | 270525B pricing options are now all selectable (checkboxes, any combination of Part 1/2/3, totals summed). New optional trip config pricingMulti: true, plus exclusive: true on an option (combo_6282) that clears the others when picked and is cleared when a part is picked. Other trips unchanged (radio) -->
 <!-- BD-REG 2026-11-26e | "מטבע זר" replaced by "מט"ח" per Ian: foreign transfer title is now just במט"ח, payment note says העברה בנקאית במט"ח (EN_TEXT key updated) -->
@@ -2079,7 +2080,8 @@ const TRIPS = {
         en: "Main deck suite, double bed and single bed",
         wasPrice: "$4,117",
         price: "$2,790",
-        priceNum: 2790
+        priceNum: 2790,
+        soldOut: true
       },
       {
         value: "upper_suite_2860",
@@ -2087,7 +2089,16 @@ const TRIPS = {
         en: "Upper deck suite, double bed and single bed",
         wasPrice: "$4,222",
         price: "$2,860",
-        priceNum: 2860
+        priceNum: 2860,
+        soldOut: true
+      },
+      {
+        value: "single_supp_lower_1245",
+        he: "שדרוג לשימוש יחיד.ה, חדר רגיל מפלס תחתון (תוספת 50%)",
+        en: "Sole use upgrade, lower deck standard cabin (50% supplement)",
+        price: "$1,245",
+        priceNum: 1245,
+        supplement: true
       }
     ]
   },
@@ -3628,7 +3639,8 @@ function init() {
   container.innerHTML = '';
   tripConfig.pricing.forEach((opt, i) => {
     const label = document.createElement('label');
-    label.className = 'option-item';
+    label.className = 'option-item' + (opt.soldOut ? ' sold-out' : '');
+    const pFullBadge = opt.soldOut ? '<span class="full-badge">FULL</span>' : '';
     const isSuplement = opt.supplement === true;
     if (isSuplement) {
       // Render as checkbox with divider
@@ -3652,7 +3664,7 @@ function init() {
       label.innerHTML = `
         <input type="checkbox" name="pricing" value="${opt.value}"${opt.exclusive ? ' data-exclusive="1"' : ''} />
         <div class="option-label">
-          <span class="he">${opt.he}</span>
+          <span class="he">${opt.he}${pFullBadge}</span>
           <span class="en">${opt.en}</span>
           <span class="price">${opt.wasPrice ? '<span class="was-price">' + opt.wasPrice + '</span>' : ''}${opt.price}</span>
         </div>
@@ -3674,7 +3686,7 @@ function init() {
       label.innerHTML = `
         <input type="radio" name="pricing" value="${opt.value}" />
         <div class="option-label">
-          <span class="he">${opt.he}</span>
+          <span class="he">${opt.he}${pFullBadge}</span>
           <span class="en">${opt.en}</span>
           <span class="price">${opt.wasPrice ? '<span class="was-price">' + opt.wasPrice + '</span>' : ''}${opt.price}</span>
         </div>
