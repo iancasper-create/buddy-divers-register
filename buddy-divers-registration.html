@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- BD-REG 2026-11-27a | New trip 270117 Best of Maldives, Emperor Serenity, 17/01-24/01/2027, USD, private registration link only (no trips.html card). One cabin upper_double_sole_4540 (upper deck double cabin, sole use). Two priced flydubai options as supplements: flight_economy_1220 (Economy return) and flight_mixed_2170 (one way Economy extra legroom, one way Business). New optional supplement flag flight: true, flight supplements are mutually exclusive, ticking one selects "flights arranged by Buddy-Divers", choosing self-arranged or undecided clears them. Config block inserted immediately before 270118 -->
 <!-- BD-REG 2026-11-26f | 270525B pricing options are now all selectable (checkboxes, any combination of Part 1/2/3, totals summed). New optional trip config pricingMulti: true, plus exclusive: true on an option (combo_6282) that clears the others when picked and is cleared when a part is picked. Other trips unchanged (radio) -->
 <!-- BD-REG 2026-11-26e | "מטבע זר" replaced by "מט"ח" per Ian: foreign transfer title is now just במט"ח, payment note says העברה בנקאית במט"ח (EN_TEXT key updated) -->
 <!-- BD-REG 2026-11-26d | Credit card and standing order titles now say בש"ח (in ILS), like the shekel bank transfer -->
@@ -2887,6 +2888,43 @@ const TRIPS = {
       }
     ]
   },
+  "270117": {
+    name: "🐠 מלדיביים בסטייל | Emperor Serenity",
+    dates: "17/01/2027 – 24/01/2027",
+    note: "🚢 Emperor Serenity | Best of Maldives | 7 לילות | יציאה וחזרה במאלה",
+    currency: "USD",
+    pricingTitle: {
+      he: "עלות הספארי והטיסות",
+      en: "Safari and Flights Pricing"
+    },
+    pricing: [
+      {
+        value: "upper_double_sole_4540",
+        he: "חדר זוגי מפלס עליון, לשימוש יחיד",
+        en: "Upper deck double cabin, sole use",
+        price: "$4,540",
+        priceNum: 4540
+      },
+      {
+        value: "flight_economy_1220",
+        he: "טיסות פליידובאי הלוך ושוב, מחלקת תיירים",
+        en: "flydubai return flights, Economy",
+        price: "$1,220",
+        priceNum: 1220,
+        supplement: true,
+        flight: true
+      },
+      {
+        value: "flight_mixed_2170",
+        he: "טיסות פליידובאי: כיוון אחד במחלקת תיירים עם מקום מורחב לרגליים, כיוון אחד במחלקת עסקים",
+        en: "flydubai flights: one way Economy with extra legroom, one way Business",
+        price: "$2,170",
+        priceNum: 2170,
+        supplement: true,
+        flight: true
+      }
+    ]
+  },
   "270118": {
     name: "🤿 ראג'ה אמפאט — Raja Ampat",
     dates: "16/01/2027 – 28/01/2027",
@@ -3598,7 +3636,7 @@ function init() {
       divider.style.cssText = 'border:none;border-top:1px dashed #c5dfe6;margin:8px 0;';
       container.appendChild(divider);
       label.innerHTML = `
-        <input type="checkbox" name="pricing_supplement" value="${opt.value}" />
+        <input type="checkbox" name="pricing_supplement" value="${opt.value}"${opt.flight ? ' data-flight="1"' : ''} />
         <div class="option-label">
           <span class="he">${opt.he}</span>
           <span class="en">${opt.en}</span>
@@ -3686,6 +3724,39 @@ function init() {
         });
       }
     }
+  }
+
+  // Priced flight supplements (flight: true): only one at a time, and kept in step with the Flights card
+  const flightSupps = container.querySelectorAll('input[name="pricing_supplement"][data-flight="1"]');
+  if (flightSupps.length > 0) {
+    const buddyRadio = document.querySelector('input[name="flights"][value="BuddyArranged"]');
+    const buddyLabel = document.getElementById('opt-flight-buddy');
+    flightSupps.forEach(function(cb) {
+      cb.addEventListener('change', function() {
+        if (!cb.checked) return;
+        flightSupps.forEach(function(other) {
+          if (other !== cb) {
+            other.checked = false;
+            other.closest('.option-item').classList.remove('selected');
+          }
+        });
+        if (buddyRadio && buddyLabel) {
+          buddyRadio.checked = true;
+          document.querySelectorAll('#flightOptions .option-item').forEach(function(i) { i.classList.remove('selected'); });
+          buddyLabel.classList.add('selected');
+        }
+      });
+    });
+    document.querySelectorAll('input[name="flights"]').forEach(function(r) {
+      if (r.value === 'BuddyArranged') return;
+      r.addEventListener('change', function() {
+        if (!r.checked) return;
+        flightSupps.forEach(function(cb) {
+          cb.checked = false;
+          cb.closest('.option-item').classList.remove('selected');
+        });
+      });
+    });
   }
 
   // Render cabin (room) options if present
